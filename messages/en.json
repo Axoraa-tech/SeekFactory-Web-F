@@ -1,0 +1,14 @@
+{
+  "brand": {
+    "name": "SEEKFACTORY",
+    "tagline": "Green Factories Worldwide"
+  },
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "postRfq": "Post RFQ"
+  }
+}

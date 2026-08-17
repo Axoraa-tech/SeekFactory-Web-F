@@ -1,0 +1,14 @@
+{
+  "brand": {
+    "name": "SEEKFACTORY",
+    "tagline": "全球绿色工厂"
+  },
+  "nav": {
+    "home": "首页",
+    "explore": "发现",
+    "messages": "消息",
+    "notifications": "通知",
+    "profile": "我的",
+    "postRfq": "发布询盘"
+  }
+}
