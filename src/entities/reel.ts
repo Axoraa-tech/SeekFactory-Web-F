@@ -10,6 +10,7 @@ export type Reel = {
   videoUrl?: string;
   durationSec: number;
   startSec: number;
+  views: number;
   likes: number;
   comments: number;
   shares: number;
