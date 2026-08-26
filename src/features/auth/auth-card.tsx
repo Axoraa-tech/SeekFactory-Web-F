@@ -9,7 +9,21 @@ import { getApi } from "@/shared/api";
 
 type Mode = "join" | "login";
 
-export function AuthCard({ mode }: { mode: Mode }) {
+interface AuthCardProps {
+  mode: Mode;
+  embedded?: boolean;
+  hideHeader?: boolean;
+  initialEmail?: string;
+  initialPassword?: string;
+}
+
+export function AuthCard({
+  mode,
+  embedded = false,
+  hideHeader = false,
+  initialEmail = "",
+  initialPassword = "",
+}: AuthCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isManufacturer = searchParams.get("role") === "manufacturer";
@@ -17,10 +31,20 @@ export function AuthCard({ mode }: { mode: Mode }) {
   const next = searchParams.get("next") ?? undefined;
 
   const [method, setMethod] = useState<"email" | "phone">("email");
+  const [email, setEmail] = useState(initialEmail);
+  const [password, setPassword] = useState(initialPassword);
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Sync state if initialEmail / initialPassword props change (e.g. on auto-fill)
+  if (initialEmail && email !== initialEmail && !email) {
+    setEmail(initialEmail);
+  }
+  if (initialPassword && password !== initialPassword && !password) {
+    setPassword(initialPassword);
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,8 +52,8 @@ export function AuthCard({ mode }: { mode: Mode }) {
     const form = new FormData(event.currentTarget);
 
     if (method === "email") {
-      const password = String(form.get("password") ?? "");
-      if (password.length < 6) {
+      const pwd = String(form.get("password") ?? password ?? "");
+      if (pwd.length < 6) {
         setError("Password must be at least 6 characters.");
         return;
       }
@@ -49,8 +73,8 @@ export function AuthCard({ mode }: { mode: Mode }) {
     const input = {
       role,
       method,
-      email: String(form.get("email") ?? "") || undefined,
-      password: String(form.get("password") ?? "") || undefined,
+      email: String(form.get("email") ?? email) || undefined,
+      password: String(form.get("password") ?? password) || undefined,
       phone: String(form.get("phone") ?? "") || undefined,
       companyName: String(form.get("companyName") ?? "") || undefined,
     };
@@ -60,14 +84,23 @@ export function AuthCard({ mode }: { mode: Mode }) {
     router.refresh();
   }
 
+  const containerClasses = embedded
+    ? "w-full"
+    : "w-full max-w-[400px] rounded-xl border border-line bg-white px-5 sm:px-6 py-6 sm:py-8 shadow-card";
+
   return (
-    <div className="w-full max-w-[400px] rounded-lg border border-line bg-white px-6 py-8 shadow-card">
-      <h1 className="mb-1 text-center text-[32px] font-light tracking-tight text-ink">
-        {mode === "join" ? "Join SeekFactory" : "Sign in"}
-      </h1>
-      <p className="mb-5 text-center text-sm text-ink-muted">
-        {isManufacturer ? "For verified factories and suppliers" : "For industrial buyers worldwide"}
-      </p>
+    <div className={containerClasses}>
+      {!hideHeader && (
+        <>
+          <h1 className="mb-1 text-center text-2xl sm:text-[30px] font-light tracking-tight text-ink">
+            {mode === "join" ? "Join SeekFactory" : "Sign in"}
+          </h1>
+          <p className="mb-4 sm:mb-5 text-center text-xs sm:text-sm text-ink-muted">
+            {isManufacturer ? "For verified factories and suppliers" : "For industrial buyers worldwide"}
+          </p>
+        </>
+      )}
+
       <RoleToggle />
 
       <form onSubmit={onSubmit} className="space-y-3">
@@ -76,7 +109,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
             name="companyName"
             required
             placeholder="Factory / company name"
-            className="h-12 w-full rounded-md border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue"
+            className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
           />
         ) : null}
 
@@ -86,16 +119,20 @@ export function AuthCard({ mode }: { mode: Mode }) {
               name="email"
               type="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              className="h-12 w-full rounded-md border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue"
+              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
             <input
               name="password"
               type="password"
               required
               minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Password (6+ characters)"
-              className="h-12 w-full rounded-md border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue"
+              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
           </>
         ) : (
@@ -104,14 +141,14 @@ export function AuthCard({ mode }: { mode: Mode }) {
               name="phone"
               required
               placeholder="Mobile number"
-              className="h-12 w-full rounded-md border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue"
+              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
             {otpSent ? (
               <input
                 name="otp"
                 required
                 placeholder="OTP (123456)"
-                className="h-12 w-full rounded-md border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue"
+                className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
               />
             ) : null}
           </>
@@ -135,13 +172,13 @@ export function AuthCard({ mode }: { mode: Mode }) {
           </p>
         ) : null}
 
-        {error ? <p className="text-center text-sm text-red-600">{error}</p> : null}
-        {notice ? <p className="text-center text-sm text-brand-blue">{notice}</p> : null}
+        {error ? <p className="text-center text-sm font-medium text-red-600">{error}</p> : null}
+        {notice ? <p className="text-center text-sm font-medium text-brand-blue">{notice}</p> : null}
 
         <button
           type="submit"
           disabled={saving}
-          className="h-12 w-full rounded-full bg-brand-blue text-base font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60"
+          className="h-11 sm:h-12 w-full rounded-full bg-brand-blue text-sm sm:text-base font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60 transition-colors"
         >
           {saving
             ? "Please wait…"
@@ -155,7 +192,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
 
       <button
         type="button"
-        className="mt-3 w-full text-sm font-semibold text-brand-blue"
+        className="mt-2.5 w-full text-xs sm:text-sm font-semibold text-brand-blue hover:underline"
         onClick={() => {
           setMethod((value) => (value === "email" ? "phone" : "email"));
           setOtpSent(false);
@@ -166,7 +203,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
         {method === "email" ? "Use phone instead" : "Use email instead"}
       </button>
 
-      <div className="my-5 flex items-center gap-3 text-sm text-ink-faint">
+      <div className="my-4 flex items-center gap-3 text-xs sm:text-sm text-ink-faint">
         <span className="h-px flex-1 bg-line" />
         or
         <span className="h-px flex-1 bg-line" />
@@ -176,7 +213,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
         <button
           type="button"
           onClick={() => setNotice("WeChat login will connect when the China backend is ready.")}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#8c8c8c] text-sm font-semibold hover:bg-canvas"
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#8c8c8c] text-xs sm:text-sm font-semibold hover:bg-canvas transition-colors"
         >
           Continue with WeChat
         </button>
@@ -184,20 +221,20 @@ export function AuthCard({ mode }: { mode: Mode }) {
         <button
           type="button"
           onClick={() => setNotice("Google login will connect when the backend is ready.")}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#8c8c8c] text-sm font-semibold hover:bg-canvas"
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#8c8c8c] text-xs sm:text-sm font-semibold hover:bg-canvas transition-colors"
         >
           <GoogleMark />
           Continue with Google
         </button>
       )}
 
-      <p className="mt-6 text-center text-sm">
+      <p className="mt-4 sm:mt-5 text-center text-xs sm:text-sm">
         {mode === "join" ? (
           <>
             Already on SeekFactory?{" "}
             <Link
               href={`/login?role=${isManufacturer ? "manufacturer" : "buyer"}`}
-              className="font-semibold text-brand-blue"
+              className="font-semibold text-brand-blue hover:underline"
             >
               Sign in
             </Link>
@@ -207,7 +244,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
             New to SeekFactory?{" "}
             <Link
               href={`/join?role=${isManufacturer ? "manufacturer" : "buyer"}`}
-              className="font-semibold text-brand-blue"
+              className="font-semibold text-brand-blue hover:underline"
             >
               Join now
             </Link>

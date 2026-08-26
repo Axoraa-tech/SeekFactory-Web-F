@@ -3,6 +3,8 @@ import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { RightAside } from "@/components/layout/right-aside";
 import { TopNav } from "@/components/layout/top-nav";
+import { BackToTop } from "@/components/ui/back-to-top";
+import { TimedAuthPrompt } from "@/features/auth/timed-auth-prompt";
 import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Conversation } from "@/entities/message";
@@ -57,6 +59,8 @@ export function AppShell({
         ) : null}
       </div>
       <MobileNav messageCount={messageCount} notificationCount={notificationCount} />
+      <TimedAuthPrompt user={user} />
+      <BackToTop />
     </div>
   );
 }

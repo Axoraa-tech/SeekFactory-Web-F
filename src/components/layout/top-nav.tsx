@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { Bell, ChevronDown, MessageCircle, Plus, Search } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Plus, Building2 } from "lucide-react";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { SearchBar } from "@/components/layout/search-bar";
+import { MessagesDropdown } from "@/components/layout/messages-dropdown";
+import { NotificationsDropdown } from "@/components/layout/notifications-dropdown";
+import { UserDropdown } from "@/components/layout/user-dropdown";
+import { LanguageCurrencyDropdown } from "@/components/layout/language-currency-dropdown";
 import type { BuyerProfile } from "@/entities/user";
 import type { Category } from "@/entities/category";
 
@@ -15,94 +18,74 @@ type Props = {
 
 export function TopNav({ user, messageCount, notificationCount, categories }: Props) {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface shadow-nav">
-      <div className="mx-auto flex h-[68px] max-w-[1440px] items-center gap-4 px-4 lg:px-6">
-        <Link href="/" className="flex shrink-0 items-center" aria-label="SeekFactory home">
-          <BrandLogo priority className="h-11 w-auto max-w-[220px] object-contain object-left sm:h-12 sm:max-w-[260px]" />
+    <header className="sticky top-0 z-40 border-b border-line bg-surface/95 shadow-nav backdrop-blur-md">
+      <div className="mx-auto flex h-[76px] max-w-[1440px] items-center gap-3 sm:gap-4 lg:gap-5 px-3 sm:px-6">
+        {/* Logo */}
+        <Link href="/" className="flex shrink-0 items-center py-1 group" aria-label="SeekFactory home">
+          <BrandLogo
+            priority
+            className="h-11 sm:h-14 md:h-16 w-auto max-w-[200px] sm:max-w-[280px] md:max-w-[320px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
+          />
         </Link>
 
-        <form action="/explore" className="mx-auto hidden min-w-0 flex-1 max-w-2xl items-center md:flex">
-          <div className="flex h-11 w-full overflow-hidden rounded-xl border border-line bg-canvas">
-            <label className="sr-only" htmlFor="search-category">
-              Category
-            </label>
-            <select
-              id="search-category"
-              name="category"
-              defaultValue="all"
-              className="w-[88px] shrink-0 border-r border-line bg-transparent px-3 text-sm text-ink"
-            >
-              <option value="all">All</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.slug}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-            <input
-              name="q"
-              placeholder="Search products, manufacturers, categories..."
-              className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-ink-faint"
-            />
-            <button
-              type="submit"
-              className="m-1 flex h-9 w-11 items-center justify-center rounded-lg bg-brand-blue text-white"
-              aria-label="Search"
-            >
-              <Search className="h-4 w-4" />
-            </button>
-          </div>
-        </form>
+        {/* Optimized Interactive Search Bar */}
+        <SearchBar categories={categories} />
 
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        {/* Right Navigation & User Actions */}
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2.5">
           {user ? (
             <>
+              <LanguageCurrencyDropdown />
               <Link
                 href="/rfq/new"
-                className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-brand-blue px-3.5 text-sm font-semibold text-white"
+                className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-brand-blue px-3.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-brand-blue-dark active:scale-95 shadow-sm"
               >
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Post RFQ</span>
               </Link>
-              <Link
-                href="/messages"
-                className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink-muted hover:bg-canvas"
-                aria-label="Messages"
-              >
-                <MessageCircle className="h-5 w-5" />
-                <Badge count={messageCount} />
-              </Link>
-              <Link
-                href="/notifications"
-                className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink-muted hover:bg-canvas"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5" />
-                <Badge count={notificationCount} />
-              </Link>
-              <Link href="/profile" className="ml-1 flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-canvas">
-                <Avatar src={user.avatarUrl} alt={user.name} size={36} />
-                <span className="hidden leading-tight lg:block">
-                  <span className="block text-sm font-semibold">{user.name}</span>
-                  <span className="block text-xs text-ink-muted">
-                    {user.role === "Supplier" ? "Manufacturer" : "Buyer"}
-                  </span>
-                </span>
-                <ChevronDown className="hidden h-4 w-4 text-ink-faint lg:block" />
-              </Link>
+              <MessagesDropdown initialCount={messageCount} />
+              <NotificationsDropdown initialCount={notificationCount} />
+              <UserDropdown
+                user={user}
+                messageCount={messageCount}
+                notificationCount={notificationCount}
+              />
             </>
           ) : (
-            <>
-              <Link href="/login" className="hidden h-10 items-center px-3 text-sm font-semibold text-ink sm:inline-flex">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Language & Currency selector replacing Explore button */}
+              <LanguageCurrencyDropdown />
+
+              <Link
+                href="/join?role=manufacturer"
+                className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-ink-muted hover:text-brand-blue transition-colors rounded-lg hover:bg-canvas"
+              >
+                <Building2 className="h-4 w-4 text-amber-600" />
+                For Suppliers
+              </Link>
+
+              <Link
+                href="/rfq/new"
+                className="hidden sm:inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl border border-brand-blue/30 bg-blue-50/70 px-3 sm:px-3.5 text-xs font-semibold text-brand-blue hover:bg-blue-100 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5 text-brand-blue" />
+                <span>Post RFQ</span>
+              </Link>
+
+              <Link
+                href="/login"
+                className="h-9 sm:h-10 inline-flex items-center px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-ink hover:text-brand-blue transition-colors"
+              >
                 Sign in
               </Link>
+
               <Link
                 href="/join"
-                className="inline-flex h-10 items-center rounded-full bg-brand-blue px-4 text-sm font-semibold text-white"
+                className="inline-flex h-9 sm:h-10 items-center justify-center rounded-full bg-gradient-to-r from-brand-blue to-blue-700 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-brand-blue/20 transition-all hover:from-blue-700 hover:to-indigo-700 active:scale-95"
               >
                 Join now
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>
