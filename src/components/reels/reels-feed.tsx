@@ -15,13 +15,14 @@ export function ReelsFeed({ items }: Props) {
   }
 
   return (
-    <div className="space-y-5">
-      {items.map((item) => (
+    <div className="space-y-6">
+      {items.map((item, index) => (
         <ReelCard
           key={item.reel.id}
           reel={item.reel}
           manufacturer={item.manufacturer}
           productSlug={item.primaryProductSlug}
+          variantIndex={index}
         />
       ))}
     </div>
