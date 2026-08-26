@@ -4,6 +4,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
 import type { AppNotification } from "@/entities/notification";
 import type { Product } from "@/entities/product";
 import type { FeedTab, Reel } from "@/entities/reel";
+import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { RfqDraft } from "@/entities/rfq";
 import type { BuyerProfile } from "@/entities/user";
 import type { JoinInput, LoginInput } from "@/features/auth/session-cookie";
@@ -68,6 +69,12 @@ export interface RfqRepository {
   submit(draft: RfqDraft): Promise<{ ok: true; id: string }>;
 }
 
+export interface CommentRepository {
+  listByReelId(reelId: string): Promise<ReelComment[]>;
+  addComment(reelId: string, content: string, user?: { name: string; avatarUrl: string; companyName?: string }): Promise<ReelComment>;
+  addReply(commentId: string, content: string, user?: { name: string; avatarUrl: string; companyName?: string }): Promise<ReelCommentReply>;
+}
+
 export interface ApiClient {
   session: SessionRepository;
   feed: FeedRepository;
@@ -77,4 +84,5 @@ export interface ApiClient {
   categories: CategoryRepository;
   notifications: NotificationRepository;
   rfq: RfqRepository;
+  comments: CommentRepository;
 }

@@ -1,6 +1,7 @@
 import type {
   ApiClient,
   CategoryRepository,
+  CommentRepository,
   FeedRepository,
   ManufacturerRepository,
   MessageRepository,
@@ -9,10 +10,12 @@ import type {
   RfqRepository,
   SessionRepository,
 } from "@/shared/api/contracts";
+import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import {
   categories,
   conversations,
   manufacturers,
+  mockComments,
   notifications,
   products,
   reels,
@@ -62,19 +65,22 @@ const session: SessionRepository = {
 
 const feed: FeedRepository = {
   async list(tab) {
-    const items = reels
-      .filter((reel) => reel.tab === tab)
-      .map((reel) => {
-        const manufacturer = manufacturers.find((item) => item.id === reel.manufacturerId);
-        if (!manufacturer) {
-          throw new Error(`Missing manufacturer for reel ${reel.id}`);
-        }
-        return {
-          reel,
-          manufacturer,
-          primaryProductSlug: products.find((item) => item.id === reel.productIds[0])?.slug,
-        };
-      });
+    const list =
+      tab === "following"
+        ? reels.filter((r) => ["mfr-apex", "mfr-bharat", "mfr-metalcraft"].includes(r.manufacturerId))
+        : reels;
+
+    const items = list.map((reel) => {
+      const manufacturer = manufacturers.find((item) => item.id === reel.manufacturerId);
+      if (!manufacturer) {
+        throw new Error(`Missing manufacturer for reel ${reel.id}`);
+      }
+      return {
+        reel,
+        manufacturer,
+        primaryProductSlug: products.find((item) => item.id === reel.productIds[0])?.slug,
+      };
+    });
     return delay(items);
   },
 };
@@ -150,6 +156,60 @@ const rfq: RfqRepository = {
   submit: async () => delay({ ok: true as const, id: `rfq-${Date.now()}` }),
 };
 
+let dynamicComments: ReelComment[] = [...mockComments];
+
+const commentsRepo: CommentRepository = {
+  async listByReelId(reelId: string) {
+    const items = dynamicComments
+      .filter((c) => c.reelId === reelId)
+      .map((c) => ({ ...c, replies: [...c.replies] }));
+    return delay(items);
+  },
+  async addComment(reelId, content, user) {
+    const newComment: ReelComment = {
+      id: `cmt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      reelId,
+      authorName: user?.name || "Arjun Mehta",
+      authorAvatarUrl:
+        user?.avatarUrl ||
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+      authorCompany: user?.companyName || "Mehta Industrial Sourcing",
+      authorCountry: "India",
+      isVerified: true,
+      content,
+      createdAt: "Just now",
+      likes: 0,
+      replies: [],
+    };
+    dynamicComments = [newComment, ...dynamicComments];
+    const reel = reels.find((r) => r.id === reelId);
+    if (reel) reel.comments += 1;
+    return delay({ ...newComment, replies: [] });
+  },
+  async addReply(commentId, content, user) {
+    const newReply: ReelCommentReply = {
+      id: `rep-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      authorName: user?.name || "Arjun Mehta",
+      authorAvatarUrl:
+        user?.avatarUrl ||
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+      authorCompany: user?.companyName || "Mehta Industrial Sourcing",
+      authorCountry: "India",
+      isVerified: true,
+      content,
+      createdAt: "Just now",
+      likes: 0,
+    };
+    const target = dynamicComments.find((c) => c.id === commentId);
+    if (target) {
+      target.replies = [...target.replies, newReply];
+      const reel = reels.find((r) => r.id === target.reelId);
+      if (reel) reel.comments += 1;
+    }
+    return delay({ ...newReply });
+  },
+};
+
 export const mockApi: ApiClient = {
   session,
   feed,
@@ -159,4 +219,5 @@ export const mockApi: ApiClient = {
   categories: categoryRepo,
   notifications: notificationRepo,
   rfq,
+  comments: commentsRepo,
 };
