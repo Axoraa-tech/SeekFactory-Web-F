@@ -109,11 +109,11 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
               "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none",
               isExpanded ? "py-1.5" : "py-1",
               !currentCategory
-                ? "text-brand-blue font-bold"
-                : "text-neutral-700 hover:text-ink font-medium"
+                ? "text-brand-orange font-bold"
+                : "text-neutral-700 hover:text-neutral-900 font-medium"
             )}
           >
-            {/* Bigger Dual-Tone Blue & Black Icon (No grey background) */}
+            {/* Bigger Dual-Tone Icon */}
             <div
               className={cn(
                 "flex items-center justify-center transition-all duration-300 overflow-hidden",
@@ -131,15 +131,15 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
             <span
               className={cn(
                 "w-full text-center text-[11px] sm:text-xs leading-tight truncate transition-colors",
-                !currentCategory ? "text-brand-blue font-bold" : "text-neutral-700 group-hover:text-ink"
+                !currentCategory ? "text-brand-orange font-bold" : "text-neutral-700 group-hover:text-neutral-900"
               )}
             >
               For You
             </span>
 
-            {/* Active Blue Indicator Underline */}
+            {/* Active Orange Indicator Underline */}
             {!currentCategory && (
-              <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-brand-blue shadow-xs" />
+              <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-brand-orange shadow-xs" />
             )}
           </Link>
 
@@ -155,11 +155,11 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
                   "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none",
                   isExpanded ? "py-1.5" : "py-1",
                   isActive
-                    ? "text-brand-blue font-bold"
-                    : "text-neutral-700 hover:text-ink font-medium"
+                    ? "text-brand-orange font-bold"
+                    : "text-neutral-700 hover:text-neutral-900 font-medium"
                 )}
               >
-                {/* Bigger Dual-Tone Blue & Black Icon (No grey background) */}
+                {/* Bigger Dual-Tone Icon */}
                 <div
                   className={cn(
                     "flex items-center justify-center transition-all duration-300 overflow-hidden",
@@ -177,15 +177,15 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
                 <span
                   className={cn(
                     "w-full text-center text-[11px] sm:text-xs leading-tight truncate transition-colors",
-                    isActive ? "text-brand-blue font-bold" : "text-neutral-700 group-hover:text-ink"
+                    isActive ? "text-brand-orange font-bold" : "text-neutral-700 group-hover:text-neutral-900"
                   )}
                 >
                   {item.name}
                 </span>
 
-                {/* Active Underline */}
+                {/* Active Orange Indicator Underline */}
                 {isActive && (
-                  <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-brand-blue shadow-xs" />
+                  <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-brand-orange shadow-xs" />
                 )}
               </Link>
             );

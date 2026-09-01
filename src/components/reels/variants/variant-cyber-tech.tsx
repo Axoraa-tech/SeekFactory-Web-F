@@ -33,7 +33,7 @@ type Props = {
 /**
  * VARIANT 6: Modern Enterprise Showcase (White, Brand Blue, Orange & Black Theme + Brand Blue 5-Button Bar)
  */
-export function VariantCyberTech({ reel, manufacturer, productSlug }: Props) {
+export function VariantCyberTech({ reel, manufacturer }: Props) {
   const [following, setFollowing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -146,7 +146,7 @@ export function VariantCyberTech({ reel, manufacturer, productSlug }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between">
           <Link
-            href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+            href={`/manufacturers/${manufacturer.slug}`}
             className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -316,7 +316,7 @@ export function VariantCyberTech({ reel, manufacturer, productSlug }: Props) {
           </div>
 
           <Link
-            href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+            href={`/manufacturers/${manufacturer.slug}`}
             className="inline-flex h-7 items-center gap-1 rounded-full bg-brand-blue hover:bg-brand-blue-dark px-3 text-xs font-bold text-white shadow-xs transition active:scale-95 flex-shrink-0"
           >
             <span>View Factory</span>
