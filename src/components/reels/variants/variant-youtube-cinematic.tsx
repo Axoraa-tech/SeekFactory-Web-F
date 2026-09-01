@@ -266,7 +266,7 @@ export function VariantYoutubeCinematic({ reel, manufacturer, productSlug }: Pro
         {/* 3. Manufacturer Profile Bar with BLACK "View Products" CTA */}
         <div className="flex items-center justify-between gap-3 flex-wrap pt-0.5">
           <Link
-            href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+            href={`/manufacturers/${manufacturer.slug}`}
             className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}

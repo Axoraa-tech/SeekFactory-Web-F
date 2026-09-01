@@ -523,7 +523,7 @@ export function VariantSocialDiscovery({ reel, manufacturer, productSlug }: Prop
           {/* Slim Sub-banner */}
           <div className="flex items-center justify-between rounded-xl bg-neutral-50/70 hover:bg-neutral-100/60 py-1.5 px-3 border border-neutral-200/60 transition">
             <Link
-              href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+              href={`/manufacturers/${manufacturer.slug}`}
               className="flex items-center gap-2 min-w-0 hover:opacity-85 transition group"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}

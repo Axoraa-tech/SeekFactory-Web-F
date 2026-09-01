@@ -144,7 +144,7 @@ export function VariantLiveCatalog({ reel, manufacturer, productSlug }: Props) {
         {/* Top Header */}
         <div className="flex items-center justify-between">
           <Link
-            href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+            href={`/manufacturers/${manufacturer.slug}`}
             className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -167,7 +167,7 @@ export function VariantLiveCatalog({ reel, manufacturer, productSlug }: Props) {
           </Link>
 
           <Link
-            href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+            href={`/manufacturers/${manufacturer.slug}`}
             className="inline-flex h-7 items-center rounded-full bg-brand-blue px-3 text-xs font-semibold text-white hover:bg-brand-blue-dark transition active:scale-95 shadow-xs"
           >
             Catalog

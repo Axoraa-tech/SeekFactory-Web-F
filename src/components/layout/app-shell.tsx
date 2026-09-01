@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -34,6 +37,11 @@ export function AppShell({
   children,
   showRight = true,
 }: Props) {
+  const pathname = usePathname();
+  // Hide LeftSidebar when viewing manufacturer profile so profile takes up the left space
+  const isManufacturerProfile = pathname?.startsWith("/manufacturers/");
+  const showLeft = !isManufacturerProfile;
+
   return (
     <div className="min-h-screen bg-canvas pb-16 lg:pb-8">
       <TopNav
@@ -42,12 +50,14 @@ export function AppShell({
         messageCount={messageCount}
         notificationCount={notificationCount}
       />
-      <div className="mx-auto flex max-w-[1440px] gap-5 px-4 py-5 lg:px-6">
-        <LeftSidebar
-          categories={categories}
-          messageCount={messageCount}
-          notificationCount={notificationCount}
-        />
+      <div className="mx-auto flex max-w-[1440px] gap-5 px-4 py-5 lg:px-6 transition-all duration-300">
+        {showLeft && (
+          <LeftSidebar
+            categories={categories}
+            messageCount={messageCount}
+            notificationCount={notificationCount}
+          />
+        )}
         <main className="min-w-0 flex-1">{children}</main>
         {showRight ? (
           <RightAside

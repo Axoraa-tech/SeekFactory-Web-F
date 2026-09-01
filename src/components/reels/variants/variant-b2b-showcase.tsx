@@ -37,7 +37,7 @@ type Props = {
 /**
  * VARIANT 3: B2B Industrial Showcase & Technical Spec Sheet (Industrial Segmented 5-Button Bar)
  */
-export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
+export function VariantB2bShowcase({ reel, manufacturer }: Props) {
   const [following, setFollowing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -167,7 +167,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
           {/* Header */}
           <div className="flex items-center justify-between">
             <Link
-              href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+              href={`/manufacturers/${manufacturer.slug}`}
               className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
