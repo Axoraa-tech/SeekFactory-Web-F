@@ -2,6 +2,7 @@ import { VerifiedManufacturers } from "@/components/widgets/verified-manufacture
 import { TrendingProducts } from "@/components/widgets/trending-products";
 import { RecentMessages } from "@/components/widgets/recent-messages";
 import { ExploreByCategory } from "@/components/widgets/explore-by-category";
+import { SidebarFooter } from "@/components/layout/sidebar-footer";
 import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
@@ -22,6 +23,7 @@ export function RightAside({ manufacturers, products, messages, categories }: Pr
         <TrendingProducts products={products} />
         <RecentMessages messages={messages} />
         <ExploreByCategory categories={categories} />
+        <SidebarFooter />
       </div>
     </aside>
   );

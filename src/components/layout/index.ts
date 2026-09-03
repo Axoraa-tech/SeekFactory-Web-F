@@ -9,5 +9,4 @@ export { MessagesDropdown } from "./messages-dropdown";
 export { NotificationsDropdown } from "./notifications-dropdown";
 export { LanguageCurrencyDropdown } from "./language-currency-dropdown";
 export { SidebarFooter } from "./sidebar-footer";
-export { SiteFooter } from "./site-footer";
 
