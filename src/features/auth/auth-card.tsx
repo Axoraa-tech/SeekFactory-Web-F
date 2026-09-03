@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { Monitor, Smartphone } from "lucide-react";
 import { RoleToggle } from "@/features/auth/role-toggle";
+
 import { postAuthPath } from "@/features/auth/session-cookie";
 import { getApi } from "@/shared/api";
 
@@ -83,6 +85,23 @@ export function AuthCard({
     router.push(postAuthPath(user.role, next));
     router.refresh();
   }
+
+  async function handleGuestLogin(view: "landscape" | "vertical") {
+    setError("");
+    setNotice("");
+    setSaving(true);
+    const input = {
+      role: "Buyer" as const,
+      method: "email" as const,
+      email: "guest.buyer@seekfactory.com",
+      companyName: "Global Sourcing Corp (Guest)",
+    };
+    const api = getApi();
+    await api.session.login(input);
+    router.push(`/?view=${view}`);
+    router.refresh();
+  }
+
 
   const containerClasses = embedded
     ? "w-full"
@@ -227,6 +246,35 @@ export function AuthCard({
           Continue with Google
         </button>
       )}
+
+      {/* Instant Guest Demo Buttons */}
+      <div className="my-3.5 flex items-center gap-2 text-[11px] sm:text-xs text-slate-400">
+        <span className="h-px flex-1 bg-slate-200" />
+        <span>⚡ Quick Guest Access</span>
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <div className="space-y-2">
+        <button
+          type="button"
+          disabled={saving}
+          onClick={() => handleGuestLogin("landscape")}
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:border-brand-blue/30 transition-all active:scale-[0.99] shadow-2xs group"
+        >
+          <Monitor className="h-3.5 w-3.5 text-brand-blue group-hover:scale-110 transition-transform" />
+          <span>Guest: Landscape B2B Feed</span>
+        </button>
+
+        <button
+          type="button"
+          disabled={saving}
+          onClick={() => handleGuestLogin("vertical")}
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/70 px-3 text-xs font-semibold text-slate-700 hover:bg-orange-100/80 hover:border-orange-300 transition-all active:scale-[0.99] shadow-2xs group"
+        >
+          <Smartphone className="h-3.5 w-3.5 text-[#FF3D00] group-hover:scale-110 transition-transform" />
+          <span>Guest: Vertical Reels Feed</span>
+        </button>
+      </div>
 
       <p className="mt-4 sm:mt-5 text-center text-xs sm:text-sm">
         {mode === "join" ? (

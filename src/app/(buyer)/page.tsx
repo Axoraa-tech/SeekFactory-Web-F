@@ -3,18 +3,20 @@ import { ReelsFeed } from "@/components/reels/reels-feed";
 import { loadFeed, parseFeedTab } from "@/features/feed/load-feed";
 
 type Props = {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; view?: string }>;
 };
 
 export default async function HomePage({ searchParams }: Props) {
   const params = await searchParams;
   const tab = parseFeedTab(params.tab);
+  const viewMode: "landscape" | "vertical" = params.view === "vertical" ? "vertical" : "landscape";
   const items = await loadFeed(tab);
 
   return (
     <section>
-      <FeedTabs tab={tab} />
-      <ReelsFeed items={items} />
+      <FeedTabs tab={tab} viewMode={viewMode} />
+      <ReelsFeed items={items} viewMode={viewMode} />
     </section>
   );
 }
+

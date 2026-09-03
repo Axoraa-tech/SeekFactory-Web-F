@@ -18,7 +18,7 @@ type Props = {
 export function RightAside({ manufacturers, products, messages, categories }: Props) {
   return (
     <aside className="hidden w-[300px] shrink-0 xl:block">
-      <div className="sticky top-[84px] space-y-4">
+      <div className="sticky top-[88px] h-[calc(100vh-104px)] overflow-y-auto space-y-4 pr-1">
         <VerifiedManufacturers manufacturers={manufacturers} />
         <TrendingProducts products={products} />
         <RecentMessages messages={messages} />
@@ -28,3 +28,4 @@ export function RightAside({ manufacturers, products, messages, categories }: Pr
     </aside>
   );
 }
+

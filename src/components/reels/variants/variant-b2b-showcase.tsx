@@ -23,7 +23,9 @@ import {
 } from "lucide-react";
 import { CommentsModal } from "@/components/reels/comments-modal";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { formatCount, formatDuration } from "@/shared/lib/format";
+
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
@@ -340,8 +342,21 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
             </div>
           </div>
 
+          {/* B2B Instant Commercial Bar: Price, Buy Now, Add to Cart, Chat */}
+          <div className="rounded-xl border border-slate-200/90 bg-gradient-to-r from-slate-50 via-white to-blue-50/20 p-2.5 shadow-2xs">
+            <ProductActionBar
+              priceInr={125000}
+              unit="Set"
+              moq={1}
+              productSlug={productSlug}
+              manufacturerSlug={manufacturer.slug}
+              size="sm"
+            />
+          </div>
+
           {/* DISTINCT DESIGN 3: Industrial Segmented 5-Button Bar (Thin & Compact) */}
           <div className="rounded-xl bg-neutral-50/90 border border-neutral-200/70 p-1 flex items-center justify-between text-xs select-none">
+
             {/* 1. Comments */}
             <button
               type="button"

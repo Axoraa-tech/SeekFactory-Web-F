@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { brand } from "@/shared/config/brand";
+import { LoadingScreen } from "@/components/ui/loading-screen";
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -22,7 +23,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${sans.variable} font-sans antialiased`}>{children}</body>
+      <body className={`${sans.variable} font-sans antialiased`}>
+        <LoadingScreen />
+        {children}
+      </body>
     </html>
   );
 }
+
