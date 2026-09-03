@@ -79,6 +79,33 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
         </button>
       </form>
 
+      {/* Category Suggestions Dropdown on Focus */}
+      {isFocused && categories.length > 0 && (
+        <div
+          onMouseDown={(e) => e.preventDefault()}
+          className="hidden md:block absolute left-0 right-0 top-12 z-50 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-in fade-in duration-150"
+        >
+          <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            {query.trim() ? "Matching Categories" : "Popular Categories"}
+          </div>
+          <div className="space-y-0.5">
+            {(query.trim()
+              ? categories.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
+              : categories.slice(0, 5)
+            ).map((cat) => (
+              <a
+                key={cat.id}
+                href={`/explore?category=${cat.id}`}
+                className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
+              >
+                <span>{cat.name}</span>
+                <span className="text-[10px] text-slate-400">{cat.listingCount} listings</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Mobile Search Toggle Icon */}
       <div className="flex md:hidden items-center justify-end">
         <button

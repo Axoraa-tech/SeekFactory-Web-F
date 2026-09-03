@@ -37,7 +37,7 @@ export function LeftSidebar({ categories, messageCount, notificationCount }: Pro
 
   return (
     <aside className="hidden w-[260px] shrink-0 lg:block">
-      <div className="sticky top-[84px] space-y-4">
+      <div className="sticky top-[88px] h-[calc(100vh-104px)] overflow-y-auto space-y-4 pr-1">
         <Card className="overflow-hidden p-2">
           <nav className="flex flex-col">
             {nav.map((item) => {

@@ -156,6 +156,38 @@ export function UserDropdown({
             </Link>
 
             <Link
+              href="/messages"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-canvas hover:text-brand-blue transition-colors group"
+            >
+              <div className="flex items-center gap-2.5">
+                <MessageSquare className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
+                <span>Messages</span>
+              </div>
+              {messageCount > 0 && (
+                <span className="rounded-full bg-brand-blue px-1.5 py-0.5 text-[10px] font-bold text-white">
+                  {messageCount}
+                </span>
+              )}
+            </Link>
+
+            <Link
+              href="/notifications"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-canvas hover:text-brand-blue transition-colors group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Bell className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
+                <span>Notifications</span>
+              </div>
+              {notificationCount > 0 && (
+                <span className="rounded-full bg-brand-orange px-1.5 py-0.5 text-[10px] font-bold text-white">
+                  {notificationCount}
+                </span>
+              )}
+            </Link>
+
+            <Link
               href="/rfq/new"
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-canvas hover:text-brand-blue transition-colors group"
