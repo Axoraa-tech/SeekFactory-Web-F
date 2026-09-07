@@ -75,10 +75,12 @@ const feed: FeedRepository = {
       if (!manufacturer) {
         throw new Error(`Missing manufacturer for reel ${reel.id}`);
       }
+      const reelProducts = products.filter((item) => reel.productIds.includes(item.id));
       return {
         reel,
         manufacturer,
         primaryProductSlug: products.find((item) => item.id === reel.productIds[0])?.slug,
+        products: reelProducts,
       };
     });
     return delay(items);

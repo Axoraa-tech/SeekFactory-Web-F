@@ -11,7 +11,7 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
   if (items.length === 0) {
     return (
       <div className="rounded-card border border-line bg-surface p-8 text-center text-sm text-ink-muted">
-        No reels in this tab yet. Follow manufacturers to fill Following.
+        No seeks in this tab yet. Follow manufacturers to fill Following.
       </div>
     );
   }
@@ -26,6 +26,7 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
           reel={item.reel}
           manufacturer={item.manufacturer}
           productSlug={item.primaryProductSlug}
+          products={item.products}
           variantIndex={index}
           viewMode={viewMode}
         />

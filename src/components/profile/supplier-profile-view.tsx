@@ -269,7 +269,7 @@ export function SupplierProfileView({
               )}
             >
               <Film className="h-4 w-4" />
-              <span>Factory Video Reels</span>
+              <span>Factory Video Seeks</span>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-semibold">
                 {reels.length}
               </span>
@@ -355,19 +355,19 @@ export function SupplierProfileView({
             </div>
           )}
 
-          {/* TAB CONTENT 2: Video Reels (Rendered in VariantB2bShowcase) */}
-          {activeTab === "videos" && (
-            <div className="space-y-5">
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Machinery Video Demos & Facility Tours</h2>
-                <p className="text-xs text-slate-500">Live technical demonstrations of manufacturing lines</p>
-              </div>
+              {/* TAB CONTENT 2: Video Seeks (Rendered in VariantB2bShowcase) */}
+              {activeTab === "videos" && (
+                <div className="space-y-5">
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900">Machinery Video Demos & Facility Tours</h2>
+                    <p className="text-xs text-slate-500">Live technical demonstrations of manufacturing lines</p>
+                  </div>
 
-              {reels.length === 0 ? (
-                <Card className="p-8 text-center text-sm text-slate-500">
-                  No video reels uploaded for this manufacturer yet.
-                </Card>
-              ) : (
+                  {reels.length === 0 ? (
+                    <Card className="p-8 text-center text-sm text-slate-500">
+                      No video seeks uploaded for this manufacturer yet.
+                    </Card>
+                  ) : (
                 <div className="space-y-6">
                   {reels.map((reel) => (
                     <VariantB2bShowcase

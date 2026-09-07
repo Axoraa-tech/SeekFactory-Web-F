@@ -11,9 +11,20 @@ import type { Category } from "@/entities/category";
 type Props = {
   categories: Category[];
   selectedCategorySlug?: string;
+  forYouHref?: string;
+  categoryHref?: (slug: string) => string;
+  className?: string;
+  sticky?: boolean;
 };
 
-export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Props) {
+export function DynamicCategoryNav({
+  categories,
+  selectedCategorySlug = "",
+  forYouHref = "/explore",
+  categoryHref,
+  className,
+  sticky = true,
+}: Props) {
   const searchParams = useSearchParams();
   const currentCategory = selectedCategorySlug || searchParams.get("category") || "";
 
@@ -54,8 +65,8 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
     const el = scrollContainerRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
-    setShowLeftArrow(scrollLeft > 10);
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    setShowLeftArrow(scrollLeft > 8);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 8);
   }, []);
 
   useEffect(() => {
@@ -70,6 +81,95 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
     };
   }, [updateArrowVisibility]);
 
+  // Auto-scroll the active category item into center view when selected
+  const activeItemRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    if (activeItemRef.current && scrollContainerRef.current) {
+      activeItemRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+      const timer = setTimeout(updateArrowVisibility, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [currentCategory, updateArrowVisibility]);
+
+  const hoverAnimRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number>(0);
+
+  const stopHoverScroll = useCallback(() => {
+    if (hoverAnimRef.current !== null) {
+      cancelAnimationFrame(hoverAnimRef.current);
+      hoverAnimRef.current = null;
+    }
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.style.scrollBehavior = "smooth";
+    }
+  }, []);
+
+  const startHoverScroll = useCallback(
+    (direction: "left" | "right") => {
+      stopHoverScroll();
+      const el = scrollContainerRef.current;
+      if (!el) return;
+
+      // Disable CSS smooth scroll during hover so requestAnimationFrame updates instantaneously
+      el.style.scrollBehavior = "auto";
+      lastTimeRef.current = performance.now();
+
+      const pixelsPerSecond = direction === "right" ? 340 : -340;
+
+      const step = (now: number) => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const dt = Math.min((now - lastTimeRef.current) / 1000, 0.05);
+        lastTimeRef.current = now;
+
+        const maxScroll = container.scrollWidth - container.clientWidth;
+
+        if (direction === "right") {
+          if (container.scrollLeft >= maxScroll - 1) {
+            container.scrollLeft = maxScroll;
+            updateArrowVisibility();
+            stopHoverScroll();
+            return;
+          }
+          container.scrollLeft = Math.min(maxScroll, container.scrollLeft + pixelsPerSecond * dt);
+        } else {
+          if (container.scrollLeft <= 1) {
+            container.scrollLeft = 0;
+            updateArrowVisibility();
+            stopHoverScroll();
+            return;
+          }
+          container.scrollLeft = Math.max(0, container.scrollLeft + pixelsPerSecond * dt);
+        }
+
+        updateArrowVisibility();
+        hoverAnimRef.current = requestAnimationFrame(step);
+      };
+
+      hoverAnimRef.current = requestAnimationFrame(step);
+    },
+    [stopHoverScroll, updateArrowVisibility]
+  );
+
+  // Stop hover scrolling if tab loses focus or window blurs
+  useEffect(() => {
+    const handleBlur = () => stopHoverScroll();
+    window.addEventListener("blur", handleBlur);
+    document.addEventListener("visibilitychange", handleBlur);
+    return () => {
+      stopHoverScroll();
+      window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("visibilitychange", handleBlur);
+    };
+  }, [stopHoverScroll]);
+
   const handleScrollLeft = () => {
     if (!scrollContainerRef.current) return;
     scrollContainerRef.current.scrollBy({ left: -240, behavior: "smooth" });
@@ -81,32 +181,49 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
   };
 
   return (
-    <div className="sticky top-[64px] z-20 w-full rounded-2xl border border-neutral-200/90 bg-white shadow-xs transition-all duration-300 overflow-hidden">
+    <nav
+      aria-label="Machinery Categories"
+      className={cn(
+        "w-full rounded-2xl border border-neutral-200/90 bg-white shadow-xs transition-all duration-300 overflow-hidden select-none",
+        sticky ? "sticky top-[76px] z-20" : "",
+        className
+      )}
+    >
       <div className="relative flex items-center px-1.5 sm:px-2">
         {/* Left Scroll Arrow */}
         {showLeftArrow && (
-          <button
-            type="button"
-            onClick={handleScrollLeft}
-            aria-label="Scroll left"
-            className="absolute left-1 z-30 flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white/95 text-neutral-700 shadow-md transition-all hover:bg-neutral-50 hover:text-brand-blue active:scale-95"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
+          <div className="absolute left-0 top-0 bottom-0 z-30 flex items-center pr-4 pl-1 bg-gradient-to-r from-white via-white/95 to-transparent pointer-events-none">
+            <button
+              type="button"
+              onClick={handleScrollLeft}
+              onPointerEnter={(e) => {
+                if (e.pointerType === "touch") return;
+                startHoverScroll("left");
+              }}
+              onPointerLeave={stopHoverScroll}
+              onPointerCancel={stopHoverScroll}
+              aria-label="Scroll categories to the left"
+              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-md transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
+            >
+              <ChevronLeft className="h-4 w-4 pointer-events-none" />
+            </button>
+          </div>
         )}
 
         {/* Scrollable Category Row - Uniformly Spaced Columns */}
         <div
           ref={scrollContainerRef}
-          className="no-scrollbar flex w-full items-center gap-0 overflow-x-auto scroll-smooth py-1"
+          className="no-scrollbar flex w-full items-center gap-0 overflow-x-auto scroll-smooth py-1 touch-pan-x overscroll-x-contain"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {/* 1. "For You" Tab (Fixed uniform width) */}
           <Link
-            href="/explore"
+            ref={!currentCategory ? activeItemRef : null}
+            href={forYouHref}
             title="For You - All Categories"
+            aria-current={!currentCategory ? "page" : undefined}
             className={cn(
-              "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none",
+              "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
               isExpanded ? "py-1.5" : "py-1",
               !currentCategory
                 ? "text-brand-blue font-bold"
@@ -146,13 +263,16 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
           {/* Root Categories (Each with uniform fixed width & ellipsis) */}
           {categories.map((item) => {
             const isActive = currentCategory === item.slug;
+            const href = categoryHref ? categoryHref(item.slug) : `/explore?category=${item.slug}`;
             return (
               <Link
                 key={item.id}
-                href={`/explore?category=${item.slug}`}
+                ref={isActive ? activeItemRef : null}
+                href={href}
                 title={item.name}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none",
+                  "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
                   isExpanded ? "py-1.5" : "py-1",
                   isActive
                     ? "text-brand-blue font-bold"
@@ -194,16 +314,24 @@ export function DynamicCategoryNav({ categories, selectedCategorySlug = "" }: Pr
 
         {/* Right Scroll Arrow */}
         {showRightArrow && (
-          <button
-            type="button"
-            onClick={handleScrollRight}
-            aria-label="Scroll right"
-            className="absolute right-1 z-30 flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white/95 text-neutral-700 shadow-md transition-all hover:bg-neutral-50 hover:text-brand-blue active:scale-95"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          <div className="absolute right-0 top-0 bottom-0 z-30 flex items-center pl-4 pr-1 bg-gradient-to-l from-white via-white/95 to-transparent pointer-events-none">
+            <button
+              type="button"
+              onClick={handleScrollRight}
+              onPointerEnter={(e) => {
+                if (e.pointerType === "touch") return;
+                startHoverScroll("right");
+              }}
+              onPointerLeave={stopHoverScroll}
+              onPointerCancel={stopHoverScroll}
+              aria-label="Scroll categories to the right"
+              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-md transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
+            >
+              <ChevronRight className="h-4 w-4 pointer-events-none" />
+            </button>
+          </div>
         )}
       </div>
-    </div>
+    </nav>
   );
 }

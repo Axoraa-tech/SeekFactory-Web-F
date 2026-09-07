@@ -5,7 +5,7 @@ import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
 import { VerifiedManufacturersSection } from "@/features/explore/verified-manufacturers-section";
 import type { Category } from "@/entities/category";
 import { getApi } from "@/shared/api";
-import { formatCount, formatPriceInr } from "@/shared/lib/format";
+import { formatPriceInr } from "@/shared/lib/format";
 import { Package, ShieldCheck } from "lucide-react";
 
 type Props = {
@@ -55,7 +55,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               href={`/explore?category=${selectedRoot.slug}`}
               className="text-xs font-semibold text-brand-blue hover:underline"
             >
-              Show all ({formatCount(selectedRoot.listingCount)})
+              Show all
             </Link>
           </div>
 
@@ -85,7 +85,6 @@ export default async function ExplorePage({ searchParams }: Props) {
                 >
                   <CategoryIcon icon={child.icon} size={14} className="opacity-80" />
                   <span>{child.name}</span>
-                  <span className="text-[10px] opacity-75">({formatCount(child.listingCount)})</span>
                 </Link>
               );
             })}

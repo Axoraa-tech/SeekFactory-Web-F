@@ -8,5 +8,6 @@ export { VariantB2bShowcase } from "./variants/variant-b2b-showcase";
 export { VariantVerticalSplitStudio } from "./variants/variant-vertical-split-studio";
 export { VariantVerticalCatalogSplit } from "./variants/variant-vertical-catalog-split";
 export { VariantVerticalShopReel } from "./variants/variant-vertical-shop-reel";
+export { VariantInstagramProductReel } from "./variants/variant-instagram-product-reel";
 
 

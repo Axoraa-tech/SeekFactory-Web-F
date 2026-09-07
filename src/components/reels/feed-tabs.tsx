@@ -18,7 +18,7 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
       {/* Feed Tabs: For You / Following */}
 
       <div className="flex items-center gap-5">
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Reels</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Seeks</h1>
         <div className="flex gap-4 text-sm font-semibold">
           <TabLink
             href={`/?tab=for-you${isVertical ? "&view=vertical" : ""}`}
@@ -59,7 +59,7 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
               ? "bg-white text-[#FF3D00] shadow-xs"
               : "text-slate-600 hover:text-slate-900"
           )}
-          title="Vertical E-Commerce Reel View (9:16)"
+          title="Vertical E-Commerce Seek View (9:16)"
         >
           <Smartphone className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Vertical</span>

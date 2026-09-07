@@ -36,7 +36,7 @@ type ActionFeedback = {
 export function VariantFullbleedReel({ reel, manufacturer, productSlug }: Props) {
   const [following, setFollowing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(reel.startSec || 0);
   const [duration, setDuration] = useState(reel.durationSec || 30);
   const [isBuffering, setIsBuffering] = useState(false);

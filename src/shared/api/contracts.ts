@@ -13,6 +13,7 @@ export type FeedItem = {
   reel: Reel;
   manufacturer: Manufacturer;
   primaryProductSlug?: string;
+  products?: Product[];
 };
 
 export type ManufacturerDetail = {
