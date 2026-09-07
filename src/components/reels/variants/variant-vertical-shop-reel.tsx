@@ -15,6 +15,7 @@ import {
   Check,
 } from "lucide-react";
 import { CommentsModal } from "@/components/reels/comments-modal";
+import { useSeekAutoplay } from "@/components/reels/use-seek-autoplay";
 import { cn } from "@/shared/lib/cn";
 import { formatCount } from "@/shared/lib/format";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -33,7 +34,7 @@ type Props = {
  */
 export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(reel.startSec || 0);
   const [duration, setDuration] = useState(reel.durationSec || 30);
   const [isBuffering, setIsBuffering] = useState(false);
@@ -64,17 +65,15 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
     }
   }, []);
 
-  const handleTogglePlay = useCallback(() => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-      pingControls();
-    } else {
-      videoRef.current.pause();
-      setIsPlaying(false);
-      setIsControlsVisible(true);
-    }
-  }, [pingControls]);
+  const { togglePlay: handleTogglePlay, toggleMute: handleToggleMute } = useSeekAutoplay({
+    videoRef,
+    containerRef: videoWrapperRef,
+    isPlaying,
+    setIsPlaying,
+    isMuted,
+    setIsMuted,
+    pingControls,
+  });
 
   const handleSeek = useCallback(
     (newTimeSec: number) => {
@@ -86,14 +85,6 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
     },
     [duration, pingControls]
   );
-
-  const handleToggleMute = useCallback(() => {
-    if (!videoRef.current) return;
-    const nextMuted = !videoRef.current.muted;
-    videoRef.current.muted = nextMuted;
-    setIsMuted(nextMuted);
-    pingControls();
-  }, [pingControls]);
 
   const handleToggleFullscreen = useCallback(() => {
     const target = containerRef.current || videoWrapperRef.current;

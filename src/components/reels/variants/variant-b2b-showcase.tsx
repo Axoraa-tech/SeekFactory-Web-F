@@ -22,6 +22,7 @@ import {
   Bookmark,
 } from "lucide-react";
 import { CommentsModal } from "@/components/reels/comments-modal";
+import { useSeekAutoplay } from "@/components/reels/use-seek-autoplay";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { formatCount, formatDuration } from "@/shared/lib/format";
@@ -42,7 +43,7 @@ type Props = {
 export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
   const [following, setFollowing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(reel.startSec || 0);
   const [duration, setDuration] = useState(reel.durationSec || 30);
   const [isBuffering, setIsBuffering] = useState(false);
@@ -74,17 +75,15 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
     }
   }, []);
 
-  const handleTogglePlay = useCallback(() => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-      pingControls();
-    } else {
-      videoRef.current.pause();
-      setIsPlaying(false);
-      setIsControlsVisible(true);
-    }
-  }, [pingControls]);
+  const { togglePlay: handleTogglePlay, toggleMute: handleToggleMute } = useSeekAutoplay({
+    videoRef,
+    containerRef: videoWrapperRef,
+    isPlaying,
+    setIsPlaying,
+    isMuted,
+    setIsMuted,
+    pingControls,
+  });
 
   const handleSeek = useCallback(
     (newTimeSec: number) => {
@@ -96,14 +95,6 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
     },
     [duration, pingControls]
   );
-
-  const handleToggleMute = useCallback(() => {
-    if (!videoRef.current) return;
-    const nextMuted = !videoRef.current.muted;
-    videoRef.current.muted = nextMuted;
-    setIsMuted(nextMuted);
-    pingControls();
-  }, [pingControls]);
 
   const handleToggleFullscreen = useCallback(() => {
     const target = videoWrapperRef.current || containerRef.current;

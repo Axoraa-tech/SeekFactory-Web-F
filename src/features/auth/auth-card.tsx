@@ -272,7 +272,7 @@ export function AuthCard({
           className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/70 px-3 text-xs font-semibold text-slate-700 hover:bg-orange-100/80 hover:border-orange-300 transition-all active:scale-[0.99] shadow-2xs group"
         >
           <Smartphone className="h-3.5 w-3.5 text-[#FF3D00] group-hover:scale-110 transition-transform" />
-          <span>Guest: Vertical Reels Feed</span>
+          <span>Guest: Vertical Seeks Feed</span>
         </button>
       </div>
 

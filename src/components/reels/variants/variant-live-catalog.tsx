@@ -34,7 +34,7 @@ type Props = {
  */
 export function VariantLiveCatalog({ reel, manufacturer, productSlug }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(reel.startSec || 0);
   const [duration, setDuration] = useState(reel.durationSec || 30);
   const [isBuffering, setIsBuffering] = useState(false);

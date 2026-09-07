@@ -23,13 +23,28 @@ export function TimedAuthPrompt({ user }: { user: unknown }) {
     return () => clearTimeout(timer);
   }, [user]);
 
-  // Freeze background dashboard scrolling when modal is open
+  // Freeze background dashboard scrolling and pause all videos when modal is open
   useEffect(() => {
     if (showModal && !user) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
+
+      // Pause all DOM videos immediately
+      document.querySelectorAll("video").forEach((video) => {
+        try {
+          video.pause();
+        } catch {
+          // Ignore
+        }
+      });
+
+      // Dispatch event to pause all Seek player components and sync their React state
+      window.dispatchEvent(new CustomEvent("sf-seek-pause-all"));
+      window.dispatchEvent(new CustomEvent("sf-auth-modal-state", { detail: { open: true } }));
+
       return () => {
         document.body.style.overflow = originalOverflow;
+        window.dispatchEvent(new CustomEvent("sf-auth-modal-state", { detail: { open: false } }));
       };
     }
   }, [showModal, user]);

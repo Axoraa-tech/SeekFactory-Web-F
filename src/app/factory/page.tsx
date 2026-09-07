@@ -14,13 +14,13 @@ export default async function FactoryHomePage() {
       <h1 className="mt-2 text-2xl font-bold">Welcome, {user.companyName}</h1>
       <p className="mt-2 text-sm text-ink-muted">
         Signed in as {user.name} ({displayRole(user.role)}). Video upload, analytics, and lead inbox ship in a later
-        milestone. This page keeps manufacturers out of the buyer Reels feed after Join.
+        milestone. This page keeps manufacturers out of the buyer Seeks feed after Join.
       </p>
       {user.role === "Buyer" ? (
         <p className="mt-4 text-sm text-ink-muted">
           You joined as a buyer.{" "}
           <Link href="/" className="font-semibold text-brand-blue">
-            Go to Reels
+            Go to Seeks
           </Link>
         </p>
       ) : (
