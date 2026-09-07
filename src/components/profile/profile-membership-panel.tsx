@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/shared/lib/cn";
 import type { MembershipTier } from "./profile-types";
 
@@ -12,38 +11,38 @@ type Props = {
 
 export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
   return (
-    <div className="space-y-5">
-      <div className="text-center max-w-xl mx-auto space-y-1">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">Choose Your Sourcing Tier</h2>
-        <p className="text-xs sm:text-sm text-slate-500">
-          Upgrade to unlock priority RFQ dispatch, live video audits, and dedicated enterprise engineering
-          support.
+    <div className="glass-fade-in w-full space-y-6">
+      <header className="space-y-1.5">
+        <h2 className="text-xl font-extrabold tracking-tight text-ink sm:text-2xl">
+          Choose Your Sourcing Tier
+        </h2>
+        <p className="max-w-2xl text-sm text-ink-muted">
+          Upgrade to unlock priority RFQ dispatch, live video audits, and dedicated enterprise
+          engineering support.
         </p>
-      </div>
+      </header>
 
-      <div className="grid gap-5 md:grid-cols-3">
-        <Card
+      <div className="grid w-full gap-4 pt-3 md:grid-cols-3 md:items-stretch">
+        <div
           className={cn(
-            "p-5 rounded-2xl border flex flex-col justify-between space-y-4 shadow-2xs",
-            currentTier === "free"
-              ? "border-brand-blue ring-2 ring-brand-blue/20 bg-blue-50/20"
-              : "border-slate-200/90 bg-white"
+            "glass-panel-liquid flex h-full flex-col justify-between space-y-4 p-5 transition hover:-translate-y-0.5",
+            currentTier === "free" && "ring-2 ring-brand-blue/25 border-brand-blue/30"
           )}
         >
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-extrabold text-slate-900 text-base">Standard Buyer</h3>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="font-extrabold text-ink text-base">Standard Buyer</h3>
               {currentTier === "free" && (
-                <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-bold text-brand-blue">
+                <span className="rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-bold text-white">
                   Active
                 </span>
               )}
             </div>
             <div>
-              <span className="text-2xl font-black text-slate-900">₹0</span>
-              <span className="text-xs text-slate-500"> / forever</span>
+              <span className="text-2xl font-black text-ink">₹0</span>
+              <span className="text-xs text-ink-muted"> / forever</span>
             </div>
-            <ul className="space-y-2 text-xs text-slate-600">
+            <ul className="space-y-2 text-xs text-ink-muted">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Browse 500+ Verified
                 Plants
@@ -53,8 +52,8 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
                 Month
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Standard Trade Assurance
-                Escrow
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Standard Trade
+                Assurance Escrow
               </li>
             </ul>
           </div>
@@ -63,26 +62,24 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             type="button"
             disabled={currentTier === "free"}
             onClick={() => onUpgradeTier("free")}
-            className="w-full h-9 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            className="glass-liquid-item mt-auto w-full h-9 rounded-full text-xs font-bold text-ink disabled:opacity-60"
           >
             {currentTier === "free" ? "Current Plan" : "Switch to Free"}
           </button>
-        </Card>
+        </div>
 
-        <Card
+        <div
           className={cn(
-            "p-5 rounded-2xl border flex flex-col justify-between space-y-4 shadow-md relative",
-            currentTier === "pro"
-              ? "border-brand-blue ring-2 ring-brand-blue/30 bg-blue-50/30"
-              : "border-slate-300 bg-white"
+            "glass-panel-liquid relative flex h-full flex-col justify-between space-y-4 p-5 transition hover:-translate-y-0.5",
+            currentTier === "pro" && "ring-2 ring-brand-blue/30 border-brand-blue/40"
           )}
         >
-          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-0.5 text-[10px] font-black text-white uppercase tracking-wider shadow-xs">
+          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-0.5 text-[10px] font-black text-white uppercase tracking-wider shadow-sm">
             Most Popular
           </span>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-extrabold text-slate-900 text-base">Pro Sourcing Lead</h3>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="font-extrabold text-ink text-base">Pro Sourcing Lead</h3>
               {currentTier === "pro" && (
                 <span className="rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-bold text-white">
                   Active
@@ -90,10 +87,10 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
               )}
             </div>
             <div>
-              <span className="text-2xl font-black text-slate-900">₹3,999</span>
-              <span className="text-xs text-slate-500"> / month</span>
+              <span className="text-2xl font-black text-ink">₹3,999</span>
+              <span className="text-xs text-ink-muted"> / month</span>
             </div>
-            <ul className="space-y-2 text-xs text-slate-700 font-medium">
+            <ul className="space-y-2 text-xs text-ink font-medium">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />{" "}
                 <strong>Unlimited</strong> Custom RFQs & Quotes
@@ -103,10 +100,12 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
                 (&lt; 4h quotes)
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Verified Buyer Gold Badge
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Verified Buyer Gold
+                Badge
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Dedicated Account Manager
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Dedicated Account
+                Manager
               </li>
             </ul>
           </div>
@@ -115,23 +114,21 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             type="button"
             disabled={currentTier === "pro"}
             onClick={() => onUpgradeTier("pro")}
-            className="w-full h-10 rounded-xl bg-brand-blue text-xs font-bold text-white hover:bg-brand-blue-dark shadow-sm active:scale-95 disabled:opacity-60 transition-all"
+            className="mt-auto w-full h-10 rounded-full bg-brand-blue text-xs font-bold text-white hover:bg-brand-blue-dark shadow-sm active:scale-95 disabled:opacity-60 transition-all"
           >
             {currentTier === "pro" ? "Current Plan Active" : "Upgrade to Pro"}
           </button>
-        </Card>
+        </div>
 
-        <Card
+        <div
           className={cn(
-            "p-5 rounded-2xl border flex flex-col justify-between space-y-4 shadow-2xs",
-            currentTier === "enterprise"
-              ? "border-brand-blue ring-2 ring-brand-blue/30 bg-blue-50/20"
-              : "border-slate-200/90 bg-white"
+            "glass-panel-liquid flex h-full flex-col justify-between space-y-4 p-5 transition hover:-translate-y-0.5",
+            currentTier === "enterprise" && "ring-2 ring-amber-400/40 border-amber-300/50"
           )}
         >
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-extrabold text-slate-900 text-base">Enterprise VIP</h3>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="font-extrabold text-ink text-base">Enterprise VIP</h3>
               {currentTier === "enterprise" && (
                 <span className="rounded-full bg-amber-500 text-white px-2 py-0.5 text-[10px] font-bold">
                   Active
@@ -139,17 +136,17 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
               )}
             </div>
             <div>
-              <span className="text-2xl font-black text-slate-900">₹11,999</span>
-              <span className="text-xs text-slate-500"> / month</span>
+              <span className="text-2xl font-black text-ink">₹11,999</span>
+              <span className="text-xs text-ink-muted"> / month</span>
             </div>
-            <ul className="space-y-2 text-xs text-slate-600">
+            <ul className="space-y-2 text-xs text-ink-muted">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> All Pro Buyer Features
                 Included
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Third-Party On-Site Plant
-                Inspection
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Third-Party On-Site
+                Plant Inspection
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Custom Escrow Milestone
@@ -166,11 +163,11 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             type="button"
             disabled={currentTier === "enterprise"}
             onClick={() => onUpgradeTier("enterprise")}
-            className="w-full h-9 rounded-xl bg-slate-900 text-xs font-bold text-white hover:bg-black active:scale-95 disabled:opacity-60 transition-all shadow-xs"
+            className="mt-auto w-full h-9 rounded-full bg-ink text-xs font-bold text-white hover:bg-black active:scale-95 disabled:opacity-60 transition-all shadow-sm"
           >
             {currentTier === "enterprise" ? "Current Plan Active" : "Upgrade to Enterprise"}
           </button>
-        </Card>
+        </div>
       </div>
     </div>
   );
