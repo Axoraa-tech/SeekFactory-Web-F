@@ -1,4 +1,4 @@
-import { UserProfileDashboard } from "@/components/profile/user-profile-dashboard";
+import { UserProfileDashboardLazy } from "@/components/profile/user-profile-dashboard-lazy";
 import { requireUser } from "@/features/auth/require-user";
 import { getApi } from "@/shared/api";
 
@@ -11,7 +11,7 @@ export default async function ProfilePage() {
 
   return (
     <section className="space-y-4">
-      <UserProfileDashboard
+      <UserProfileDashboardLazy
         user={user}
         initialProducts={products}
         initialManufacturers={manufacturers}
@@ -19,4 +19,3 @@ export default async function ProfilePage() {
     </section>
   );
 }
-

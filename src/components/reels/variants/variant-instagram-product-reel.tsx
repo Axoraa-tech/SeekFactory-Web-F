@@ -23,7 +23,7 @@ import {
   Check,
   Sparkles,
 } from "lucide-react";
-import { CommentsModal } from "@/components/reels/comments-modal";
+import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { cn } from "@/shared/lib/cn";
@@ -408,7 +408,7 @@ export function VariantInstagramProductReel({
         </article>
 
         {/* Comments Modal */}
-        <CommentsModal
+        <CommentsModalLazy
           reelId={reel.id}
           reelTitle={reel.title}
           isOpen={isCommentsOpen}
@@ -747,7 +747,7 @@ export function VariantInstagramProductReel({
       </article>
 
       {/* Comments Modal */}
-      <CommentsModal
+      <CommentsModalLazy
         reelId={reel.id}
         reelTitle={reel.title}
         isOpen={isCommentsOpen}

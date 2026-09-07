@@ -14,8 +14,8 @@ import {
   Loader2,
   Check,
 } from "lucide-react";
-import { CommentsModal } from "@/components/reels/comments-modal";
-import { useSeekAutoplay } from "@/components/reels/use-seek-autoplay";
+import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
+import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { cn } from "@/shared/lib/cn";
 import { formatCount } from "@/shared/lib/format";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -378,7 +378,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
       </article>
 
       {/* Comments Drawer Modal */}
-      <CommentsModal
+      <CommentsModalLazy
         reelId={reel.id}
         reelTitle={reel.title}
         isOpen={isCommentsOpen}
