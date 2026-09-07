@@ -52,6 +52,7 @@ export function readBrowserCookie(): SessionPayload | null {
   return parseSessionCookie(match?.slice(SESSION_COOKIE.length + 1));
 }
 
+/** Demo-only: not HttpOnly/Secure/signed. Never use for production auth. */
 export function writeBrowserCookie(payload: SessionPayload) {
   document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(JSON.stringify(payload))}; Path=/; Max-Age=${MAX_AGE}; SameSite=Lax`;
 }

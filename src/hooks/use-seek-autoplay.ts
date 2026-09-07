@@ -14,8 +14,17 @@ type UseSeekAutoplayProps = {
   onAutoPause?: () => void;
 };
 
-// Global preference for audio: defaults to unmuted (false)
+/** Global mute preference shared across all seek players on the page. */
 let globalAudioMuted = false;
+
+/** Ensures only one HTMLVideoElement is considered the active seek at a time. */
+let activeSeekVideo: HTMLVideoElement | null = null;
+
+export function pauseAllSeeks() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("sf-seek-pause-all"));
+  activeSeekVideo = null;
+}
 
 export function useSeekAutoplay({
   videoRef,
@@ -30,16 +39,15 @@ export function useSeekAutoplay({
   const userPausedRef = useRef<boolean>(false);
   const isModalOpenRef = useRef<boolean>(false);
 
-  // Keep DOM video element's muted attribute strictly synchronized with React's isMuted state
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = isMuted;
     }
   }, [isMuted, videoRef]);
 
-  // Broadcast that this video has started playing, pausing any other playing seek
   const broadcastPlay = useCallback(() => {
     if (typeof window === "undefined" || !videoRef.current) return;
+    activeSeekVideo = videoRef.current;
     window.dispatchEvent(
       new CustomEvent("sf-seek-play", {
         detail: { video: videoRef.current },
@@ -47,7 +55,6 @@ export function useSeekAutoplay({
     );
   }, [videoRef]);
 
-  // Listen for other seeks playing or modal popup opening so only one video plays or all freeze
   useEffect(() => {
     const handleOtherPlay = (e: Event) => {
       const customEvent = e as CustomEvent<{ video: HTMLVideoElement }>;
@@ -70,6 +77,9 @@ export function useSeekAutoplay({
         setIsPlaying(false);
         onAutoPause?.();
       }
+      if (activeSeekVideo === videoRef.current) {
+        activeSeekVideo = null;
+      }
     };
 
     const handleModalState = (e: Event) => {
@@ -90,7 +100,6 @@ export function useSeekAutoplay({
     };
   }, [videoRef, setIsPlaying, onAutoPause]);
 
-  // IntersectionObserver to handle autoplay when scrolling between seeks
   useEffect(() => {
     const target = containerRef.current;
     if (!target) return;
@@ -98,15 +107,13 @@ export function useSeekAutoplay({
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          // Do not autoplay if login / auth modal is currently displayed
           if (isModalOpenRef.current) {
             continue;
           }
 
-          // When 50% or more of the seek/video is visible in the viewport
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          // Prefer a clear majority of the card visible so only one seek autoplays.
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
             if (!userPausedRef.current && videoRef.current && videoRef.current.paused) {
-              // Set desired audio state according to user's mute setting
               videoRef.current.muted = globalAudioMuted;
 
               videoRef.current
@@ -119,8 +126,6 @@ export function useSeekAutoplay({
                   onAutoPlay?.();
                 })
                 .catch(() => {
-                  // If unmuted autoplay is rejected by browser policy before first user interaction,
-                  // temporarily mute so video plays, and accurately update the mute icon
                   if (videoRef.current) {
                     videoRef.current.muted = true;
                     if (setIsMuted) setIsMuted(true);
@@ -135,7 +140,6 @@ export function useSeekAutoplay({
                       })
                       .catch(() => {});
 
-                    // As soon as the user interacts anywhere on the page, automatically unmute with sound
                     const unlockAudio = () => {
                       if (videoRef.current && !globalAudioMuted) {
                         videoRef.current.muted = false;
@@ -151,19 +155,21 @@ export function useSeekAutoplay({
                   }
                 });
             }
-          } else if (entry.intersectionRatio < 0.25 || !entry.isIntersecting) {
-            // Scrolled away: pause video and reset userPaused so it can autoplay next time
+          } else if (entry.intersectionRatio < 0.3 || !entry.isIntersecting) {
             userPausedRef.current = false;
             if (videoRef.current && !videoRef.current.paused) {
               videoRef.current.pause();
               setIsPlaying(false);
+              if (activeSeekVideo === videoRef.current) {
+                activeSeekVideo = null;
+              }
               onAutoPause?.();
             }
           }
         }
       },
       {
-        threshold: [0.1, 0.25, 0.5, 0.75],
+        threshold: [0.1, 0.3, 0.55, 0.75],
       }
     );
 
@@ -192,6 +198,9 @@ export function useSeekAutoplay({
     userPausedRef.current = true;
     videoRef.current.pause();
     setIsPlaying(false);
+    if (activeSeekVideo === videoRef.current) {
+      activeSeekVideo = null;
+    }
   }, [videoRef, setIsPlaying]);
 
   const togglePlay = useCallback(() => {

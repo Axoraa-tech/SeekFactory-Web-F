@@ -59,13 +59,14 @@ src/
     widgets/         # Right-rail widgets only
   entities/          # Domain types only (reel, comment, manufacturer, product, message…)
   features/          # Feature logic: auth, feed, rfq, shell loaders
+  hooks/             # Shared React hooks only (e.g. useSeekAutoplay)
   shared/
     api/             # ApiClient contracts + getApi() + future http-api
     mocks/           # fixtures + mock-api + machinery-taxonomy
     config/          # brand, featureFlags
-    lib/             # cn(), format helpers
+    lib/             # cn(), format helpers, messages helper
   styles/globals.css # Design tokens (CSS variables)
-messages/            # en.json, zh.json (i18n strings; EN UI first)
+messages/            # en.json, zh.json (lightly wired via shared/lib/messages; full i18n later)
 public/brand/        # Official logo assets
 public/videos/       # Demo video mp4 assets for Reels feed
 ```
@@ -77,6 +78,9 @@ public/videos/       # Demo video mp4 assets for Reels feed
 3. **Presentational UI** lives in `components/ui`. Feature-specific UI can live under `features/*/`.
 4. **Route groups:** `(auth)` ≠ `(buyer)`. Do not wrap Join/Login in `AppShell`.
 5. When backend exists: implement `createHttpApi` in `src/shared/api/http-api.ts` and switch `getApi()` — **do not rewrite pages**.
+6. **Shared hooks** live in `src/hooks/`. Feature-only hooks stay under `features/*/`.
+7. **Do not add empty `plugins/` or `actions/` trees.** Add `features/*/actions.ts` only when the first real server mutation exists.
+8. See `docs/FRONTEND_AUDIT.md` for architecture scores, security findings, and the “where to change” map.
 
 ---
 
@@ -134,13 +138,17 @@ Defined in `src/styles/globals.css` and `src/shared/config/brand.ts`. Prefer Tai
 
 ## 7. Auth rules (FE mock today)
 
-- Session cookie: `sf-session` (role, email, name, company)
+> **Security (non-negotiable):** The mock `sf-session` cookie is **insecure by design** — client-writable, not HttpOnly, not signed. Anyone can forge role/identity in DevTools. **Do not ship real user accounts or production data on this model.** Production must use a backend-issued **HttpOnly + Secure + SameSite** session (or equivalent) and swap via `getApi()` / feature flags — do not “harden” the client cookie as if it were real auth.
+
+- Session cookie: `sf-session` (role, email, name, company) — **demo only**
 - Roles: **Buyer** (`Buyer`) and **Manufacturer** (`Supplier` in types)
 - After join/login: Buyer → `/`, Manufacturer → `/factory`
 - Buyer: email/password primary; phone OTP mock (`123456`); Google button is **stub**
 - Manufacturer: factory name on join; WeChat button is **stub** (China — no Google-only path)
 - Guests: TopNav shows **Sign in** / **Join now**, not avatar
 - Real OAuth/SMS stays behind `featureFlags` in `src/shared/config/flags.ts`
+- `postAuthPath()` must keep blocking open redirects (`next` only if starts with `/` and not `//`)
+- `src/middleware.ts` sets baseline security headers; real auth gates move there when the backend session exists. Protected routes still use `requireUser()` per page in mock mode.
 
 ---
 
@@ -228,11 +236,14 @@ const roots = await api.categories.listRoots();
 | `src/components/reels/reel-card.tsx` | Video reel card with autoplay & views |
 | `src/components/reels/reel-player.tsx` | Scrubber timeline, seeks & video chrome |
 | `src/components/reels/comments-modal.tsx` | Comments drawer, replies & pagination |
+| `src/hooks/use-seek-autoplay.ts` | Single-active reel autoplay / mute |
+| `src/middleware.ts` | Security headers (+ future auth gates) |
 | `src/features/auth/auth-card.tsx` | Join / Sign in UI |
 | `src/shared/api/index.ts` | `getApi()` seam |
 | `src/shared/mocks/mock-api.ts` | Mock implementations (feed, comments, mfrs) |
 | `src/shared/mocks/machinery-taxonomy.ts` | Category tree |
 | `src/styles/globals.css` | Design tokens |
+| `docs/FRONTEND_AUDIT.md` | Architecture & security audit |
 
 ---
 

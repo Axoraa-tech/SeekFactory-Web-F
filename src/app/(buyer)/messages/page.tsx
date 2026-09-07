@@ -1,4 +1,4 @@
-import { InteractiveChatApp } from "@/components/messages/interactive-chat-app";
+import { InteractiveChatAppLazy } from "@/components/messages/interactive-chat-app-lazy";
 import { getApi } from "@/shared/api";
 import { requireUser } from "@/features/auth/require-user";
 
@@ -11,11 +11,10 @@ export default async function MessagesPage() {
 
   return (
     <section className="space-y-3">
-      <InteractiveChatApp
+      <InteractiveChatAppLazy
         initialThreads={threads}
         allManufacturers={allManufacturers}
       />
     </section>
   );
 }
-

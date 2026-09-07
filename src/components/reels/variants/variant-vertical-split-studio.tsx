@@ -16,7 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
-import { useSeekAutoplay } from "@/components/reels/use-seek-autoplay";
+import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";

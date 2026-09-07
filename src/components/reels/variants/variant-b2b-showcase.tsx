@@ -21,8 +21,8 @@ import {
   BarChart2,
   Bookmark,
 } from "lucide-react";
-import { CommentsModal } from "@/components/reels/comments-modal";
-import { useSeekAutoplay } from "@/components/reels/use-seek-autoplay";
+import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
+import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { formatCount, formatDuration } from "@/shared/lib/format";
@@ -414,7 +414,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
         </div>
       </article>
 
-      <CommentsModal
+      <CommentsModalLazy
         reelId={reel.id}
         reelTitle={reel.title}
         isOpen={isCommentsOpen}
