@@ -12,7 +12,7 @@ export const GUEST_BUYER_FALLBACK: BuyerProfile = {
   country: "India",
 };
 
-export async function requireUser(nextPath?: string): Promise<BuyerProfile> {
+export async function requireUser(_nextPath?: string): Promise<BuyerProfile> {
   const user = await getApi().session.getCurrentUser();
   if (!user) {
     return GUEST_BUYER_FALLBACK;
