@@ -4,14 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import type { Product } from "@/entities/product";
-import { formatPriceInr } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   products: Product[];
 };
 
 export function TrendingProducts({ products }: Props) {
+  const { t, formatPrice, translateProduct, translateUnit } = useRegionalSettings();
   const pages: Product[][] = [];
   for (let i = 0; i < products.length; i += 2) {
     pages.push(products.slice(i, i + 2));
@@ -22,9 +23,9 @@ export function TrendingProducts({ products }: Props) {
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold">Trending Products</h2>
+        <h2 className="text-sm font-bold">{t("widgets.trendingProducts", "Trending Products")}</h2>
         <Link href="/explore" className="text-xs font-semibold text-brand-blue">
-          View all
+          {t("widgets.viewAll", "View all")}
         </Link>
       </div>
       <div className="grid grid-cols-2 gap-2.5">
@@ -33,12 +34,12 @@ export function TrendingProducts({ products }: Props) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={product.imageUrl}
-              alt={product.name}
+              alt={translateProduct(product.name)}
               className="h-24 w-full rounded-lg object-cover"
             />
-            <p className="mt-1.5 line-clamp-2 text-xs font-semibold leading-snug">{product.name}</p>
+            <p className="mt-1.5 line-clamp-2 text-xs font-semibold leading-snug">{translateProduct(product.name)}</p>
             <p className="mt-0.5 text-xs font-bold text-brand-blue">
-              {formatPriceInr(product.priceInr)} / {product.unit}
+              {formatPrice(product.priceInr)} / {translateUnit(product.unit)}
             </p>
           </Link>
         ))}

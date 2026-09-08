@@ -24,9 +24,9 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
-import { formatPriceInr } from "@/shared/lib/format";
 import { getApi } from "@/shared/api";
 import { cn } from "@/shared/lib/cn";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import type { BuyerProfile } from "@/entities/user";
 import type { Product } from "@/entities/product";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -43,6 +43,7 @@ export function UserProfileDashboard({
   initialManufacturers = [],
 }: Props) {
   const router = useRouter();
+  const { formatPrice } = useRegionalSettings();
   const [activeTab, setActiveTab] = useState<"details" | "rfqs" | "saved" | "following" | "premium">("details");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -530,7 +531,7 @@ export function UserProfileDashboard({
                       <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{p.description}</p>
                       <div className="mt-1 flex items-baseline gap-1.5">
                         <span className="text-sm sm:text-base font-extrabold text-slate-900">
-                          {formatPriceInr(p.priceInr)}
+                          {formatPrice(p.priceInr)}
                         </span>
                         <span className="text-[11px] text-slate-400">/{p.unit}</span>
                       </div>

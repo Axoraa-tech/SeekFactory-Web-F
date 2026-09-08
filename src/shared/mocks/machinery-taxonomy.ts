@@ -1,26 +1,228 @@
 import type { Category } from "@/entities/category";
 
 /**
- * SeekFactory Product List: Official categories and subcategories.
- * Total: 13 Parent Categories & 63 Subcategories.
- * Source: SeekFactory Category Service (7 September 2026).
+ * SeekFactory machinery taxonomy:
+ * Combines full client Excel Sheet2 catalog (~187 subcategories)
+ * plus official new categories and subcategories from the SeekFactory Product List.
  */
 export const categories: Category[] = [
-  // ==================== 1. Agricultural Machinery ====================
+  { id: "cat-agriculture", slug: "agriculture", name: "Agriculture", listingCount: 139244, parentId: null, icon: "agriculture" },
+  { id: "cat-aircraft-and-ground-support-equipment", slug: "aircraft-and-ground-support-equipment", name: "Aircraft & Ground Support Equipment", listingCount: 3887, parentId: null, icon: "aircraft" },
+  { id: "cat-boats-and-marine-equipment", slug: "boats-and-marine-equipment", name: "Boats & Marine Equipment", listingCount: 294791, parentId: null, icon: "marine" },
+  { id: "cat-construction", slug: "construction", name: "Construction", listingCount: 538686, parentId: null, icon: "construction" },
+  { id: "cat-energy", slug: "energy", name: "Energy", listingCount: 283510, parentId: null, icon: "energy" },
+  { id: "cat-food-and-beverage-processing", slug: "food-and-beverage-processing", name: "Food & Beverage Processing", listingCount: 278350, parentId: null, icon: "food" },
+  { id: "cat-forestry", slug: "forestry", name: "Forestry", listingCount: 9868, parentId: null, icon: "forestry" },
+  { id: "cat-industrial-automation", slug: "industrial-automation", name: "Industrial Automation", listingCount: 328556, parentId: null, icon: "automation" },
+  { id: "cat-machine-tools", slug: "machine-tools", name: "Machine Tools", listingCount: 439847, parentId: null, icon: "machine-tools" },
+  { id: "cat-material-handling", slug: "material-handling", name: "Material handling", listingCount: 150617, parentId: null, icon: "material-handling" },
+  { id: "cat-oil-gas-and-mining", slug: "oil-gas-and-mining", name: "Oil, Gas & Mining", listingCount: 70836, parentId: null, icon: "mining" },
+  { id: "cat-printing", slug: "printing", name: "Printing", listingCount: 60504, parentId: null, icon: "printing" },
+  { id: "cat-processing", slug: "processing", name: "Processing", listingCount: 463881, parentId: null, icon: "processing" },
+  { id: "cat-semiconductors", slug: "semiconductors", name: "Semiconductors", listingCount: 110718, parentId: null, icon: "semiconductors" },
+  { id: "cat-test-lab-medical-equipment", slug: "test-lab-medical-equipment", name: "Test, Lab, Medical equipment", listingCount: 595493, parentId: null, icon: "medical" },
+  { id: "cat-textile-and-leather-manufacturing", slug: "textile-and-leather-manufacturing", name: "Textile and leather manufacturing", listingCount: 60026, parentId: null, icon: "textile" },
+  { id: "cat-transportation-and-trailers", slug: "transportation-and-trailers", name: "Transportation & Trailers", listingCount: 449180, parentId: null, icon: "transport" },
+  { id: "cat-waste-and-recycling", slug: "waste-and-recycling", name: "Waste & Recycling", listingCount: 31287, parentId: null, icon: "waste" },
+  { id: "cat-woodworking", slug: "woodworking", name: "Woodworking", listingCount: 45083, parentId: null, icon: "woodworking" },
+  { id: "cat-other", slug: "other", name: "Other", listingCount: 321063, parentId: null, icon: "other" },
+  { id: "cat-tractors", slug: "tractors", name: "Tractors", listingCount: 32086, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-tillage-equipment", slug: "tillage-equipment", name: "Tillage Equipment", listingCount: 13376, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-lawn-mowers", slug: "lawn-mowers", name: "Lawn Mowers", listingCount: 12094, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-planting-equipment", slug: "planting-equipment", name: "Planting Equipment", listingCount: 6282, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-combines", slug: "combines", name: "Combines", listingCount: 5976, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-applicators", slug: "applicators", name: "Applicators", listingCount: 4356, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-fertilizer-spreaders", slug: "fertilizer-spreaders", name: "Fertilizer Spreaders", listingCount: 4335, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-lawn-and-turf-equipment", slug: "lawn-and-turf-equipment", name: "Lawn & Turf Equipment", listingCount: 4032, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-livestock-equipment", slug: "livestock-equipment", name: "Livestock Equipment", listingCount: 3842, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-balers", slug: "balers", name: "Balers", listingCount: 3810, parentId: "cat-agriculture", icon: "agriculture" },
+  { id: "cat-airport-ground-support-equipment-gse", slug: "airport-ground-support-equipment-gse", name: "Airport Ground Support Equipment (GSE)", listingCount: 2959, parentId: "cat-aircraft-and-ground-support-equipment", icon: "aircraft" },
+  { id: "cat-avionics-and-instruments", slug: "avionics-and-instruments", name: "Avionics & Instruments", listingCount: 592, parentId: "cat-aircraft-and-ground-support-equipment", icon: "aircraft" },
+  { id: "cat-aircrafts", slug: "aircrafts", name: "Aircrafts", listingCount: 336, parentId: "cat-aircraft-and-ground-support-equipment", icon: "aircraft" },
+  { id: "cat-power-boats", slug: "power-boats", name: "Power Boats", listingCount: 249093, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-sail-boats", slug: "sail-boats", name: "Sail Boats", listingCount: 15120, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-marine-engines-and-generators", slug: "marine-engines-and-generators", name: "Marine Engines & Generators", listingCount: 14205, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-marine-equipment", slug: "marine-equipment", name: "Marine Equipment", listingCount: 5805, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-cargo-ships", slug: "cargo-ships", name: "Cargo Ships", listingCount: 1386, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-dredges", slug: "dredges", name: "Dredges", listingCount: 1284, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-offshore-support-vessels", slug: "offshore-support-vessels", name: "Offshore Support Vessels", listingCount: 1045, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-service-vessels", slug: "service-vessels", name: "Service Vessels", listingCount: 684, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-maritime-cranes-and-port-equipment", slug: "maritime-cranes-and-port-equipment", name: "Maritime Cranes & Port Equipment", listingCount: 403, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-fishing-vessels", slug: "fishing-vessels", name: "Fishing Vessels", listingCount: 393, parentId: "cat-boats-and-marine-equipment", icon: "marine" },
+  { id: "cat-excavators", slug: "excavators", name: "Excavators", listingCount: 144541, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-lifts", slug: "lifts", name: "Lifts", listingCount: 50580, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-generator-sets", slug: "generator-sets", name: "Generator Sets", listingCount: 30346, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-cranes", slug: "cranes", name: "Cranes", listingCount: 29755, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-construction-industrial-engines", slug: "construction-industrial-engines", name: "Construction/Industrial Engines", listingCount: 27225, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-wheel-loaders", slug: "wheel-loaders", name: "Wheel Loaders", listingCount: 26098, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-block-brick-and-paver-making-machines", slug: "block-brick-and-paver-making-machines", name: "Block, Brick & Paver Making Machines", listingCount: 19377, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-drilling-rigs", slug: "drilling-rigs", name: "Drilling Rigs", listingCount: 17537, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-earthmoving-attachments-and-accessories", slug: "earthmoving-attachments-and-accessories", name: "Earthmoving Attachments & Accessories", listingCount: 16760, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-dozers", slug: "dozers", name: "Dozers", listingCount: 16190, parentId: "cat-construction", icon: "construction" },
+  { id: "cat-electrical-and-electronic-components", slug: "electrical-and-electronic-components", name: "Electrical & Electronic Components", listingCount: 211637, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-circuit-breakers", slug: "circuit-breakers", name: "Circuit Breakers", listingCount: 20679, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-power-supply", slug: "power-supply", name: "Power Supply", listingCount: 19221, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-transformers", slug: "transformers", name: "Transformers", listingCount: 14696, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-batteries-and-chargers", slug: "batteries-and-chargers", name: "Batteries & Chargers", listingCount: 5564, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-turbines", slug: "turbines", name: "Turbines", listingCount: 5130, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-boilers", slug: "boilers", name: "Boilers", listingCount: 2155, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-solar-power", slug: "solar-power", name: "Solar Power", listingCount: 1287, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-diesel-engines-and-generators", slug: "diesel-engines-and-generators", name: "Diesel Engines & Generators", listingCount: 827, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-power-plants", slug: "power-plants", name: "Power Plants", listingCount: 669, parentId: "cat-energy", icon: "energy" },
+  { id: "cat-bottling-filling-and-packaging", slug: "bottling-filling-and-packaging", name: "Bottling, Filling & Packaging", listingCount: 42965, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-kitchen-and-restaurant-equipment", slug: "kitchen-and-restaurant-equipment", name: "Kitchen & Restaurant Equipment", listingCount: 41827, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-dough-processing-and-heat-treatment", slug: "dough-processing-and-heat-treatment", name: "Dough Processing & Heat Treatment", listingCount: 36724, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-fruit-and-vegetable-processing", slug: "fruit-and-vegetable-processing", name: "Fruit & Vegetable Processing", listingCount: 27813, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-meat-and-poultry-processing", slug: "meat-and-poultry-processing", name: "Meat & Poultry Processing", listingCount: 24125, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-industrial-cooking-machines", slug: "industrial-cooking-machines", name: "Industrial Cooking Machines", listingCount: 23917, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-dairy-processing", slug: "dairy-processing", name: "Dairy Processing", listingCount: 17536, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-ovens-and-grills", slug: "ovens-and-grills", name: "Ovens & Grills", listingCount: 15178, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-food-refrigeration", slug: "food-refrigeration", name: "Food Refrigeration", listingCount: 12040, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-confectionery-equipment", slug: "confectionery-equipment", name: "Confectionery Equipment", listingCount: 9889, parentId: "cat-food-and-beverage-processing", icon: "food" },
+  { id: "cat-wood-chippers", slug: "wood-chippers", name: "Wood Chippers", listingCount: 2135, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-forwarders", slug: "forwarders", name: "Forwarders", listingCount: 1312, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-mulchers", slug: "mulchers", name: "Mulchers", listingCount: 1180, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-forestry-harvesters", slug: "forestry-harvesters", name: "Forestry Harvesters", listingCount: 929, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-stump-grinders", slug: "stump-grinders", name: "Stump Grinders", listingCount: 473, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-horizontal-grinders", slug: "horizontal-grinders", name: "Horizontal Grinders", listingCount: 393, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-skidders", slug: "skidders", name: "Skidders", listingCount: 284, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-feller-bunchers", slug: "feller-bunchers", name: "Feller Bunchers", listingCount: 274, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-forestry-attachments", slug: "forestry-attachments", name: "Forestry Attachments", listingCount: 263, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-tub-grinders", slug: "tub-grinders", name: "Tub Grinders", listingCount: 153, parentId: "cat-forestry", icon: "forestry" },
+  { id: "cat-programmable-logic-controllers-plc", slug: "programmable-logic-controllers-plc", name: "Programmable Logic Controllers (PLC)", listingCount: 68948, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-sensors", slug: "sensors", name: "Sensors", listingCount: 35309, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-electric-motors", slug: "electric-motors", name: "Electric Motors", listingCount: 29085, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-motion-controllers", slug: "motion-controllers", name: "Motion Controllers", listingCount: 24706, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-human-machine-interfaces-hmi", slug: "human-machine-interfaces-hmi", name: "Human Machine Interfaces (HMI)", listingCount: 16165, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-input-output-modules", slug: "input-output-modules", name: "Input/Output Modules", listingCount: 14752, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-actuators", slug: "actuators", name: "Actuators", listingCount: 13131, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-industrial-robots", slug: "industrial-robots", name: "Industrial Robots", listingCount: 12630, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-drives", slug: "drives", name: "Drives", listingCount: 12055, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-feedback-devices", slug: "feedback-devices", name: "Feedback Devices", listingCount: 9019, parentId: "cat-industrial-automation", icon: "automation" },
+  { id: "cat-bending-and-forming", slug: "bending-and-forming", name: "Bending & Forming", listingCount: 31740, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-machining-centers", slug: "machining-centers", name: "Machining Centers", listingCount: 31284, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-lathes", slug: "lathes", name: "Lathes", listingCount: 27594, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-welding-equipment", slug: "welding-equipment", name: "Welding equipment", listingCount: 26811, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-cnc-lathes", slug: "cnc-lathes", name: "CNC Lathes", listingCount: 25596, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-milling-machines", slug: "milling-machines", name: "Milling Machines", listingCount: 24518, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-grinding-machines", slug: "grinding-machines", name: "Grinding machines", listingCount: 20594, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-saws", slug: "saws", name: "Saws", listingCount: 18058, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-laser-cutters", slug: "laser-cutters", name: "Laser Cutters", listingCount: 16623, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-presses", slug: "presses", name: "Presses", listingCount: 16375, parentId: "cat-machine-tools", icon: "machine-tools" },
+  { id: "cat-forklifts", slug: "forklifts", name: "Forklifts", listingCount: 61048, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-telehandlers", slug: "telehandlers", name: "Telehandlers", listingCount: 14581, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-pallet-trucks", slug: "pallet-trucks", name: "Pallet Trucks", listingCount: 7144, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-overhead-cranes", slug: "overhead-cranes", name: "Overhead Cranes", listingCount: 6888, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-pallet-stackers", slug: "pallet-stackers", name: "Pallet Stackers", listingCount: 6068, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-reach-trucks", slug: "reach-trucks", name: "Reach Trucks", listingCount: 4702, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-material-handlers", slug: "material-handlers", name: "Material Handlers", listingCount: 2790, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-order-pickers", slug: "order-pickers", name: "Order Pickers", listingCount: 1763, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-tow-tractors", slug: "tow-tractors", name: "Tow Tractors", listingCount: 1301, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-sideloaders", slug: "sideloaders", name: "Sideloaders", listingCount: 962, parentId: "cat-material-handling", icon: "material-handling" },
+  { id: "cat-crushers-and-screening-plants", slug: "crushers-and-screening-plants", name: "Crushers and Screening Plants", listingCount: 30218, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-mineral-processing", slug: "mineral-processing", name: "Mineral Processing", listingCount: 14586, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-oilfield-equipment", slug: "oilfield-equipment", name: "Oilfield Equipment", listingCount: 4034, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-articulated-haulers", slug: "articulated-haulers", name: "Articulated Haulers", listingCount: 2487, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-haul-trucks", slug: "haul-trucks", name: "Haul Trucks", listingCount: 1861, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-tanks-and-vessels", slug: "tanks-and-vessels", name: "Tanks & Vessels", listingCount: 1786, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-mud-pumps", slug: "mud-pumps", name: "Mud Pumps", listingCount: 1477, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-mills-mineral-processing", slug: "mills-mineral-processing", name: "Mills (mineral processing)", listingCount: 1186, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-well-control", slug: "well-control", name: "Well Control", listingCount: 942, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-lhd-mining-loaders", slug: "lhd-mining-loaders", name: "LHD - Mining Loaders", listingCount: 839, parentId: "cat-oil-gas-and-mining", icon: "mining" },
+  { id: "cat-digital-printing", slug: "digital-printing", name: "Digital Printing", listingCount: 10287, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-post-press", slug: "post-press", name: "Post-press", listingCount: 5492, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-sheet-fed-press", slug: "sheet-fed-press", name: "Sheet-fed press", listingCount: 4246, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-die-cutters", slug: "die-cutters", name: "Die Cutters", listingCount: 3924, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-folders", slug: "folders", name: "Folders", listingCount: 3492, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-large-wide-format-printers", slug: "large-wide-format-printers", name: "Large Wide Format Printers", listingCount: 2954, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-screen-printing-print-production", slug: "screen-printing-print-production", name: "Screen Printing (print production)", listingCount: 2561, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-offset-press", slug: "offset-press", name: "Offset press", listingCount: 2151, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-flexographic-printing", slug: "flexographic-printing", name: "Flexographic printing", listingCount: 2124, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-guillotines", slug: "guillotines", name: "Guillotines", listingCount: 2074, parentId: "cat-printing", icon: "printing" },
+  { id: "cat-packaging-machinery", slug: "packaging-machinery", name: "Packaging Machinery", listingCount: 44587, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-industrial-compressors", slug: "industrial-compressors", name: "Industrial Compressors", listingCount: 32617, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-tanks-and-kettles", slug: "tanks-and-kettles", name: "Tanks & Kettles", listingCount: 28516, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-coating-and-laminating", slug: "coating-and-laminating", name: "Coating & Laminating", listingCount: 27421, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-conveyors", slug: "conveyors", name: "Conveyors", listingCount: 22402, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-agitators-blenders-mixers", slug: "agitators-blenders-mixers", name: "Agitators, Blenders, Mixers", listingCount: 21740, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-extruders", slug: "extruders", name: "Extruders", listingCount: 17800, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-industrial-chillers", slug: "industrial-chillers", name: "Industrial Chillers", listingCount: 14155, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-injection-molding", slug: "injection-molding", name: "Injection Molding", listingCount: 12647, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-plastic-rubber-processing", slug: "plastic-rubber-processing", name: "Plastic/Rubber Processing", listingCount: 12600, parentId: "cat-processing", icon: "processing" },
+  { id: "cat-supporting-equipment-semiconductors", slug: "supporting-equipment-semiconductors", name: "Supporting equipment (semiconductors)", listingCount: 29026, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-pcb-assembly", slug: "pcb-assembly", name: "PCB Assembly", listingCount: 15449, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-test-and-measurement-semiconductors", slug: "test-and-measurement-semiconductors", name: "Test & Measurement (semiconductors)", listingCount: 6977, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-metrology-inspection-semiconductors", slug: "metrology-inspection-semiconductors", name: "Metrology / Inspection (semiconductors)", listingCount: 5321, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-deposition-equipment-cvd-pvd", slug: "deposition-equipment-cvd-pvd", name: "Deposition Equipment (CVD, PVD)", listingCount: 4672, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-laser-marking", slug: "laser-marking", name: "Laser Marking", listingCount: 4275, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-die-bonders", slug: "die-bonders", name: "Die Bonders", listingCount: 2435, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-surface-treatment-cleaning", slug: "surface-treatment-cleaning", name: "Surface Treatment / Cleaning", listingCount: 1916, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-soldering", slug: "soldering", name: "Soldering", listingCount: 1695, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-etching-systems", slug: "etching-systems", name: "Etching Systems", listingCount: 1070, parentId: "cat-semiconductors", icon: "semiconductors" },
+  { id: "cat-general-medical-equipment", slug: "general-medical-equipment", name: "General Medical Equipment", listingCount: 155102, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-general-laboratory-equipment", slug: "general-laboratory-equipment", name: "General Laboratory Equipment", listingCount: 76226, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-general-analytical-equipment", slug: "general-analytical-equipment", name: "General Analytical Equipment", listingCount: 36789, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-medical-imaging", slug: "medical-imaging", name: "Medical Imaging", listingCount: 29222, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-electrical-test-instruments", slug: "electrical-test-instruments", name: "Electrical Test Instruments", listingCount: 20365, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-medical-ultrasound", slug: "medical-ultrasound", name: "Medical Ultrasound", listingCount: 18520, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-oscilloscopes", slug: "oscilloscopes", name: "Oscilloscopes", listingCount: 14129, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-test-generators", slug: "test-generators", name: "Test Generators", listingCount: 13317, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-flow-electric-and-gas-meters", slug: "flow-electric-and-gas-meters", name: "Flow, Electric & Gas Meters", listingCount: 13289, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-dental-equipment", slug: "dental-equipment", name: "Dental Equipment", listingCount: 12495, parentId: "cat-test-lab-medical-equipment", icon: "medical" },
+  { id: "cat-sewing-machines", slug: "sewing-machines", name: "Sewing Machines", listingCount: 10425, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-non-woven", slug: "non-woven", name: "Non Woven", listingCount: 7971, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-knitting", slug: "knitting", name: "Knitting", listingCount: 6730, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-weaving", slug: "weaving", name: "Weaving", listingCount: 6033, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-shoe-machines", slug: "shoe-machines", name: "Shoe Machines", listingCount: 4715, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-industrial-laundry-equipment", slug: "industrial-laundry-equipment", name: "Industrial Laundry Equipment", listingCount: 3550, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-dyeing-and-finishing", slug: "dyeing-and-finishing", name: "Dyeing & Finishing", listingCount: 3236, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-winders-and-unwinders", slug: "winders-and-unwinders", name: "Winders & Unwinders", listingCount: 2395, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-mattress-manufacturing", slug: "mattress-manufacturing", name: "Mattress Manufacturing", listingCount: 2275, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-yarn-manufacturing", slug: "yarn-manufacturing", name: "Yarn Manufacturing", listingCount: 2264, parentId: "cat-textile-and-leather-manufacturing", icon: "textile" },
+  { id: "cat-rvs-campers-caravans-motorhomes", slug: "rvs-campers-caravans-motorhomes", name: "RVs, Campers, Caravans, Motorhomes", listingCount: 115683, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-trailers", slug: "trailers", name: "Trailers", listingCount: 32107, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-vans", slug: "vans", name: "Vans", listingCount: 25363, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-conventional-trucks", slug: "conventional-trucks", name: "Conventional trucks", listingCount: 22371, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-dump-trucks", slug: "dump-trucks", name: "Dump Trucks", listingCount: 21637, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-atv-and-utv", slug: "atv-and-utv", name: "ATV & UTV", listingCount: 21555, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-automotive-equipment", slug: "automotive-equipment", name: "Automotive Equipment", listingCount: 16908, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-truck-engines", slug: "truck-engines", name: "Truck Engines", listingCount: 10014, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-bucket-boom-trucks", slug: "bucket-boom-trucks", name: "Bucket (boom) trucks", listingCount: 9762, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-pickup-trucks", slug: "pickup-trucks", name: "Pickup Trucks", listingCount: 9261, parentId: "cat-transportation-and-trailers", icon: "transport" },
+  { id: "cat-recycling-and-disposal", slug: "recycling-and-disposal", name: "Recycling & Disposal", listingCount: 17119, parentId: "cat-waste-and-recycling", icon: "waste" },
+  { id: "cat-industrial-shredders", slug: "industrial-shredders", name: "Industrial Shredders", listingCount: 7103, parentId: "cat-waste-and-recycling", icon: "waste" },
+  { id: "cat-industrial-balers", slug: "industrial-balers", name: "Industrial Balers", listingCount: 4499, parentId: "cat-waste-and-recycling", icon: "waste" },
+  { id: "cat-wastewater-recycling", slug: "wastewater-recycling", name: "Wastewater Recycling", listingCount: 1186, parentId: "cat-waste-and-recycling", icon: "waste" },
+  { id: "cat-waste-compactors", slug: "waste-compactors", name: "Waste Compactors", listingCount: 701, parentId: "cat-waste-and-recycling", icon: "waste" },
+  { id: "cat-construction-waste-recycling", slug: "construction-waste-recycling", name: "Construction Waste Recycling", listingCount: 336, parentId: "cat-waste-and-recycling", icon: "waste" },
+  { id: "cat-wood-saws", slug: "wood-saws", name: "Wood Saws", listingCount: 7221, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-planers-and-moulders", slug: "planers-and-moulders", name: "Planers and Moulders", listingCount: 5652, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-sanders", slug: "sanders", name: "Sanders", listingCount: 4440, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-edgebanders", slug: "edgebanders", name: "Edgebanders", listingCount: 4318, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-cnc-wood-routers", slug: "cnc-wood-routers", name: "CNC Wood Routers", listingCount: 3955, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-wood-sawmills", slug: "wood-sawmills", name: "Wood Sawmills", listingCount: 2586, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-boring-dowel-inserting-gluing", slug: "boring-dowel-inserting-gluing", name: "Boring, Dowel inserting, Gluing", listingCount: 2259, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-wood-finishing-equipment", slug: "wood-finishing-equipment", name: "Wood Finishing Equipment", listingCount: 1934, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-veneer-machines", slug: "veneer-machines", name: "Veneer Machines", listingCount: 1543, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-wood-presses", slug: "wood-presses", name: "Wood Presses", listingCount: 1306, parentId: "cat-woodworking", icon: "woodworking" },
+  { id: "cat-floor-scrubbers-and-sweepers", slug: "floor-scrubbers-and-sweepers", name: "Floor Scrubbers & Sweepers", listingCount: 40683, parentId: "cat-other", icon: "other" },
+  { id: "cat-vacuum-pumps", slug: "vacuum-pumps", name: "Vacuum Pumps", listingCount: 12639, parentId: "cat-other", icon: "other" },
+  { id: "cat-centrifugal-pumps", slug: "centrifugal-pumps", name: "Centrifugal Pumps", listingCount: 10115, parentId: "cat-other", icon: "other" },
+  { id: "cat-audiovisual-broadcast", slug: "audiovisual-broadcast", name: "Audiovisual/Broadcast", listingCount: 8369, parentId: "cat-other", icon: "other" },
+  { id: "cat-positive-displacement-pumps", slug: "positive-displacement-pumps", name: "Positive Displacement Pumps", listingCount: 3942, parentId: "cat-other", icon: "other" },
+  { id: "cat-water-pumps", slug: "water-pumps", name: "Water Pumps", listingCount: 2201, parentId: "cat-other", icon: "other" },
+  { id: "cat-pressure-washers", slug: "pressure-washers", name: "Pressure Washers", listingCount: 1981, parentId: "cat-other", icon: "other" },
+  { id: "cat-ice-resurfacers", slug: "ice-resurfacers", name: "Ice Resurfacers", listingCount: 12, parentId: "cat-other", icon: "other" },
   { id: "cat-agricultural-machinery", slug: "agricultural-machinery", name: "Agricultural Machinery", listingCount: 84200, parentId: null, icon: "agriculture" },
   { id: "cat-food-technology", slug: "food-technology", name: "Food Technology", listingCount: 18450, parentId: "cat-agricultural-machinery", icon: "agriculture" },
   { id: "cat-machine-for-food-industry", slug: "machine-for-food-industry", name: "Machine For Food Industry", listingCount: 22100, parentId: "cat-agricultural-machinery", icon: "agriculture" },
   { id: "cat-agricultural-machinery-equipement", slug: "agricultural-machinery-equipement", name: "Agricultural Machinery Equipement", listingCount: 26800, parentId: "cat-agricultural-machinery", icon: "agriculture" },
   { id: "cat-vegetable-washing-machine", slug: "vegetable-washing-machine", name: "Vegetable Washing Machine", listingCount: 9350, parentId: "cat-agricultural-machinery", icon: "agriculture" },
   { id: "cat-fertiliser-spray-machine", slug: "fertiliser-spray-machine", name: "Fertiliser Spray Machine", listingCount: 7500, parentId: "cat-agricultural-machinery", icon: "agriculture" },
-
-  // ==================== 2. DIY Machinery ====================
   { id: "cat-diy-machinery", slug: "diy-machinery", name: "DIY Machinery", listingCount: 32450, parentId: null, icon: "machine-tools" },
   { id: "cat-consumer-durables", slug: "consumer-durables", name: "Consumer Durables", listingCount: 12400, parentId: "cat-diy-machinery", icon: "machine-tools" },
   { id: "cat-fmcg", slug: "fmcg", name: "FMCG", listingCount: 14200, parentId: "cat-diy-machinery", icon: "machine-tools" },
   { id: "cat-printing-machines-and-printers", slug: "printing-machines-and-printers", name: "Printing machines & printers", listingCount: 5850, parentId: "cat-diy-machinery", icon: "machine-tools" },
-
-  // ==================== 3. Electronics Manufacturing Machinery ====================
   { id: "cat-electronics-manufacturing-machinery", slug: "electronics-manufacturing-machinery", name: "Electronics Manufacturing Machinery", listingCount: 115800, parentId: null, icon: "semiconductors" },
   { id: "cat-electronics-system-design-and-manufacturing", slug: "electronics-system-design-and-manufacturing", name: "Electronics System Design & Manufacturing", listingCount: 31200, parentId: "cat-electronics-manufacturing-machinery", icon: "semiconductors" },
   { id: "cat-smt-line", slug: "smt-line", name: "SMT Line", listingCount: 24500, parentId: "cat-electronics-manufacturing-machinery", icon: "semiconductors" },
@@ -28,8 +230,6 @@ export const categories: Category[] = [
   { id: "cat-wave-soldering-machine", slug: "wave-soldering-machine", name: "Wave Soldering Machine", listingCount: 11400, parentId: "cat-electronics-manufacturing-machinery", icon: "semiconductors" },
   { id: "cat-circuit-board-drilling-machine", slug: "circuit-board-drilling-machine", name: "Circuit Board Drilling Machine", listingCount: 9600, parentId: "cat-electronics-manufacturing-machinery", icon: "semiconductors" },
   { id: "cat-wire-harness-machine", slug: "wire-harness-machine", name: "Wire Harness Machine", listingCount: 10200, parentId: "cat-electronics-manufacturing-machinery", icon: "semiconductors" },
-
-  // ==================== 4. Engineering capital Machinery ====================
   { id: "cat-engineering-capital-machinery", slug: "engineering-capital-machinery", name: "Engineering capital Machinery", listingCount: 382400, parentId: null, icon: "construction" },
   { id: "cat-infrastructure-and-real-estate", slug: "infrastructure-and-real-estate", name: "Infrastructure & Real Estate", listingCount: 78500, parentId: "cat-engineering-capital-machinery", icon: "construction" },
   { id: "cat-cement-industry", slug: "cement-industry", name: "Cement Industry", listingCount: 34200, parentId: "cat-engineering-capital-machinery", icon: "construction" },
@@ -42,8 +242,6 @@ export const categories: Category[] = [
   { id: "cat-die-casting-machine", slug: "die-casting-machine", name: "Die Casting Machine", listingCount: 18500, parentId: "cat-engineering-capital-machinery", icon: "construction" },
   { id: "cat-cnc-wood-router-machine", slug: "cnc-wood-router-machine", name: "CNC Wood Router Machine", listingCount: 15300, parentId: "cat-engineering-capital-machinery", icon: "construction" },
   { id: "cat-woodworking-carving-machine", slug: "woodworking-carving-machine", name: "Woodworking Carving Machine", listingCount: 14400, parentId: "cat-engineering-capital-machinery", icon: "construction" },
-
-  // ==================== 5. Fashion Machinery ====================
   { id: "cat-fashion-machinery", slug: "fashion-machinery", name: "Fashion Machinery", listingCount: 76200, parentId: null, icon: "textile" },
   { id: "cat-textile-knitting-and-weaving-machine", slug: "textile-knitting-and-weaving-machine", name: "Textile Knitting & Weaving Machine", listingCount: 16800, parentId: "cat-fashion-machinery", icon: "textile" },
   { id: "cat-automatic-sewing-machine", slug: "automatic-sewing-machine", name: "Automatic Sewing Machine", listingCount: 18500, parentId: "cat-fashion-machinery", icon: "textile" },
@@ -52,65 +250,130 @@ export const categories: Category[] = [
   { id: "cat-digital-textile-printer", slug: "digital-textile-printer", name: "Digital Textile Printer", listingCount: 8900, parentId: "cat-fashion-machinery", icon: "textile" },
   { id: "cat-fabric-cloth-dyeing-machine", slug: "fabric-cloth-dyeing-machine", name: "Fabric Cloth Dyeing Machine", listingCount: 7600, parentId: "cat-fashion-machinery", icon: "textile" },
   { id: "cat-embroidery-machine", slug: "embroidery-machine", name: "Embroidery Machine", listingCount: 8800, parentId: "cat-fashion-machinery", icon: "textile" },
-
-  // ==================== 6. Food Processing Machinery ====================
   { id: "cat-food-processing-machinery", slug: "food-processing-machinery", name: "Food Processing Machinery", listingCount: 198500, parentId: null, icon: "food" },
   { id: "cat-floor-mill-machine", slug: "floor-mill-machine", name: "Floor Mill Machine", listingCount: 54200, parentId: "cat-food-processing-machinery", icon: "food" },
   { id: "cat-grinding-machine-spice", slug: "grinding-machine-spice", name: "Grinding Machine (Spice)", listingCount: 48900, parentId: "cat-food-processing-machinery", icon: "food" },
   { id: "cat-rice-mill-machine", slug: "rice-mill-machine", name: "Rice Mill Machine", listingCount: 51200, parentId: "cat-food-processing-machinery", icon: "food" },
   { id: "cat-oil-extraction-machine", slug: "oil-extraction-machine", name: "Oil Extraction Machine", listingCount: 44200, parentId: "cat-food-processing-machinery", icon: "food" },
-
-  // ==================== 7. Healthcare Machinery ====================
   { id: "cat-healthcare-machinery", slug: "healthcare-machinery", name: "Healthcare Machinery", listingCount: 64100, parentId: null, icon: "medical" },
   { id: "cat-tablet-compression-machine", slug: "tablet-compression-machine", name: "Tablet Compression Machine", listingCount: 21300, parentId: "cat-healthcare-machinery", icon: "medical" },
   { id: "cat-medical-devices", slug: "medical-devices", name: "Medical Devices", listingCount: 28400, parentId: "cat-healthcare-machinery", icon: "medical" },
   { id: "cat-syringe-making-machine", slug: "syringe-making-machine", name: "Syringe Making Machine", listingCount: 14400, parentId: "cat-healthcare-machinery", icon: "medical" },
-
-  // ==================== 8. IT Machinery ====================
   { id: "cat-it-machinery", slug: "it-machinery", name: "IT Machinery", listingCount: 42300, parentId: null, icon: "automation" },
   { id: "cat-it-electronics-system-design-and-manufacturing", slug: "electronics-system-design-and-manufacturing-it", name: "Electronics System Design & Manufacturing", listingCount: 42300, parentId: "cat-it-machinery", icon: "automation" },
-
-  // ==================== 9. Packaging Machinery ====================
-  { id: "cat-packaging-machinery", slug: "packaging-machinery", name: "Packaging Machinery", listingCount: 145900, parentId: null, icon: "processing" },
   { id: "cat-bottle-filling-machines", slug: "bottle-filling-machines", name: "Bottle Filling Machines", listingCount: 38500, parentId: "cat-packaging-machinery", icon: "processing" },
   { id: "cat-pet-preform-injection-molding-mc", slug: "pet-preform-injection-molding-mc", name: "PET Preform (Injection Molding) Mc", listingCount: 29800, parentId: "cat-packaging-machinery", icon: "processing" },
   { id: "cat-tools-parts-packaging-machines", slug: "tools-parts-packaging-machines", name: "Tools Parts Packaging Machines", listingCount: 22400, parentId: "cat-packaging-machinery", icon: "processing" },
   { id: "cat-automatic-packing-machine", slug: "automatic-packing-machine", name: "Automatic Packing Machine", listingCount: 27100, parentId: "cat-packaging-machinery", icon: "processing" },
   { id: "cat-blow-molding-machine", slug: "blow-molding-machine", name: "Blow Molding Machine", listingCount: 16500, parentId: "cat-packaging-machinery", icon: "processing" },
   { id: "cat-shrink-wrapper-machine", slug: "shrink-wrapper-machine", name: "Shrink Wrapper Machine", listingCount: 11600, parentId: "cat-packaging-machinery", icon: "processing" },
-
-  // ==================== 10. Pharmaceutical Machinery ====================
   { id: "cat-pharmaceutical-machinery", slug: "pharmaceutical-machinery", name: "Pharmaceutical Machinery", listingCount: 88700, parentId: null, icon: "medical" },
   { id: "cat-pharmaceutical-machine", slug: "pharmaceutical-machine", name: "Pharmaceutical Machine", listingCount: 29400, parentId: "cat-pharmaceutical-machinery", icon: "medical" },
   { id: "cat-capsule-filling-machine", slug: "capsule-filling-machine", name: "Capsule Filling Machine", listingCount: 24100, parentId: "cat-pharmaceutical-machinery", icon: "medical" },
   { id: "cat-blister-packing-machine", slug: "blister-packing-machine", name: "Blister Packing Machine", listingCount: 19800, parentId: "cat-pharmaceutical-machinery", icon: "medical" },
   { id: "cat-sterilisation-equipment", slug: "sterilisation-equipment", name: "Sterilisation Equipment", listingCount: 15400, parentId: "cat-pharmaceutical-machinery", icon: "medical" },
-
-  // ==================== 11. ROBOTS ====================
   { id: "cat-robots", slug: "robots", name: "ROBOTS", listingCount: 94600, parentId: null, icon: "automation" },
   { id: "cat-diy-robots", slug: "diy-robots", name: "DIY ROBOTS", listingCount: 11200, parentId: "cat-robots", icon: "automation" },
   { id: "cat-printing-robots", slug: "printing-robots", name: "Printing ROBOTS", listingCount: 9800, parentId: "cat-robots", icon: "automation" },
   { id: "cat-hotel-robots", slug: "hotel-robots", name: "Hotel ROBOTS", listingCount: 13500, parentId: "cat-robots", icon: "automation" },
   { id: "cat-humonoids-human-ai-robots", slug: "humonoids-human-ai-robots", name: "HUMONOIDS (Human AI Robots)", listingCount: 17200, parentId: "cat-robots", icon: "automation" },
-  { id: "cat-industrial-robots", slug: "industrial-robots", name: "Industrial ROBOTS", listingCount: 21400, parentId: "cat-robots", icon: "automation" },
   { id: "cat-welding-robots", slug: "welding-robots", name: "Welding ROBOTS", listingCount: 11800, parentId: "cat-robots", icon: "automation" },
   { id: "cat-warehouse-robots", slug: "warehouse-robots", name: "Warehouse ROBOTS", listingCount: 9700, parentId: "cat-robots", icon: "automation" },
-
-  // ==================== 12. Renewable Energy Machinery ====================
   { id: "cat-renewable-energy-machinery", slug: "renewable-energy-machinery", name: "Renewable Energy Machinery", listingCount: 156300, parentId: null, icon: "energy" },
   { id: "cat-lithium-ion-battery-assembly-line", slug: "lithium-ion-battery-assembly-line", name: "Lithium ion Battery Assembly Line", listingCount: 62400, parentId: "cat-renewable-energy-machinery", icon: "energy" },
   { id: "cat-solar-panel-production-line", slug: "solar-panel-production-line", name: "Solar Panel Production line", listingCount: 54100, parentId: "cat-renewable-energy-machinery", icon: "energy" },
   { id: "cat-battery-pack-assembly-line", slug: "battery-pack-assembly-line", name: "Battery Pack Assembly Line", listingCount: 39800, parentId: "cat-renewable-energy-machinery", icon: "energy" },
-
-  // ==================== 13. Transaportation Machinery ====================
   { id: "cat-transaportation-machinery", slug: "transaportation-machinery", name: "Transaportation Machinery", listingCount: 210800, parentId: null, icon: "transport" },
   { id: "cat-automobiles-equipments-evs", slug: "automobiles-equipments-evs", name: "Automobiles Equipments EVs", listingCount: 94500, parentId: "cat-transaportation-machinery", icon: "transport" },
   { id: "cat-drones-and-aviation", slug: "drones-and-aviation", name: "Drones & Aviation", listingCount: 68200, parentId: "cat-transaportation-machinery", icon: "transport" },
   { id: "cat-roads-rails-and-ports", slug: "roads-rails-and-ports", name: "Roads, Rails & Ports", listingCount: 48100, parentId: "cat-transaportation-machinery", icon: "transport" },
 ];
 
-export const rootCategories = categories.filter((item) => item.parentId === null);
+/**
+ * Maps primary categories to their related parent taxonomy IDs so buyers see all subcategories
+ * (both client legacy subcategories and newly added official subcategories).
+ */
+const PARENT_ALIASES: Record<string, string[]> = {
+  "cat-agricultural-machinery": ["cat-agriculture"],
+  "cat-agriculture": ["cat-agricultural-machinery"],
+  "cat-food-processing-machinery": ["cat-food-and-beverage-processing"],
+  "cat-food-and-beverage-processing": ["cat-food-processing-machinery"],
+  "cat-fashion-machinery": ["cat-textile-and-leather-manufacturing"],
+  "cat-textile-and-leather-manufacturing": ["cat-fashion-machinery"],
+  "cat-engineering-capital-machinery": ["cat-construction", "cat-machine-tools"],
+  "cat-construction": ["cat-engineering-capital-machinery"],
+  "cat-machine-tools": ["cat-engineering-capital-machinery"],
+  "cat-renewable-energy-machinery": ["cat-energy"],
+  "cat-energy": ["cat-renewable-energy-machinery"],
+  "cat-transaportation-machinery": ["cat-transportation-and-trailers"],
+  "cat-transportation-and-trailers": ["cat-transaportation-machinery"],
+  "cat-healthcare-machinery": ["cat-test-lab-medical-equipment"],
+  "cat-test-lab-medical-equipment": ["cat-healthcare-machinery", "cat-pharmaceutical-machinery"],
+  "cat-packaging-machinery": ["cat-processing"],
+  "cat-processing": ["cat-packaging-machinery"],
+  "cat-electronics-manufacturing-machinery": ["cat-semiconductors", "cat-industrial-automation"],
+  "cat-robots": ["cat-industrial-automation"],
+};
 
-export function childrenOf(parentId: string) {
-  return categories.filter((item) => item.parentId === parentId);
+/**
+ * Root categories:
+ * Ordered to prioritize the official 13 machinery categories, followed by the remaining legacy categories.
+ */
+const PRIORITY_ROOT_SLUGS = [
+  "agricultural-machinery",
+  "diy-machinery",
+  "electronics-manufacturing-machinery",
+  "engineering-capital-machinery",
+  "fashion-machinery",
+  "food-processing-machinery",
+  "healthcare-machinery",
+  "it-machinery",
+  "packaging-machinery",
+  "pharmaceutical-machinery",
+  "robots",
+  "renewable-energy-machinery",
+  "transaportation-machinery",
+];
+
+export const rootCategories: Category[] = (() => {
+  const allRoots = categories.filter((item) => item.parentId === null);
+  const priorityRoots: Category[] = [];
+  const otherRoots: Category[] = [];
+
+  for (const slug of PRIORITY_ROOT_SLUGS) {
+    const found = allRoots.find((c) => c.slug === slug);
+    if (found) priorityRoots.push(found);
+  }
+
+  // Add the remaining root categories (excluding any direct duplicate legacy aliases)
+  const legacyAliasesToOmit = new Set([
+    "cat-agriculture",
+    "cat-construction",
+    "cat-energy",
+    "cat-food-and-beverage-processing",
+    "cat-textile-and-leather-manufacturing",
+    "cat-transportation-and-trailers",
+    "cat-test-lab-medical-equipment",
+  ]);
+
+  for (const c of allRoots) {
+    if (!priorityRoots.some((p) => p.id === c.id) && !legacyAliasesToOmit.has(c.id)) {
+      otherRoots.push(c);
+    }
+  }
+
+  return [...priorityRoots, ...otherRoots];
+})();
+
+export function childrenOf(parentId: string): Category[] {
+  const matchingParents = new Set([parentId, ...(PARENT_ALIASES[parentId] || [])]);
+  const seen = new Set<string>();
+  const results: Category[] = [];
+  for (const item of categories) {
+    if (item.parentId && matchingParents.has(item.parentId) && !seen.has(item.id)) {
+      seen.add(item.id);
+      results.push(item);
+    }
+  }
+  return results;
 }

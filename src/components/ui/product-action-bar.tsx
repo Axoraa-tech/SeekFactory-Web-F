@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ShoppingCart, Zap, MessageSquare, Check } from "lucide-react";
-import { formatPriceInr } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type ProductActionBarProps = {
   priceInr?: number;
@@ -29,6 +29,7 @@ export function ProductActionBar({
   showPrice = true,
   className,
 }: ProductActionBarProps) {
+  const { t, formatPrice } = useRegionalSettings();
   const [isAdded, setIsAdded] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
 
@@ -70,7 +71,7 @@ export function ProductActionBar({
                 isSmall ? "text-sm" : isLarge ? "text-2xl" : "text-lg"
               )}
             >
-              {formatPriceInr(priceInr)}
+              {formatPrice(priceInr)}
             </span>
             <span className="text-xs text-slate-500 font-medium">/{unit}</span>
           </div>
@@ -89,7 +90,7 @@ export function ProductActionBar({
           layout === "vertical" ? "w-full flex-col sm:flex-row" : "shrink-0"
         )}
       >
-        {/* 1. Chat with Supplier Button */}
+        {/* 1. Chat with Manufacturer Button */}
         <Link
           href={manufacturerSlug ? `/messages?with=${manufacturerSlug}` : "/messages"}
           onClick={(e) => e.stopPropagation()}
@@ -100,10 +101,10 @@ export function ProductActionBar({
           title="Chat with factory"
         >
           <MessageSquare className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-brand-blue")} />
-          <span>Chat</span>
+          <span>{t("common.chat", "Chat")}</span>
         </Link>
 
-        {/* 2. Add to Cart Button (Warm Vibrant Orange Shade) */}
+        {/* 2. Add to Cart Button */}
         <button
           type="button"
           onClick={handleAddToCart}
@@ -117,17 +118,17 @@ export function ProductActionBar({
           {isAdded ? (
             <>
               <Check className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-              <span>Added to Cart</span>
+              <span>{t("common.order", "Added")}</span>
             </>
           ) : (
             <>
               <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-              <span>Add to Cart</span>
+              <span>{t("common.order", "Order")}</span>
             </>
           )}
         </button>
 
-        {/* 3. Buy Now Button (Premium Red Shade) */}
+        {/* 3. Buy Now Button */}
         <button
           type="button"
           disabled={isBuying}
@@ -139,7 +140,7 @@ export function ProductActionBar({
           )}
         >
           <Zap className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "fill-white/80")} />
-          <span>{isBuying ? "Processing..." : "Buy Now"}</span>
+          <span>{isBuying ? "Processing..." : t("common.buyNow", "Buy Now")}</span>
         </button>
       </div>
     </div>

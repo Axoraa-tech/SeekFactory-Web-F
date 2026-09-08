@@ -131,7 +131,7 @@ export function SupplierProfileView({
                   </h1>
                   {manufacturer.premium && (
                     <span className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
-                      Gold Supplier
+                      Gold Manufacturer
                     </span>
                   )}
                 </div>

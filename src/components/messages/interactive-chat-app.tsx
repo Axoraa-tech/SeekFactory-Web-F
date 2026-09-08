@@ -85,6 +85,7 @@ export function InteractiveChatApp({ initialThreads }: Props) {
   const [mobileShowChat, setMobileShowChat] = useState(Boolean(withSlug));
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const activeThread = threads.find((t) => t.id === selectedThreadId) || threads[0];
 
   useEffect(() => {
@@ -171,13 +172,16 @@ export function InteractiveChatApp({ initialThreads }: Props) {
     }, 1200);
   };
 
-  const handleAttachMockFile = () => {
-    if (attachedFile) {
-      setAttachedFile(null);
-    } else {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const sizeFormatted =
+        file.size > 1024 * 1024
+          ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+          : `${Math.round(file.size / 1024)} KB`;
       setAttachedFile({
-        name: "Component_CAD_Drawing_v2.dwg",
-        size: "4.2 MB",
+        name: file.name,
+        size: sizeFormatted,
       });
     }
   };
@@ -196,11 +200,20 @@ export function InteractiveChatApp({ initialThreads }: Props) {
   );
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200/90 bg-white shadow-sm overflow-hidden flex h-[calc(100vh-140px)] min-h-[580px] max-h-[820px]">
+    <div className="w-full rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden flex h-[calc(100vh-140px)] min-h-[580px] max-h-[820px]">
+      {/* Hidden File Input for Real Chat Attachments */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept=".step,.stp,.dwg,.dxf,.pdf,.png,.jpg,.jpeg,.zip,.rar"
+        onChange={handleFileSelect}
+      />
+
       {/* 1. LEFT PANE: THREADS LIST (Hidden on mobile if chat is active) */}
       <div
         className={cn(
-          "w-full md:w-[320px] lg:w-[360px] border-r border-slate-100 flex flex-col bg-slate-50/40 shrink-0",
+          "w-full md:w-[250px] lg:w-[280px] xl:w-[300px] border-r border-slate-100 flex flex-col bg-slate-50/40 shrink-0",
           mobileShowChat ? "hidden md:flex" : "flex"
         )}
       >
@@ -299,57 +312,64 @@ export function InteractiveChatApp({ initialThreads }: Props) {
           )}
         >
           {/* Chat Header */}
-          <div className="p-3 sm:px-5 sm:py-3.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-white/95 backdrop-blur-md shrink-0">
-            <div className="flex items-center gap-2.5 min-w-0">
+          <div className="px-3.5 py-2.5 sm:px-5 sm:py-3 border-b border-slate-200/90 bg-white flex items-center justify-between gap-2.5 shadow-2xs z-10 relative shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <button
                 type="button"
                 onClick={() => setMobileShowChat(false)}
-                className="md:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100"
+                className="md:hidden p-1.5 -ml-1 rounded-lg text-slate-600 hover:bg-slate-100 shrink-0"
                 aria-label="Back to threads"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
 
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={activeThread.manufacturer.logoUrl}
-                alt={activeThread.manufacturer.name}
-                className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
-              />
+              <div className="relative shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={activeThread.manufacturer.logoUrl}
+                  alt={activeThread.manufacturer.name}
+                  className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                />
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+              </div>
 
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 min-w-0">
                   <h3 className="font-bold text-xs sm:text-sm text-slate-900 truncate">
                     {activeThread.manufacturer.name}
                   </h3>
                   {activeThread.manufacturer.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                  <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5 whitespace-nowrap overflow-hidden">
+                  <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold shrink-0">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Online Sourcing Engineer
+                    Online
                   </span>
-                  <span>•</span>
-                  <span>{activeThread.manufacturer.location}, {activeThread.manufacturer.country}</span>
+                  <span className="text-slate-300 shrink-0">•</span>
+                  <span className="truncate text-slate-500 font-medium">
+                    {activeThread.manufacturer.location}, {activeThread.manufacturer.country}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Quick Action Links */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <Link
                 href={`/manufacturers/${activeThread.manufacturer.slug}`}
-                className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors shadow-2xs"
+                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue hover:border-slate-300 transition-all shadow-2xs active:scale-95"
+                title="Visit Plant Profile"
               >
-                <Building2 className="h-3.5 w-3.5" />
-                <span>Visit Plant</span>
+                <Building2 className="h-3.5 w-3.5 text-brand-blue" />
+                <span className="hidden sm:inline">Visit Plant</span>
               </Link>
               <Link
-                href="/rfq/new"
-                className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
+                href={`/rfq/new?category=${encodeURIComponent(activeThread.manufacturer.categoryIds?.[0] || "")}&product=${encodeURIComponent(activeThread.manufacturer.name + " Parts")}`}
+                className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-2.5 sm:px-3.5 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
+                title="Post RFQ to this Manufacturer"
               >
                 <FileText className="h-3.5 w-3.5" />
-                <span>Post RFQ</span>
+                <span className="whitespace-nowrap">Post RFQ</span>
               </Link>
             </div>
           </div>
@@ -477,7 +497,7 @@ export function InteractiveChatApp({ initialThreads }: Props) {
           >
             <button
               type="button"
-              onClick={handleAttachMockFile}
+              onClick={() => fileInputRef.current?.click()}
               title="Attach technical drawing or CAD file"
               className={cn(
                 "p-2 rounded-xl border transition-colors shadow-2xs",

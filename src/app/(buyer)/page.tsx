@@ -1,11 +1,15 @@
-import { FeedTabs } from "@/components/reels/feed-tabs";
-import { ReelsFeed } from "@/components/reels/reels-feed";
-import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
+import { HomeSeeksInteractiveFeed } from "@/features/feed/home-seeks-interactive-feed";
 import { loadFeed, parseFeedTab } from "@/features/feed/load-feed";
 import { getApi } from "@/shared/api";
 
 type Props = {
-  searchParams: Promise<{ tab?: string; view?: string; category?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    view?: string;
+    category?: string;
+    sub?: string;
+    q?: string;
+  }>;
 };
 
 export default async function HomePage({ searchParams }: Props) {
@@ -13,24 +17,40 @@ export default async function HomePage({ searchParams }: Props) {
   const tab = parseFeedTab(params.tab);
   const viewMode: "landscape" | "vertical" = params.view === "vertical" ? "vertical" : "landscape";
   const category = params.category || "";
+  const sub = params.sub || "";
+  const q = params.q || "";
 
   const api = getApi();
-  const [roots, items] = await Promise.all([
+  const [roots, allCategories, items] = await Promise.all([
     api.categories.listRoots(),
+    api.categories.list(),
     loadFeed(tab),
   ]);
 
+  // Pre-fetch all children for every root category (same as Explore page)
+  const childrenMap: Record<string, typeof allCategories> = {};
+  await Promise.all(
+    roots.map(async (r) => {
+      const children = await api.categories.listChildren(r.id);
+      childrenMap[r.id] = children;
+      childrenMap[r.slug] = children;
+    })
+  );
+
   return (
-    <section className="space-y-3">
-      <DynamicCategoryNav
-        categories={roots}
-        selectedCategorySlug={category}
-        forYouHref="/"
-        sticky={false}
-      />
-      <FeedTabs tab={tab} viewMode={viewMode} />
-      <ReelsFeed items={items} viewMode={viewMode} />
-    </section>
+    <HomeSeeksInteractiveFeed
+      initialItems={items}
+      roots={roots}
+      allCategories={allCategories}
+      childrenByRoot={childrenMap}
+      initialTab={tab}
+      initialViewMode={viewMode}
+      initialCategorySlug={category}
+      initialSubcategorySlug={sub}
+      initialQuery={q}
+    />
   );
 }
+
+
 

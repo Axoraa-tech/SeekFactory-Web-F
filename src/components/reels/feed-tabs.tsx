@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Monitor, Smartphone } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import type { FeedTab } from "@/entities/reel";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   tab: FeedTab;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
+  const { t } = useRegionalSettings();
   const isVertical = viewMode === "vertical";
 
   return (
@@ -24,13 +26,13 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
             href={`/?tab=for-you${isVertical ? "&view=vertical" : ""}`}
             active={tab === "for-you"}
           >
-            For You
+            {t("feed.forYou", "For You")}
           </TabLink>
           <TabLink
             href={`/?tab=following${isVertical ? "&view=vertical" : ""}`}
             active={tab === "following"}
           >
-            Following
+            {t("feed.following", "Following")}
           </TabLink>
         </div>
       </div>
@@ -48,7 +50,7 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
           title="Landscape B2B Showcase View (16:9)"
         >
           <Monitor className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Landscape</span>
+          <span className="hidden sm:inline">{t("feed.landscape", "Landscape")}</span>
         </Link>
 
         <Link
@@ -62,7 +64,7 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
           title="Vertical E-Commerce Seek View (9:16)"
         >
           <Smartphone className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Vertical</span>
+          <span className="hidden sm:inline">{t("feed.vertical", "Vertical")}</span>
         </Link>
       </div>
     </div>

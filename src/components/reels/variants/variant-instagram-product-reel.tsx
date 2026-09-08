@@ -27,10 +27,11 @@ import { CommentsModal } from "@/components/reels/comments-modal";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { cn } from "@/shared/lib/cn";
-import { formatCount, formatPriceInr } from "@/shared/lib/format";
+import { formatCount } from "@/shared/lib/format";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
 import type { Product } from "@/entities/product";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   reel: Reel;
@@ -53,6 +54,7 @@ export function VariantInstagramProductReel({
   products = [],
   viewMode = "landscape",
 }: Props) {
+  const { t, formatPrice, translateCountry, translateProduct, translateUnit, translateReelTitle, translateReelDescription } = useRegionalSettings();
   const [following, setFollowing] = useState(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(reel.comments || 18);
@@ -241,7 +243,7 @@ export function VariantInstagramProductReel({
                       {manufacturer.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
                     </div>
                     <p className="text-[11px] text-slate-500 truncate">
-                      {manufacturer.location}, {manufacturer.country} · Est. {manufacturer.yearsEstablished}
+                      {manufacturer.location}, {translateCountry(manufacturer.country)} · Est. {manufacturer.yearsEstablished}
                     </p>
                   </div>
                 </Link>
@@ -256,7 +258,7 @@ export function VariantInstagramProductReel({
                       : "bg-brand-blue text-white hover:bg-brand-blue-dark active:scale-95"
                   )}
                 >
-                  {following ? "Following" : "+ Follow"}
+                  {following ? t("widgets.following", "Following") : t("widgets.follow", "+ Follow")}
                 </button>
               </div>
 
@@ -265,16 +267,16 @@ export function VariantInstagramProductReel({
                 <div className="flex items-baseline justify-between gap-1">
                   <div>
                     <span className="text-base sm:text-lg font-black text-rose-600">
-                      {formatPriceInr(activeProduct.priceInr)}
+                      {formatPrice(activeProduct.priceInr)}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium"> / {activeProduct.unit}</span>
+                    <span className="text-xs text-slate-500 font-medium"> / {translateUnit(activeProduct.unit)}</span>
                   </div>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">
                     MOQ: {activeProduct.moq}
                   </span>
                 </div>
                 <p className="mt-1 text-xs font-bold text-slate-800 line-clamp-1">
-                  {activeProduct.name}
+                  {translateProduct(activeProduct.name)}
                 </p>
               </div>
             </div>
@@ -466,7 +468,7 @@ export function VariantInstagramProductReel({
                   {manufacturer.verified ? <VerifiedBadge className="h-4 w-4" /> : null}
                 </div>
                 <p className="text-xs text-ink-muted mt-0.5">
-                  {manufacturer.country} • {formatCount(reel.views)} views
+                  {translateCountry(manufacturer.country)} • {formatCount(reel.views)} {t("feed.views", "views")}
                 </p>
               </div>
             </Link>
@@ -482,14 +484,14 @@ export function VariantInstagramProductReel({
                     : "border border-neutral-300 text-neutral-700 hover:bg-neutral-50"
                 )}
               >
-                {following ? "Following" : "Follow"}
+                {following ? t("widgets.following", "Following") : t("widgets.follow", "+ Follow")}
               </button>
 
               <Link
                 href="/rfq/new"
                 className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-1 text-xs font-bold text-white hover:bg-brand-blue-dark transition shadow-2xs"
               >
-                <Send className="h-3 w-3" /> Send RFQ
+                <Send className="h-3 w-3" /> {t("feed.sendRfq", "Send RFQ")}
               </Link>
             </div>
           </div>
@@ -497,10 +499,10 @@ export function VariantInstagramProductReel({
           {/* 3. Title and Description */}
           <div>
             <h2 className="text-sm sm:text-base font-bold text-neutral-900 leading-snug">
-              {reel.title}
+              {translateReelTitle(reel.title)}
             </h2>
             <p className="text-xs text-neutral-600 line-clamp-2 mt-0.5">
-              {reel.description}
+              {translateReelDescription(reel.description)}
             </p>
           </div>
 
@@ -540,7 +542,7 @@ export function VariantInstagramProductReel({
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={prod.imageUrl}
-                            alt={prod.name}
+                            alt={translateProduct(prod.name)}
                             className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover/item:scale-105"
                           />
                         </div>
@@ -551,13 +553,13 @@ export function VariantInstagramProductReel({
                             <Link
                               href={`/products/${prod.slug}`}
                               className="text-[11px] sm:text-xs font-bold text-neutral-900 group-hover/item:text-brand-blue truncate block"
-                              title={prod.name}
+                              title={translateProduct(prod.name)}
                             >
-                              {prod.name}
+                              {translateProduct(prod.name)}
                             </Link>
                             <span className="text-[11px] sm:text-xs font-extrabold text-brand-orange">
-                              {formatPriceInr(prod.priceInr)}
-                              <span className="text-[9px] text-neutral-400 font-normal"> / {prod.unit}</span>
+                              {formatPrice(prod.priceInr)}
+                              <span className="text-[9px] text-neutral-400 font-normal"> / {translateUnit(prod.unit)}</span>
                             </span>
                           </div>
 
@@ -572,7 +574,7 @@ export function VariantInstagramProductReel({
                                 : "bg-[#E53935] hover:bg-[#D32F2F]"
                             )}
                           >
-                            {isBuying ? "Buying..." : "Buy Now"}
+                            {isBuying ? "..." : t("common.buyNow", "Buy Now")}
                           </button>
                         </div>
                       </div>
