@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
+  Search,
   X,
   Check,
   Monitor,
@@ -287,7 +288,7 @@ export function HomeSeeksInteractiveFeed({
         const inDesc = item.reel.description.toLowerCase().includes(q);
         const inTags = item.reel.hashtags.some((t) => t.toLowerCase().includes(q));
         const inMfr = item.manufacturer.name.toLowerCase().includes(q);
-        const inProd = item.products.some((p) => p.name.toLowerCase().includes(q));
+        const inProd = item.products?.some((p) => p.name.toLowerCase().includes(q));
         return inTitle || inDesc || inTags || inMfr || inProd;
       });
     }
