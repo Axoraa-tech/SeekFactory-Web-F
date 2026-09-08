@@ -27,6 +27,7 @@ const config: Config = {
       boxShadow: {
         card: "0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.04)",
         nav: "0 1px 0 rgba(16, 24, 40, 0.06)",
+        glass: "0 8px 28px rgba(16, 24, 40, 0.06)",
       },
       borderRadius: {
         card: "12px",

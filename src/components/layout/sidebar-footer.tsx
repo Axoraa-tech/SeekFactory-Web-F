@@ -5,8 +5,10 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { cn } from "@/shared/lib/cn";
+import { getMessages } from "@/shared/lib/messages";
 
 const year = new Date().getFullYear();
+const messages = getMessages("en");
 
 export function SidebarFooter() {
   return (
@@ -52,7 +54,9 @@ export function SidebarFooter() {
       </nav>
       <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-ink-muted">
         <BrandLogo className="h-5 w-auto max-w-[110px] object-contain object-left" />
-        <span>SeekFactory © {year}</span>
+        <span>
+          {messages.brand.name} © {year}
+        </span>
       </p>
     </footer>
   );
