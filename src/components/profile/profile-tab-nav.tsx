@@ -12,6 +12,20 @@ type Props = {
   followingCount: number;
 };
 
+const tabs: {
+  id: ProfileTab;
+  label: string;
+  icon: typeof Building2;
+  count?: "rfq" | "saved" | "following";
+  crown?: boolean;
+}[] = [
+  { id: "details", label: "Company & Contact", icon: Building2 },
+  { id: "rfqs", label: "My RFQs & Orders", icon: FileText, count: "rfq" },
+  { id: "saved", label: "Saved Products", icon: Bookmark, count: "saved" },
+  { id: "following", label: "Following Factories", icon: User, count: "following" },
+  { id: "premium", label: "Membership & Plans", icon: Crown, crown: true },
+];
+
 export function ProfileTabNav({
   activeTab,
   onTabChange,
@@ -19,86 +33,46 @@ export function ProfileTabNav({
   savedCount,
   followingCount,
 }: Props) {
+  const counts = { rfq: rfqCount, saved: savedCount, following: followingCount };
+
   return (
-    <div className="flex items-center gap-2 border-b border-slate-200 pb-1 overflow-x-auto no-scrollbar">
-      <button
-        type="button"
-        onClick={() => onTabChange("details")}
-        className={cn(
-          "inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap",
-          activeTab === "details"
-            ? "border-brand-blue text-brand-blue"
-            : "border-transparent text-slate-600 hover:text-slate-900"
-        )}
-      >
-        <Building2 className="h-4 w-4" />
-        <span>Company & Contact Info</span>
-      </button>
+    <div className="glass-panel-liquid glass-fade-in sticky top-[68px] z-20 px-2 sm:px-3">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.id;
+          const count = tab.count ? counts[tab.count] : undefined;
 
-      <button
-        type="button"
-        onClick={() => onTabChange("rfqs")}
-        className={cn(
-          "inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap",
-          activeTab === "rfqs"
-            ? "border-brand-blue text-brand-blue"
-            : "border-transparent text-slate-600 hover:text-slate-900"
-        )}
-      >
-        <FileText className="h-4 w-4" />
-        <span>My RFQs & Orders</span>
-        <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[10px] text-slate-600 font-semibold">
-          {rfqCount}
-        </span>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => onTabChange("saved")}
-        className={cn(
-          "inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap",
-          activeTab === "saved"
-            ? "border-brand-blue text-brand-blue"
-            : "border-transparent text-slate-600 hover:text-slate-900"
-        )}
-      >
-        <Bookmark className="h-4 w-4" />
-        <span>Saved Products</span>
-        <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[10px] text-slate-600 font-semibold">
-          {savedCount}
-        </span>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => onTabChange("following")}
-        className={cn(
-          "inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap",
-          activeTab === "following"
-            ? "border-brand-blue text-brand-blue"
-            : "border-transparent text-slate-600 hover:text-slate-900"
-        )}
-      >
-        <User className="h-4 w-4" />
-        <span>Following Factories</span>
-        <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[10px] text-slate-600 font-semibold">
-          {followingCount}
-        </span>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => onTabChange("premium")}
-        className={cn(
-          "inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition-all whitespace-nowrap",
-          activeTab === "premium"
-            ? "border-brand-blue text-brand-blue"
-            : "border-transparent text-slate-600 hover:text-slate-900"
-        )}
-      >
-        <Crown className="h-4 w-4 text-amber-500" />
-        <span>Membership & Plans</span>
-      </button>
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onTabChange(tab.id)}
+              className={cn(
+                "relative inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200",
+                active
+                  ? "bg-brand-blue text-white shadow-[0_8px_20px_rgba(26,115,232,0.35)]"
+                  : "glass-liquid-item text-ink-muted hover:text-ink"
+              )}
+            >
+              <Icon className={cn("h-4 w-4", tab.crown && !active && "text-amber-500")} />
+              <span>{tab.label}</span>
+              {typeof count === "number" ? (
+                <span
+                  className={cn(
+                    "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                    active
+                      ? "bg-white/25 text-white"
+                      : "bg-white/40 text-ink-muted border border-white/50"
+                  )}
+                >
+                  {count}
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

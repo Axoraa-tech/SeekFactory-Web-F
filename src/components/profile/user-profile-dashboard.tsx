@@ -10,6 +10,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
 import type { MembershipTier, ProfileFormData, ProfileRfq, ProfileTab } from "./profile-types";
 import { ProfileHero } from "./profile-hero";
 import { ProfileTabNav } from "./profile-tab-nav";
+import { ProfileAside } from "./profile-aside";
 import { ProfileDetailsPanel } from "./profile-details-panel";
 import { ProfileRfqsPanel } from "./profile-rfqs-panel";
 import { ProfileSavedPanel } from "./profile-saved-panel";
@@ -128,60 +129,78 @@ export function UserProfileDashboard({
     }
   };
 
+  const openPremium = () => setActiveTab("premium");
+
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-5">
+      {/* Soft ambient wash so liquid glass can refract something beyond flat gray */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-10 h-[520px] -z-10 rounded-[2.5rem] opacity-100"
+        style={{
+          background:
+            "radial-gradient(ellipse 65% 50% at 12% 18%, rgba(26,115,232,0.28), transparent 58%), radial-gradient(ellipse 50% 42% at 88% 8%, rgba(242,107,33,0.2), transparent 52%), radial-gradient(ellipse 55% 48% at 55% 55%, rgba(120,200,255,0.18), transparent 65%), linear-gradient(180deg, rgba(255,255,255,0.35), transparent 70%)",
+        }}
+      />
+
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 rounded-xl bg-slate-900 text-white px-4 py-2.5 text-xs font-semibold flex items-center gap-2 shadow-2xl animate-in fade-in slide-in-from-top-2">
+        <div className="fixed top-20 right-6 z-50 rounded-full border border-white/60 bg-ink/95 text-white px-4 py-2.5 text-xs font-semibold flex items-center gap-2 shadow-glass backdrop-blur-md glass-fade-in">
           <Check className="h-4 w-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      <ProfileHero
-        user={user}
-        formData={formData}
-        currentTier={currentTier}
-        rfqCount={rfqs.length}
-        savedCount={savedProducts.length}
-        followingCount={followedSuppliers.length}
-        isLoggingOut={isLoggingOut}
-        onOpenPremium={() => setActiveTab("premium")}
-        onLogout={handleLogout}
-      />
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-5 items-start">
+        <div className="space-y-4 min-w-0">
+          <ProfileHero
+            user={user}
+            formData={formData}
+            currentTier={currentTier}
+            rfqCount={rfqs.length}
+            savedCount={savedProducts.length}
+            followingCount={followedSuppliers.length}
+            isLoggingOut={isLoggingOut}
+            onOpenPremium={openPremium}
+            onLogout={handleLogout}
+          />
 
-      <ProfileTabNav
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        rfqCount={rfqs.length}
-        savedCount={savedProducts.length}
-        followingCount={followedSuppliers.length}
-      />
+          <ProfileTabNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            rfqCount={rfqs.length}
+            savedCount={savedProducts.length}
+            followingCount={followedSuppliers.length}
+          />
 
-      {activeTab === "details" && (
-        <ProfileDetailsPanel
-          formData={formData}
-          setFormData={setFormData}
-          isSaving={isSaving}
-          onSave={handleSaveProfile}
-        />
-      )}
+          {activeTab === "details" && (
+            <ProfileDetailsPanel
+              formData={formData}
+              setFormData={setFormData}
+              isSaving={isSaving}
+              onSave={handleSaveProfile}
+            />
+          )}
 
-      {activeTab === "rfqs" && <ProfileRfqsPanel rfqs={rfqs} />}
+          {activeTab === "rfqs" && <ProfileRfqsPanel rfqs={rfqs} />}
 
-      {activeTab === "saved" && (
-        <ProfileSavedPanel savedProducts={savedProducts} onRemoveSaved={handleRemoveSaved} />
-      )}
+          {activeTab === "saved" && (
+            <ProfileSavedPanel savedProducts={savedProducts} onRemoveSaved={handleRemoveSaved} />
+          )}
 
-      {activeTab === "following" && (
-        <ProfileFollowingPanel
-          followedSuppliers={followedSuppliers}
-          onToggleFollow={handleToggleFollow}
-        />
-      )}
+          {activeTab === "following" && (
+            <ProfileFollowingPanel
+              followedSuppliers={followedSuppliers}
+              onToggleFollow={handleToggleFollow}
+            />
+          )}
 
-      {activeTab === "premium" && (
-        <ProfileMembershipPanel currentTier={currentTier} onUpgradeTier={handleUpgradeTier} />
-      )}
+          {activeTab === "premium" && (
+            <ProfileMembershipPanel currentTier={currentTier} onUpgradeTier={handleUpgradeTier} />
+          )}
+        </div>
+
+        <ProfileAside onOpenPremium={openPremium} />
+      </div>
     </div>
   );
 }
