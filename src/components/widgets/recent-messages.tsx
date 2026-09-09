@@ -1,19 +1,24 @@
+"use client";
+
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Conversation } from "@/entities/message";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   messages: (Conversation & { manufacturer: Manufacturer })[];
 };
 
 export function RecentMessages({ messages }: Props) {
+  const { t } = useRegionalSettings();
+
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold">Recent Messages</h2>
+        <h2 className="text-sm font-bold">{t("widgets.recentMessages", "Recent Messages")}</h2>
         <Link href="/messages" className="text-xs font-semibold text-brand-blue">
-          View all
+          {t("widgets.viewAll", "View all")}
         </Link>
       </div>
       <ul className="space-y-3">

@@ -19,7 +19,7 @@ export default async function ExplorePage({ searchParams }: Props) {
     api.categories.listRoots(),
     api.categories.list(),
     api.manufacturers.listAll(),
-    api.products.listTrending(12),
+    api.products.listTrending(50),
   ]);
 
   const selectedRoot = roots.find((item) => item.slug === category) ?? null;
@@ -160,6 +160,28 @@ export default async function ExplorePage({ searchParams }: Props) {
   );
 }
 
+const PARENT_ALIASES: Record<string, string[]> = {
+  "cat-agricultural-machinery": ["cat-agriculture"],
+  "cat-agriculture": ["cat-agricultural-machinery"],
+  "cat-food-processing-machinery": ["cat-food-and-beverage-processing"],
+  "cat-food-and-beverage-processing": ["cat-food-processing-machinery"],
+  "cat-fashion-machinery": ["cat-textile-and-leather-manufacturing"],
+  "cat-textile-and-leather-manufacturing": ["cat-fashion-machinery"],
+  "cat-engineering-capital-machinery": ["cat-construction", "cat-machine-tools"],
+  "cat-construction": ["cat-engineering-capital-machinery"],
+  "cat-machine-tools": ["cat-engineering-capital-machinery"],
+  "cat-renewable-energy-machinery": ["cat-energy"],
+  "cat-energy": ["cat-renewable-energy-machinery"],
+  "cat-transaportation-machinery": ["cat-transportation-and-trailers"],
+  "cat-transportation-and-trailers": ["cat-transaportation-machinery"],
+  "cat-healthcare-machinery": ["cat-test-lab-medical-equipment"],
+  "cat-test-lab-medical-equipment": ["cat-healthcare-machinery", "cat-pharmaceutical-machinery"],
+  "cat-packaging-machinery": ["cat-processing"],
+  "cat-processing": ["cat-packaging-machinery"],
+  "cat-electronics-manufacturing-machinery": ["cat-semiconductors", "cat-industrial-automation"],
+  "cat-robots": ["cat-industrial-automation"],
+};
+
 function matchesAssigned(
   assignedIds: string[],
   selected: Category | null,
@@ -167,9 +189,22 @@ function matchesAssigned(
 ): boolean {
   if (!selected) return true;
   if (assignedIds.includes(selected.id)) return true;
+
+  // Root category selected: match products belonging to any child or alias parent
   if (selected.parentId === null) {
-    const childIds = all.filter((item) => item.parentId === selected.id).map((item) => item.id);
-    return assignedIds.some((id) => childIds.includes(id));
+    const matchingParents = new Set([selected.id, ...(PARENT_ALIASES[selected.id] || [])]);
+    const childIds = all
+      .filter((item) => item.parentId && matchingParents.has(item.parentId))
+      .map((item) => item.id);
+    return assignedIds.some((id) => matchingParents.has(id) || childIds.includes(id));
   }
+
+  // Subcategory selected: direct match or parent category match
+  const parentId = selected.parentId;
+  if (parentId) {
+    const matchingParents = new Set([parentId, ...(PARENT_ALIASES[parentId] || [])]);
+    if (assignedIds.some((id) => matchingParents.has(id))) return true;
+  }
+
   return false;
 }

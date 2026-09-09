@@ -120,7 +120,7 @@ export function UserDropdown({
                 <div className="mt-1.5 flex items-center gap-1.5">
                   <span className="inline-flex items-center gap-1 rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-semibold text-brand-blue">
                     <Sparkles className="h-3 w-3 text-brand-blue" />
-                    {user.role === "Supplier" ? "Verified Supplier" : "Verified Buyer"}
+                    {user.role === "Supplier" ? "Verified Manufacturer" : "Verified Buyer"}
                   </span>
                 </div>
               </div>

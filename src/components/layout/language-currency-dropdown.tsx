@@ -2,50 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Globe, ChevronDown, Check, Search, DollarSign, Languages, Sparkles } from "lucide-react";
-
-export type LanguageOption = {
-  code: string;
-  name: string;
-  nativeName: string;
-  flag: string;
-};
-
-export type CurrencyOption = {
-  code: string;
-  name: string;
-  symbol: string;
-};
-
-const LANGUAGES: LanguageOption[] = [
-  { code: "EN", name: "English (US)", nativeName: "English (US)", flag: "🇺🇸" },
-  { code: "EN-GB", name: "English (UK)", nativeName: "English (UK)", flag: "🇬🇧" },
-  { code: "ES", name: "Spanish", nativeName: "Español", flag: "🇪🇸" },
-  { code: "FR", name: "French", nativeName: "Français", flag: "🇫🇷" },
-  { code: "DE", name: "German", nativeName: "Deutsch", flag: "🇩🇪" },
-  { code: "ZH", name: "Chinese (Simplified)", nativeName: "中文(简体)", flag: "🇨🇳" },
-  { code: "JA", name: "Japanese", nativeName: "日本語", flag: "🇯🇵" },
-  { code: "AR", name: "Arabic", nativeName: "العربية", flag: "🇸🇦" },
-  { code: "HI", name: "Hindi", nativeName: "हिन्दी", flag: "🇮🇳" },
-  { code: "PT", name: "Portuguese", nativeName: "Português", flag: "🇵🇹" },
-];
-
-const CURRENCIES: CurrencyOption[] = [
-  { code: "EUR", name: "Euro", symbol: "€" },
-  { code: "USD", name: "US Dollar", symbol: "$" },
-  { code: "GBP", name: "British Pound", symbol: "£" },
-  { code: "INR", name: "Indian Rupee", symbol: "₹" },
-  { code: "CAD", name: "Canadian Dollar", symbol: "CA$" },
-  { code: "AUD", name: "Australian Dollar", symbol: "AU$" },
-  { code: "JPY", name: "Japanese Yen", symbol: "¥" },
-  { code: "CNY", name: "Chinese Yuan", symbol: "CN¥" },
-  { code: "AED", name: "UAE Dirham", symbol: "AED" },
-  { code: "SGD", name: "Singapore Dollar", symbol: "SG$" },
-];
+import {
+  useRegionalSettings,
+  LANGUAGES,
+  CURRENCIES,
+  type LanguageOption,
+  type CurrencyOption,
+} from "@/shared/i18n/regional-context";
 
 export function LanguageCurrencyDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(LANGUAGES[0]);
-  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyOption>(CURRENCIES[0]);
+  const { selectedLanguage, selectedCurrency, setLanguage, setCurrency } = useRegionalSettings();
 
   // Sub-dropdown open states inside main popover
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -56,24 +23,6 @@ export function LanguageCurrencyDropdown() {
   const [currSearch, setCurrSearch] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Load saved preferences if available
-  useEffect(() => {
-    try {
-      const savedLangCode = localStorage.getItem("seek_lang");
-      const savedCurrCode = localStorage.getItem("seek_curr");
-      if (savedLangCode) {
-        const foundLang = LANGUAGES.find((l) => l.code === savedLangCode);
-        if (foundLang) setSelectedLanguage(foundLang);
-      }
-      if (savedCurrCode) {
-        const foundCurr = CURRENCIES.find((c) => c.code === savedCurrCode);
-        if (foundCurr) setSelectedCurrency(foundCurr);
-      }
-    } catch {
-      // ignore SSR errors
-    }
-  }, []);
 
   // Outside click & escape handlers
   useEffect(() => {
@@ -102,19 +51,13 @@ export function LanguageCurrencyDropdown() {
   }, [isOpen]);
 
   const handleSelectLanguage = (lang: LanguageOption) => {
-    setSelectedLanguage(lang);
+    setLanguage(lang);
     setIsLangOpen(false);
-    try {
-      localStorage.setItem("seek_lang", lang.code);
-    } catch {}
   };
 
   const handleSelectCurrency = (curr: CurrencyOption) => {
-    setSelectedCurrency(curr);
+    setCurrency(curr);
     setIsCurrOpen(false);
-    try {
-      localStorage.setItem("seek_curr", curr.code);
-    } catch {}
   };
 
   const filteredLanguages = LANGUAGES.filter(

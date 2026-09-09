@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { brand } from "@/shared/config/brand";
 import { LoadingScreen } from "@/components/ui/loading-screen";
+import { RegionalSettingsProvider } from "@/shared/i18n/regional-context";
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -24,8 +25,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={`${sans.variable} font-sans antialiased`}>
-        <LoadingScreen />
-        {children}
+        <RegionalSettingsProvider>
+          <LoadingScreen />
+          {children}
+        </RegionalSettingsProvider>
       </body>
     </html>
   );

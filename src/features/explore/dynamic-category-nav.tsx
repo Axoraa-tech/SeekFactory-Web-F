@@ -7,12 +7,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { cn } from "@/shared/lib/cn";
 import type { Category } from "@/entities/category";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   categories: Category[];
   selectedCategorySlug?: string;
   forYouHref?: string;
   categoryHref?: (slug: string) => string;
+  onCategorySelect?: (slug: string) => void;
+  onForYouClick?: () => void;
   className?: string;
   sticky?: boolean;
 };
@@ -22,11 +25,14 @@ export function DynamicCategoryNav({
   selectedCategorySlug = "",
   forYouHref = "/explore",
   categoryHref,
+  onCategorySelect,
+  onForYouClick,
   className,
   sticky = true,
 }: Props) {
   const searchParams = useSearchParams();
   const currentCategory = selectedCategorySlug || searchParams.get("category") || "";
+  const { t, translateCategory } = useRegionalSettings();
 
   // isExpanded state: true when at top or when scrolling up
   const [isExpanded, setIsExpanded] = useState(true);
@@ -220,7 +226,13 @@ export function DynamicCategoryNav({
           <Link
             ref={!currentCategory ? activeItemRef : null}
             href={forYouHref}
-            title="For You - All Categories"
+            onClick={(e) => {
+              if (onForYouClick) {
+                e.preventDefault();
+                onForYouClick();
+              }
+            }}
+            title={`${t("feed.forYou", "For You")} - ${t("sidebar.allCategories", "All Categories")}`}
             aria-current={!currentCategory ? "page" : undefined}
             className={cn(
               "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
@@ -251,7 +263,7 @@ export function DynamicCategoryNav({
                 !currentCategory ? "text-brand-blue font-bold" : "text-neutral-700 group-hover:text-ink"
               )}
             >
-              For You
+              {t("feed.forYou", "For You")}
             </span>
 
             {/* Active Blue Indicator Underline */}
@@ -264,12 +276,19 @@ export function DynamicCategoryNav({
           {categories.map((item) => {
             const isActive = currentCategory === item.slug;
             const href = categoryHref ? categoryHref(item.slug) : `/explore?category=${item.slug}`;
+            const translatedName = translateCategory(item.name);
             return (
               <Link
                 key={item.id}
                 ref={isActive ? activeItemRef : null}
                 href={href}
-                title={item.name}
+                onClick={(e) => {
+                  if (onCategorySelect) {
+                    e.preventDefault();
+                    onCategorySelect(item.slug);
+                  }
+                }}
+                title={translatedName}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
@@ -300,7 +319,7 @@ export function DynamicCategoryNav({
                     isActive ? "text-brand-blue font-bold" : "text-neutral-700 group-hover:text-ink"
                   )}
                 >
-                  {item.name}
+                  {translatedName}
                 </span>
 
                 {/* Active Underline */}

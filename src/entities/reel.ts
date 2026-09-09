@@ -17,4 +17,6 @@ export type Reel = {
   saves: number;
   tab: FeedTab;
   productIds: string[];
+  categoryIds?: string[];
+  subcategoryIds?: string[];
 };

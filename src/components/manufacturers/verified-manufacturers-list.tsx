@@ -15,6 +15,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import type { Manufacturer } from "@/entities/manufacturer";
 
 type Layout = "rail" | "explore";
@@ -39,6 +40,7 @@ export function VerifiedManufacturersList({ manufacturers, layout = "rail" }: Pr
 }
 
 function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
+  const { t, translateCountry } = useRegionalSettings();
   const [followedMap, setFollowedMap] = useState<Record<string, boolean>>({});
 
   const toggleFollow = (id: string, e: React.MouseEvent) => {
@@ -50,9 +52,11 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
   return (
     <Card className="p-4 border-slate-200/90 shadow-2xs">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold text-slate-900">Verified Manufacturers</h2>
+        <h2 className="text-sm font-bold text-slate-900">
+          {t("widgets.verifiedManufacturers", "Verified Manufacturers")}
+        </h2>
         <Link href="/explore" className="text-xs font-semibold text-brand-blue hover:underline">
-          View all
+          {t("widgets.viewAll", "View all")}
         </Link>
       </div>
       <ul className="space-y-3">
@@ -76,7 +80,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                     {shortName(manufacturer.name)}
                     {manufacturer.verified ? <VerifiedBadge className="h-3 w-3 shrink-0" /> : null}
                   </p>
-                  <p className="text-[11px] text-slate-500 truncate">{manufacturer.country}</p>
+                  <p className="text-[11px] text-slate-500 truncate">{translateCountry(manufacturer.country)}</p>
                 </div>
               </Link>
 
@@ -93,12 +97,12 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                 {isFollowing ? (
                   <>
                     <Check className="h-3 w-3" />
-                    <span>Following</span>
+                    <span>{t("widgets.following", "Following")}</span>
                   </>
                 ) : (
                   <>
                     <Plus className="h-3 w-3" />
-                    <span>Follow</span>
+                    <span>{t("widgets.follow", "Follow")}</span>
                   </>
                 )}
               </button>

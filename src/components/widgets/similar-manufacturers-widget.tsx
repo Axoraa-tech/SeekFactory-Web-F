@@ -38,7 +38,7 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
         <div className="mb-3.5 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-slate-900">Explore Similar Profiles</h2>
-            <p className="text-[11px] text-slate-500 font-medium">Verified OEM & machinery suppliers</p>
+            <p className="text-[11px] text-slate-500 font-medium">Verified OEM & machinery manufacturers</p>
           </div>
           <Link
             href="/explore"

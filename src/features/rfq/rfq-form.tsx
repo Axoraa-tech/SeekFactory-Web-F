@@ -68,7 +68,7 @@ export function RfqForm({ categories }: Props) {
 
   if (status === "sent") {
     return (
-      <Card className="p-6 sm:p-8 border-emerald-200/90 bg-gradient-to-br from-emerald-50/60 via-white to-blue-50/40 shadow-sm text-center space-y-4">
+      <Card className="w-full rounded-2xl p-6 sm:p-8 border-emerald-200/90 bg-gradient-to-br from-emerald-50/60 via-white to-blue-50/40 shadow-xs text-center space-y-4">
         <div className="h-14 w-14 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
           <CheckCircle2 className="h-8 w-8" />
         </div>
@@ -81,7 +81,7 @@ export function RfqForm({ categories }: Props) {
             Request for Quotation Live!
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-            Your RFQ reference is <strong className="font-mono text-brand-blue">{referenceId}</strong>. Verified OEM suppliers matching your category will start providing quotes within 4 hours.
+            Your RFQ reference is <strong className="font-mono text-brand-blue">{referenceId}</strong>. Verified OEM manufacturers matching your category will start providing quotes within 4 hours.
           </p>
         </div>
 
@@ -125,7 +125,7 @@ export function RfqForm({ categories }: Props) {
   }
 
   return (
-    <Card className="p-6 sm:p-7 border-slate-200/90 shadow-2xs">
+    <Card className="w-full rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-xs">
       <div className="mb-6 pb-4 border-b border-slate-100 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
@@ -156,20 +156,20 @@ export function RfqForm({ categories }: Props) {
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
               placeholder="e.g. 5-Axis CNC Aluminum Machining"
-              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Industrial Category
+              Machinery Category
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors cursor-pointer"
             >
-              <option value="">All Industrial Categories</option>
+              <option value="">All Machinery Categories</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.name}>
                   {c.name}
@@ -180,7 +180,7 @@ export function RfqForm({ categories }: Props) {
         </div>
 
         {/* Quantity, Unit & Target Price */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Order Quantity *
@@ -191,7 +191,7 @@ export function RfqForm({ categories }: Props) {
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors"
             />
           </div>
 
@@ -202,7 +202,7 @@ export function RfqForm({ categories }: Props) {
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors cursor-pointer"
             >
               <option value="Pieces">Pieces</option>
               <option value="Sets">Sets</option>
@@ -220,7 +220,7 @@ export function RfqForm({ categories }: Props) {
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-16 h-10 rounded-xl border border-slate-200 bg-white px-1 text-xs outline-none focus:border-brand-blue"
+                className="w-18 h-10 rounded-xl border border-slate-200 bg-white px-1.5 text-xs outline-none focus:border-brand-blue cursor-pointer shrink-0 transition-colors"
               >
                 <option value="INR">₹ INR</option>
                 <option value="USD">$ USD</option>
@@ -232,7 +232,7 @@ export function RfqForm({ categories }: Props) {
                 value={targetPrice}
                 onChange={(e) => setTargetPrice(e.target.value)}
                 placeholder="e.g. 1250"
-                className="flex-1 h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                className="min-w-0 flex-1 h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors"
               />
             </div>
           </div>
@@ -244,7 +244,7 @@ export function RfqForm({ categories }: Props) {
             <select
               value={incoterm}
               onChange={(e) => setIncoterm(e.target.value)}
-              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue cursor-pointer transition-colors"
             >
               <option value="FOB">FOB (Free on Board)</option>
               <option value="CIF">CIF (Cost, Insurance & Freight)</option>
