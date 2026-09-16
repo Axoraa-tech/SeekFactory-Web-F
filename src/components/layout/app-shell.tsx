@@ -5,6 +5,7 @@ import { RightAside } from "@/components/layout/right-aside";
 import { TopNav } from "@/components/layout/top-nav";
 import { BackToTop } from "@/components/ui/back-to-top";
 import { TimedAuthPrompt } from "@/features/auth/timed-auth-prompt";
+import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
 import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Conversation } from "@/entities/message";
@@ -42,7 +43,12 @@ export function AppShell({
         messageCount={messageCount}
         notificationCount={notificationCount}
       />
-      <div className="mx-auto flex max-w-[1440px] gap-5 px-4 py-5 lg:px-6">
+      {categories && categories.length > 0 ? (
+        <div className="mx-auto max-w-[1440px] px-4 pt-1.5 lg:px-6">
+          <DynamicCategoryNav categories={categories} forYouHref="/" sticky={false} />
+        </div>
+      ) : null}
+      <div className="mx-auto flex max-w-[1440px] gap-5 px-4 pt-3 pb-4 lg:px-6">
         <LeftSidebar
           categories={categories}
           manufacturers={manufacturers}

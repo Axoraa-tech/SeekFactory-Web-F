@@ -32,49 +32,6 @@ export function ReelCard({
   variantIndex = 0,
   viewMode = "landscape",
 }: ReelCardProps) {
-  // If the reel has 3 or more products, render the Instagram-style products showcase
-  if (products.length >= 3 || reel.productIds.length >= 3) {
-    return (
-      <VariantInstagramProductReel
-        reel={reel}
-        manufacturer={manufacturer}
-        productSlug={productSlug}
-        products={products}
-        viewMode={viewMode}
-      />
-    );
-  }
-
-  if (viewMode === "vertical") {
-    const variant = variantIndex % 3;
-    if (variant === 0) {
-      return (
-        <VariantVerticalSplitStudio
-          reel={reel}
-          manufacturer={manufacturer}
-          productSlug={productSlug}
-        />
-      );
-    }
-    if (variant === 1) {
-      return (
-        <VariantVerticalCatalogSplit
-          reel={reel}
-          manufacturer={manufacturer}
-          productSlug={productSlug}
-        />
-      );
-    }
-    return (
-      <VariantVerticalShopReel
-        reel={reel}
-        manufacturer={manufacturer}
-        productSlug={productSlug}
-      />
-    );
-  }
-
-  // Landscape remains B2b showcase
   return (
     <VariantB2bShowcase
       reel={reel}

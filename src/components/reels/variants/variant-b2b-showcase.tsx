@@ -31,7 +31,6 @@ import { formatCount, formatDuration } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
-import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   reel: Reel;
@@ -43,7 +42,6 @@ type Props = {
  * VARIANT 3: B2B Industrial Showcase & Technical Spec Sheet (Industrial Segmented 5-Button Bar)
  */
 export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
-  const { t, translateCountry, translateReelTitle, translateReelDescription } = useRegionalSettings();
   const [following, setFollowing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -87,6 +85,20 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
     setIsMuted,
     pingControls,
   });
+
+  const handleMouseEnter = useCallback(() => {
+    pingControls();
+    if (videoRef.current) {
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  }, [pingControls, setIsPlaying]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [setIsPlaying]);
 
   const handleSeek = useCallback(
     (newTimeSec: number) => {
@@ -146,15 +158,15 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1 font-bold text-amber-400">
               <Award className="h-3.5 w-3.5" />
-              {t("feed.verifiedOem", "Verified OEM Manufacturer")}
+              Verified OEM Manufacturer
             </span>
             <span className="text-slate-400">•</span>
-            <span className="text-slate-300 font-medium hidden sm:inline">{t("feed.iso9001", "ISO 9001 Audited")}</span>
+            <span className="text-slate-300 font-medium hidden sm:inline">ISO 9001 Audited</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
               <ShieldCheck className="h-3.5 w-3.5" />
-              {t("feed.verifiedFactory", "Verified Factory")}
+              Verified Factory
             </span>
           </div>
         </div>
@@ -181,7 +193,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
                     {manufacturer.verified ? <VerifiedBadge className="h-4 w-4" /> : null}
                   </div>
                   <p className="text-xs text-ink-muted mt-0.5">
-                    {translateCountry(manufacturer.country)} • {formatCount(reel.views)} {t("feed.views", "views")}
+                    {manufacturer.country} • {formatCount(reel.views)} views
                   </p>
                 </div>
               </Link>
@@ -197,14 +209,14 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
                       : "border-brand-blue/30 bg-brand-blue-soft text-brand-blue hover:bg-brand-blue hover:text-white"
                   )}
                 >
-                  {following ? t("widgets.following", "Following") : t("widgets.follow", "+ Follow")}
+                  {following ? "Following" : "Follow"}
                 </button>
                 <Link
                   href="/rfq/new"
                   className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
                 >
                   <Send className="h-3 w-3" />
-                  <span>{t("feed.sendRfq", "Send RFQ")}</span>
+                  <span>Send RFQ</span>
                 </Link>
               </div>
             </div>
@@ -212,14 +224,16 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
 
           {/* Title & Description */}
           <div>
-            <h3 className="text-base font-bold text-ink leading-snug">{translateReelTitle(reel.title)}</h3>
-            <p className="text-xs sm:text-sm text-neutral-600 mt-0.5 leading-relaxed">{translateReelDescription(reel.description)}</p>
+            <h3 className="text-base font-bold text-ink leading-snug">{reel.title}</h3>
+            <p className="text-xs sm:text-sm text-neutral-600 mt-0.5 leading-relaxed">{reel.description}</p>
           </div>
 
           {/* Video Player */}
           <div
             ref={videoWrapperRef}
             onMouseMove={pingControls}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             onClick={handleTogglePlay}
             className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-black cursor-pointer shadow-sm group select-none"
           >
@@ -326,16 +340,16 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
               <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
                 <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
                   <Clock className="h-3 w-3 text-brand-blue" />
-                  <span>{t("feed.leadTime", "LEAD TIME")}</span>
+                  <span>LEAD TIME</span>
                 </div>
-                <p className="font-bold text-neutral-800 mt-0.5 text-xs">{t("feed.leadTimeVal", "15-20 Days")}</p>
+                <p className="font-bold text-neutral-800 mt-0.5 text-xs">15-20 Days</p>
               </div>
               <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
                 <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
                   <FileSpreadsheet className="h-3 w-3 text-brand-blue" />
-                  <span>{t("feed.customization", "CUSTOMIZATION")}</span>
+                  <span>CUSTOMIZATION</span>
                 </div>
-                <p className="font-bold text-neutral-800 mt-0.5 text-xs">{t("feed.customizationVal", "OEM & ODM")}</p>
+                <p className="font-bold text-neutral-800 mt-0.5 text-xs">OEM & ODM</p>
               </div>
             </div>
           </SupplierLockOverlay>
@@ -415,7 +429,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
               )}
             >
               <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-brand-blue")} />
-              <span className="font-medium text-[11px]">{saved ? t("feed.saved", "Saved") : t("feed.save", "Save")}</span>
+              <span className="font-medium text-[11px]">{saved ? "Saved" : "Save"}</span>
             </button>
           </div>
         </div>
