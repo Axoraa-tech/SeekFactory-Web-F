@@ -66,48 +66,13 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Dynamic Header Badge for Dual Video Tracks */}
-      <div className="glass-panel-liquid px-4 py-3 rounded-2xl flex items-center justify-between border border-slate-200/90 shadow-2xs">
-        <div className="flex items-center gap-2.5">
-          <Sparkles className="h-4 w-4 text-brand-blue" />
-          <span className="text-xs font-bold text-slate-800">
-            Dual Video Seeks — Independent Vertical Tracks
-          </span>
-        </div>
-        <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline">
-          Scroll Left or Right column individually
-        </span>
-      </div>
-
       {/* 2 Independent Vertical Scroll Columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 items-start">
         {/* COLUMN 1: LEFT TRACK */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-2xs">
-            <span>Track A ({leftItems.length} Seeks)</span>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => scrollTrack("left", "up")}
-                className="p-1 rounded hover:bg-slate-800 text-slate-300 hover:text-white transition"
-                title="Scroll Column A Up"
-              >
-                <ChevronUp className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollTrack("left", "down")}
-                className="p-1 rounded hover:bg-slate-800 text-slate-300 hover:text-white transition"
-                title="Scroll Column A Down"
-              >
-                <ChevronDown className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
           <div
             ref={trackLeftRef}
-            className="h-[640px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+            className="h-[calc(100vh-210px)] min-h-[680px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
           >
             {leftItems.map((item, index) => (
               <div
@@ -130,31 +95,9 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
 
         {/* COLUMN 2: RIGHT TRACK */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-2xs">
-            <span>Track B ({finalRightItems.length} Seeks)</span>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => scrollTrack("right", "up")}
-                className="p-1 rounded hover:bg-slate-800 text-slate-300 hover:text-white transition"
-                title="Scroll Column B Up"
-              >
-                <ChevronUp className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollTrack("right", "down")}
-                className="p-1 rounded hover:bg-slate-800 text-slate-300 hover:text-white transition"
-                title="Scroll Column B Down"
-              >
-                <ChevronDown className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
           <div
             ref={trackRightRef}
-            className="h-[640px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+            className="h-[calc(100vh-210px)] min-h-[680px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
           >
             {finalRightItems.map((item, index) => (
               <div

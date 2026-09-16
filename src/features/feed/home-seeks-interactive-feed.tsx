@@ -7,11 +7,10 @@ import {
   Search,
   X,
   Check,
-  Monitor,
-  Smartphone,
   SlidersHorizontal,
 } from "lucide-react";
 import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
+import { ReelsFeed } from "@/components/reels/reels-feed";
 import { ReelCard } from "@/components/reels/reel-card";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { cn } from "@/shared/lib/cn";
@@ -298,17 +297,7 @@ export function HomeSeeksInteractiveFeed({
 
   return (
     <section className="space-y-3.5">
-      {/* 1. Category Navigation Carousel */}
-      <DynamicCategoryNav
-        categories={roots}
-        selectedCategorySlug={expandedCategorySlug}
-        forYouHref="/"
-        onCategorySelect={handleCategorySelect}
-        onForYouClick={handleForYouClick}
-        sticky={false}
-      />
-
-      {/* 2. Subcategories Panel (Matches Explore page style and shows all subcategories) */}
+      {/* Subcategories Panel (Matches Explore page style and shows all subcategories) */}
       {expandedRoot && subcategories.length > 0 && (
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs space-y-3 animate-in fade-in-50 slide-in-from-top-2 duration-200">
           {/* Header Row */}
@@ -427,45 +416,6 @@ export function HomeSeeksInteractiveFeed({
             </button>
           </div>
         </div>
-
-        {/* Right: Landscape vs Vertical switcher */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 border border-slate-200 shadow-2xs shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              setViewMode("landscape");
-              updateUrl(expandedCategorySlug, selectedSubcategorySlug, tab, "landscape", searchQuery);
-            }}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer",
-              viewMode === "landscape"
-                ? "bg-white text-brand-blue shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
-            title="Landscape B2B Showcase View (16:9)"
-          >
-            <Monitor className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{t("feed.landscape", "Landscape")}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setViewMode("vertical");
-              updateUrl(expandedCategorySlug, selectedSubcategorySlug, tab, "vertical", searchQuery);
-            }}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer",
-              viewMode === "vertical"
-                ? "bg-white text-[#FF3D00] shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
-            title="Vertical E-Commerce Seek View (9:16)"
-          >
-            <Smartphone className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{t("feed.vertical", "Vertical")}</span>
-          </button>
-        </div>
       </div>
 
       {/* 4. Active Filter Indicator Bar (shown when subcategory or search query is applied) */}
@@ -521,48 +471,8 @@ export function HomeSeeksInteractiveFeed({
         </div>
       )}
 
-      {/* 5. Reels Feed */}
-      {filteredItems.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center space-y-3 shadow-xs">
-          <div className="flex h-12 w-12 mx-auto items-center justify-center rounded-full bg-slate-100 text-slate-400">
-            <Search className="h-6 w-6" />
-          </div>
-          <h3 className="text-sm font-bold text-slate-800">
-            {t("feed.noSeeksFound", "No Seeks match this filter")}
-          </h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            {selectedSub
-              ? `No specific video Seeks tagged under "${translateCategory(selectedSub.name)}" yet.`
-              : "Try adjusting your search query or exploring other machinery categories."}
-          </p>
-          <button
-            type="button"
-            onClick={handleClearFilter}
-            className="inline-flex h-8 items-center rounded-full bg-brand-blue px-4 text-xs font-bold text-white hover:bg-brand-blue-dark transition cursor-pointer shadow-xs"
-          >
-            {t("feed.showAllSeeks", "Show All Seeks")}
-          </button>
-        </div>
-      ) : (
-        <div
-          className={cn(
-            "space-y-6",
-            viewMode === "vertical" && "max-w-[760px] lg:max-w-[820px] mx-auto"
-          )}
-        >
-          {filteredItems.map((item, index) => (
-            <ReelCard
-              key={item.reel.id}
-              reel={item.reel}
-              manufacturer={item.manufacturer}
-              productSlug={item.primaryProductSlug}
-              products={item.products}
-              variantIndex={index}
-              viewMode={viewMode}
-            />
-          ))}
-        </div>
-      )}
+      {/* Complete Page as Dual Video Feeds */}
+      <ReelsFeed items={filteredItems} />
     </section>
   );
 }
