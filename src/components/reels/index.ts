@@ -10,3 +10,4 @@ export { VariantVerticalSplitStudio } from "./variants/variant-vertical-split-st
 export { VariantVerticalCatalogSplit } from "./variants/variant-vertical-catalog-split";
 export { VariantVerticalShopReel } from "./variants/variant-vertical-shop-reel";
 export { VariantInstagramProductReel } from "./variants/variant-instagram-product-reel";
+export { DualVideoShowcase } from "./dual-video-showcase";

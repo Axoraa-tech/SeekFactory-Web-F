@@ -5,6 +5,8 @@ import "@/styles/globals.css";
 import { brand } from "@/shared/config/brand";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { RegionalSettingsProvider } from "@/shared/i18n/regional-context";
+import { BuyerPlanProvider } from "@/features/subscription";
+import { UpgradePlanModal } from "@/components/modals/upgrade-plan-modal";
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -27,10 +29,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className={`${sans.variable} font-sans antialiased`}>
         <RegionalSettingsProvider>
           <LoadingScreen />
-          {children}
+          <BuyerPlanProvider>
+            {children}
+            <UpgradePlanModal />
+          </BuyerPlanProvider>
         </RegionalSettingsProvider>
       </body>
     </html>
   );
 }
-
