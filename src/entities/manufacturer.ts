@@ -16,4 +16,5 @@ export type Manufacturer = {
   followerCount: number;
   categoryIds: string[];
   chairmanName?: string;
+  websiteUrl?: string;
 };

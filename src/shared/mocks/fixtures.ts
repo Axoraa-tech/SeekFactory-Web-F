@@ -69,6 +69,7 @@ export const manufacturers: Manufacturer[] = [
     followerCount: 12840,
     categoryIds: ["cat-engineering-capital-machinery", "cat-die-casting-machine"],
     chairmanName: "Rajesh Kulkarni",
+    websiteUrl: "https://www.apex-forgings.com",
   },
   {
     id: "mfr-bharat",
@@ -87,6 +88,7 @@ export const manufacturers: Manufacturer[] = [
     description: "Precision CNC tooling, jigs, and fixtures for automotive OEMs and tier-1 manufacturers.",
     followerCount: 6210,
     categoryIds: ["cat-engineering-capital-machinery", "cat-cnc-vmc-machines"],
+    websiteUrl: "https://www.bharatprecisiontools.in",
   },
   {
     id: "mfr-steelforge",
@@ -116,6 +118,7 @@ export const manufacturers: Manufacturer[] = [
       "cat-cnc-plasma-cutting-machine",
     ],
     chairmanName: "Zhang Wei",
+    websiteUrl: "https://www.steelforge-industries.cn",
   },
   {
     id: "mfr-metalcraft",
@@ -134,6 +137,7 @@ export const manufacturers: Manufacturer[] = [
     description: "Sheet metal fabrication, laser cutting, and powder coating for enclosures and machine guards.",
     followerCount: 3890,
     categoryIds: ["cat-engineering-capital-machinery", "cat-cnc-plasma-cutting-machine", "cat-metal-engraving-machine"],
+    websiteUrl: "https://www.metalcraftsolutions.in",
   },
   {
     id: "mfr-ningbo",
@@ -153,6 +157,7 @@ export const manufacturers: Manufacturer[] = [
     followerCount: 9104,
     categoryIds: ["cat-transaportation-machinery", "cat-automobiles-equipments-evs"],
     chairmanName: "Li Ming",
+    websiteUrl: "https://www.kaiyuanfluid.com",
   },
 ];
 
