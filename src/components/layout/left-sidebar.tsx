@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Bell,
-  Compass,
-  Crown,
   Home,
+  Compass,
   MessageCircle,
+  Bell,
   UserRound,
+  Crown,
+  Settings2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { CategoryIcon } from "@/components/ui/category-icon";
 import { VerifiedManufacturers } from "@/components/widgets/verified-manufacturers";
 import { TrendingProducts } from "@/components/widgets/trending-products";
 import { RecentMessages } from "@/components/widgets/recent-messages";
@@ -21,6 +23,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { Conversation } from "@/entities/message";
 import { cn } from "@/shared/lib/cn";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   messageCount: number;
@@ -31,12 +34,12 @@ type Props = {
   categories?: Category[];
 };
 
-const nav = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/explore", label: "Explore", icon: Compass },
-  { href: "/messages", label: "Messages", icon: MessageCircle, badgeKey: "messages" as const },
-  { href: "/notifications", label: "Notifications", icon: Bell, badgeKey: "notifications" as const },
-  { href: "/profile", label: "Profile", icon: UserRound },
+const navItems = [
+  { href: "/", key: "nav.home", defaultLabel: "Home", icon: Home },
+  { href: "/explore", key: "nav.explore", defaultLabel: "Explore", icon: Compass },
+  { href: "/messages", key: "nav.messages", defaultLabel: "Messages", icon: MessageCircle, badgeKey: "messages" as const },
+  { href: "/notifications", key: "nav.notifications", defaultLabel: "Notifications", icon: Bell, badgeKey: "notifications" as const },
+  { href: "/profile", key: "nav.profile", defaultLabel: "Profile", icon: UserRound },
 ];
 
 export function LeftSidebar({
@@ -48,6 +51,7 @@ export function LeftSidebar({
   categories = [],
 }: Props) {
   const pathname = usePathname();
+  const { t, translateCategory } = useRegionalSettings();
   const counts = { messages: messageCount, notifications: notificationCount };
 
   return (
@@ -55,7 +59,7 @@ export function LeftSidebar({
       <div className="sticky top-[88px] h-[calc(100vh-104px)] overflow-y-auto space-y-4 pr-1">
         <Card className="overflow-hidden p-2">
           <nav className="flex flex-col">
-            {nav.map((item) => {
+            {navItems.map((item) => {
               const active = pathname === item.href;
               const Icon = item.icon;
               const badge = item.badgeKey ? counts[item.badgeKey] : 0;
@@ -69,7 +73,7 @@ export function LeftSidebar({
                   )}
                 >
                   <Icon className="h-[18px] w-[18px]" />
-                  {item.label}
+                  {t(item.key, item.defaultLabel)}
                   {badge > 0 ? (
                     <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                       {badge}
@@ -101,15 +105,15 @@ export function LeftSidebar({
           <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange">
             <Crown className="h-4 w-4" />
           </div>
-          <p className="text-sm font-bold">Upgrade to Premium</p>
+          <p className="text-sm font-bold">{t("sidebar.upgradePremium", "Upgrade to Premium")}</p>
           <p className="mt-1 text-xs leading-relaxed text-ink-muted">
-            Unlock advanced features and get priority support
+            {t("sidebar.upgradeDesc", "Unlock advanced features and get priority factory quotes")}
           </p>
           <Link
             href="/profile"
             className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-lg bg-brand-orange text-sm font-semibold text-white"
           >
-            Upgrade Now
+            {t("sidebar.upgradeNow", "Upgrade Now")}
           </Link>
         </Card>
 
@@ -118,5 +122,3 @@ export function LeftSidebar({
     </aside>
   );
 }
-
-

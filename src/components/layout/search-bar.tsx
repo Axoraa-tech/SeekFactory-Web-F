@@ -3,12 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, X, Command } from "lucide-react";
 import type { Category } from "@/entities/category";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type SearchBarProps = {
   categories?: Category[];
 };
 
 export function SearchBar({ categories = [] }: SearchBarProps) {
+  const { t, translateCategory } = useRegionalSettings();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -51,7 +53,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="Search products, verified factories, categories..."
+          placeholder={t("nav.searchPlaceholder", "Search products, verified factories, categories...")}
           className="min-w-0 flex-1 bg-transparent px-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none"
         />
 
@@ -73,35 +75,31 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
         <button
           type="submit"
           className="ml-2 flex h-7 px-3 items-center justify-center gap-1 rounded-full bg-brand-blue text-xs font-semibold text-white transition-all hover:bg-brand-blue-dark active:scale-95 shadow-xs"
-          aria-label="Search"
         >
-          <span>Search</span>
+          <span>{t("nav.search", "Search")}</span>
         </button>
       </form>
 
-      {/* Category Suggestions Dropdown on Focus */}
-      {isFocused && categories.length > 0 && (
-        <div
-          onMouseDown={(e) => e.preventDefault()}
-          className="hidden md:block absolute left-0 right-0 top-12 z-50 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-in fade-in duration-150"
-        >
-          <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            {query.trim() ? "Matching Categories" : "Popular Categories"}
-          </div>
+      {/* Real-time Category Search Suggestions */}
+      {isFocused && query.trim().length > 0 && (
+        <div className="absolute left-0 right-0 top-12 z-50 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-1 duration-150">
+          <p className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            Matching Categories
+          </p>
           <div className="space-y-0.5">
-            {(query.trim()
-              ? categories.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
-              : categories.slice(0, 5)
-            ).map((cat) => (
-              <a
-                key={cat.id}
-                href={`/explore?category=${cat.id}`}
-                className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
-              >
-                <span>{cat.name}</span>
-                <span className="text-[10px] text-slate-400">{cat.listingCount} listings</span>
-              </a>
-            ))}
+            {categories
+              .filter((c) => c.name.toLowerCase().includes(query.toLowerCase()))
+              .slice(0, 5)
+              .map((cat) => (
+                <a
+                  key={cat.id}
+                  href={`/explore?category=${cat.slug}`}
+                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
+                >
+                  <span>{translateCategory(cat.name)}</span>
+                  <span className="text-[10px] text-slate-400">{cat.listingCount} listings</span>
+                </a>
+              ))}
           </div>
         </div>
       )}
@@ -131,7 +129,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
               name="q"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products & suppliers..."
+              placeholder={t("nav.searchPlaceholder", "Search products & manufacturers...")}
               className="min-w-0 flex-1 bg-transparent px-2 text-sm text-slate-800 outline-none"
               autoFocus
             />
@@ -148,7 +146,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
               type="submit"
               className="flex h-7 px-3 items-center justify-center rounded-full bg-brand-blue text-xs font-semibold text-white ml-1"
             >
-              Search
+              {t("nav.search", "Search")}
             </button>
           </form>
         </div>

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import type { AppNotification } from "@/entities/notification";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   initialNotifications: AppNotification[];
@@ -24,6 +25,7 @@ type Props = {
 type NotificationCategory = "all" | "unread" | "quotes" | "system";
 
 export function InteractiveNotificationsCenter({ initialNotifications }: Props) {
+  const { t } = useRegionalSettings();
   const [notifications, setNotifications] = useState<AppNotification[]>(initialNotifications);
   const [activeTab, setActiveTab] = useState<NotificationCategory>("all");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -103,15 +105,15 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
             <Bell className="h-5 w-5 text-brand-blue" />
-            <span>Notifications Center</span>
+            <span>{t("notifications.title", "Notifications Center")}</span>
             {unreadCount > 0 && (
               <span className="rounded-full bg-brand-orange px-2.5 py-0.5 text-xs font-bold text-white">
-                {unreadCount} Unread
+                {unreadCount} {t("notifications.unread", "Unread")}
               </span>
             )}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Real-time updates on supplier quotations, RFQ responses, and factory audit verifications
+            Real-time updates on manufacturer quotations, RFQ responses, and factory audit verifications
           </p>
         </div>
 
@@ -124,7 +126,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-brand-blue/30 hover:text-brand-blue transition-all active:scale-95 shadow-2xs"
             >
               <CheckCheck className="h-3.5 w-3.5 text-brand-blue" />
-              <span>Mark all read</span>
+              <span>{t("notifications.markAllAsRead", "Mark all read")}</span>
             </button>
           )}
 
@@ -153,7 +155,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <span>All</span>
+          <span>{t("notifications.all", "All")}</span>
           <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[10px] text-slate-600 font-semibold">
             {notifications.length}
           </span>
@@ -169,7 +171,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <span>Unread</span>
+          <span>{t("notifications.unread", "Unread")}</span>
           {unreadCount > 0 && (
             <span className="rounded-full bg-brand-orange px-1.5 py-0.2 text-[10px] text-white font-bold">
               {unreadCount}
@@ -214,7 +216,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
             <div>
               <p className="font-bold text-sm text-slate-800">No notifications in this view</p>
               <p className="text-xs text-slate-500 mt-0.5">
-                {activeTab === "unread" ? "You have caught up with all updates!" : "You will receive updates here as suppliers reply to RFQs."}
+                {activeTab === "unread" ? "You have caught up with all updates!" : "You will receive updates here as manufacturers reply to RFQs."}
               </p>
             </div>
           </div>

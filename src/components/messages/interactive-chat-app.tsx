@@ -141,14 +141,10 @@ export function InteractiveChatApp({ initialThreads }: Props) {
   };
 
   const handleAttachMockFile = () => {
-    if (attachedFile) {
-      setAttachedFile(null);
-    } else {
-      setAttachedFile({
-        name: "Component_CAD_Drawing_v2.dwg",
-        size: "4.2 MB",
-      });
-    }
+    setAttachedFile({
+      name: "RFQ-Technical-Drawing-rev2.dwg",
+      size: "2.4 MB",
+    });
   };
 
   const quickInquiries = [
@@ -165,7 +161,7 @@ export function InteractiveChatApp({ initialThreads }: Props) {
   );
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200/90 bg-white shadow-sm overflow-hidden flex h-[calc(100vh-140px)] min-h-[580px] max-h-[820px]">
+    <div className="w-full rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden flex h-[calc(100vh-140px)] min-h-[580px] max-h-[820px]">
       <ChatThreadList
         threads={threads}
         filteredThreads={filteredThreads}

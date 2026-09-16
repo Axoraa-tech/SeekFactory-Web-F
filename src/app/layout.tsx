@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { brand } from "@/shared/config/brand";
 import { LoadingScreen } from "@/components/ui/loading-screen";
+import { RegionalSettingsProvider } from "@/shared/i18n/regional-context";
 import { BuyerPlanProvider } from "@/features/subscription";
 import { UpgradePlanModal } from "@/components/modals/upgrade-plan-modal";
 
@@ -26,13 +27,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={`${sans.variable} font-sans antialiased`}>
-        <LoadingScreen />
-        <BuyerPlanProvider>
-          {children}
-          <UpgradePlanModal />
-        </BuyerPlanProvider>
+        <RegionalSettingsProvider>
+          <LoadingScreen />
+          <BuyerPlanProvider>
+            {children}
+            <UpgradePlanModal />
+          </BuyerPlanProvider>
+        </RegionalSettingsProvider>
       </body>
     </html>
   );
 }
-

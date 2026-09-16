@@ -115,7 +115,7 @@ export function AuthCard({
             {mode === "join" ? "Join SeekFactory" : "Sign in"}
           </h1>
           <p className="mb-4 sm:mb-5 text-center text-xs sm:text-sm text-ink-muted">
-            {isManufacturer ? "For verified factories and suppliers" : "For industrial buyers worldwide"}
+            {isManufacturer ? "For verified factories and manufacturers" : "For industrial buyers worldwide"}
           </p>
         </>
       )}
