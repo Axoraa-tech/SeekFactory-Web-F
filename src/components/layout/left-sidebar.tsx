@@ -8,19 +8,27 @@ import {
   Crown,
   Home,
   MessageCircle,
-  Settings2,
   UserRound,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { CategoryIcon } from "@/components/ui/category-icon";
+import { VerifiedManufacturers } from "@/components/widgets/verified-manufacturers";
+import { TrendingProducts } from "@/components/widgets/trending-products";
+import { RecentMessages } from "@/components/widgets/recent-messages";
+import { ExploreByCategory } from "@/components/widgets/explore-by-category";
+import { SidebarFooter } from "@/components/layout/sidebar-footer";
 import type { Category } from "@/entities/category";
+import type { Manufacturer } from "@/entities/manufacturer";
+import type { Product } from "@/entities/product";
+import type { Conversation } from "@/entities/message";
 import { cn } from "@/shared/lib/cn";
-import { formatCount } from "@/shared/lib/format";
 
 type Props = {
-  categories: Category[];
   messageCount: number;
   notificationCount: number;
+  manufacturers?: Manufacturer[];
+  products?: Product[];
+  messages?: (Conversation & { manufacturer: Manufacturer })[];
+  categories?: Category[];
 };
 
 const nav = [
@@ -31,12 +39,19 @@ const nav = [
   { href: "/profile", label: "Profile", icon: UserRound },
 ];
 
-export function LeftSidebar({ categories, messageCount, notificationCount }: Props) {
+export function LeftSidebar({
+  messageCount,
+  notificationCount,
+  manufacturers = [],
+  products = [],
+  messages = [],
+  categories = [],
+}: Props) {
   const pathname = usePathname();
   const counts = { messages: messageCount, notifications: notificationCount };
 
   return (
-    <aside className="hidden w-[260px] shrink-0 lg:block">
+    <aside className="hidden w-[280px] shrink-0 lg:block">
       <div className="sticky top-[88px] h-[calc(100vh-104px)] overflow-y-auto space-y-4 pr-1">
         <Card className="overflow-hidden p-2">
           <nav className="flex flex-col">
@@ -66,35 +81,21 @@ export function LeftSidebar({ categories, messageCount, notificationCount }: Pro
           </nav>
         </Card>
 
-        <Card className="p-3">
-          <div className="mb-2 flex items-center justify-between px-1">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-ink-faint">
-              Product Categories
-            </p>
-            <Settings2 className="h-4 w-4 text-ink-faint" />
-          </div>
-          <ul className="max-h-[420px] space-y-0.5 overflow-y-auto pr-1">
-            {categories.map((category) => (
-              <li key={category.id}>
-                <Link
-                  href={`/explore?category=${category.slug}`}
-                  className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-ink hover:bg-canvas"
-                >
-                  <CategoryIcon icon={category.icon} className="h-4 w-4 shrink-0 text-ink-muted" />
-                  <span className="flex-1 truncate">{category.name}</span>
-                  <span className="text-xs text-ink-faint">{formatCount(category.listingCount)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <Link
-            href="/explore"
-            className="mt-1 flex items-center justify-between px-2 py-2 text-sm font-semibold text-brand-blue"
-          >
-            All Categories
-            <span aria-hidden>›</span>
-          </Link>
-        </Card>
+        {manufacturers.length > 0 ? (
+          <VerifiedManufacturers manufacturers={manufacturers} />
+        ) : null}
+
+        {products.length > 0 ? (
+          <TrendingProducts products={products} />
+        ) : null}
+
+        {messages.length > 0 ? (
+          <RecentMessages messages={messages} />
+        ) : null}
+
+        {categories.length > 0 ? (
+          <ExploreByCategory categories={categories} />
+        ) : null}
 
         <Card className="overflow-hidden border-orange-100 bg-gradient-to-b from-brand-orange-soft to-white p-4">
           <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange">
@@ -111,7 +112,11 @@ export function LeftSidebar({ categories, messageCount, notificationCount }: Pro
             Upgrade Now
           </Link>
         </Card>
+
+        <SidebarFooter />
       </div>
     </aside>
   );
 }
+
+

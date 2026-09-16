@@ -16,6 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -285,43 +286,45 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
       <div className="w-full md:w-[44%] p-4 flex flex-col justify-between bg-white border-t md:border-t-0 md:border-l border-slate-100">
         {/* Top: Factory Profile Header */}
         <div className="pb-3 border-b border-slate-100 shrink-0">
-          <div className="flex items-center justify-between gap-2">
-            <Link
-              href={`/manufacturers/${manufacturer.slug}`}
-              className="flex items-center gap-2.5 min-w-0 group"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={manufacturer.logoUrl}
-                alt={manufacturer.name}
-                className="h-9 w-9 rounded-xl border border-slate-200 object-cover shrink-0 shadow-2xs"
-              />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1">
-                  <p className="font-bold text-xs text-slate-900 truncate group-hover:text-brand-blue transition-colors">
-                    {manufacturer.name}
+          <SupplierLockOverlay badgeLabel="Verified Supplier Locked">
+            <div className="flex items-center justify-between gap-2">
+              <Link
+                href={`/manufacturers/${manufacturer.slug}`}
+                className="flex items-center gap-2.5 min-w-0 group"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={manufacturer.logoUrl}
+                  alt={manufacturer.name}
+                  className="h-9 w-9 rounded-xl border border-slate-200 object-cover shrink-0 shadow-2xs"
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    <p className="font-bold text-xs text-slate-900 truncate group-hover:text-brand-blue transition-colors">
+                      {manufacturer.name}
+                    </p>
+                    {manufacturer.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 truncate">
+                    {manufacturer.location}, {manufacturer.country}
                   </p>
-                  {manufacturer.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
                 </div>
-                <p className="text-[11px] text-slate-500 truncate">
-                  {manufacturer.location}, {manufacturer.country}
-                </p>
-              </div>
-            </Link>
+              </Link>
 
-            <button
-              type="button"
-              onClick={() => setFollowing((v) => !v)}
-              className={cn(
-                "shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all",
-                following
-                  ? "bg-slate-100 text-slate-700"
-                  : "bg-brand-blue text-white hover:bg-brand-blue-dark active:scale-95"
-              )}
-            >
-              {following ? "Following" : "+ Follow"}
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setFollowing((v) => !v)}
+                className={cn(
+                  "shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all",
+                  following
+                    ? "bg-slate-100 text-slate-700"
+                    : "bg-brand-blue text-white hover:bg-brand-blue-dark active:scale-95"
+                )}
+              >
+                {following ? "Following" : "+ Follow"}
+              </button>
+            </div>
+          </SupplierLockOverlay>
 
           {/* Product Title & Price Bar */}
           <div className="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100">

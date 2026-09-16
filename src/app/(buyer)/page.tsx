@@ -1,3 +1,4 @@
+import { DualVideoShowcase } from "@/components/reels/dual-video-showcase";
 import { FeedTabs } from "@/components/reels/feed-tabs";
 import { ReelsFeed } from "@/components/reels/reels-feed";
 import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
@@ -29,8 +30,10 @@ export default async function HomePage({ searchParams }: Props) {
         sticky={false}
       />
       <FeedTabs tab={tab} viewMode={viewMode} />
+      <DualVideoShowcase />
       <ReelsFeed items={items} viewMode={viewMode} />
     </section>
   );
 }
+
 

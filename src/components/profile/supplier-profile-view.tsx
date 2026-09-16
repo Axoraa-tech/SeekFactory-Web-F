@@ -20,12 +20,19 @@ import {
   FileCheck,
   Star,
   CheckCircle2,
+  Lock,
+  Sparkles,
+  ArrowRight,
+  ArrowLeft,
+  PhoneCall,
+  FileCheck2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { VariantB2bShowcase } from "@/components/reels/variants/variant-b2b-showcase";
 import { SimilarManufacturersWidget } from "@/components/widgets/similar-manufacturers-widget";
+import { useBuyerPlan } from "@/features/subscription";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
@@ -48,6 +55,7 @@ export function SupplierProfileView({
   const [activeTab, setActiveTab] = useState<"products" | "videos" | "about">("products");
   const [isFollowing, setIsFollowing] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const { isSupplierLocked, upgradeTier, openUpgradeModal } = useBuyerPlan();
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -56,6 +64,110 @@ export function SupplierProfileView({
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
+
+  // If the buyer is on the Free tier, block full profile access and prompt to upgrade
+  if (isSupplierLocked) {
+    return (
+      <div className="relative min-h-[75vh] w-full rounded-3xl overflow-hidden border border-slate-200/90 bg-white shadow-xl">
+        {/* Blurred preview of the manufacturer behind frosted glass */}
+        <div className="absolute inset-0 filter blur-[12px] opacity-35 select-none pointer-events-none scale-105">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={manufacturer.coverUrl} alt="" className="w-full h-48 sm:h-64 object-cover" />
+          <div className="p-8 space-y-4 bg-slate-50">
+            <div className="flex items-center gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={manufacturer.logoUrl} alt="" className="w-20 h-20 rounded-2xl" />
+              <div>
+                <h1 className="text-2xl font-black">{manufacturer.name}</h1>
+                <p className="text-sm">{manufacturer.location}, {manufacturer.country}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Frosted glass paywall modal/card positioned directly in center */}
+        <div className="relative z-10 flex min-h-[75vh] w-full flex-col items-center justify-center p-4 sm:p-8 bg-slate-900/30 backdrop-blur-md">
+          <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-white/80 bg-white/95 p-6 sm:p-8 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 text-center">
+            {/* Lock Badge */}
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 border border-amber-500/20 shadow-xs mb-4">
+              <Lock className="h-7 w-7" />
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 border border-blue-200/60 mb-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+              <span>Verified Supplier Protected</span>
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+              Direct Supplier Profile Access Locked
+            </h2>
+
+            <p className="mt-2 text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+              Full plant inspection reports, machine tooling lines, verified ISO certifications, and direct contact details for <strong className="text-slate-900 font-bold">{manufacturer.name}</strong> are reserved for verified Pro buyers.
+            </p>
+
+            {/* 3 Value Pillars */}
+            <div className="my-6 grid grid-cols-3 gap-2 sm:gap-3 text-left">
+              <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-3">
+                <div className="h-6 w-6 rounded-lg bg-blue-600/10 text-brand-blue flex items-center justify-center mb-1.5">
+                  <Building2 className="h-3.5 w-3.5" />
+                </div>
+                <p className="text-[11px] font-bold text-slate-900">Plant Audits</p>
+                <p className="text-[10px] text-slate-500 leading-tight">ISO 9001, plant size & machines</p>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3">
+                <div className="h-6 w-6 rounded-lg bg-emerald-600/10 text-emerald-600 flex items-center justify-center mb-1.5">
+                  <PhoneCall className="h-3.5 w-3.5" />
+                </div>
+                <p className="text-[11px] font-bold text-slate-900">Direct Contact</p>
+                <p className="text-[10px] text-slate-500 leading-tight">Verified WhatsApp & phone</p>
+              </div>
+
+              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-3">
+                <div className="h-6 w-6 rounded-lg bg-indigo-600/10 text-indigo-600 flex items-center justify-center mb-1.5">
+                  <FileCheck2 className="h-3.5 w-3.5" />
+                </div>
+                <p className="text-[11px] font-bold text-slate-900">Priority RFQ</p>
+                <p className="text-[10px] text-slate-500 leading-tight">&lt; 4h quote response time</p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={() => upgradeTier("pro")}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-700 transition active:scale-[0.99] cursor-pointer"
+              >
+                <Sparkles className="h-4 w-4 fill-amber-300 text-amber-300" />
+                <span>Upgrade to Pro • Unlock Full Profile (₹3,999/mo)</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+
+              <div className="flex items-center justify-center gap-4 text-xs font-semibold text-slate-600 pt-1">
+                <button
+                  type="button"
+                  onClick={openUpgradeModal}
+                  className="text-brand-blue hover:underline cursor-pointer"
+                >
+                  Compare All Sourcing Plans
+                </button>
+                <span>•</span>
+                <Link
+                  href="/"
+                  className="text-slate-500 hover:text-slate-900 transition flex items-center gap-1"
+                >
+                  <ArrowLeft className="h-3 w-3" />
+                  <span>Back to Video Feed</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

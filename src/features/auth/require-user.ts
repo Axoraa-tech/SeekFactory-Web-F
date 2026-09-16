@@ -14,9 +14,9 @@ export const GUEST_BUYER_FALLBACK: BuyerProfile = {
 
 export async function requireUser(_nextPath?: string): Promise<BuyerProfile> {
   const user = await getApi().session.getCurrentUser();
-  if (!user) {
-    return GUEST_BUYER_FALLBACK;
-  }
-  return user;
+  return user ?? GUEST_BUYER_FALLBACK;
 }
+
+
+
 

@@ -18,6 +18,7 @@ import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { cn } from "@/shared/lib/cn";
 import { formatCount } from "@/shared/lib/format";
+import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
 
@@ -214,21 +215,23 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
             </button>
           </div>
 
-          {/* Top Factory Pill Badge */}
+          {/* Top Factory Pill Badge with SupplierLockOverlay */}
           <div className="absolute top-3 left-3 z-20 pointer-events-auto">
-            <Link
-              href={`/manufacturers/${manufacturer.slug}`}
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-2 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white hover:bg-black/80 transition-colors border border-white/10 shadow-xs"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={manufacturer.logoUrl}
-                alt={manufacturer.name}
-                className="h-5 w-5 rounded-full object-cover"
-              />
-              <span className="truncate max-w-[170px]">{manufacturer.name}</span>
-            </Link>
+            <SupplierLockOverlay badgeLabel="Verified Supplier" compact>
+              <Link
+                href={`/manufacturers/${manufacturer.slug}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-2 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white hover:bg-black/80 transition-colors border border-white/10 shadow-xs"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={manufacturer.logoUrl}
+                  alt={manufacturer.name}
+                  className="h-5 w-5 rounded-full object-cover"
+                />
+                <span className="truncate max-w-[170px]">{manufacturer.name}</span>
+              </Link>
+            </SupplierLockOverlay>
           </div>
 
           {/* Video Scrubber (Docked right above the related search bar) */}

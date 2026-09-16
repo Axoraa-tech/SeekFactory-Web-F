@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Monitor, Smartphone } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
+
+
+
+
 import type { FeedTab } from "@/entities/reel";
 
 type Props = {
@@ -67,6 +70,11 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
           </div>
         </div>
 
+        {/*
+        ========================================================================
+        LEGACY_SINGLE_VIEW_MODE_TOGGLES_REVERT:
+        Uncomment this block if your client asks to restore single-video landscape/vertical view toggles.
+        ========================================================================
         <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 border border-slate-200 shadow-2xs">
           <Link
             href={`/?tab=${tab}&view=landscape`}
@@ -96,7 +104,10 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
             <span className="hidden sm:inline">Vertical</span>
           </Link>
         </div>
+        ========================================================================
+        */}
       </div>
+
     </>
   );
 }

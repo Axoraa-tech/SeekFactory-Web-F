@@ -32,7 +32,7 @@ export function AppShell({
   messageCount,
   notificationCount,
   children,
-  showRight = true,
+  showRight = false,
 }: Props) {
   return (
     <div className="min-h-screen bg-canvas pb-16 lg:pb-0">
@@ -45,6 +45,9 @@ export function AppShell({
       <div className="mx-auto flex max-w-[1440px] gap-5 px-4 py-5 lg:px-6">
         <LeftSidebar
           categories={categories}
+          manufacturers={manufacturers}
+          products={products}
+          messages={messages}
           messageCount={messageCount}
           notificationCount={notificationCount}
         />

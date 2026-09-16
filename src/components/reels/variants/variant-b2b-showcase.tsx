@@ -25,6 +25,7 @@ import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
+import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { formatCount, formatDuration } from "@/shared/lib/format";
 
 import { cn } from "@/shared/lib/cn";
@@ -157,53 +158,55 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
         </div>
 
         <div className="p-3.5 sm:p-4 pb-2 sm:pb-2.5 space-y-2.5">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <Link
-              href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
-              className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={manufacturer.logoUrl}
-                alt=""
-                className="h-10 w-10 rounded-lg border border-neutral-200 object-cover shadow-xs flex-shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <p className="text-sm font-bold text-ink hover:text-brand-blue transition">
-                    {manufacturer.name}
-                  </p>
-                  {manufacturer.verified ? <VerifiedBadge className="h-4 w-4" /> : null}
-                </div>
-                <p className="text-xs text-ink-muted mt-0.5">
-                  {manufacturer.country} • {formatCount(reel.views)} views
-                </p>
-              </div>
-            </Link>
-
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => setFollowing((v) => !v)}
-                className={cn(
-                  "rounded-lg px-3 py-1 text-xs font-semibold transition border",
-                  following
-                    ? "border-neutral-200 bg-neutral-100 text-neutral-700"
-                    : "border-brand-blue/30 bg-brand-blue-soft text-brand-blue hover:bg-brand-blue hover:text-white"
-                )}
-              >
-                {following ? "Following" : "Follow"}
-              </button>
+          {/* Header with SupplierLockOverlay */}
+          <SupplierLockOverlay badgeLabel="Verified Supplier Locked">
+            <div className="flex items-center justify-between">
               <Link
-                href="/rfq/new"
-                className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
+                href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+                className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
               >
-                <Send className="h-3 w-3" />
-                <span>Send RFQ</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={manufacturer.logoUrl}
+                  alt=""
+                  className="h-10 w-10 rounded-lg border border-neutral-200 object-cover shadow-xs flex-shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-sm font-bold text-ink hover:text-brand-blue transition">
+                      {manufacturer.name}
+                    </p>
+                    {manufacturer.verified ? <VerifiedBadge className="h-4 w-4" /> : null}
+                  </div>
+                  <p className="text-xs text-ink-muted mt-0.5">
+                    {manufacturer.country} • {formatCount(reel.views)} views
+                  </p>
+                </div>
               </Link>
+
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setFollowing((v) => !v)}
+                  className={cn(
+                    "rounded-lg px-3 py-1 text-xs font-semibold transition border",
+                    following
+                      ? "border-neutral-200 bg-neutral-100 text-neutral-700"
+                      : "border-brand-blue/30 bg-brand-blue-soft text-brand-blue hover:bg-brand-blue hover:text-white"
+                  )}
+                >
+                  {following ? "Following" : "Follow"}
+                </button>
+                <Link
+                  href="/rfq/new"
+                  className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
+                >
+                  <Send className="h-3 w-3" />
+                  <span>Send RFQ</span>
+                </Link>
+              </div>
             </div>
-          </div>
+          </SupplierLockOverlay>
 
           {/* Title & Description */}
           <div>
@@ -301,37 +304,39 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
             </div>
           </div>
 
-          {/* Technical Spec Sheet Chips */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-              <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                <Layers className="h-3 w-3 text-brand-blue" />
-                <span>CAPACITY</span>
+          {/* Technical Spec Sheet Chips with SupplierLockOverlay */}
+          <SupplierLockOverlay badgeLabel="Factory Specs & Audits Locked" compact>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
+                <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
+                  <Layers className="h-3 w-3 text-brand-blue" />
+                  <span>CAPACITY</span>
+                </div>
+                <p className="font-bold text-neutral-800 mt-0.5 text-xs">500 Units / Mo</p>
               </div>
-              <p className="font-bold text-neutral-800 mt-0.5 text-xs">500 Units / Mo</p>
-            </div>
-            <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-              <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                <PackageCheck className="h-3 w-3 text-brand-blue" />
-                <span>MIN. ORDER</span>
+              <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
+                <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
+                  <PackageCheck className="h-3 w-3 text-brand-blue" />
+                  <span>MIN. ORDER</span>
+                </div>
+                <p className="font-bold text-neutral-800 mt-0.5 text-xs">1 Set / MOQ</p>
               </div>
-              <p className="font-bold text-neutral-800 mt-0.5 text-xs">1 Set / MOQ</p>
-            </div>
-            <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-              <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                <Clock className="h-3 w-3 text-brand-blue" />
-                <span>LEAD TIME</span>
+              <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
+                <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
+                  <Clock className="h-3 w-3 text-brand-blue" />
+                  <span>LEAD TIME</span>
+                </div>
+                <p className="font-bold text-neutral-800 mt-0.5 text-xs">15-20 Days</p>
               </div>
-              <p className="font-bold text-neutral-800 mt-0.5 text-xs">15-20 Days</p>
-            </div>
-            <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-              <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                <FileSpreadsheet className="h-3 w-3 text-brand-blue" />
-                <span>CUSTOMIZATION</span>
+              <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
+                <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
+                  <FileSpreadsheet className="h-3 w-3 text-brand-blue" />
+                  <span>CUSTOMIZATION</span>
+                </div>
+                <p className="font-bold text-neutral-800 mt-0.5 text-xs">OEM & ODM</p>
               </div>
-              <p className="font-bold text-neutral-800 mt-0.5 text-xs">OEM & ODM</p>
             </div>
-          </div>
+          </SupplierLockOverlay>
 
           {/* B2B Instant Commercial Bar: Price, Buy Now, Add to Cart, Chat */}
           <div className="rounded-xl border border-slate-200/90 bg-gradient-to-r from-slate-50 via-white to-blue-50/20 p-2.5 shadow-2xs">
