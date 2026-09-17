@@ -91,7 +91,8 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
             className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-white shadow-xs hover:border-brand-blue hover:shadow-md transition"
           >
             {/* Thumbnail + Play Overlay */}
-            <div className="relative aspect-16/10 w-full bg-neutral-900 overflow-hidden">
+            {/* <div className="relative aspect-16/10 w-full bg-neutral-900 overflow-hidden"> */}
+            <div className="relative aspect-[16/10] w-full bg-neutral-900 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={seek.thumbnailUrl}

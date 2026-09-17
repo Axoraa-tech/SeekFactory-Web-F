@@ -30,7 +30,7 @@ type Props = {
 function shortName(name: string) {
   return name.replace(" Pvt. Ltd.", "").replace(" Industries", "");
 }
-
+  
 /**
  * Single Verified Manufacturers UI — `rail` for right aside, `explore` for Explore page.
  */
