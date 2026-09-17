@@ -233,8 +233,6 @@ export function FactoryDashboard({ user }: Props) {
         seeksCount={seeks.length}
         rfqsCount={newRfqsCount}
         unreadMessagesCount={unreadMessagesCount}
-        onOpenAddProduct={() => setIsAddProductOpen(true)}
-        onOpenAddSeek={() => setIsAddSeekOpen(true)}
         profile={profile}
         userName={user.name}
       />
