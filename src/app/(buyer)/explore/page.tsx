@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { CategoryIcon } from "@/components/ui/category-icon";
-import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
+// import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
 import { VerifiedManufacturersSection } from "@/features/explore/verified-manufacturers-section";
 import type { Category } from "@/entities/category";
 import { getApi } from "@/shared/api";
@@ -41,8 +41,8 @@ export default async function ExplorePage({ searchParams }: Props) {
   return (
     <section className="space-y-6">
       {/* 1. Dynamic Flipkart/Amazon Style Category Nav (Scroll-responsive expand/collapse) */}
-      <DynamicCategoryNav categories={roots} selectedCategorySlug={category} />
-
+      {/*<DynamicCategoryNav categories={roots} selectedCategorySlug={category} /> */}
+       
       {/* 2. Subcategory Quick Filter Chips (if Root Selected) */}
       {selectedRoot ? (
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs space-y-3">
