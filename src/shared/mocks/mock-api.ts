@@ -85,6 +85,10 @@ const feed: FeedRepository = {
     });
     return delay(items);
   },
+  async addReel(reel) {
+    reels.unshift(reel);
+    return delay(undefined);
+  },
 };
 
 const manufacturerRepo: ManufacturerRepository = {
@@ -121,6 +125,10 @@ const productRepo: ProductRepository = {
         return productCategory?.parentId === selected.id;
       }),
     ),
+  async addProduct(product) {
+    products.unshift(product);
+    return delay(undefined);
+  },
 };
 
 const messages: MessageRepository = {

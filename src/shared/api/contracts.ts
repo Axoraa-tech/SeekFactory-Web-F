@@ -36,6 +36,7 @@ export interface SessionRepository {
 
 export interface FeedRepository {
   list(tab: FeedTab): Promise<FeedItem[]>;
+  addReel(reel: Reel): Promise<void>;
 }
 
 export interface ManufacturerRepository {
@@ -48,6 +49,7 @@ export interface ProductRepository {
   listTrending(limit?: number): Promise<Product[]>;
   getBySlug(slug: string): Promise<ProductDetail | null>;
   listByCategory(categoryId: string): Promise<Product[]>;
+  addProduct(product: Product): Promise<void>;
 }
 
 export interface MessageRepository {

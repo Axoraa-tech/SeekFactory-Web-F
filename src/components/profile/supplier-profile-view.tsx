@@ -26,6 +26,7 @@ import {
   ArrowLeft,
   PhoneCall,
   FileCheck2,
+  ExternalLink,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -268,7 +269,20 @@ export function SupplierProfileView({
             </div>
 
             {/* Header Action Buttons */}
-            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 pt-2 md:pt-0">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 pt-2 md:pt-0">
+              {/* Official Seller Website */}
+              <a
+                href={manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
+                title="Visit Official Seller Website"
+              >
+                <Globe2 className="h-4 w-4 text-brand-blue group-hover:text-white transition-colors" />
+                <span>Visit Website</span>
+                <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100" />
+              </a>
+
               <button
                 type="button"
                 onClick={() => setIsFollowing((v) => !v)}
@@ -500,11 +514,23 @@ export function SupplierProfileView({
               <Card className="p-5 border-slate-200/90 shadow-2xs space-y-3">
                 <h3 className="text-base font-bold text-slate-900">About {manufacturer.name}</h3>
                 <p className="text-sm text-slate-600 leading-relaxed">{manufacturer.description}</p>
-                {manufacturer.chairmanName && (
-                  <p className="pt-2 text-sm text-slate-700">
-                    Managing Director / Chairman: <strong className="text-slate-900">{manufacturer.chairmanName}</strong>
-                  </p>
-                )}
+                <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
+                  {manufacturer.chairmanName && (
+                    <p className="text-slate-700">
+                      Managing Director / Chairman: <strong className="text-slate-900">{manufacturer.chairmanName}</strong>
+                    </p>
+                  )}
+                  <a
+                    href={manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
+                  >
+                    <Globe2 className="h-3.5 w-3.5" />
+                    <span>Official Factory Website: {manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
               </Card>
 
               <div className="grid gap-4 sm:grid-cols-2">
