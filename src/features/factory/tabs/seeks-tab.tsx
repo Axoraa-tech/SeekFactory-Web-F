@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+// import { useState } from "react";
+import Link from "next/link";
 import {
   Film,
   Plus,
@@ -9,7 +10,6 @@ import {
   TrendingUp,
   Trash2,
   Package,
-  X,
 } from "lucide-react";
 import type { SellerSeek } from "../types";
 
@@ -20,7 +20,7 @@ type Props = {
 };
 
 export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
-  const [playingSeek, setPlayingSeek] = useState<SellerSeek | null>(null);
+  // const [playingSeek, setPlayingSeek] = useState<SellerSeek | null>(null);
 
   const totalViews = seeks.reduce((acc, s) => acc + s.viewsCount, 0);
   const totalLeads = seeks.reduce((acc, s) => acc + s.inquiriesGenerated, 0);
@@ -91,7 +91,6 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
             className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-line bg-white shadow-xs hover:border-brand-blue hover:shadow-md transition"
           >
             {/* Thumbnail + Play Overlay */}
-            {/* <div className="relative aspect-16/10 w-full bg-neutral-900 overflow-hidden"> */}
             <div className="relative aspect-[16/10] w-full bg-neutral-900 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -108,16 +107,15 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
                 {seek.durationSeconds}s
               </div>
 
-              {/* Play Trigger */}
-              <button
-                type="button"
-                onClick={() => setPlayingSeek(seek)}
+              {/* Play Trigger — navigates to a dedicated video page */}
+              <Link
+                href={`/factory/seeks/${seek.id}`}
                 className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition cursor-pointer"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue text-white shadow-lg group-hover:scale-110 transition-transform">
                   <Play className="h-5 w-5 fill-white ml-0.5" />
                 </div>
-              </button>
+              </Link>
             </div>
 
             {/* Video Info */}
@@ -161,7 +159,7 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
       </div>
 
       {/* Video Playback Modal */}
-      {playingSeek && (
+      {/* {playingSeek && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs animate-in fade-in">
           <div className="relative w-full max-w-2xl rounded-2xl bg-neutral-900 overflow-hidden shadow-2xl border border-neutral-800">
             <div className="flex items-center justify-between p-3.5 bg-neutral-900 text-white border-b border-neutral-800">
@@ -176,9 +174,8 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
             <div className="aspect-video w-full bg-black flex items-center justify-center">
               <video src={playingSeek.videoUrl} className="h-full w-full object-contain" autoPlay controls />
             </div>
-          </div>
-        </div>
-      )}
+          </div> */}
+       
     </div>
   );
 }
