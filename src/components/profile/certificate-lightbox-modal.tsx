@@ -132,7 +132,7 @@ export function CertificateLightboxModal({
                 <span>On-Site Factory Compliance Guarantee</span>
               </p>
               <span>
-                This accreditation has been verified through SeekFactory's on-site plant verification protocol.
+                This accreditation has been verified through SeekFactory&apos;s on-site plant verification protocol.
               </span>
             </div>
           </div>
