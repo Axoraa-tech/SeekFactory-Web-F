@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Lock, Sparkles } from "lucide-react";
+import { Eye } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useBuyerPlan } from "@/features/subscription";
 
@@ -19,10 +19,10 @@ interface SupplierLockOverlayProps {
 export function SupplierLockOverlay({
   children,
   className,
-  badgeLabel = "Supplier Details Locked",
+  badgeLabel = "View Manufacturer",
   compact = false,
 }: SupplierLockOverlayProps) {
-  const { isSupplierLocked, openUpgradeModal, pricing } = useBuyerPlan();
+  const { isSupplierLocked, openUpgradeModal } = useBuyerPlan();
 
   if (!isSupplierLocked) {
     return <>{children}</>;
@@ -41,7 +41,7 @@ export function SupplierLockOverlay({
         "group/lock relative overflow-hidden rounded-xl cursor-pointer transition-all",
         className
       )}
-      title="Click to upgrade plan and unlock full supplier details"
+      title="Click to view supplier details"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -64,14 +64,10 @@ export function SupplierLockOverlay({
             compact ? "text-[10px] px-2.5 py-0.5" : "text-xs"
           )}
         >
-          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-white shrink-0 group-hover/lock:bg-brand-blue transition-colors">
-            <Lock className="h-2.5 w-2.5" />
+          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-blue text-white shrink-0 transition-colors">
+            <Eye className="h-2.5 w-2.5" />
           </div>
           <span className="font-extrabold tracking-tight truncate">{badgeLabel}</span>
-          <span className="hidden sm:inline-flex items-center gap-0.5 rounded-full bg-blue-50 px-1.5 py-0.2 text-[9px] font-bold text-blue-700">
-            <Sparkles className="h-2.5 w-2.5 fill-blue-500 text-blue-500" />
-            Upgrade ({pricing.proPriceSub})
-          </span>
         </div>
       </div>
     </div>

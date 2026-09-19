@@ -109,9 +109,10 @@ export type SellerFactoryProfile = {
   annualTurnover?: string;
   exportCountries: string[];
   certifications: string[];
+  certificates?: import("@/entities/factory-certificate").FactoryCertificate[];
   description: string;
   productionLines: number;
   verified: boolean;
   websiteUrl?: string;
-  tier: "Gold Plus Verified" | "Verified Manufacturer" | "Standard Supplier";
+  tier: string;
 };

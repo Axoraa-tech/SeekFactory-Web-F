@@ -34,7 +34,7 @@ type Props = {
  * - Smooth S-curve upward under right actions (from (x_right - w, H_tot) to (x_right, H1))
  * - Continuous liquid-glass backdrop blur and soft perimeter drop-shadow
  */
-function UnifiedHeaderBackground() {
+function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState({
     viewportWidth: 1440,
@@ -67,7 +67,7 @@ function UnifiedHeaderBackground() {
         x_right = actionsEl ? actionsEl.getBoundingClientRect().right - headerRect.left : cRect.right - headerRect.left;
       }
 
-      const H_tot = Math.max(headerRect.height, H1 + 54);
+      const H_tot = hasCategories ? Math.max(headerRect.height, H1 + 54) : H1;
 
       setLayout({
         viewportWidth: W,
@@ -91,7 +91,7 @@ function UnifiedHeaderBackground() {
       ro.disconnect();
       window.removeEventListener("resize", updateLayout);
     };
-  }, []);
+  }, [hasCategories]);
 
   const { viewportWidth: W, H1, H_tot, x_left, x_right } = layout;
   const w = W < 640 ? 38 : 54;
@@ -103,27 +103,40 @@ function UnifiedHeaderBackground() {
   const pl2x = x_left + 0.38 * w;
 
   // Closed path for fill & clip (entire unified header)
-  const fullPathD = [
-    `M 0 0`,
-    `L ${W.toFixed(2)} 0`,
-    `L ${W.toFixed(2)} ${H1.toFixed(2)}`,
-    `L ${x_right.toFixed(2)} ${H1.toFixed(2)}`,
-    `C ${pr1x.toFixed(2)} ${H1.toFixed(2)}, ${pr2x.toFixed(2)} ${H_tot.toFixed(2)}, ${(x_right - w).toFixed(2)} ${H_tot.toFixed(2)}`,
-    `L ${(x_left + w).toFixed(2)} ${H_tot.toFixed(2)}`,
-    `C ${pl1x.toFixed(2)} ${H_tot.toFixed(2)}, ${pl2x.toFixed(2)} ${H1.toFixed(2)}, ${x_left.toFixed(2)} ${H1.toFixed(2)}`,
-    `L 0 ${H1.toFixed(2)}`,
-    `Z`,
-  ].join(" ");
+  const fullPathD = hasCategories
+    ? [
+        `M 0 0`,
+        `L ${W.toFixed(2)} 0`,
+        `L ${W.toFixed(2)} ${H1.toFixed(2)}`,
+        `L ${x_right.toFixed(2)} ${H1.toFixed(2)}`,
+        `C ${pr1x.toFixed(2)} ${H1.toFixed(2)}, ${pr2x.toFixed(2)} ${H_tot.toFixed(2)}, ${(x_right - w).toFixed(2)} ${H_tot.toFixed(2)}`,
+        `L ${(x_left + w).toFixed(2)} ${H_tot.toFixed(2)}`,
+        `C ${pl1x.toFixed(2)} ${H_tot.toFixed(2)}, ${pl2x.toFixed(2)} ${H1.toFixed(2)}, ${x_left.toFixed(2)} ${H1.toFixed(2)}`,
+        `L 0 ${H1.toFixed(2)}`,
+        `Z`,
+      ].join(" ")
+    : [
+        `M 0 0`,
+        `L ${W.toFixed(2)} 0`,
+        `L ${W.toFixed(2)} ${H1.toFixed(2)}`,
+        `L 0 ${H1.toFixed(2)}`,
+        `Z`,
+      ].join(" ");
 
-  // Open path that strokes ONLY the bottom perimeter (no divider, no top stroke)
-  const bottomStrokeD = [
-    `M 0 ${H1.toFixed(2)}`,
-    `L ${x_left.toFixed(2)} ${H1.toFixed(2)}`,
-    `C ${pl2x.toFixed(2)} ${H1.toFixed(2)}, ${pl1x.toFixed(2)} ${H_tot.toFixed(2)}, ${(x_left + w).toFixed(2)} ${H_tot.toFixed(2)}`,
-    `L ${(x_right - w).toFixed(2)} ${H_tot.toFixed(2)}`,
-    `C ${pr2x.toFixed(2)} ${H_tot.toFixed(2)}, ${pr1x.toFixed(2)} ${H1.toFixed(2)}, ${x_right.toFixed(2)} ${H1.toFixed(2)}`,
-    `L ${W.toFixed(2)} ${H1.toFixed(2)}`,
-  ].join(" ");
+  // Open path that strokes ONLY the bottom perimeter
+  const bottomStrokeD = hasCategories
+    ? [
+        `M 0 ${H1.toFixed(2)}`,
+        `L ${x_left.toFixed(2)} ${H1.toFixed(2)}`,
+        `C ${pl2x.toFixed(2)} ${H1.toFixed(2)}, ${pl1x.toFixed(2)} ${H_tot.toFixed(2)}, ${(x_left + w).toFixed(2)} ${H_tot.toFixed(2)}`,
+        `L ${(x_right - w).toFixed(2)} ${H_tot.toFixed(2)}`,
+        `C ${pr2x.toFixed(2)} ${H_tot.toFixed(2)}, ${pr1x.toFixed(2)} ${H1.toFixed(2)}, ${x_right.toFixed(2)} ${H1.toFixed(2)}`,
+        `L ${W.toFixed(2)} ${H1.toFixed(2)}`,
+      ].join(" ")
+    : [
+        `M 0 ${H1.toFixed(2)}`,
+        `L ${W.toFixed(2)} ${H1.toFixed(2)}`,
+      ].join(" ");
 
   return (
     <div
@@ -186,7 +199,7 @@ export function TopNav({ user, messageCount, notificationCount, categories }: Pr
           UNIFIED ARCHITECTURAL BACKGROUND — One single seamless surface.
           Zero dividers, zero borders between tiers, zero floating pills.
       ================================================================== */}
-      <UnifiedHeaderBackground />
+      <UnifiedHeaderBackground hasCategories={Boolean(categories && categories.length > 0)} />
 
       {/* ==================================================================
           CONTENT LAYER (Flat, horizontally aligned, strictly uncurved)
@@ -206,7 +219,7 @@ export function TopNav({ user, messageCount, notificationCount, categories }: Pr
           >
             <BrandLogo
               priority
-              className="h-9 sm:h-11 md:h-12 w-auto max-w-[160px] sm:max-w-[200px] md:max-w-[240px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
+              className="h-11 sm:h-13 md:h-14 w-auto max-w-[190px] sm:max-w-[240px] md:max-w-[280px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
             />
           </Link>
 

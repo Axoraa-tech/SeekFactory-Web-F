@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { ReelCard } from "@/components/reels/reel-card";
+import { ReelPopupProvider } from "@/components/reels/use-reel-popup";
+import { ReelPopupModal } from "@/components/reels/reel-popup-modal";
 import type { FeedItem } from "@/shared/api/contracts";
 
 type Props = {
@@ -10,27 +11,20 @@ type Props = {
   viewMode?: "landscape" | "vertical";
 };
 
-type TrackKey = "left" | "right";
-
 export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
   const [, setActiveVideoId] = useState<string | null>(null);
 
   const trackLeftRef = useRef<HTMLDivElement>(null);
   const trackRightRef = useRef<HTMLDivElement>(null);
 
-  // Divide feed items into Left Track (odd index) and Right Track (even index)
-  const leftItems = items.filter((_, i) => i % 2 === 0);
-  const rightItems = items.filter((_, i) => i % 2 !== 0);
-  // Fallback if odd number of items or only 1 item available
-  const finalRightItems = rightItems.length > 0 ? rightItems : leftItems;
-
-  // Scroll Track Left or Right up or down
-  const scrollTrack = (track: TrackKey, direction: "up" | "down") => {
-    const container = track === "left" ? trackLeftRef.current : trackRightRef.current;
-    if (!container) return;
-    const delta = direction === "down" ? 640 : -640;
-    container.scrollBy({ top: delta, behavior: "smooth" });
-  };
+  // Build left/right columns preserving original feed index for popup navigation
+  const leftItems = items
+    .map((item, i) => ({ item, originalIndex: i }))
+    .filter((_, i) => i % 2 === 0);
+  const rightItemsRaw = items
+    .map((item, i) => ({ item, originalIndex: i }))
+    .filter((_, i) => i % 2 !== 0);
+  const finalRightItems = rightItemsRaw.length > 0 ? rightItemsRaw : leftItems;
 
   // IntersectionObserver for active reel focus tracking
   useEffect(() => {
@@ -41,9 +35,7 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
         for (const entry of entries) {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.45) {
             const itemId = entry.target.getAttribute("data-feed-reel-id");
-            if (itemId) {
-              setActiveVideoId(itemId);
-            }
+            if (itemId) setActiveVideoId(itemId);
           }
         }
       },
@@ -52,7 +44,6 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
 
     const cards = document.querySelectorAll("[data-feed-reel-id]");
     cards.forEach((card) => observer.observe(card));
-
     return () => observer.disconnect();
   }, [items]);
 
@@ -65,82 +56,66 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* 2 Independent Vertical Scroll Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 items-start">
-        {/* COLUMN 1: LEFT TRACK */}
-        <div className="space-y-2">
-          <div
-            ref={trackLeftRef}
-            className="h-[calc(100vh-210px)] min-h-[680px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
-          >
-            {leftItems.map((item, index) => (
-              <div
-                key={`left-${item.reel.id}`}
-                data-feed-reel-id={item.reel.id}
-                className="snap-start shrink-0"
-              >
-                <ReelCard
-                  reel={item.reel}
-                  manufacturer={item.manufacturer}
-                  productSlug={item.primaryProductSlug}
-                  products={item.products}
-                  variantIndex={index * 2}
-                  viewMode={viewMode}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+    <ReelPopupProvider totalItems={items.length}>
+      {/* Global popup modal — mounted once at feed level, outside card DOM */}
+      <ReelPopupModal items={items} />
 
-        {/* COLUMN 2: RIGHT TRACK */}
-        <div className="space-y-2">
-          <div
-            ref={trackRightRef}
-            className="h-[calc(100vh-210px)] min-h-[680px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
-          >
-            {finalRightItems.map((item, index) => (
-              <div
-                key={`right-${item.reel.id}`}
-                data-feed-reel-id={item.reel.id}
-                className="snap-start shrink-0"
-              >
-                <ReelCard
-                  reel={item.reel}
-                  manufacturer={item.manufacturer}
-                  productSlug={item.primaryProductSlug}
-                  products={item.products}
-                  variantIndex={index * 2 + 1}
-                  viewMode={viewMode}
-                />
-              </div>
-            ))}
+      <div className="space-y-4">
+        {/* 2 Independent Vertical Scroll Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 items-start">
+          {/* COLUMN 1: LEFT TRACK */}
+          <div className="space-y-2">
+            <div
+              ref={trackLeftRef}
+              className="h-[calc(100vh-180px)] sm:h-[calc(100vh-210px)] min-h-[520px] sm:min-h-[680px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+            >
+              {leftItems.map(({ item, originalIndex }) => (
+                <div
+                  key={`left-${item.reel.id}`}
+                  data-feed-reel-id={item.reel.id}
+                  className="snap-start shrink-0"
+                >
+                  <ReelCard
+                    reel={item.reel}
+                    manufacturer={item.manufacturer}
+                    productSlug={item.primaryProductSlug}
+                    products={item.products}
+                    variantIndex={originalIndex}
+                    viewMode={viewMode}
+                    itemIndex={originalIndex}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* COLUMN 2: RIGHT TRACK */}
+          <div className="space-y-2">
+            <div
+              ref={trackRightRef}
+              className="h-[calc(100vh-180px)] sm:h-[calc(100vh-210px)] min-h-[520px] sm:min-h-[680px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+            >
+              {finalRightItems.map(({ item, originalIndex }) => (
+                <div
+                  key={`right-${item.reel.id}`}
+                  data-feed-reel-id={item.reel.id}
+                  className="snap-start shrink-0"
+                >
+                  <ReelCard
+                    reel={item.reel}
+                    manufacturer={item.manufacturer}
+                    productSlug={item.primaryProductSlug}
+                    products={item.products}
+                    variantIndex={originalIndex}
+                    viewMode={viewMode}
+                    itemIndex={originalIndex}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-
-      {/*
-      ========================================================================
-      LEGACY_SINGLE_VIDEO_FEED_REVERT:
-      Uncomment the block below if your client asks to revert back to single-video
-      landscape/vertical list rendering instead of dual-video independent tracks.
-      ========================================================================
-
-      <div className={cn("space-y-6", viewMode === "vertical" && "max-w-[760px] lg:max-w-[820px] mx-auto")}>
-        {items.map((item, index) => (
-          <ReelCard
-            key={item.reel.id}
-            reel={item.reel}
-            manufacturer={item.manufacturer}
-            productSlug={item.primaryProductSlug}
-            products={item.products}
-            variantIndex={index}
-            viewMode={viewMode}
-          />
-        ))}
-      </div>
-      ========================================================================
-      */}
-    </div>
+    </ReelPopupProvider>
   );
 }
