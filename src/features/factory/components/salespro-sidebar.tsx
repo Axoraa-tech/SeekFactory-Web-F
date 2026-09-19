@@ -30,6 +30,8 @@ type Props = {
   unreadMessagesCount: number;
   profile: SellerFactoryProfile;
   userName: string;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
 };
 
 export function SalesproSidebar({
@@ -41,19 +43,50 @@ export function SalesproSidebar({
   unreadMessagesCount,
   profile,
   userName,
+  isMobileOpen = false,
+  onCloseMobile,
 }: Props) {
   const [productsOpen, setProductsOpen] = useState(true);
   const [customerOpen, setCustomerOpen] = useState(true);
   const [showPromo, setShowPromo] = useState(true);
 
+  function handleSelectTab(tab: SellerTab) {
+    onSelectTab(tab);
+    onCloseMobile?.();
+  }
+
   return (
-    <aside className="w-64 shrink-0 flex flex-col border-r border-[#E6E8EB] bg-[#FFFFFF] min-h-screen">
-      {/* Top Brand Logo */}
-      <div className="h-16 flex items-center px-5 border-b border-[#E6E8EB]">
-        <Link href="/" className="flex items-center gap-2 group">
-          <BrandLogo className="h-8 w-auto max-w-[160px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]" />
-        </Link>
-      </div>
+    <>
+      {/* Mobile backdrop overlay */}
+      {isMobileOpen && (
+        <div
+          onClick={onCloseMobile}
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] shrink-0 flex flex-col border-r border-[#E6E8EB] bg-[#FFFFFF] min-h-screen transition-transform duration-200 ease-out",
+          "lg:static lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {/* Top Brand Logo */}
+        <div className="h-16 flex items-center justify-between px-5 border-b border-[#E6E8EB]">
+          <Link href="/" className="flex items-center gap-2 group">
+            <BrandLogo className="h-8 w-auto max-w-[160px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]" />
+          </Link>
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            className="lg:hidden rounded-lg p-1.5 text-[#5F6368] hover:bg-[#F3F4F6]"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
       {/* Navigation Scrollable Body */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 text-xs font-semibold">
@@ -65,7 +98,7 @@ export function SalesproSidebar({
           </div>
           <button
             type="button"
-            onClick={() => onSelectTab("overview")}
+            onClick={() => handleSelectTab("overview")}
             className={cn(
               "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition cursor-pointer",
               activeTab === "overview"
@@ -96,7 +129,7 @@ export function SalesproSidebar({
             <div className="pl-6 space-y-0.5 border-l border-[#E6E8EB] ml-3">
               <button
                 type="button"
-                onClick={() => onSelectTab("products")}
+                onClick={() => handleSelectTab("products")}
                 className={cn(
                   "w-full text-left px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer flex items-center justify-between",
                   activeTab === "products"
@@ -111,7 +144,7 @@ export function SalesproSidebar({
               </button>
               <button
                 type="button"
-                onClick={() => onSelectTab("seeks")}
+                onClick={() => handleSelectTab("seeks")}
                 className={cn(
                   "w-full text-left px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer flex items-center justify-between",
                   activeTab === "seeks"
@@ -146,7 +179,7 @@ export function SalesproSidebar({
             <div className="pl-6 space-y-0.5 border-l border-[#E6E8EB] ml-3">
               <button
                 type="button"
-                onClick={() => onSelectTab("rfqs")}
+                onClick={() => handleSelectTab("rfqs")}
                 className={cn(
                   "w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer",
                   activeTab === "rfqs"
@@ -164,7 +197,7 @@ export function SalesproSidebar({
 
               <button
                 type="button"
-                onClick={() => onSelectTab("messages")}
+                onClick={() => handleSelectTab("messages")}
                 className={cn(
                   "w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer",
                   activeTab === "messages"
@@ -191,7 +224,7 @@ export function SalesproSidebar({
 
           <button
             type="button"
-            onClick={() => onSelectTab("profile")}
+            onClick={() => handleSelectTab("profile")}
             className={cn(
               "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition cursor-pointer",
               activeTab === "profile"
@@ -232,7 +265,7 @@ export function SalesproSidebar({
         <div className="pt-2 border-t border-[#E6E8EB] space-y-1">
           <button
             type="button"
-            onClick={() => onSelectTab("profile")}
+            onClick={() => handleSelectTab("profile")}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8] cursor-pointer"
           >
             <Settings className="h-4 w-4" />
@@ -280,6 +313,7 @@ export function SalesproSidebar({
         </div>
         <LogoutButton />
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
