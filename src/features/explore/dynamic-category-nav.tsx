@@ -34,37 +34,10 @@ export function DynamicCategoryNav({
   const currentCategory = selectedCategorySlug || searchParams.get("category") || "";
   const { t, translateCategory } = useRegionalSettings();
 
-  // isExpanded state: true when at top or when scrolling up
-  const [isExpanded, setIsExpanded] = useState(true);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const lastScrollYRef = useRef<number>(0);
-
-  // Handle vertical window scroll for expand/collapse
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const delta = currentScrollY - lastScrollYRef.current;
-
-      if (currentScrollY < 30) {
-        // At the very top: always expanded with icons
-        setIsExpanded(true);
-      } else if (delta > 6) {
-        // Scrolling DOWN: collapse to text-only
-        setIsExpanded(false);
-      } else if (delta < -6) {
-        // Scrolling UP: expand to show icons + text
-        setIsExpanded(true);
-      }
-
-      lastScrollYRef.current = currentScrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Check horizontal scroll arrows
   const updateArrowVisibility = useCallback(() => {
@@ -87,20 +60,21 @@ export function DynamicCategoryNav({
     };
   }, [updateArrowVisibility]);
 
-  // Auto-scroll the active category item into center view when selected
   const activeItemRef = useRef<HTMLAnchorElement>(null);
 
+  // Ensure the carousel starts at default leftmost state (0) on mount with For You as the first category
   useEffect(() => {
-    if (activeItemRef.current && scrollContainerRef.current) {
-      activeItemRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
-      const timer = setTimeout(updateArrowVisibility, 350);
-      return () => clearTimeout(timer);
-    }
-  }, [currentCategory, updateArrowVisibility]);
+    const resetScroll = () => {
+      const el = scrollContainerRef.current;
+      if (el) {
+        el.scrollLeft = 0;
+      }
+      setShowLeftArrow(false);
+    };
+    resetScroll();
+    const timer = setTimeout(resetScroll, 60);
+    return () => clearTimeout(timer);
+  }, [categories]);
 
   const hoverAnimRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -190,7 +164,7 @@ export function DynamicCategoryNav({
     <nav
       aria-label="Machinery Categories"
       className={cn(
-        "w-full rounded-2xl border border-neutral-200/90 bg-white shadow-xs transition-all duration-300 overflow-hidden select-none",
+        "w-full rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] transition-all duration-300 overflow-hidden select-none",
         sticky ? "sticky top-[76px] z-20" : "",
         className
       )}
@@ -198,7 +172,7 @@ export function DynamicCategoryNav({
       <div className="relative flex items-center px-1.5 sm:px-2">
         {/* Left Scroll Arrow */}
         {showLeftArrow && (
-          <div className="absolute left-0 top-0 bottom-0 z-30 flex items-center pr-4 pl-1 bg-gradient-to-r from-white via-white/95 to-transparent pointer-events-none">
+          <div className="absolute left-0 top-0 bottom-0 z-30 flex items-center pr-4 pl-1 bg-gradient-to-r from-white/95 via-white/80 to-transparent pointer-events-none">
             <button
               type="button"
               onClick={handleScrollLeft}
@@ -209,7 +183,7 @@ export function DynamicCategoryNav({
               onPointerLeave={stopHoverScroll}
               onPointerCancel={stopHoverScroll}
               aria-label="Scroll categories to the left"
-              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-md transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
+              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
             >
               <ChevronLeft className="h-4 w-4 pointer-events-none" />
             </button>
@@ -235,20 +209,14 @@ export function DynamicCategoryNav({
             title={`${t("feed.forYou", "For You")} - ${t("sidebar.allCategories", "All Categories")}`}
             aria-current={!currentCategory ? "page" : undefined}
             className={cn(
-              "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
-              isExpanded ? "py-1.5" : "py-1",
+              "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 py-1.5 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
               !currentCategory
-                ? "text-brand-blue font-bold"
-                : "text-neutral-700 hover:text-ink font-medium"
+                ? "text-brand-blue font-bold bg-white/60 backdrop-blur-md shadow-2xs"
+                : "text-neutral-700 hover:text-ink hover:bg-white/40 hover:backdrop-blur-xs font-medium"
             )}
           >
-            {/* Bigger Dual-Tone Blue & Black Icon (No grey background) */}
-            <div
-              className={cn(
-                "flex items-center justify-center transition-all duration-300 overflow-hidden",
-                isExpanded ? "h-8 w-8 mb-1 opacity-100 scale-100" : "h-0 w-0 mb-0 opacity-0 scale-75"
-              )}
-            >
+            {/* Bigger Dual-Tone Blue & Black Icon (Always visible, stable) */}
+            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center mb-1 shrink-0 overflow-hidden">
               <CategoryIcon
                 icon="for-you"
                 size={28}
@@ -268,7 +236,7 @@ export function DynamicCategoryNav({
 
             {/* Active Blue Indicator Underline */}
             {!currentCategory && (
-              <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-brand-blue shadow-xs" />
+              <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-gradient-to-r from-brand-blue to-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
             )}
           </Link>
 
@@ -291,20 +259,14 @@ export function DynamicCategoryNav({
                 title={translatedName}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
-                  isExpanded ? "py-1.5" : "py-1",
+                  "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 py-1.5 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
                   isActive
-                    ? "text-brand-blue font-bold"
-                    : "text-neutral-700 hover:text-ink font-medium"
+                    ? "text-brand-blue font-bold bg-white/60 backdrop-blur-md shadow-2xs"
+                    : "text-neutral-700 hover:text-ink hover:bg-white/40 hover:backdrop-blur-xs font-medium"
                 )}
               >
-                {/* Bigger Dual-Tone Blue & Black Icon (No grey background) */}
-                <div
-                  className={cn(
-                    "flex items-center justify-center transition-all duration-300 overflow-hidden",
-                    isExpanded ? "h-8 w-8 mb-1 opacity-100 scale-100" : "h-0 w-0 mb-0 opacity-0 scale-75"
-                  )}
-                >
+                {/* Bigger Dual-Tone Blue & Black Icon (Always visible, stable) */}
+                <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center mb-1 shrink-0 overflow-hidden">
                   <CategoryIcon
                     icon={item.icon}
                     size={28}
@@ -324,7 +286,7 @@ export function DynamicCategoryNav({
 
                 {/* Active Underline */}
                 {isActive && (
-                  <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-brand-blue shadow-xs" />
+                  <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-gradient-to-r from-brand-blue to-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
                 )}
               </Link>
             );
@@ -333,7 +295,7 @@ export function DynamicCategoryNav({
 
         {/* Right Scroll Arrow */}
         {showRightArrow && (
-          <div className="absolute right-0 top-0 bottom-0 z-30 flex items-center pl-4 pr-1 bg-gradient-to-l from-white via-white/95 to-transparent pointer-events-none">
+          <div className="absolute right-0 top-0 bottom-0 z-30 flex items-center pl-4 pr-1 bg-gradient-to-l from-white/95 via-white/80 to-transparent pointer-events-none">
             <button
               type="button"
               onClick={handleScrollRight}
@@ -344,7 +306,7 @@ export function DynamicCategoryNav({
               onPointerLeave={stopHoverScroll}
               onPointerCancel={stopHoverScroll}
               aria-label="Scroll categories to the right"
-              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-md transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
+              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
             >
               <ChevronRight className="h-4 w-4 pointer-events-none" />
             </button>

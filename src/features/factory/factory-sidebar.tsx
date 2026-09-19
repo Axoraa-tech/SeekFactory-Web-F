@@ -145,17 +145,9 @@ export function FactorySidebar({
               <p className="text-[10px] text-amber-700 font-semibold">Tier-1 Manufacturer</p>
             </div>
           </div>
-          <p className="text-[11px] text-ink-muted mb-3 line-clamp-2">
-            Your factory showroom is live and visible to buyers searching in India and globally.
+          <p className="text-[11px] text-ink-muted">
+            Your factory showroom is live and active for enterprise buyers searching globally.
           </p>
-          <Link
-            href={`/manufacturers/${profile.slug}`}
-            target="_blank"
-            className="flex items-center justify-center gap-1.5 rounded-lg bg-surface border border-line py-1.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue-soft transition"
-          >
-            <span>View Public Profile</span>
-            <ExternalLink className="h-3 w-3" />
-          </Link>
         </Card>
       </div>
     </aside>

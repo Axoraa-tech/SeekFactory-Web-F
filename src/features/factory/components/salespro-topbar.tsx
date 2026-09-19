@@ -1,4 +1,4 @@
-import { Share2, Plus, Video, Eye, Globe2, ExternalLink } from "lucide-react";
+import { Share2, Plus, Video, Eye, Globe2, ExternalLink, Menu } from "lucide-react";
 import Link from "next/link";
 import type { SellerTab, SellerFactoryProfile } from "../types";
 
@@ -7,6 +7,7 @@ type Props = {
   onOpenAddProduct: () => void;
   onOpenAddSeek: () => void;
   profile: SellerFactoryProfile;
+  onOpenMobileMenu?: () => void;
 };
 
 export function SalesproTopbar({
@@ -14,6 +15,7 @@ export function SalesproTopbar({
   onOpenAddProduct,
   onOpenAddSeek,
   profile,
+  onOpenMobileMenu,
 }: Props) {
   const titles: Record<SellerTab, string> = {
     overview: "Manufacturer Hub Dashboard",
@@ -26,13 +28,25 @@ export function SalesproTopbar({
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E6E8EB]">
-      <div>
-        <h1 className="text-2xl font-extrabold text-[#1C1C1C] tracking-tight">
-          {titles[activeTab]}
-        </h1>
-        <p className="text-xs text-[#5F6368] mt-0.5">
-          India–China Industrial Machinery Discovery & Inquiries
-        </p>
+      <div className="flex items-center gap-3">
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            onClick={onOpenMobileMenu}
+            className="lg:hidden p-2 rounded-xl border border-[#E6E8EB] bg-white text-[#5F6368] hover:text-[#1A73E8] hover:bg-[#F3F4F6] transition shadow-2xs"
+            aria-label="Open sidebar navigation"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+        <div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#1C1C1C] tracking-tight">
+            {titles[activeTab]}
+          </h1>
+          <p className="text-xs text-[#5F6368] mt-0.5">
+            India–China Industrial Machinery Discovery & Inquiries
+          </p>
+        </div>
       </div>
 
       {/* Right Actions Bar (Pure Blue, Orangish-Yellow, Red - No Black) */}

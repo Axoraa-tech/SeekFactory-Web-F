@@ -286,7 +286,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
       <div className="w-full md:w-[44%] p-4 flex flex-col justify-between bg-white border-t md:border-t-0 md:border-l border-slate-100">
         {/* Top: Factory Profile Header */}
         <div className="pb-3 border-b border-slate-100 shrink-0">
-          <SupplierLockOverlay badgeLabel="Verified Supplier Locked">
+          <SupplierLockOverlay badgeLabel="View Manufacturer">
             <div className="flex items-center justify-between gap-2">
               <Link
                 href={`/manufacturers/${manufacturer.slug}`}

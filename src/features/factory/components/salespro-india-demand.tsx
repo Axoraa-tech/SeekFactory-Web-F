@@ -11,7 +11,7 @@ export function SalesproIndiaDemand() {
   ];
 
   return (
-    <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs flex flex-col justify-between">
+    <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs flex flex-col justify-between h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div>
