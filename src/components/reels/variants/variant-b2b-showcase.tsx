@@ -111,14 +111,18 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
     [duration, pingControls]
   );
 
-  const handleToggleFullscreen = useCallback(() => {
-    const target = videoWrapperRef.current || containerRef.current;
-    if (!target) return;
-    if (!document.fullscreenElement) {
-      target.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
-    } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
-    }
+  // const handleToggleFullscreen = useCallback(() => {
+  //   const target = videoWrapperRef.current || containerRef.current;
+  //   if (!target) return;
+  //   if (!document.fullscreenElement) {
+  //     target.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+  //   } else {
+  //     document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+  //   }
+  // }, []);
+
+    const handleToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => !prev);
   }, []);
 
   const getTimeFromEvent = useCallback(
@@ -143,6 +147,19 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
       window.removeEventListener("mouseup", onPointerUp);
     };
   }, [isScrubbing, getTimeFromEvent, handleSeek]);
+
+  // const totalDuration = duration > 0 ? duration : 1;
+  // const progressPercent = Math.min(100, Math.max(0, (currentTime / totalDuration) * 100));
+
+
+    useEffect(() => {
+    if (!isFullscreen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsFullscreen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isFullscreen]);
 
   const totalDuration = duration > 0 ? duration : 1;
   const progressPercent = Math.min(100, Math.max(0, (currentTime / totalDuration) * 100));
@@ -228,15 +245,33 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
             <p className="text-xs sm:text-sm text-neutral-600 mt-0.5 leading-relaxed">{reel.description}</p>
           </div>
 
-          {/* Video Player */}
+                    {/* Video Player */}
           <div
             ref={videoWrapperRef}
             onMouseMove={pingControls}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTogglePlay}
-            className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-black cursor-pointer shadow-sm group select-none"
+            className={cn(
+              "relative w-full overflow-hidden bg-black cursor-pointer shadow-sm group select-none",
+              isFullscreen
+                ? "fixed inset-0 z-[100] flex items-center justify-center rounded-none"
+                : "aspect-[16/9] rounded-xl"
+            )}
           >
+            {isFullscreen && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFullscreen(false);
+                }}
+                className="absolute top-3 left-3 z-30 h-8 w-8 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black/90"
+                aria-label="Close expanded view"
+              >
+                <Minimize2 className="h-4 w-4" />
+              </button>
+            )}
             {reel.videoUrl ? (
               <video
                 ref={videoRef}
@@ -254,12 +289,17 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
                 }}
                 onWaiting={() => setIsBuffering(true)}
                 onPlaying={() => setIsBuffering(false)}
-                className="h-full w-full object-cover"
+                className={isFullscreen ? "max-h-full max-w-full object-contain" : "h-full w-full object-cover"}
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={reel.posterUrl} alt={reel.title} className="h-full w-full object-cover" />
+              <img
+                src={reel.posterUrl}
+                alt={reel.title}
+                className={isFullscreen ? "max-h-full max-w-full object-contain" : "h-full w-full object-cover"}
+              />
             )}
+            
 
             {isBuffering && (
               <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
@@ -319,6 +359,28 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
               </div>
             </div>
           </div>
+
+
+
+           {/* new block insert */}
+
+                     {isFullscreen && (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-x-0 bottom-0 z-[110] border-t border-slate-200 bg-white/95 p-3 shadow-[0_-4px_16px_rgba(0,0,0,0.12)] backdrop-blur-sm sm:p-4"
+            >
+              <div className="mx-auto max-w-3xl">
+                <ProductActionBar
+                  priceInr={125000}
+                  unit="Set"
+                  moq={1}
+                  productSlug={productSlug}
+                  manufacturerSlug={manufacturer.slug}
+                  size="sm"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Technical Spec Sheet Chips with SupplierLockOverlay */}
           <SupplierLockOverlay badgeLabel="Factory Specs & Audits Locked" compact>
