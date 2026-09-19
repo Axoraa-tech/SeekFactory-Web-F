@@ -22,7 +22,7 @@ export function SupplierLockOverlay({
   badgeLabel = "Supplier Details Locked",
   compact = false,
 }: SupplierLockOverlayProps) {
-  const { isSupplierLocked, openUpgradeModal } = useBuyerPlan();
+  const { isSupplierLocked, openUpgradeModal, pricing } = useBuyerPlan();
 
   if (!isSupplierLocked) {
     return <>{children}</>;
@@ -70,7 +70,7 @@ export function SupplierLockOverlay({
           <span className="font-extrabold tracking-tight truncate">{badgeLabel}</span>
           <span className="hidden sm:inline-flex items-center gap-0.5 rounded-full bg-blue-50 px-1.5 py-0.2 text-[9px] font-bold text-blue-700">
             <Sparkles className="h-2.5 w-2.5 fill-blue-500 text-blue-500" />
-            Upgrade
+            Upgrade ({pricing.proPriceSub})
           </span>
         </div>
       </div>

@@ -56,7 +56,7 @@ export function SupplierProfileView({
   const [activeTab, setActiveTab] = useState<"products" | "videos" | "about">("products");
   const [isFollowing, setIsFollowing] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const { isSupplierLocked, upgradeTier, openUpgradeModal } = useBuyerPlan();
+  const { isSupplierLocked, upgradeTier, openUpgradeModal, pricing } = useBuyerPlan();
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -142,7 +142,9 @@ export function SupplierProfileView({
                 className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-700 transition active:scale-[0.99] cursor-pointer"
               >
                 <Sparkles className="h-4 w-4 fill-amber-300 text-amber-300" />
-                <span>Upgrade to Pro • Unlock Full Profile (₹3,999/mo)</span>
+                <span>
+                  Upgrade to Pro • Unlock Full Profile ({pricing.proPriceFormatted} / {pricing.proPriceSub})
+                </span>
                 <ArrowRight className="h-4 w-4" />
               </button>
 
