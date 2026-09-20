@@ -190,7 +190,7 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
                 >
                   <Eye className="h-3.5 w-3.5" />
                   <span>View</span>
-                </Link>
+                </Link> 
 
                 <button
                   type="button"
