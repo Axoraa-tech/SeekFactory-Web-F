@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp, UserPlus } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import type { SellerFactoryProfile, SellerProduct, SellerRfq, SellerSeek, SellerStats } from "../types";
 import { SalesproAnalyticsChart } from "./salespro-analytics-chart";
 import { SalesproIndiaDemand } from "./salespro-india-demand";
@@ -25,39 +25,11 @@ export function SalesproOverviewView({
 }: Props) {
   return (
     <div className="space-y-6 pt-5">
-      {/* Header: Data Analytics & Team Avatars */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Subheader Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E6E8EB]">
         <div>
           <h2 className="text-lg font-bold text-[#1C1C1C]">India–China B2B Discovery & RFQ Analytics</h2>
           <p className="text-xs text-[#5F6368]">Live performance metrics and purchase inquiries from Indian industrial importers</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Stacked Buyer / Team Avatars */}
-          <div className="flex items-center -space-x-2">
-            {[
-              "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80",
-              "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80",
-              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=80&q=80",
-              "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=80&q=80",
-            ].map((img, i) => (
-              <div key={i} className="h-7 w-7 rounded-full overflow-hidden border-2 border-white ring-1 ring-[#E6E8EB]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img} alt="" className="h-full w-full object-cover" />
-              </div>
-            ))}
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F3F4F6] border-2 border-white text-[10px] font-bold text-[#5F6368]">
-              +4
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="flex items-center gap-1.5 rounded-lg border border-[#E6E8EB] bg-white px-3 py-1.5 text-xs font-semibold text-[#1C1C1C] hover:bg-[#F3F4F6] transition shadow-2xs"
-          >
-            <UserPlus className="h-3.5 w-3.5 text-[#5F6368]" />
-            <span>Invite Team Member</span>
-          </button>
         </div>
       </div>
 
@@ -120,15 +92,15 @@ export function SalesproOverviewView({
         </div>
       </div>
 
-      {/* Middle Grid: Area Step Chart (Left 7 cols) + India Sourcing Hubs Demand (Right 5 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Left 7 Columns: Video Seeks vs RFQ Conversion Trend */}
-        <div className="lg:col-span-7">
+      {/* Middle Grid: Area Step Chart (Equal Left 6 cols) + India Sourcing Hubs Demand (Equal Right 6 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+        {/* Left: Video Seeks vs RFQ Conversion Trend */}
+        <div className="flex flex-col">
           <SalesproAnalyticsChart />
         </div>
 
-        {/* Right 5 Columns: India Industrial Sourcing Hubs & Ports */}
-        <div className="lg:col-span-5">
+        {/* Right: India Industrial Sourcing Hubs & Ports */}
+        <div className="flex flex-col">
           <SalesproIndiaDemand />
         </div>
       </div>

@@ -76,7 +76,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
           </Link>
         )}
       </div>
-      <SupplierLockOverlay badgeLabel="Manufacturers Locked • Upgrade">
+      <SupplierLockOverlay badgeLabel="View Manufacturers">
         <ul className="space-y-3">
           {manufacturers.slice(0, 4).map((manufacturer) => {
             const isFollowing = !!followedMap[manufacturer.id];
@@ -174,7 +174,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
         </button>
       </div>
 
-      <SupplierLockOverlay badgeLabel="Verified Manufacturers Locked • Upgrade to Pro">
+      <SupplierLockOverlay badgeLabel="View Verified Manufacturers">
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {visibleManufacturers.map((m) => (
             <Link

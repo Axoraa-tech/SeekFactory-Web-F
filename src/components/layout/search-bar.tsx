@@ -36,8 +36,8 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
         action="/explore"
         className={`hidden md:flex h-11 w-full items-center rounded-full border px-4 transition-all duration-200 ${
           isFocused
-            ? "border-brand-blue bg-white ring-2 ring-brand-blue/20 shadow-md"
-            : "border-slate-200/90 bg-slate-100/70 hover:bg-slate-100 hover:border-slate-300"
+            ? "border-brand-blue/70 bg-white/95 ring-3 ring-brand-blue/15 shadow-[0_4px_16px_rgba(37,99,235,0.12)]"
+            : "border-white/80 bg-white/55 backdrop-blur-md hover:bg-white/80 hover:border-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.03),0_2px_8px_rgba(0,0,0,0.04)]"
         }`}
       >
         <Search

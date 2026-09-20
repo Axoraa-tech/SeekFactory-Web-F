@@ -6,7 +6,7 @@ export function SalesproAnalyticsChart() {
   const timeRange = "Last 12 Months";
 
   return (
-    <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs flex flex-col justify-between">
+    <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs flex flex-col justify-between h-full">
       {/* Chart Header with Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
@@ -37,8 +37,8 @@ export function SalesproAnalyticsChart() {
       {/* SVG Step & Area Chart */}
       <div className="relative w-full h-[220px] pt-1">
         <svg
-          viewBox="0 0 600 200"
-          className="w-full h-full overflow-visible"
+          viewBox="-45 0 645 200"
+          className="w-full h-full overflow-hidden"
           preserveAspectRatio="none"
         >
           <defs>
@@ -62,12 +62,12 @@ export function SalesproAnalyticsChart() {
           <line x1="0" y1="155" x2="600" y2="155" stroke="#F3F4F6" strokeDasharray="3 3" />
           <line x1="0" y1="190" x2="600" y2="190" stroke="#E6E8EB" />
 
-          {/* Y Axis Labels */}
-          <text x="-30" y="24" fontSize="9" fill="#80868B" textAnchor="end">50k</text>
-          <text x="-30" y="69" fontSize="9" fill="#80868B" textAnchor="end">35k</text>
-          <text x="-30" y="114" fontSize="9" fill="#80868B" textAnchor="end">20k</text>
-          <text x="-30" y="159" fontSize="9" fill="#80868B" textAnchor="end">10k</text>
-          <text x="-30" y="193" fontSize="9" fill="#80868B" textAnchor="end">0</text>
+          {/* Y Axis Labels (contained inside viewBox bounds -45..600) */}
+          <text x="-8" y="24" fontSize="10" fontWeight="500" fill="#80868B" textAnchor="end">50k</text>
+          <text x="-8" y="69" fontSize="10" fontWeight="500" fill="#80868B" textAnchor="end">35k</text>
+          <text x="-8" y="114" fontSize="10" fontWeight="500" fill="#80868B" textAnchor="end">20k</text>
+          <text x="-8" y="159" fontSize="10" fontWeight="500" fill="#80868B" textAnchor="end">10k</text>
+          <text x="-8" y="193" fontSize="10" fontWeight="500" fill="#80868B" textAnchor="end">0</text>
 
           {/* Step Area 1: Video Impressions (Blue fill) */}
           <path
@@ -103,8 +103,8 @@ export function SalesproAnalyticsChart() {
         </svg>
       </div>
 
-      {/* Month X-Axis */}
-      <div className="flex items-center justify-between text-[10px] font-semibold text-[#80868B] pt-2 border-t border-[#F3F4F6]">
+      {/* Month X-Axis aligned with chart plot area */}
+      <div className="flex items-center justify-between text-[10px] font-semibold text-[#80868B] pt-2 border-t border-[#F3F4F6] pl-9">
         {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(
           (m) => (
             <span key={m}>{m}</span>

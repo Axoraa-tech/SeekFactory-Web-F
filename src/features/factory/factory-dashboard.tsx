@@ -31,6 +31,7 @@ import { ProfileTab } from "./tabs/profile-tab";
 import { AddProductModal } from "./components/add-product-modal";
 import { AddSeekModal } from "./components/add-seek-modal";
 import { RfqQuoteModal } from "./components/rfq-quote-modal";
+import { FactoryPricingModal, type FactoryPlanTier } from "./components/factory-pricing-modal";
 
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
@@ -167,6 +168,15 @@ export function FactoryDashboard({
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddSeekOpen, setIsAddSeekOpen] = useState(false);
   const [quotingRfq, setQuotingRfq] = useState<SellerRfq | null>(null);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
+  function handleSelectFactoryPlan(tierId: FactoryPlanTier, tierName: string) {
+    setProfile((prev) => ({
+      ...prev,
+      tier: tierName,
+    }));
+    setIsPricingModalOpen(false);
+  }
 
   // Unread messages count
   const unreadMessagesCount = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
@@ -336,6 +346,7 @@ export function FactoryDashboard({
   }
 
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   function handleOpenChatWithBuyer(buyerCompany: string) {
     const targetConv = conversations.find(
@@ -349,7 +360,7 @@ export function FactoryDashboard({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex">
-      {/* Salespro Left Sidebar */}
+      {/* Salespro Left Sidebar (Responsive drawer on mobile) */}
       <SalesproSidebar
         activeTab={activeTab}
         onSelectTab={setActiveTab}
@@ -359,27 +370,31 @@ export function FactoryDashboard({
         unreadMessagesCount={unreadMessagesCount}
         profile={profile}
         userName={user.name}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        onOpenUpgradeModal={() => setIsPricingModalOpen(true)}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
-        <main className="flex-1 p-6 lg:p-8 max-w-[1500px] w-full mx-auto">
-          {/* Top Header with title & action buttons */}
+      {/* Main Content Area (offset by fixed 256px / w-64 sidebar on desktop) */}
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen lg:ml-64">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1500px] w-full mx-auto">
+          {/* Top Header with title, hamburger menu, & action buttons */}
           <SalesproTopbar
             activeTab={activeTab}
             onOpenAddProduct={() => setIsAddProductOpen(true)}
             onOpenAddSeek={() => setIsAddSeekOpen(true)}
             profile={profile}
+            onOpenMobileMenu={() => setIsMobileSidebarOpen(true)}
           />
 
           {/* Tab Views */}
           {activeTab === "overview" && (
             <SalesproOverviewView
+              profile={profile}
               stats={stats}
               products={products}
               seeks={seeks}
               rfqs={rfqs}
-              profile={profile}
               onOpenQuoteModal={(rfq) => setQuotingRfq(rfq)}
             />
           )}
@@ -431,6 +446,7 @@ export function FactoryDashboard({
                 onUpdateProfile={(updated) =>
                   setProfile((prev) => ({ ...prev, ...updated }))
                 }
+                onOpenUpgradeModal={() => setIsPricingModalOpen(true)}
               />
             </div>
           )}
@@ -456,6 +472,14 @@ export function FactoryDashboard({
         isOpen={!!quotingRfq}
         onClose={() => setQuotingRfq(null)}
         onSubmitQuote={handleSubmitQuote}
+      />
+
+      {/* Global Chairman Membership Pricing Modal */}
+      <FactoryPricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+        currentTier={profile.tier}
+        onSelectPlan={handleSelectFactoryPlan}
       />
     </div>
   );

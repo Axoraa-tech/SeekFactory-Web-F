@@ -27,6 +27,7 @@ import {
   PhoneCall,
   FileCheck2,
   ExternalLink,
+  Maximize2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -37,6 +38,9 @@ import { useBuyerPlan } from "@/features/subscription";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
+import type { FactoryCertificate } from "@/entities/factory-certificate";
+import { CertificateLightboxModal } from "@/components/profile/certificate-lightbox-modal";
+import { AlibabaCertSection } from "@/components/profile/alibaba-cert-section";
 import { cn } from "@/shared/lib/cn";
 
 
@@ -56,7 +60,58 @@ export function SupplierProfileView({
   const [activeTab, setActiveTab] = useState<"products" | "videos" | "about">("products");
   const [isFollowing, setIsFollowing] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const { isSupplierLocked, upgradeTier, openUpgradeModal } = useBuyerPlan();
+  const [inspectingCert, setInspectingCert] = useState<FactoryCertificate | null>(null);
+  const { isSupplierLocked, upgradeTier, openUpgradeModal, pricing } = useBuyerPlan();
+
+  const displayCertificates: FactoryCertificate[] =
+    manufacturer.certificates && manufacturer.certificates.length > 0
+      ? manufacturer.certificates
+      : [
+          {
+            id: "cert-iso-9001",
+            title: "ISO 9001:2015 Quality Management",
+            issuer: "TUV Rheinland Certification Body",
+            certNumber: "TUV-QM-984210-IN",
+            issueDate: "2023-04-12",
+            expiryDate: "2026-04-11",
+            imageUrl: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=1200&q=80",
+            verified: true,
+            category: "Quality",
+          },
+          {
+            id: "cert-ce-machinery",
+            title: "CE Conformity - Machinery Directive 2006/42/EC",
+            issuer: "Eurofins Product Testing EU",
+            certNumber: "CE-EU-448102-M",
+            issueDate: "2022-09-18",
+            expiryDate: "2027-09-17",
+            imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80",
+            verified: true,
+            category: "Safety & CE",
+          },
+          {
+            id: "cert-rohs",
+            title: "RoHS 2011/65/EU Environmental Compliance",
+            issuer: "SGS Global Standards Authority",
+            certNumber: "SGS-ROHS-77219",
+            issueDate: "2023-01-15",
+            expiryDate: "2026-01-14",
+            imageUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80",
+            verified: true,
+            category: "Environmental",
+          },
+          {
+            id: "cert-tuv-audit",
+            title: "TUV On-Site Gold Factory Audit & Capacity Verification",
+            issuer: "TUV Rheinland Global Inspection",
+            certNumber: "TUV-FAC-2024-889",
+            issueDate: "2024-02-10",
+            expiryDate: "2027-02-09",
+            imageUrl: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80",
+            verified: true,
+            category: "Audit Report",
+          },
+        ];
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -142,7 +197,9 @@ export function SupplierProfileView({
                 className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-700 transition active:scale-[0.99] cursor-pointer"
               >
                 <Sparkles className="h-4 w-4 fill-amber-300 text-amber-300" />
-                <span>Upgrade to Pro • Unlock Full Profile (₹3,999/mo)</span>
+                <span>
+                  Upgrade to Pro • Unlock Full Profile ({pricing.proPriceFormatted} / {pricing.proPriceSub})
+                </span>
                 <ArrowRight className="h-4 w-4" />
               </button>
 
@@ -413,6 +470,9 @@ export function SupplierProfileView({
             >
               <FileCheck className="h-4 w-4" />
               <span>Overview & Audits</span>
+              <span className="rounded-full bg-slate-100 text-slate-700 px-2 py-0.5 text-xs font-semibold">
+                {displayCertificates.length} Verified
+              </span>
             </button>
           </div>
 
@@ -578,6 +638,16 @@ export function SupplierProfileView({
                   </div>
                 </Card>
               </div>
+
+              {/* Verified Profile & Certifications Showcase (Alibaba Reference Style) */}
+              <div className="pt-2">
+                <AlibabaCertSection
+                  certificates={displayCertificates}
+                  manufacturer={manufacturer}
+                  isOwner={false}
+                  onInspect={(cert) => setInspectingCert(cert)}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -590,6 +660,13 @@ export function SupplierProfileView({
           />
         </aside>
       </div>
+
+      {/* Full-Screen Certificate Lightbox Inspector */}
+      <CertificateLightboxModal
+        certificate={inspectingCert}
+        onClose={() => setInspectingCert(null)}
+        manufacturerName={manufacturer.name}
+      />
     </div>
   );
 }

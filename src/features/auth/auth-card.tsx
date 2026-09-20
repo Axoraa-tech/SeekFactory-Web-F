@@ -81,10 +81,17 @@ export function AuthCard({
       phone: String(form.get("phone") ?? "") || undefined,
       companyName: String(form.get("companyName") ?? "") || undefined,
     };
-
     try {
       const api = getApi();
       const user = mode === "join" ? await api.session.join(input) : await api.session.login(input);
+
+      // New manufacturers go through verification step before landing on their dashboard
+      if (mode === "join" && role === "Supplier") {
+        router.push("/factory/verify");
+        router.refresh();
+        return;
+      }
+
       router.push(postAuthPath(user.role, next));
       router.refresh();
     } catch (err: unknown) {

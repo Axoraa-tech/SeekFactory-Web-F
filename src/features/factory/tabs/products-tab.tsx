@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Package,
   Plus,
   Search,
   Trash2,
+  ExternalLink,
+  Eye,
 } from "lucide-react";
 import type { SellerProduct } from "../types";
 
@@ -106,14 +109,21 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
           >
             {/* Left: Thumbnail & Details */}
             <div className="flex items-start gap-4 flex-1 min-w-0">
-              <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 bg-canvas border border-line">
+              <Link
+                href={`/products/${product.slug}`}
+                className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 bg-canvas border border-line block group/img"
+                title={`View ${product.name}`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={product.imageUrl}
                   alt={product.name}
-                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="h-full w-full object-cover group-hover/img:scale-110 transition-transform duration-300"
                 />
-              </div>
+                <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-colors flex items-center justify-center">
+                  <ExternalLink className="h-4 w-4 text-white opacity-0 group-hover/img:opacity-100 transition-opacity" />
+                </div>
+              </Link>
 
               <div className="space-y-1 min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -132,9 +142,13 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
                   <span className="text-[11px] text-neutral-400">Added {product.createdAt}</span>
                 </div>
 
-                <h3 className="text-sm font-bold text-neutral-900 group-hover:text-brand-blue transition truncate">
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="block font-bold text-sm text-neutral-900 hover:text-brand-blue transition truncate"
+                  title={`View ${product.name}`}
+                >
                   {product.name}
-                </h3>
+                </Link>
 
                 <p className="text-xs font-semibold text-neutral-800">
                   ₹{(product.priceInr ?? 0).toLocaleString()} / {product.unit} •{" "}
@@ -169,10 +183,19 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
               </div>
 
               <div className="flex items-center gap-2">
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
+                  title="View Public Marketplace Listing"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  <span>View</span>
+                </Link>
+
                 <button
                   type="button"
                   onClick={() => onDeleteProduct(product.id)}
-                  className="rounded-xl border border-line p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
+                  className="rounded-xl border border-line p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                   title="Delete Product"
                 >
                   <Trash2 className="h-4 w-4" />

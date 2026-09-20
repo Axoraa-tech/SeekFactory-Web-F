@@ -16,6 +16,7 @@ import { ProfileRfqsPanel } from "./profile-rfqs-panel";
 import { ProfileSavedPanel } from "./profile-saved-panel";
 import { ProfileFollowingPanel } from "./profile-following-panel";
 import { ProfileMembershipPanel } from "./profile-membership-panel";
+import { useBuyerPlan } from "@/features/subscription";
 
 import type { RfqItem } from "@/entities/rfq";
 
@@ -33,6 +34,7 @@ export function UserProfileDashboard({
   initialRfqs = [],
 }: Props) {
   const router = useRouter();
+  const { pricing, upgradeTier } = useBuyerPlan();
   const [activeTab, setActiveTab] = useState<ProfileTab>("details");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -140,7 +142,14 @@ export function UserProfileDashboard({
 
   const handleUpgradeTier = (tier: MembershipTier) => {
     setCurrentTier(tier);
-    showToast(`Membership successfully upgraded to ${tier.toUpperCase()} Tier!`);
+    upgradeTier(tier === "pro" ? "pro" : tier === "enterprise" ? "enterprise" : "free");
+    if (tier === "pro") {
+      showToast(`Membership successfully updated to PRO Tier (${pricing.proPriceFormatted} / ${pricing.proPriceSub})!`);
+    } else if (tier === "enterprise") {
+      showToast(`Membership successfully updated to ENTERPRISE Tier (${pricing.enterprisePrice})!`);
+    } else {
+      showToast("Membership updated to Free Tier.");
+    }
   };
 
   const handleLogout = async () => {

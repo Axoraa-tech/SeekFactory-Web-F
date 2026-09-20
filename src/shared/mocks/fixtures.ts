@@ -344,6 +344,110 @@ export const products: Product[] = [
     categoryId: "cat-cnc-plasma-cutting-machine",
     specs: { LaserPower: "12 kW", TableSize: "6000 x 2500 mm", PosAccuracy: "±0.03 mm", MaxSpeed: "120 m/min" },
   },
+  {
+    id: "prod-apex-1",
+    name: "Heavy-Duty 5-Axis CNC Precision Machining Center (VMC 1200)",
+    slug: "cnc-vmc-1200",
+    manufacturerId: "mfr-apex",
+    imageUrl:
+      "https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&w=900&q=80",
+    categoryId: "cat-cnc-vmc-machines",
+    priceInr: 2850000,
+    unit: "Set",
+    moq: "1 Set",
+    specs: {
+      "Spindle Speed": "12,000 RPM",
+      "Table Size": "1300 x 600 mm",
+      "Controller": "Siemens 828D / Fanuc 0i-MF",
+      "Axis Travel (X/Y/Z)": "1200 / 600 / 600 mm",
+      "Tool Magazine": "24 Tools Arm-Type ATC",
+      "Positioning Accuracy": "±0.005 mm",
+    },
+    description:
+      "High rigidity linear guideways designed for heavy-duty metal cutting, automotive parts, mold making, and aerospace components.",
+  },
+  {
+    id: "prod-apex-2",
+    name: "Closed-Die Hydraulic Hot Forging Press (1600T Capacity)",
+    slug: "hot-forging-press-1600t",
+    manufacturerId: "mfr-apex",
+    imageUrl:
+      "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=900&q=80",
+    categoryId: "cat-die-casting-machine",
+    priceInr: 4500000,
+    unit: "Set",
+    moq: "1 Set",
+    specs: {
+      "Nominal Force": "16,000 kN",
+      "Slide Stroke": "450 mm",
+      "Die Height": "950 mm",
+      "Working Table": "1200 x 1200 mm",
+      "Motor Power": "110 kW",
+    },
+    description:
+      "Automated hydraulic forging press with high-speed cycle times, precise force control, and energy-saving servo hydraulic power pack.",
+  },
+  {
+    id: "prod-apex-3",
+    name: "Precision Aluminum Die Casting Automated Machine Cell",
+    slug: "die-casting-automated-cell",
+    manufacturerId: "mfr-apex",
+    imageUrl:
+      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80",
+    categoryId: "cat-die-casting-machine",
+    priceInr: 3200000,
+    unit: "Set",
+    moq: "1 Set",
+    specs: {
+      "Clamping Force": "800 Tons",
+      "Injection Stroke": "720 mm",
+      "Shot Weight (Al)": "9.5 kg",
+      "Automation": "Integrated ABB Robotic Ladler & Extractor",
+    },
+    description:
+      "Fully automated cold chamber die casting unit with automatic spraying, molten metal pouring, and part extraction.",
+  },
+  {
+    id: "prod-apex-4",
+    name: "Industrial 6kW Fiber Laser Metal Sheet Cutting Machine",
+    slug: "fiber-laser-cutting-6kw",
+    manufacturerId: "mfr-apex",
+    imageUrl:
+      "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=900&q=80",
+    categoryId: "cat-cnc-plasma-cutting-machine",
+    priceInr: 2150000,
+    unit: "Set",
+    moq: "1 Set",
+    specs: {
+      "Laser Power": "6,000 Watts Raycus/IPG",
+      "Cutting Bed Area": "3000 x 1500 mm",
+      "Max Cutting (Carbon Steel)": "25 mm",
+      "Max Cutting (Stainless)": "14 mm",
+      "Positioning Speed": "120 m/min",
+    },
+    description:
+      "Aviation aluminum gantry with dual exchange shuttle tables and smart auto-focus cutting head.",
+  },
+  {
+    id: "prod-apex-5",
+    name: "Forged Alloy Steel Crankshaft Blanks & Shaft Components",
+    slug: "forged-crankshaft-blanks",
+    manufacturerId: "mfr-apex",
+    imageUrl:
+      "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?auto=format&fit=crop&w=900&q=80",
+    categoryId: "cat-die-casting-machine",
+    priceInr: 12500,
+    unit: "Piece",
+    moq: "100 Pieces",
+    specs: {
+      "Material Grade": "42CrMo4 / 40Cr / SAE 4140",
+      "Heat Treatment": "Quenched & Tempered (QT)",
+      "Surface Finish": "Machined / Shot Blasted",
+      "NDT Testing": "100% Ultrasonic + Magnetic Particle",
+    },
+    description:
+      "Custom forged engine crankshafts and heavy-duty drivetrain components manufactured to client drawings.",
+  },
 ];
 
 export const reels: Reel[] = [
