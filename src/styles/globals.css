@@ -1,0 +1,272 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-blue: #1a73e8;
+  --brand-blue-dark: #1557b0;
+  --brand-blue-soft: #e8f1fd;
+  --brand-orange: #f26b21;
+  --brand-orange-soft: #fff1e8;
+  --ink: #1c1c1c;
+  --ink-muted: #5f6368;
+  --ink-faint: #80868b;
+  --line: #e6e8eb;
+  --canvas: #f3f4f6;
+  --surface: #ffffff;
+  --font-sans: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d0d5dd;
+  border-radius: 999px;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes glass-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Soft light caustic that drifts across Apple-style liquid glass */
+@keyframes liquid-glass-caustic {
+  0% {
+    transform: translate3d(-30%, -20%, 0) rotate(0deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(20%, 10%, 0) rotate(12deg);
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(55%, -5%, 0) rotate(0deg);
+    opacity: 0.3;
+  }
+}
+
+@keyframes liquid-glass-rim {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-2xl border border-white/70 bg-white/70 shadow-glass backdrop-blur-xl;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.75) inset,
+      0 8px 28px rgba(16, 24, 40, 0.06);
+  }
+
+  /*
+   * Apple-inspired Liquid Glass (approximation in CSS):
+   * clear refractive material, saturated backdrop, specular rim, drifting caustic —
+   * not classic frosted glassmorphism.
+   */
+  .glass-panel-liquid {
+    --lg-radius: 1.75rem;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--lg-radius);
+    border: 0.5px solid rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(40px) saturate(220%) brightness(1.08);
+    -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.08);
+    box-shadow:
+      inset 0.5px 0.5px 0 rgba(255, 255, 255, 0.85),
+      inset -0.5px -0.5px 0 rgba(255, 255, 255, 0.2),
+      inset 0 0 40px rgba(255, 255, 255, 0.12),
+      0 1px 2px rgba(255, 255, 255, 0.4),
+      0 12px 40px rgba(15, 23, 42, 0.1),
+      0 28px 80px rgba(26, 115, 232, 0.08);
+  }
+
+  /* Specular top lip — light catching the glass edge */
+  .glass-panel-liquid::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 0;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.72) 0%,
+        rgba(255, 255, 255, 0.18) 12%,
+        rgba(255, 255, 255, 0.04) 28%,
+        transparent 48%
+      ),
+      radial-gradient(
+        120% 80% at 10% -10%,
+        rgba(255, 255, 255, 0.7),
+        transparent 42%
+      );
+    mix-blend-mode: soft-light;
+    animation: liquid-glass-rim 7s ease-in-out infinite;
+  }
+
+  /* Drifting caustic / liquid highlight */
+  .glass-panel-liquid::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+    width: 70%;
+    height: 90%;
+    top: -20%;
+    left: -10%;
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 255, 255, 0.75) 0%,
+        rgba(255, 255, 255, 0.2) 28%,
+        transparent 62%
+      ),
+      radial-gradient(
+        circle at 70% 60%,
+        rgba(26, 115, 232, 0.18) 0%,
+        transparent 55%
+      );
+    filter: blur(18px);
+    animation: liquid-glass-caustic 10s ease-in-out infinite alternate;
+  }
+
+  .glass-panel-liquid > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .glass-chip {
+    @apply rounded-xl border border-white/80 bg-white/55 px-3 py-2 shadow-sm backdrop-blur-md transition duration-200;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  }
+
+  .glass-chip:hover {
+    @apply -translate-y-0.5 bg-white/80;
+  }
+
+  /* Nested liquid controls */
+  .glass-input {
+    width: 100%;
+    border-radius: 0.875rem;
+    border: 0.5px solid rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.18);
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--ink);
+    outline: none;
+    backdrop-filter: blur(16px) saturate(180%) brightness(1.05);
+    -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.05);
+    box-shadow:
+      inset 0.5px 0.5px 0 rgba(255, 255, 255, 0.75),
+      inset -0.5px -0.5px 0 rgba(255, 255, 255, 0.15),
+      0 1px 2px rgba(15, 23, 42, 0.04);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      background 0.15s ease;
+  }
+
+  @media (min-width: 640px) {
+    .glass-input {
+      font-size: 0.875rem;
+    }
+  }
+
+  .glass-input:focus {
+    border-color: rgba(26, 115, 232, 0.55);
+    background: rgba(255, 255, 255, 0.28);
+    box-shadow:
+      0 0 0 2px rgba(26, 115, 232, 0.18),
+      inset 0.5px 0.5px 0 rgba(255, 255, 255, 0.85),
+      inset -0.5px -0.5px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-fade-in {
+    animation: glass-fade-up 0.45s ease-out both;
+  }
+
+  /* Nested liquid glass control / list row */
+  .glass-liquid-item {
+    border-radius: 0.875rem;
+    border: 0.5px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(14px) saturate(170%) brightness(1.05);
+    -webkit-backdrop-filter: blur(14px) saturate(170%) brightness(1.05);
+    box-shadow:
+      inset 0.5px 0.5px 0 rgba(255, 255, 255, 0.7),
+      inset -0.5px -0.5px 0 rgba(255, 255, 255, 0.12);
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .glass-liquid-item:hover {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glass-panel-liquid::before,
+    .glass-panel-liquid::after {
+      animation: none;
+    }
+  }
+}
+
