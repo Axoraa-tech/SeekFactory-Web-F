@@ -28,8 +28,8 @@ export default function AdminLoginPage() {
     try {
       // Pre-flight check: test credentials with a dummy TOTP code
       await adminApi.login(email, password, "000000");
-    } catch (err: any) {
-      const msg = err.message || "";
+    } catch (err: unknown) {
+      const msg = (err as Error).message || "";
       if (msg.includes("Invalid email or password") || msg.includes("deactivated") || msg.includes("not configured")) {
         setError(msg);
         setIsLoading(false);
@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
         setStep(2);
 
       } else {
-        const code = typeof totpCode === "string" ? totpCode : totpCode.join("");
+        const code = totpCode;
         if (code.length !== 6) {
           setError("Please enter the 6-digit TOTP code.");
           setIsLoading(false);
@@ -75,8 +75,8 @@ export default function AdminLoginPage() {
         document.cookie = `admin_token=${data.accessToken}; path=/`;
         router.push("/admin/dashboard");
       }
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials or TOTP code.");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Invalid credentials or TOTP code.");
       setIsLoading(false);
     }
   };

@@ -55,8 +55,8 @@ function AdminSetupContent() {
       setIsLoading(false);
       setStep(2);
       
-    } catch (err: any) {
-      setError(err.message || "Failed to set up account.");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Failed to set up account.");
       setIsLoading(false);
     }
   };
@@ -164,6 +164,7 @@ function AdminSetupContent() {
 
               {qrCodeUri && (
                 <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl inline-block mx-auto shadow-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={qrCodeUri} alt="TOTP QR Code" className="w-48 h-48" />
                 </div>
               )}
