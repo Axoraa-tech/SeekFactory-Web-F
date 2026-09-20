@@ -134,9 +134,10 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
               autoFocus
             />
             {query && (
-              <button
+                  <button
                 type="button"
                 onClick={() => setQuery("")}
+                aria-label="Clear search"
                 className="p-1 text-slate-400 hover:text-slate-600"
               >
                 <X className="h-4 w-4" />

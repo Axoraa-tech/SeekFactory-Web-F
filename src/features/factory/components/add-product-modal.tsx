@@ -125,6 +125,7 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="rounded-lg p-1.5 text-ink-muted hover:bg-canvas hover:text-ink transition"
           >
             <X className="h-5 w-5" />
@@ -317,6 +318,7 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
                     <button
                       type="button"
                       onClick={() => handleRemoveSpec(idx)}
+                      aria-label="Remove specification"
                       className="p-1.5 text-ink-muted hover:text-red-500 transition"
                     >
                       <Trash2 className="h-4 w-4" />

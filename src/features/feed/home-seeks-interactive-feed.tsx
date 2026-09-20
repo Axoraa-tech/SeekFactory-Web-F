@@ -433,6 +433,7 @@ export function HomeSeeksInteractiveFeed({
                 <button
                   type="button"
                   onClick={() => handleSubcategoryClick(selectedSub.slug)}
+                  aria-label="Remove category filter"
                   className="hover:text-rose-600 ml-0.5 cursor-pointer"
                 >
                   <X className="h-3 w-3" />
@@ -449,6 +450,7 @@ export function HomeSeeksInteractiveFeed({
                     setSearchQuery("");
                     updateUrl(expandedCategorySlug, selectedSubcategorySlug, tab, viewMode, "");
                   }}
+                  aria-label="Clear search filter"
                   className="hover:text-rose-600 ml-0.5 cursor-pointer"
                 >
                   <X className="h-3 w-3" />
