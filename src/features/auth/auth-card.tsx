@@ -82,6 +82,16 @@ export function AuthCard({
     };
     const api = getApi();
     const user = mode === "join" ? await api.session.join(input) : await api.session.login(input);
+
+    // New manufacturers go through a verification step (business documents,
+    // certificates) before landing on their dashboard, so buyers can trust
+    // that verified badges mean something.
+    if (mode === "join" && role === "Supplier") {
+      router.push("/factory/verify");
+      router.refresh();
+      return;
+    }
+
     router.push(postAuthPath(user.role, next));
     router.refresh();
   }
