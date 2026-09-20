@@ -58,7 +58,7 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
           </div>
           <div>
             <p className="text-xs text-ink-muted font-medium">Total Video Impressions</p>
-            <p className="text-lg font-bold text-brand-blue">{totalViews.toLocaleString()} Plays</p>
+            <p className="text-lg font-bold text-brand-blue">{(totalViews ?? 0).toLocaleString()} Plays</p>
           </div>
         </div>
 
@@ -137,7 +137,7 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1 font-semibold text-neutral-900">
                     <Eye className="h-3.5 w-3.5 text-neutral-400" />
-                    {seek.viewsCount.toLocaleString()}
+                    {(seek.viewsCount ?? 0).toLocaleString()}
                   </span>
                   <span className="flex items-center gap-1 font-bold text-red-600">
                     {seek.inquiriesGenerated} Leads

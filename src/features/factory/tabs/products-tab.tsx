@@ -151,7 +151,7 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
                 </Link>
 
                 <p className="text-xs font-semibold text-neutral-800">
-                  ₹{product.priceInr.toLocaleString()} / {product.unit} •{" "}
+                  ₹{(product.priceInr ?? 0).toLocaleString()} / {product.unit} •{" "}
                   <span className="text-ink-muted font-normal">MOQ: {product.moq}</span>
                 </p>
 

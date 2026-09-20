@@ -141,7 +141,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
                 </div>
                 {rfq.targetBudgetInr && (
                   <div>
-                    <span>Target Budget: <strong>₹{rfq.targetBudgetInr.toLocaleString()}</strong></span>
+                    <span>Target Budget: <strong>₹{(rfq.targetBudgetInr ?? 0).toLocaleString()}</strong></span>
                   </div>
                 )}
               </div>
@@ -156,7 +156,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
               <div className="flex items-center gap-4 rounded-xl bg-emerald-50 border border-emerald-200/80 px-3.5 py-2 text-xs text-emerald-900 font-semibold">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                 <span>
-                  Official Quote Sent: <strong>₹{rfq.quotedPriceInr.toLocaleString()}</strong> • Lead Time:{" "}
+                  Official Quote Sent: <strong>₹{(rfq.quotedPriceInr ?? 0).toLocaleString()}</strong> • Lead Time:{" "}
                   <strong>{rfq.leadTimeDays} Days</strong>
                 </span>
               </div>

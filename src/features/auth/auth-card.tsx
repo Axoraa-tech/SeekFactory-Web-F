@@ -55,8 +55,8 @@ export function AuthCard({
 
     if (method === "email") {
       const pwd = String(form.get("password") ?? password ?? "");
-      if (pwd.length < 6) {
-        setError("Password must be at least 6 characters.");
+      if (pwd.length < 8) {
+        setError("Password must be at least 8 characters.");
         return;
       }
     } else {
@@ -75,25 +75,29 @@ export function AuthCard({
     const input = {
       role,
       method,
+      name: String(form.get("name") ?? "") || undefined,
       email: String(form.get("email") ?? email) || undefined,
       password: String(form.get("password") ?? password) || undefined,
       phone: String(form.get("phone") ?? "") || undefined,
       companyName: String(form.get("companyName") ?? "") || undefined,
     };
-    const api = getApi();
-    const user = mode === "join" ? await api.session.join(input) : await api.session.login(input);
+    try {
+      const api = getApi();
+      const user = mode === "join" ? await api.session.join(input) : await api.session.login(input);
 
-    // New manufacturers go through a verification step (business documents,
-    // certificates) before landing on their dashboard, so buyers can trust
-    // that verified badges mean something.
-    if (mode === "join" && role === "Supplier") {
-      router.push("/factory/verify");
+      // New manufacturers go through verification step before landing on their dashboard
+      if (mode === "join" && role === "Supplier") {
+        router.push("/factory/verify");
+        router.refresh();
+        return;
+      }
+
+      router.push(postAuthPath(user.role, next));
       router.refresh();
-      return;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Authentication failed. Please check your credentials.");
+      setSaving(false);
     }
-
-    router.push(postAuthPath(user.role, next));
-    router.refresh();
   }
 
   async function handleGuestLogin(view: "landscape" | "vertical") {
@@ -106,10 +110,15 @@ export function AuthCard({
       email: "guest.buyer@seekfactory.com",
       companyName: "Global Sourcing Corp (Guest)",
     };
-    const api = getApi();
-    await api.session.login(input);
-    router.push(`/?view=${view}`);
-    router.refresh();
+    try {
+      const api = getApi();
+      await api.session.login(input);
+      router.push(`/?view=${view}`);
+      router.refresh();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Guest login failed.");
+      setSaving(false);
+    }
   }
 
 
@@ -133,13 +142,21 @@ export function AuthCard({
       <RoleToggle />
 
       <form onSubmit={onSubmit} className="space-y-3">
-        {mode === "join" && isManufacturer ? (
-          <input
-            name="companyName"
-            required
-            placeholder="Factory / company name"
-            className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-          />
+        {mode === "join" ? (
+          <>
+            <input
+              name="name"
+              required
+              placeholder="Contact Person / Full Name"
+              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+            />
+            <input
+              name="companyName"
+              required
+              placeholder={isManufacturer ? "Factory / Manufacturer Name" : "Company / Enterprise Name"}
+              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+            />
+          </>
         ) : null}
 
         {method === "email" ? (
@@ -157,10 +174,10 @@ export function AuthCard({
               name="password"
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password (6+ characters)"
+              placeholder="Password (8+ characters)"
               className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
           </>

@@ -176,7 +176,7 @@ export function MessagesTab({
                         <p className="text-[11px] opacity-85 mt-0.5">{msg.attachmentData.detail}</p>
                         {msg.attachmentData.price && (
                           <p className="font-extrabold text-amber-300 mt-1">
-                            Quoted: ₹{msg.attachmentData.price.toLocaleString()}
+                            Quoted: ₹{(msg.attachmentData.price ?? 0).toLocaleString()}
                           </p>
                         )}
                       </div>

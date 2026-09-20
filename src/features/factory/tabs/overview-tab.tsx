@@ -97,11 +97,11 @@ export function OverviewTab({
             </div>
           </div>
           <p className="text-xl font-extrabold text-ink">
-            {stats.totalProductViews.toLocaleString()}
+            {(stats?.totalProductViews ?? 0).toLocaleString()}
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-brand-blue">
             <TrendingUp className="h-3 w-3" />
-            <span>+{stats.productViewsChange}% this mo</span>
+            <span>+{stats?.productViewsChange ?? 0}% this mo</span>
           </p>
         </Card>
 
@@ -116,11 +116,11 @@ export function OverviewTab({
             </div>
           </div>
           <p className="text-xl font-extrabold text-ink">
-            {stats.videoSeekPlays.toLocaleString()}
+            {(stats?.videoSeekPlays ?? 0).toLocaleString()}
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-brand-blue">
             <TrendingUp className="h-3 w-3" />
-            <span>+{stats.videoPlaysChange}% plays</span>
+            <span>+{stats?.videoPlaysChange ?? 0}% plays</span>
           </p>
         </Card>
 
@@ -135,27 +135,29 @@ export function OverviewTab({
             </div>
           </div>
           <p className="text-xl font-extrabold text-ink">
-            {stats.factoryProfileVisits.toLocaleString()}
+            {(stats?.factoryProfileVisits ?? 0).toLocaleString()}
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-amber-700">
             <TrendingUp className="h-3 w-3" />
-            <span>+{stats.profileVisitsChange}% visits</span>
+            <span>+{stats?.profileVisitsChange ?? 0}% visits</span>
           </p>
         </Card>
 
-        {/* 4. Active RFQs & Inquiries */}
+        {/* 4. Total Inquiries / RFQs */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
               Active RFQs
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-600">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
               <FileText className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-xl font-extrabold text-ink">{stats.activeRfqsCount}</p>
-          <p className="mt-1 text-[11px] font-bold text-red-600">
-            {stats.pendingRfqsCount} awaiting quote
+          <p className="text-xl font-extrabold text-ink">
+            {stats?.activeRfqsCount ?? 0}
+          </p>
+          <p className="mt-1 text-[11px] text-emerald-700 font-semibold">
+            {stats?.pendingRfqsCount ?? 0} awaiting quotes
           </p>
         </Card>
 
@@ -165,17 +167,19 @@ export function OverviewTab({
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
               Response Rate
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-canvas text-ink-muted">
               <Clock className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-xl font-extrabold text-ink">{stats.responseRatePercent}%</p>
+          <p className="text-xl font-extrabold text-ink">
+            {stats?.responseRatePercent ?? 100}%
+          </p>
           <p className="mt-1 text-[11px] text-ink-muted font-medium">
-            Avg {stats.avgResponseTimeHours}h reply
+            Avg {stats?.avgResponseTimeHours ?? 1.5}h
           </p>
         </Card>
 
-        {/* 6. Buyer Followers */}
+        {/* 6. Followers */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
@@ -186,7 +190,7 @@ export function OverviewTab({
             </div>
           </div>
           <p className="text-xl font-extrabold text-ink">
-            {stats.followerCount.toLocaleString()}
+            {(stats?.followerCount ?? 0).toLocaleString()}
           </p>
           <p className="mt-1 text-[11px] text-ink-muted font-medium">Verified buyers</p>
         </Card>
@@ -284,7 +288,7 @@ export function OverviewTab({
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-ink truncate">{prod.name}</p>
                   <p className="text-[11px] text-ink-muted">
-                    ₹{prod.priceInr.toLocaleString()} / {prod.unit} • MOQ {prod.moq}
+                    ₹{(prod.priceInr ?? 0).toLocaleString()} / {prod.unit} • MOQ {prod.moq}
                   </p>
                   <div className="flex items-center gap-3 text-[10px] text-ink-muted mt-1">
                     <span className="font-semibold text-brand-blue">{prod.viewsCount} Views</span>
@@ -323,7 +327,7 @@ export function OverviewTab({
                   <p className="text-xs font-bold text-ink truncate">{seek.title}</p>
                   <p className="text-[11px] text-ink-muted">{seek.category} • {seek.durationSeconds}s</p>
                   <div className="flex items-center gap-3 text-[10px] text-ink-muted mt-1">
-                    <span className="font-semibold text-brand-blue">{seek.viewsCount.toLocaleString()} Plays</span>
+                    <span className="font-semibold text-brand-blue">{(seek.viewsCount ?? 0).toLocaleString()} Plays</span>
                     <span>•</span>
                     <span className="font-bold text-red-600">
                       {seek.inquiriesGenerated} Leads Generated

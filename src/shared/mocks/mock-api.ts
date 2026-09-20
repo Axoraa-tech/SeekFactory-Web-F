@@ -9,6 +9,7 @@ import type {
   ProductRepository,
   RfqRepository,
   SessionRepository,
+  FactoryRepository,
 } from "@/shared/api/contracts";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import {
@@ -61,6 +62,27 @@ const session: SessionRepository = {
     clearBrowserCookie();
     return delay(undefined);
   },
+  async updateProfile(input) {
+    const payload = readBrowserCookie();
+    if (payload) {
+      const updated = {
+        ...payload,
+        name: input.name || payload.name,
+        companyName: input.companyName || payload.companyName,
+      };
+      writeBrowserCookie(updated);
+      return delay(payloadToProfile(updated));
+    }
+    return delay({
+      id: "mock-user",
+      name: input.name || "Member",
+      role: "Buyer" as const,
+      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+      companyName: input.companyName || "Global Industrial",
+      industry: input.industry || "Machinery",
+      country: input.country || "India",
+    });
+  },
 };
 
 const feed: FeedRepository = {
@@ -89,6 +111,8 @@ const feed: FeedRepository = {
     reels.unshift(reel);
     return delay(undefined);
   },
+  likeReel: () => delay({ liked: true, likesCount: 43 }),
+  saveReel: () => delay({ saved: true, savesCount: 15 }),
 };
 
 const manufacturerRepo: ManufacturerRepository = {
@@ -142,6 +166,42 @@ const messages: MessageRepository = {
     });
     return delay(items);
   },
+  async getMessages(conversationId: string) {
+    return delay([
+      {
+        id: `mock-msg-1-${conversationId}`,
+        conversationId,
+        sender: "factory" as const,
+        text: "Hello! Welcome to our manufacturing plant. How can our engineering team assist you today?",
+        time: "10:30 AM",
+      },
+    ]);
+  },
+  async sendMessage(conversationId: string, text: string, attachment?: { name: string; size: string; url?: string }) {
+    return delay({
+      id: `mock-msg-${Date.now()}`,
+      conversationId,
+      sender: "user" as const,
+      text,
+      time: "Just now",
+      attachment,
+    });
+  },
+  async startConversation(manufacturerId: string, initialMessage?: string) {
+    const mfg = manufacturers.find((m) => m.id === manufacturerId) || manufacturers[0];
+    const newConv = {
+      id: `conv-${Date.now()}`,
+      manufacturerId: mfg.id,
+      lastMessage: initialMessage || "Hello",
+      lastMessageAt: new Date().toISOString(),
+      unreadCount: 0,
+      manufacturer: mfg,
+    };
+    return delay(newConv);
+  },
+  async markAsRead() {
+    return delay(undefined);
+  },
 };
 
 const categoryRepo: CategoryRepository = {
@@ -160,10 +220,18 @@ const categoryRepo: CategoryRepository = {
 const notificationRepo: NotificationRepository = {
   list: () => delay(notifications),
   unreadCount: () => delay(notifications.filter((item) => !item.read).length),
+  markAllAsRead: () => delay(undefined),
+  markAsRead: () => delay(undefined),
+  deleteNotification: () => delay(undefined),
 };
 
 const rfq: RfqRepository = {
-  submit: async () => delay({ ok: true as const, id: `rfq-${Date.now()}` }),
+  submit: async (_draft) => delay({
+    ok: true as const,
+    id: `rfq-${Date.now()}`,
+    referenceNumber: `RFQ-2026-${Math.floor(100000 + Math.random() * 900000)}`,
+  }),
+  listMyRfqs: async () => delay([]),
 };
 
 let dynamicComments: ReelComment[] = [...mockComments];
@@ -220,6 +288,49 @@ const commentsRepo: CommentRepository = {
   },
 };
 
+const factoryRepo: FactoryRepository = {
+  getProfile: () => delay(manufacturers[0]),
+  updateProfile: (data) => delay({ ...manufacturers[0], ...data }),
+  getStats: () => delay(null),
+  getProducts: () => delay(products),
+  addProduct: (data) => delay({
+    id: `prod-${Date.now()}`,
+    manufacturerId: "mfg-01",
+    name: data.name,
+    slug: data.name.toLowerCase().replace(/\s+/g, "-"),
+    imageUrl: data.imageUrl,
+    description: data.description || "",
+    priceInr: data.priceInr,
+    unit: data.unit || "Piece",
+    moq: data.moq || "1 Piece",
+    categoryId: data.categoryId,
+    specs: data.specs || {},
+  }),
+  deleteProduct: () => delay(undefined),
+  getSeeks: () => delay(reels),
+  addSeek: (data) => delay({
+    id: `reel-${Date.now()}`,
+    manufacturerId: "mfg-01",
+    title: data.title,
+    description: data.description || "",
+    hashtags: [],
+    posterUrl: data.posterUrl,
+    videoUrl: data.videoUrl,
+    durationSec: data.durationSec || 30,
+    startSec: 0,
+    views: 0,
+    likes: 0,
+    comments: 0,
+    shares: 0,
+    saves: 0,
+    tab: "for-you",
+    productIds: [],
+  }),
+  deleteSeek: () => delay(undefined),
+  getRfqs: () => delay([]),
+  submitQuote: () => delay(undefined),
+};
+
 export const mockApi: ApiClient = {
   session,
   feed,
@@ -230,4 +341,5 @@ export const mockApi: ApiClient = {
   notifications: notificationRepo,
   rfq,
   comments: commentsRepo,
+  factory: factoryRepo,
 };

@@ -44,15 +44,27 @@ export function RfqForm({ categories }: Props) {
     event.preventDefault();
     setStatus("saving");
 
-    const result = await getApi().rfq.submit({
-      productName,
-      quantity: `${quantity} ${unit}`,
-      details: `[${selectedCategory || "General"}] [${incoterm}] Target: ${currency} ${targetPrice || "Negotiable"}. ${details} ${attachedFile ? `[Attached: ${attachedFile.name}]` : ""}`,
-      companyName,
-    });
+    try {
+      const result = await getApi().rfq.submit({
+        productName,
+        quantity,
+        unit,
+        targetPrice: targetPrice || "Negotiable",
+        currency,
+        incoterm,
+        categoryId: selectedCategory || undefined,
+        details,
+        companyName,
+        attachmentName: attachedFile?.name,
+        attachmentSize: attachedFile?.size,
+      });
 
-    setReferenceId(result.id || `SF-RFQ-${Math.floor(100000 + Math.random() * 900000)}`);
-    setStatus("sent");
+      setReferenceId(result.referenceNumber || result.id || `SF-RFQ-${Math.floor(100000 + Math.random() * 900000)}`);
+      setStatus("sent");
+    } catch (err) {
+      console.error("Failed to submit RFQ:", err);
+      setStatus("idle");
+    }
   }
 
   const handleAttachMock = () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { getApi } from "@/shared/api";
@@ -18,16 +18,20 @@ import { ProfileFollowingPanel } from "./profile-following-panel";
 import { ProfileMembershipPanel } from "./profile-membership-panel";
 import { useBuyerPlan } from "@/features/subscription";
 
+import type { RfqItem } from "@/entities/rfq";
+
 type Props = {
   user: BuyerProfile;
   initialProducts?: Product[];
   initialManufacturers?: Manufacturer[];
+  initialRfqs?: RfqItem[];
 };
 
 export function UserProfileDashboard({
   user,
   initialProducts = [],
   initialManufacturers = [],
+  initialRfqs = [],
 }: Props) {
   const router = useRouter();
   const { pricing, upgradeTier } = useBuyerPlan();
@@ -38,14 +42,29 @@ export function UserProfileDashboard({
 
   const [formData, setFormData] = useState<ProfileFormData>({
     name: user.name || "Global Sourcing Lead",
-    email: (user as { email?: string }).email || "buyer@seekfactory.com",
+    email: user.email || "",
     companyName: user.companyName || "Apex Industrial Solutions",
     industry: user.industry || "Precision Engineering & Machinery",
     country: user.country || "India",
-    phone: "+91 98765 43210",
+    phone: user.phone || "+91 98765 43210",
     taxId: "GSTIN29ABCDE1234F1Z5",
-    address: "Plot 42, Peenya Industrial Area, Phase 2, Bengaluru, Karnataka 560058",
+    address: "Peenya Industrial Area, Phase 2, Bengaluru, Karnataka",
   });
+
+  // Sync state if user profile props update
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        companyName: user.companyName || prev.companyName,
+        industry: user.industry || prev.industry,
+        country: user.country || prev.country,
+        phone: user.phone || prev.phone,
+      }));
+    }
+  }, [user]);
 
   const [savedProducts, setSavedProducts] = useState<Product[]>(() => {
     return initialProducts.slice(0, 4);
@@ -57,51 +76,57 @@ export function UserProfileDashboard({
 
   const [currentTier, setCurrentTier] = useState<MembershipTier>("pro");
 
-  const [rfqs] = useState<ProfileRfq[]>([
-    {
-      id: "SF-RFQ-9482",
-      title: "5-Axis CNC Precision Aluminum Housings",
-      category: "CNC Machining",
-      targetQty: "500 Pieces",
-      targetPrice: "₹1,450 / pc",
-      status: "3 Factory Quotes Received",
-      statusColor: "text-emerald-700 bg-emerald-50 border-emerald-200",
-      date: "Yesterday",
-    },
-    {
-      id: "SF-RFQ-8910",
-      title: "Closed Die Forged Automotive Drive Shafts",
-      category: "Forging & Casting",
-      targetQty: "250 Pieces",
-      targetPrice: "₹2,800 / pc",
-      status: "In Tooling & Sample Run",
-      statusColor: "text-blue-700 bg-blue-50 border-blue-200",
-      date: "3 days ago",
-    },
-    {
-      id: "SF-RFQ-7241",
-      title: "Multi-Cavity Precision Injection Tooling Mold",
-      category: "Molds & Tooling",
-      targetQty: "1 Set",
-      targetPrice: "₹1,80,000 / set",
-      status: "Open for Verified Bids",
-      statusColor: "text-amber-700 bg-amber-50 border-amber-200",
-      date: "1 week ago",
-    },
-  ]);
+  const [rfqs] = useState<ProfileRfq[]>(() => {
+    if (initialRfqs && initialRfqs.length > 0) {
+      return initialRfqs.map((r) => ({
+        id: r.referenceNumber || r.id,
+        title: r.productName,
+        category: r.details?.split("]")[0]?.replace("[", "") || "Industrial Component",
+        targetQty: `${r.quantity} ${r.unit || "Pieces"}`,
+        targetPrice: r.targetPrice && r.targetPrice !== "Negotiable" ? `${r.currency || "INR"} ${r.targetPrice}` : "Negotiable",
+        status: r.status === "SUBMITTED" ? "Open for Verified Bids" : r.status,
+        statusColor: r.status === "SUBMITTED" ? "text-amber-700 bg-amber-50 border-amber-200" : "text-emerald-700 bg-emerald-50 border-emerald-200",
+        date: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "Recently",
+      }));
+    }
+
+    return [
+      {
+        id: "SF-RFQ-9482",
+        title: "5-Axis CNC Precision Aluminum Housings",
+        category: "CNC Machining",
+        targetQty: "500 Pieces",
+        targetPrice: "₹1,450 / pc",
+        status: "3 Factory Quotes Received",
+        statusColor: "text-emerald-700 bg-emerald-50 border-emerald-200",
+        date: "Yesterday",
+      },
+    ];
+  });
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      await getApi().session.updateProfile({
+        name: formData.name,
+        companyName: formData.companyName,
+        industry: formData.industry,
+        country: formData.country,
+        phone: formData.phone,
+      });
       showToast("Company profile & contact preferences updated successfully!");
-    }, 600);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      showToast("Profile details updated locally.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleRemoveSaved = (productId: string, e: React.MouseEvent) => {

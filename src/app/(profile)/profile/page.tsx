@@ -4,9 +4,11 @@ import { getApi } from "@/shared/api";
 
 export default async function ProfilePage() {
   const user = await requireUser("/profile");
-  const [products, manufacturers] = await Promise.all([
-    getApi().products.listTrending(6),
-    getApi().manufacturers.listAll(),
+  const api = getApi();
+  const [products, manufacturers, myRfqs] = await Promise.all([
+    api.products.listTrending(6),
+    api.manufacturers.listAll(),
+    api.rfq.listMyRfqs(),
   ]);
 
   return (
@@ -15,6 +17,7 @@ export default async function ProfilePage() {
         user={user}
         initialProducts={products}
         initialManufacturers={manufacturers}
+        initialRfqs={myRfqs}
       />
     </section>
   );
