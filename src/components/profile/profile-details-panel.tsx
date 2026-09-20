@@ -37,13 +37,19 @@ export function ProfileDetailsPanel({ formData, setFormData, isSaving, onSave }:
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink mb-1">Business Email</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-ink">Account & Business Email</label>
+              <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                Verified Login ID
+              </span>
+            </div>
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              className="glass-input h-10"
+              readOnly
+              disabled
+              title="Your login email serves as your verified account ID."
+              className="glass-input h-10 bg-slate-100/70 text-slate-600 cursor-not-allowed border-slate-200"
             />
           </div>
 

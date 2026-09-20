@@ -6,4 +6,6 @@ export type BuyerProfile = {
   companyName: string;
   industry: string;
   country: string;
+  email?: string;
+  phone?: string;
 };

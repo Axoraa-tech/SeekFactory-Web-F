@@ -31,6 +31,7 @@ import { formatCount, formatDuration } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
+import { getApi } from "@/shared/api";
 
 type Props = {
   reel: Reel;
@@ -461,7 +462,10 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
             {/* 3. Like */}
             <button
               type="button"
-              onClick={() => setLiked((v) => !v)}
+              onClick={() => {
+                setLiked((v) => !v);
+                getApi().feed.likeReel(reel.id).catch(() => {});
+              }}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-rose-600 hover:shadow-xs transition",
                 liked && "text-rose-600 bg-white shadow-xs"
@@ -484,7 +488,10 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug }: Props) {
             {/* 5. Save */}
             <button
               type="button"
-              onClick={() => setSaved((v) => !v)}
+              onClick={() => {
+                setSaved((v) => !v);
+                getApi().feed.saveReel(reel.id).catch(() => {});
+              }}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition",
                 saved && "text-brand-blue bg-white shadow-xs"

@@ -32,24 +32,135 @@ import { AddProductModal } from "./components/add-product-modal";
 import { AddSeekModal } from "./components/add-seek-modal";
 import { RfqQuoteModal } from "./components/rfq-quote-modal";
 
+import type { Manufacturer } from "@/entities/manufacturer";
+import type { Product } from "@/entities/product";
+import type { Reel } from "@/entities/reel";
+import type { RfqItem } from "@/entities/rfq";
+import type { Category } from "@/entities/category";
+
 type Props = {
   user: BuyerProfile;
+  initialProfile?: Manufacturer | null;
+  initialStats?: SellerStats | null;
+  initialProducts?: Product[];
+  initialSeeks?: Reel[];
+  initialRfqs?: RfqItem[];
+  allCategories?: Category[];
 };
 
-export function FactoryDashboard({ user }: Props) {
+export function FactoryDashboard({
+  user,
+  initialProfile,
+  initialStats,
+  initialProducts = [],
+  initialSeeks = [],
+  initialRfqs = [],
+  allCategories: _allCategories = [],
+}: Props) {
   const [activeTab, setActiveTab] = useState<SellerTab>("overview");
 
-  // State
-  const [stats, setStats] = useState<SellerStats>(initialSellerStats);
-  const [products, setProducts] = useState<SellerProduct[]>(initialSellerProducts);
-  const [seeks, setSeeks] = useState<SellerSeek[]>(initialSellerSeeks);
-  const [rfqs, setRfqs] = useState<SellerRfq[]>(initialSellerRfqs);
+  const [stats, setStats] = useState<SellerStats>(() => {
+    if (initialStats) {
+      return {
+        ...initialSellerStats,
+        ...initialStats,
+      };
+    }
+    return initialSellerStats;
+  });
+
+  const [products, setProducts] = useState<SellerProduct[]>(() => {
+    if (initialProducts && initialProducts.length > 0) {
+      return initialProducts.map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        imageUrl: p.imageUrl,
+        category: "Industrial Machinery",
+        categoryId: p.categoryId,
+        priceInr: p.priceInr,
+        unit: p.unit,
+        moq: p.moq,
+        status: "Active" as const,
+        viewsCount: 1420,
+        inquiriesCount: 18,
+        specs: p.specs,
+        description: p.description,
+        createdAt: "Recently",
+      }));
+    }
+    return initialSellerProducts;
+  });
+
+  const [seeks, setSeeks] = useState<SellerSeek[]>(() => {
+    if (initialSeeks && initialSeeks.length > 0) {
+      return initialSeeks.map((s) => ({
+        id: s.id,
+        title: s.title,
+        videoUrl: s.videoUrl || "",
+        thumbnailUrl: s.posterUrl,
+        durationSeconds: s.durationSec,
+        viewsCount: s.views,
+        likesCount: s.likes,
+        commentsCount: s.comments,
+        inquiriesGenerated: 12,
+        category: "Factory Production",
+        createdAt: "Recently",
+        status: "Published" as const,
+      }));
+    }
+    return initialSellerSeeks;
+  });
+
+  const [rfqs, setRfqs] = useState<SellerRfq[]>(() => {
+    if (initialRfqs && initialRfqs.length > 0) {
+      return initialRfqs.map((r) => ({
+        id: r.id,
+        buyerName: r.companyName || "Verified Industrial Buyer",
+        buyerCompany: r.companyName || "Global Sourcing Ltd",
+        buyerCountry: "India",
+        productName: r.productName,
+        productCategory: r.details?.split("]")[0]?.replace("[", "") || "Machinery",
+        quantityRequested: `${r.quantity} ${r.unit || "Pieces"}`,
+        targetBudgetInr: r.targetPrice && !isNaN(Number(r.targetPrice)) ? Number(r.targetPrice) : undefined,
+        deliveryPort: r.incoterm || "FOB",
+        status: (r.status === "SUBMITTED" ? "New" : "Responded") as SellerRfq["status"],
+        createdAt: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "Recent",
+        requirements: r.details || "",
+      }));
+    }
+    return initialSellerRfqs;
+  });
+
   const [conversations, setConversations] = useState<SellerConversation[]>(
     initialSellerConversations
   );
-  const [profile, setProfile] = useState<SellerFactoryProfile>({
-    ...initialFactoryProfile,
-    name: user.companyName || initialFactoryProfile.name,
+
+  const [profile, setProfile] = useState<SellerFactoryProfile>(() => {
+    if (initialProfile) {
+      return {
+        name: initialProfile.name,
+        slug: initialProfile.slug,
+        logoUrl: initialProfile.logoUrl,
+        coverUrl: initialProfile.coverUrl,
+        country: initialProfile.country,
+        location: initialProfile.location,
+        yearsEstablished: initialProfile.yearsEstablished,
+        factorySize: initialProfile.factorySize,
+        employees: initialProfile.employees,
+        annualTurnover: "$10M - $25M USD",
+        exportCountries: initialProfile.exportCountries,
+        certifications: ["ISO 9001:2015", "CE Certified", "RoHS Compliant"],
+        description: initialProfile.description,
+        productionLines: 8,
+        verified: initialProfile.verified,
+        tier: "Gold Plus Verified",
+      };
+    }
+    return {
+      ...initialFactoryProfile,
+      name: user.companyName || initialFactoryProfile.name,
+    };
   });
 
   // Modals state
@@ -62,76 +173,78 @@ export function FactoryDashboard({ user }: Props) {
   const newRfqsCount = rfqs.filter((r) => r.status === "New").length;
 
   // Handlers
-  function handleAddProduct(newProd: SellerProduct) {
+  async function handleAddProduct(newProd: SellerProduct) {
     setProducts((prev) => [newProd, ...prev]);
     setStats((prev) => ({
       ...prev,
       totalProductsCount: prev.totalProductsCount + 1,
     }));
 
-    // Synchronize into shared marketplace repository
-    const api = getApi();
-    void api.products.addProduct({
-      id: newProd.id,
-      slug: newProd.slug,
-      manufacturerId: "mfr-apex",
-      name: newProd.name,
-      imageUrl: newProd.imageUrl,
-      description: newProd.description,
-      priceInr: newProd.priceInr,
-      unit: newProd.unit,
-      moq: newProd.moq,
-      categoryId: newProd.categoryId,
-      specs: newProd.specs,
-    });
+    try {
+      await getApi().factory.addProduct({
+        name: newProd.name,
+        imageUrl: newProd.imageUrl,
+        description: newProd.description,
+        priceInr: newProd.priceInr,
+        unit: newProd.unit,
+        moq: newProd.moq,
+        categoryId: newProd.categoryId,
+        specs: newProd.specs,
+      });
+    } catch (err) {
+      console.error("Failed to persist product to factory backend:", err);
+    }
   }
 
-  function handleDeleteProduct(id: string) {
+  async function handleDeleteProduct(id: string) {
     setProducts((prev) => prev.filter((p) => p.id !== id));
     setStats((prev) => ({
       ...prev,
       totalProductsCount: Math.max(0, prev.totalProductsCount - 1),
     }));
+
+    try {
+      await getApi().factory.deleteProduct(id);
+    } catch (err) {
+      console.error("Failed to delete product from backend:", err);
+    }
   }
 
-  function handleAddSeek(newSeek: SellerSeek) {
+  async function handleAddSeek(newSeek: SellerSeek) {
     setSeeks((prev) => [newSeek, ...prev]);
     setStats((prev) => ({
       ...prev,
       totalSeeksCount: prev.totalSeeksCount + 1,
     }));
 
-    // Synchronize into shared buyer feed repository
-    const api = getApi();
-    void api.feed.addReel({
-      id: newSeek.id,
-      manufacturerId: "mfr-apex",
-      videoUrl: newSeek.videoUrl,
-      posterUrl: newSeek.thumbnailUrl,
-      title: newSeek.title,
-      description: newSeek.title,
-      hashtags: ["#manufacturing", "#machinery", "#b2b"],
-      durationSec: newSeek.durationSeconds,
-      startSec: 0,
-      views: newSeek.viewsCount,
-      likes: newSeek.likesCount,
-      comments: newSeek.commentsCount,
-      shares: 0,
-      saves: 0,
-      tab: "for-you",
-      productIds: [products[0]?.id || "prod-apex-1"],
-    });
+    try {
+      await getApi().factory.addSeek({
+        title: newSeek.title,
+        description: newSeek.title,
+        posterUrl: newSeek.thumbnailUrl,
+        videoUrl: newSeek.videoUrl,
+        durationSec: newSeek.durationSeconds,
+      });
+    } catch (err) {
+      console.error("Failed to persist reel to factory backend:", err);
+    }
   }
 
-  function handleDeleteSeek(id: string) {
+  async function handleDeleteSeek(id: string) {
     setSeeks((prev) => prev.filter((s) => s.id !== id));
     setStats((prev) => ({
       ...prev,
       totalSeeksCount: Math.max(0, prev.totalSeeksCount - 1),
     }));
+
+    try {
+      await getApi().factory.deleteSeek(id);
+    } catch (err) {
+      console.error("Failed to delete reel from backend:", err);
+    }
   }
 
-  function handleSubmitQuote(
+  async function handleSubmitQuote(
     rfqId: string,
     quotedPriceInr: number,
     leadTimeDays: number,
@@ -150,6 +263,17 @@ export function FactoryDashboard({ user }: Props) {
       )
     );
 
+    try {
+      await getApi().factory.submitQuote(rfqId, {
+        quotePrice: quotedPriceInr,
+        currency: "INR",
+        leadTimeDays,
+        notes: replyNotes,
+      });
+    } catch (err) {
+      console.error("Failed to submit quotation to backend:", err);
+    }
+
     // Also send quotation into trade messenger if buyer conversation exists
     const targetRfq = rfqs.find((r) => r.id === rfqId);
     if (targetRfq) {
@@ -162,7 +286,7 @@ export function FactoryDashboard({ user }: Props) {
             c.id === existingConv.id
               ? {
                   ...c,
-                  lastMessage: `Formal Quote Sent: ₹${quotedPriceInr.toLocaleString()}`,
+                  lastMessage: `Formal Quote Sent: ₹${(quotedPriceInr ?? 0).toLocaleString()}`,
                   lastMessageTime: "Just now",
                   messages: [
                     ...c.messages,

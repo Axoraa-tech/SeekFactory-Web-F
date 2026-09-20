@@ -17,6 +17,7 @@ import {
 import { cn } from "@/shared/lib/cn";
 import type { AppNotification } from "@/entities/notification";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { getApi } from "@/shared/api";
 
 type Props = {
   initialNotifications: AppNotification[];
@@ -38,11 +39,13 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
   const handleMarkAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     showToast("All notifications marked as read");
+    getApi().notifications.markAllAsRead().catch(() => {});
   };
 
   const handleClearAll = () => {
     setNotifications([]);
     showToast("All notifications cleared");
+    getApi().notifications.markAllAsRead().catch(() => {});
   };
 
   const handleToggleRead = (id: string, e: React.MouseEvent) => {
@@ -50,12 +53,14 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n))
     );
+    getApi().notifications.markAsRead(id).catch(() => {});
   };
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     showToast("Notification removed");
+    getApi().notifications.deleteNotification(id).catch(() => {});
   };
 
   // Filter based on tab

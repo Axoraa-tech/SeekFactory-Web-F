@@ -67,7 +67,7 @@ export function SalesproOverviewView({
         <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">Video Seek Impressions</p>
           <p className="text-2xl font-extrabold text-[#1A73E8]">
-            {stats.videoSeekPlays.toLocaleString()}
+            {(stats?.videoSeekPlays ?? 0).toLocaleString()}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
             <span>From last Month</span>
@@ -81,7 +81,7 @@ export function SalesproOverviewView({
         <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">Active India Buyer RFQs</p>
           <p className="text-2xl font-extrabold text-[#F26B21]">
-            {stats.activeRfqsCount} Leads
+            {stats?.activeRfqsCount ?? 0} Leads
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
             <span>Awaiting Quote</span>
@@ -95,7 +95,7 @@ export function SalesproOverviewView({
         <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">Catalog Product Views</p>
           <p className="text-2xl font-extrabold text-[#1C1C1C]">
-            {stats.totalProductViews.toLocaleString()}
+            {(stats?.totalProductViews ?? 0).toLocaleString()}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
             <span>From last Month</span>
@@ -109,7 +109,7 @@ export function SalesproOverviewView({
         <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">Buyer Response Rate</p>
           <p className="text-2xl font-extrabold text-[#1C1C1C]">
-            {stats.responseRatePercent}%
+            {stats?.responseRatePercent ?? 100}%
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
             <span>Avg Response Speed</span>

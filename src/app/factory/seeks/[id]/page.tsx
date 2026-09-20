@@ -62,7 +62,7 @@ export default function SeekDetailPage({ params }: Props) {
           <div className="flex items-center gap-5 pt-3 border-t border-line text-sm text-neutral-700">
             <span className="flex items-center gap-1.5 font-semibold">
               <Eye className="h-4 w-4 text-neutral-400" />
-              {seek.viewsCount.toLocaleString()} Views
+              {(seek.viewsCount ?? 0).toLocaleString()} Views
             </span>
             <span className="flex items-center gap-1.5 font-bold text-red-600">
               <TrendingUp className="h-4 w-4" />

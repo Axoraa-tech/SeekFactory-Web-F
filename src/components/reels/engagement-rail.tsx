@@ -10,8 +10,10 @@ import {
 } from "lucide-react";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+import { getApi } from "@/shared/api";
 
 type Props = {
+  reelId?: string;
   likes: number;
   comments: number;
   shares: number;
@@ -30,6 +32,7 @@ type Props = {
  * 5. Bookmark / Save
  */
 export function EngagementRail({
+  reelId,
   likes,
   comments,
   shares,
@@ -48,6 +51,9 @@ export function EngagementRail({
 
   const handleToggleLike = () => {
     setLiked((prev) => !prev);
+    if (reelId) {
+      getApi().feed.likeReel(reelId).catch(() => {});
+    }
   };
 
   const handleToggleRepost = () => {
@@ -56,6 +62,9 @@ export function EngagementRail({
 
   const handleToggleSave = () => {
     setSaved((prev) => !prev);
+    if (reelId) {
+      getApi().feed.saveReel(reelId).catch(() => {});
+    }
   };
 
   if (variant === "horizontal") {

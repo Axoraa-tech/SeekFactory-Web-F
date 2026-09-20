@@ -1,7 +1,7 @@
 import type { BuyerProfile } from "@/entities/user";
 
 export const SESSION_COOKIE = "sf-session";
-const MAX_AGE = 60 * 60 * 24 * 7;
+const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export type SessionPayload = {
   id: string;
@@ -9,14 +9,19 @@ export type SessionPayload = {
   role: "Buyer" | "Supplier";
   email: string;
   companyName: string;
+  token?: string;          // JWT Access Token from backend
+  refreshToken?: string;   // JWT Refresh Token
 };
 
 export type JoinInput = {
   role: "Buyer" | "Supplier";
+  name?: string;
   email?: string;
   password?: string;
   phone?: string;
   companyName?: string;
+  industry?: string;
+  country?: string;
   method: "email" | "phone";
 };
 
@@ -43,6 +48,7 @@ export function payloadToProfile(payload: SessionPayload): BuyerProfile {
     companyName: payload.companyName,
     industry: payload.role === "Buyer" ? "Industrial sourcing" : "Manufacturing",
     country: payload.role === "Buyer" ? "India" : "China",
+    email: payload.email,
   };
 }
 
@@ -52,7 +58,6 @@ export function readBrowserCookie(): SessionPayload | null {
   return parseSessionCookie(match?.slice(SESSION_COOKIE.length + 1));
 }
 
-/** Demo-only: not HttpOnly/Secure/signed. Never use for production auth. */
 export function writeBrowserCookie(payload: SessionPayload) {
   document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(JSON.stringify(payload))}; Path=/; Max-Age=${MAX_AGE}; SameSite=Lax`;
 }
