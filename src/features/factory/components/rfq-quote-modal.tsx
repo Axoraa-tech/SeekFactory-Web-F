@@ -43,6 +43,7 @@ export function RfqQuoteModal({ rfq, isOpen, onClose, onSubmitQuote }: Props) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="rounded-lg p-1.5 text-neutral-400 hover:bg-canvas hover:text-neutral-700 transition"
           >
             <X className="h-5 w-5" />

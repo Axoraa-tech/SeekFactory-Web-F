@@ -195,6 +195,7 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
                 <button
                   type="button"
                   onClick={() => onDeleteProduct(product.id)}
+                  aria-label="Delete product"
                   className="rounded-xl border border-line p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                   title="Delete Product"
                 >

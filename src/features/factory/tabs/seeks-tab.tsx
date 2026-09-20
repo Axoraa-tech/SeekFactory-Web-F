@@ -147,6 +147,7 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
                 <button
                   type="button"
                   onClick={() => onDeleteSeek(seek.id)}
+                  aria-label="Delete video"
                   className="rounded-lg p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                   title="Delete Video"
                 >
