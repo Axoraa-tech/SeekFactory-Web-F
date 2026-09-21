@@ -9,7 +9,6 @@ import {
   ChevronUp,
   ExternalLink,
   MapPin,
-  Plus,
   ShieldCheck,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -94,11 +93,15 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                     className="h-9 w-9 rounded-full object-cover border border-slate-200 shrink-0 group-hover:scale-105 transition-transform"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-1 truncate text-xs font-bold text-slate-900 group-hover:text-brand-blue transition-colors">
+                    <p className="truncate text-xs font-bold text-slate-900 group-hover:text-brand-blue transition-colors">
                       {shortName(manufacturer.name)}
-                      {manufacturer.verified ? <VerifiedBadge className="h-3 w-3 shrink-0" /> : null}
                     </p>
-                    <p className="text-[11px] text-slate-500 truncate">{translateCountry(manufacturer.country)}</p>
+
+                    <div className="flex min-w-0 items-center gap-1">
+                      {manufacturer.verified ? <VerifiedBadge className="h-3 w-3 shrink-0" /> : null}
+                      <p className="text-[11px] text-slate-500 truncate">{translateCountry(manufacturer.country)}</p>
+                    </div>
+
                   </div>
                 </Link>
 
@@ -119,7 +122,6 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                     </>
                   ) : (
                     <>
-                      <Plus className="h-3 w-3" />
                       <span>{t("widgets.follow", "Follow")}</span>
                     </>
                   )}
