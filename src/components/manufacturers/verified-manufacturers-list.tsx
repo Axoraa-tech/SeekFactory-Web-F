@@ -122,7 +122,6 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                     </>
                   ) : (
                     <>
-                      {/* <Plus className="h-3 w-3" /> */}
                       <span>{t("widgets.follow", "Follow")}</span>
                     </>
                   )}
