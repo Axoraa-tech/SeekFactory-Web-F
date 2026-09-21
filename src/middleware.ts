@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * Middleware skeleton (mock-safe).
@@ -9,7 +10,21 @@ import { NextResponse } from "next/server";
  * When real backend auth lands: verify HttpOnly session here and redirect guests
  * away from /messages, /notifications, /profile, /rfq/* before rendering.
  */
-export function middleware() {
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Protect Admin routes
+  if (
+    pathname.startsWith("/admin") &&
+    !pathname.startsWith("/admin/login") &&
+    !pathname.startsWith("/admin/setup")
+  ) {
+    const adminToken = request.cookies.get("admin_token");
+    if (!adminToken) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+  }
+
   const response = NextResponse.next();
 
   response.headers.set("X-Frame-Options", "DENY");

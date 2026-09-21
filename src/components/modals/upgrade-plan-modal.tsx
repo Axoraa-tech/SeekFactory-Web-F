@@ -403,10 +403,11 @@ export function UpgradePlanModal() {
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
             <span>100% Satisfaction Guarantee • Direct Plant Access</span>
           </div>
-          <button
+           <button
             type="button"
             onClick={closeUpgradeModal}
-            className="text-xs font-semibold text-slate-600 hover:text-slate-900 transition cursor-pointer"
+            aria-label="Close"
+            className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white/90 backdrop-blur-md transition hover:bg-black/40 hover:text-white"
           >
             Dismiss
           </button>

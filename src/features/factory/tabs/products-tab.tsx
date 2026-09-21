@@ -190,11 +190,12 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
                 >
                   <Eye className="h-3.5 w-3.5" />
                   <span>View</span>
-                </Link>
+                </Link> 
 
                 <button
                   type="button"
                   onClick={() => onDeleteProduct(product.id)}
+                  aria-label="Delete product"
                   className="rounded-xl border border-line p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                   title="Delete Product"
                 >

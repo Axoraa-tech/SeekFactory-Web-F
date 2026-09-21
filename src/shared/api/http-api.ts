@@ -672,8 +672,12 @@ export function createHttpApi(baseUrl: string): ApiClient {
     },
 
     async listChildren(slug: string): Promise<Category[]> {
-      const list = await fetchJson<BackendCategory[]>(`/api/v1/categories/${slug}/children`);
-      return list.map(normalizeCategory);
+      try {
+        const list = await fetchJson<BackendCategory[]>(`/api/v1/categories/${slug}/children`);
+        return list.map(normalizeCategory);
+      } catch {
+        return [];
+      }
     },
 
     async getBySlug(slug: string): Promise<Category | null> {

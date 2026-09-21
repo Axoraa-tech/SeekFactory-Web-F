@@ -84,6 +84,7 @@ export function AddSeekModal({ isOpen, onClose, products, onAddSeek }: Props) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="rounded-lg p-1.5 text-ink-muted hover:bg-canvas hover:text-ink transition"
           >
             <X className="h-5 w-5" />
