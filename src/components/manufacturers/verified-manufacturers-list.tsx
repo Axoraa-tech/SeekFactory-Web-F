@@ -95,9 +95,13 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-bold text-slate-900 group-hover:text-brand-blue transition-colors">
                       {shortName(manufacturer.name)}
-                      {manufacturer.verified ? <VerifiedBadge className="h-3 w-3 shrink-0" /> : null}
                     </p>
-                    <p className="text-[11px] text-slate-500 truncate">{translateCountry(manufacturer.country)}</p>
+
+                    <div className="flex min-w-0 items-center gap-1">
+                      {manufacturer.verified ? <VerifiedBadge className="h-3 w-3 shrink-0" /> : null}
+                      <p className="text-[11px] text-slate-500 truncate">{translateCountry(manufacturer.country)}</p>
+                    </div>
+
                   </div>
                 </Link>
 
