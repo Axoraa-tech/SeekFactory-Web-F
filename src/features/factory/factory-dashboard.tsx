@@ -221,11 +221,14 @@ export function FactoryDashboard({
         title: s.title,
         thumbnailUrl: s.posterUrl,
         videoUrl: s.videoUrl || "",
-        views: s.views,
-        leadsGenerated: s.likes + s.saves,
+        viewsCount: s.views,
+        likesCount: s.likes,
+        commentsCount: s.comments,
+        inquiriesGenerated: s.saves,
         durationSeconds: s.durationSec,
-        status: "Active" as const,
-        postedAt: "Recently",
+        category: s.category || "Manufacturing",
+        status: "Published" as const,
+        createdAt: "Recently",
       })));
     }
   }, [initialSeeks]);
