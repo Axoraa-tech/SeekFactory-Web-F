@@ -13,7 +13,20 @@ export async function POST(req: NextRequest) {
     });
 
     const data = await backendRes.json();
-    return NextResponse.json(data, { status: backendRes.status });
+    const response = NextResponse.json(data, { status: backendRes.status });
+    
+    if (backendRes.ok && data.accessToken) {
+      response.cookies.set({
+        name: "admin_token",
+        value: data.accessToken,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
+    }
+
+    return response;
   } catch (err) {
     console.error("Proxy error (login):", err);
     return NextResponse.json(

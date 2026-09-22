@@ -35,7 +35,7 @@ export function AuthCard({
   const [method, setMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState(initialPassword);
-  const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -187,27 +187,27 @@ export function AuthCard({
               className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
             <div className="relative">
-            <input
-              name="password"
-              type={showPassword ? "text" : "password"}
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password (8+ characters)"
-              className={
-                `h-11 pr-10 sm:h-12 w-full rounded-lg border  px-3 text-sm outline-none 
-                
-                ${
-                  password && passwordErrors ? "border-red-500 focus:border-red-500 focus:ring-1-red-500" : " border-[#8c8c8c] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-                }
-
-            `}/>
-
-            <button type="button" onClick={() => setShowPassword((p)=>!p)} className="absolute right-3 -translate-y-2 top-1/2 text-[#8c8c8c]">
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password (8+ characters)"
+                className={`h-11 sm:h-12 w-full rounded-lg border px-3 pr-10 text-sm outline-none transition-colors ${
+                  password && passwordErrors.length > 0 
+                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" 
+                    : "border-[#8c8c8c] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8c8c8c] hover:text-ink focus:outline-none"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
 
             {password && !isPasswordValid && (
@@ -217,7 +217,6 @@ export function AuthCard({
                 ))}
               </ul>
             )}
-
           </>
         ) : (
           <>

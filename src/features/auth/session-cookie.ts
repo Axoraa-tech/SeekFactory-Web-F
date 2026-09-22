@@ -9,8 +9,6 @@ export type SessionPayload = {
   role: "Buyer" | "Supplier";
   email: string;
   companyName: string;
-  token?: string;          // JWT Access Token from backend
-  refreshToken?: string;   // JWT Refresh Token
 };
 
 export type JoinInput = {
