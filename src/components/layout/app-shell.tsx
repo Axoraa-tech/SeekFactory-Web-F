@@ -10,6 +10,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
 import type { Conversation } from "@/entities/message";
 import type { Product } from "@/entities/product";
 import type { BuyerProfile } from "@/entities/user";
+import { CategoryHoverNav } from "@/features/explore/category-hover-nav";
 
 type Props = {
   user: BuyerProfile | null;
@@ -36,12 +37,17 @@ export function AppShell({
 }: Props) {
   return (
     <div className="min-h-screen bg-canvas pb-16 lg:pb-0">
-      <TopNav
+        <TopNav
         user={user}
         categories={categories}
         messageCount={messageCount}
         notificationCount={notificationCount}
       />
+      {categories && categories.length > 0 ? (
+        <div className="mx-auto max-w-[1440px] px-4 pt-1.5 lg:px-6">
+          <CategoryHoverNav categories={categories} forYouHref="/" />
+        </div>
+      ) : null}
       <div className="mx-auto flex max-w-[1440px] gap-5 px-4 pt-3 pb-4 lg:px-6">
         <LeftSidebar
           categories={categories}

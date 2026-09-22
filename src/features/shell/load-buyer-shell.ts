@@ -15,10 +15,16 @@ export async function loadBuyerShellData() {
     ? messages.reduce((sum, item) => sum + item.unreadCount, 0)
     : 0;
   const visibleNotificationCount = user ? notificationCount : 0;
-
+    // add 
+      const categoriesWithChildren = await Promise.all(
+    categories.map(async (category) => {
+      const children = await api.categories.listChildren(category.slug);
+      return { ...category, subcategories: children };
+    })
+  );
   return {
     user,
-    categories,
+    categories: categoriesWithChildren,
     manufacturers,
     products,
     messages,

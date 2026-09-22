@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { CategoryIcon } from "@/components/ui/category-icon";
+// import { CategoryIcon } from "@/components/ui/category-icon";
 import { cn } from "@/shared/lib/cn";
 import type { Category } from "@/entities/category";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
@@ -31,9 +31,10 @@ export function DynamicCategoryNav({
   sticky = true,
 }: Props) {
   const searchParams = useSearchParams();
-  const currentCategory = selectedCategorySlug || searchParams.get("category") || "";
+  const currentCategory =
+    selectedCategorySlug || searchParams.get("category") || "";
   const { t, translateCategory } = useRegionalSettings();
-
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
@@ -118,7 +119,10 @@ export function DynamicCategoryNav({
             stopHoverScroll();
             return;
           }
-          container.scrollLeft = Math.min(maxScroll, container.scrollLeft + pixelsPerSecond * dt);
+          container.scrollLeft = Math.min(
+            maxScroll,
+            container.scrollLeft + pixelsPerSecond * dt,
+          );
         } else {
           if (container.scrollLeft <= 1) {
             container.scrollLeft = 0;
@@ -126,7 +130,10 @@ export function DynamicCategoryNav({
             stopHoverScroll();
             return;
           }
-          container.scrollLeft = Math.max(0, container.scrollLeft + pixelsPerSecond * dt);
+          container.scrollLeft = Math.max(
+            0,
+            container.scrollLeft + pixelsPerSecond * dt,
+          );
         }
 
         updateArrowVisibility();
@@ -135,7 +142,7 @@ export function DynamicCategoryNav({
 
       hoverAnimRef.current = requestAnimationFrame(step);
     },
-    [stopHoverScroll, updateArrowVisibility]
+    [stopHoverScroll, updateArrowVisibility],
   );
 
   // Stop hover scrolling if tab loses focus or window blurs
@@ -166,7 +173,7 @@ export function DynamicCategoryNav({
       className={cn(
         "w-full rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] transition-all duration-300 overflow-hidden select-none",
         sticky ? "sticky top-[76px] z-20" : "",
-        className
+        className,
       )}
     >
       <div className="relative flex items-center px-1.5 sm:px-2">
@@ -209,26 +216,28 @@ export function DynamicCategoryNav({
             title={`${t("feed.forYou", "For You")} - ${t("sidebar.allCategories", "All Categories")}`}
             aria-current={!currentCategory ? "page" : undefined}
             className={cn(
-              "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 py-1.5 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
+              "group relative flex w-auto shrink-0 items-center justify-center rounded-xl px-3 py-2 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
               !currentCategory
-                ? "text-brand-blue font-bold bg-white/60 backdrop-blur-md shadow-2xs"
-                : "text-neutral-700 hover:text-ink hover:bg-white/40 hover:backdrop-blur-xs font-medium"
+                ? "text-brand-blue font-bold bg-blue-50"
+                : "text-neutral-700 hover:text-ink hover:bg-neutral-100 font-medium",
             )}
           >
-            {/* Bigger Dual-Tone Blue & Black Icon (Always visible, stable) */}
+            {/* Bigger Dual-Tone Blue & Black Icon (Always visible, stable)
             <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center mb-1 shrink-0 overflow-hidden">
               <CategoryIcon
                 icon="for-you"
                 size={28}
                 className="transition-transform group-hover:scale-110"
               />
-            </div>
+            </div> */}
 
             {/* Label - Uniform Truncated with ellipsis */}
             <span
               className={cn(
                 "w-full text-center text-[11px] sm:text-xs leading-tight truncate transition-colors",
-                !currentCategory ? "text-brand-blue font-bold" : "text-neutral-700 group-hover:text-ink"
+                !currentCategory
+                  ? "text-brand-blue font-bold"
+                  : "text-neutral-700 group-hover:text-ink",
               )}
             >
               {t("feed.forYou", "For You")}
@@ -243,52 +252,82 @@ export function DynamicCategoryNav({
           {/* Root Categories (Each with uniform fixed width & ellipsis) */}
           {categories.map((item) => {
             const isActive = currentCategory === item.slug;
-            const href = categoryHref ? categoryHref(item.slug) : `/explore?category=${item.slug}`;
+            const href = categoryHref
+              ? categoryHref(item.slug)
+              : `/explore?category=${item.slug}`;
             const translatedName = translateCategory(item.name);
+            const hasChildren = Boolean(
+              item.subcategories && item.subcategories.length > 0,
+            );
             return (
-              <Link
+              <div
                 key={item.id}
-                ref={isActive ? activeItemRef : null}
-                href={href}
-                onClick={(e) => {
-                  if (onCategorySelect) {
-                    e.preventDefault();
-                    onCategorySelect(item.slug);
-                  }
-                }}
-                title={translatedName}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "group relative flex w-[76px] sm:w-[80px] shrink-0 flex-col items-center justify-center rounded-xl px-1 py-1.5 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
-                  isActive
-                    ? "text-brand-blue font-bold bg-white/60 backdrop-blur-md shadow-2xs"
-                    : "text-neutral-700 hover:text-ink hover:bg-white/40 hover:backdrop-blur-xs font-medium"
-                )}
+                className="relative shrink-0"
+                onMouseEnter={() => hasChildren && setHoveredSlug(item.slug)}
+                onMouseLeave={() => setHoveredSlug(null)}
               >
-                {/* Bigger Dual-Tone Blue & Black Icon (Always visible, stable) */}
-                <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center mb-1 shrink-0 overflow-hidden">
-                  <CategoryIcon
-                    icon={item.icon}
-                    size={28}
-                    className="transition-transform group-hover:scale-110"
-                  />
-                </div>
-
-                {/* Category Name - Uniformly Truncated */}
-                <span
+                <Link
+                  ref={isActive ? activeItemRef : null}
+                  href={href}
+                  onClick={(e) => {
+                    if (onCategorySelect) {
+                      e.preventDefault();
+                      onCategorySelect(item.slug);
+                    }
+                  }}
+                  title={translatedName}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "w-full text-center text-[11px] sm:text-xs leading-tight truncate transition-colors",
-                    isActive ? "text-brand-blue font-bold" : "text-neutral-700 group-hover:text-ink"
+                    "group relative flex w-auto shrink-0 items-center justify-center rounded-xl px-3 py-2 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
+                    isActive
+                      ? "text-brand-blue font-bold bg-blue-50"
+                      : "text-neutral-700 hover:text-ink hover:bg-neutral-100 font-medium",
                   )}
                 >
-                  {translatedName}
-                </span>
+                  {/* Category Name - Uniformly Truncated */}
+                  <span
+                    className={cn(
+                      "w-full text-center text-[11px] sm:text-xs leading-tight truncate transition-colors",
+                      isActive
+                        ? "text-brand-blue font-bold"
+                        : "text-neutral-700 group-hover:text-ink",
+                    )}
+                  >
+                    {translatedName}
+                  </span>
 
-                {/* Active Underline */}
-                {isActive && (
-                  <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-gradient-to-r from-brand-blue to-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
+                  {/* Active Underline */}
+                  {isActive && (
+                    <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-gradient-to-r from-brand-blue to-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
+                  )}
+                </Link>
+
+                {/* Subcategory Dropdown */}
+                {hasChildren && hoveredSlug === item.slug && (
+                  <div className="absolute left-0 top-full z-40 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white py-2 shadow-lg">
+                    {item.subcategories!.map((sub) => (
+                      <Link
+                        key={sub.id}
+                        href={
+                          categoryHref
+                            ? categoryHref(sub.slug)
+                            : `/explore?category=${sub.slug}`
+                        }
+                        onClick={(e) => {
+                          if (onCategorySelect) {
+                            e.preventDefault();
+                            onCategorySelect(sub.slug);
+                          }
+                          setHoveredSlug(null);
+                        }}
+                        className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-brand-blue transition-colors"
+                      >
+                        {translateCategory(sub.name)}
+                      </Link>
+                    ))}
+                  </div>
                 )}
-              </Link>
+              </div>
             );
           })}
         </div>
