@@ -94,7 +94,7 @@ export function SeeksTab({ seeks, onOpenAddSeek, onDeleteSeek }: Props) {
             <div className="relative aspect-[16/10] w-full bg-neutral-900 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={seek.thumbnailUrl}
+                src={seek.thumbnailUrl || "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=600&q=80"}
                 alt={seek.title}
                 className="h-full w-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-300"
               />

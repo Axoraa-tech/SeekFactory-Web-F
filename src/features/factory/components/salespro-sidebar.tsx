@@ -305,13 +305,16 @@ export function SalesproSidebar({
       {/* User Profile Footer */}
       <div className="p-3 border-t border-[#E6E8EB] bg-[#FFFFFF] flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="relative h-9 w-9 rounded-full overflow-hidden border border-[#E6E8EB] shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={profile.logoUrl} alt="" className="h-full w-full object-cover" />
+          <div className="relative h-9 w-9 rounded-full overflow-hidden border border-[#E6E8EB] shrink-0 bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
+            {profile.logoUrl && !profile.logoUrl.includes('default.png') ? (
+              <img src={profile.logoUrl} alt={profile.name} className="h-full w-full object-cover" />
+            ) : (
+              <span>{profile.name.charAt(0).toUpperCase()}</span>
+            )}
           </div>
           <div className="min-w-0 text-left">
-            <p className="text-xs font-bold text-[#1C1C1C] truncate">{userName}</p>
-            <p className="text-[10px] text-[#5F6368] truncate">Manager • {profile.name.slice(0, 14)}...</p>
+            <p className="text-xs font-bold text-[#1C1C1C] truncate">{profile.name}</p>
+            <p className="text-[10px] text-[#5F6368] truncate">{userName} • {profile.tier || "Manager"}</p>
           </div>
         </div>
         <LogoutButton />

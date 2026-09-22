@@ -9,7 +9,6 @@ import {
   Check,
   SlidersHorizontal,
 } from "lucide-react";
-import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
 import { ReelsFeed } from "@/components/reels/reels-feed";
 import { ReelCard } from "@/components/reels/reel-card";
 import { CategoryIcon } from "@/components/ui/category-icon";

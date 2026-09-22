@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Monitor, Smartphone } from "lucide-react";
+import { Monitor, Smartphone, Eye, EyeOff } from "lucide-react";
 import { RoleToggle } from "@/features/auth/role-toggle";
 
 import { postAuthPath } from "@/features/auth/session-cookie";
@@ -39,6 +39,7 @@ export function AuthCard({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Sync state if initialEmail / initialPassword props change (e.g. on auto-fill)
   if (initialEmail && email !== initialEmail && !email) {
@@ -170,16 +171,25 @@ export function AuthCard({
               placeholder="Email"
               className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
-            <input
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password (8+ characters)"
-              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-            />
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password (8+ characters)"
+                className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 pr-10 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8c8c8c] hover:text-ink focus:outline-none"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </>
         ) : (
           <>

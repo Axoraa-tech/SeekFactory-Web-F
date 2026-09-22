@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getApi } from "@/shared/api";
 import type { BuyerProfile } from "@/entities/user";
 import type {
@@ -12,14 +13,7 @@ import type {
   SellerStats,
   SellerTab,
 } from "./types";
-import {
-  initialFactoryProfile,
-  initialSellerConversations,
-  initialSellerProducts,
-  initialSellerRfqs,
-  initialSellerSeeks,
-  initialSellerStats,
-} from "./factory-data";
+
 import { SalesproSidebar } from "./components/salespro-sidebar";
 import { SalesproTopbar } from "./components/salespro-topbar";
 import { SalesproOverviewView } from "./components/salespro-overview-view";
@@ -46,6 +40,7 @@ type Props = {
   initialProducts?: Product[];
   initialSeeks?: Reel[];
   initialRfqs?: RfqItem[];
+  initialConversations?: SellerConversation[];
   allCategories?: Category[];
 };
 
@@ -56,18 +51,31 @@ export function FactoryDashboard({
   initialProducts = [],
   initialSeeks = [],
   initialRfqs = [],
+  initialConversations = [],
   allCategories: _allCategories = [],
 }: Props) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<SellerTab>("overview");
 
   const [stats, setStats] = useState<SellerStats>(() => {
     if (initialStats) {
-      return {
-        ...initialSellerStats,
-        ...initialStats,
-      };
+      return initialStats;
     }
-    return initialSellerStats;
+    return {
+      totalProductViews: 0,
+      productViewsChange: 0,
+      factoryProfileVisits: 0,
+      profileVisitsChange: 0,
+      videoSeekPlays: 0,
+      videoPlaysChange: 0,
+      activeRfqsCount: 0,
+      pendingRfqsCount: 0,
+      responseRatePercent: 0,
+      avgResponseTimeHours: 0,
+      followerCount: 0,
+      totalProductsCount: 0,
+      totalSeeksCount: 0,
+    };
   });
 
   const [products, setProducts] = useState<SellerProduct[]>(() => {
@@ -90,7 +98,7 @@ export function FactoryDashboard({
         createdAt: "Recently",
       }));
     }
-    return initialSellerProducts;
+    return [];
   });
 
   const [seeks, setSeeks] = useState<SellerSeek[]>(() => {
@@ -110,7 +118,7 @@ export function FactoryDashboard({
         status: "Published" as const,
       }));
     }
-    return initialSellerSeeks;
+    return [];
   });
 
   const [rfqs, setRfqs] = useState<SellerRfq[]>(() => {
@@ -130,11 +138,11 @@ export function FactoryDashboard({
         requirements: r.details || "",
       }));
     }
-    return initialSellerRfqs;
+    return [];
   });
 
   const [conversations, setConversations] = useState<SellerConversation[]>(
-    initialSellerConversations
+    initialConversations
   );
 
   const [profile, setProfile] = useState<SellerFactoryProfile>(() => {
@@ -159,16 +167,76 @@ export function FactoryDashboard({
       };
     }
     return {
-      ...initialFactoryProfile,
-      name: user.companyName || initialFactoryProfile.name,
+      name: user.companyName || "Verified Factory",
+      slug: "",
+      logoUrl: "https://images.seekfactory.com/logos/default.png",
+      coverUrl: "https://images.seekfactory.com/covers/default.jpg",
+      country: "China",
+      location: "Zhejiang, China",
+      yearsEstablished: 12,
+      factorySize: "20,000 sq.m",
+      employees: "200-500",
+      annualTurnover: "$10M - $25M USD",
+      exportCountries: ["India", "USA", "Germany"],
+      certifications: ["ISO 9001:2015", "CE Certified", "RoHS Compliant"],
+      description: "",
+      productionLines: 8,
+      verified: true,
+      tier: "Verified",
     };
   });
-
   // Modals state
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddSeekOpen, setIsAddSeekOpen] = useState(false);
   const [quotingRfq, setQuotingRfq] = useState<SellerRfq | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
+  // Sync state with server props on Next.js soft navigation or refresh
+  useEffect(() => {
+    if (initialProducts) {
+      setProducts(initialProducts.map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        imageUrl: p.imageUrl,
+        category: "Industrial Machinery",
+        categoryId: p.categoryId,
+        priceInr: p.priceInr,
+        unit: p.unit,
+        moq: p.moq,
+        status: "Active" as const,
+        viewsCount: 1420,
+        inquiriesCount: 18,
+        specs: p.specs,
+        description: p.description,
+        createdAt: "Recently",
+      })));
+    }
+  }, [initialProducts]);
+
+  useEffect(() => {
+    if (initialSeeks) {
+      setSeeks(initialSeeks.map((s) => ({
+        id: s.id,
+        title: s.title,
+        thumbnailUrl: s.posterUrl,
+        videoUrl: s.videoUrl || "",
+        views: s.views,
+        leadsGenerated: s.likes + s.saves,
+        durationSeconds: s.durationSec,
+        status: "Active" as const,
+        postedAt: "Recently",
+      })));
+    }
+  }, [initialSeeks]);
+
+  useEffect(() => {
+    if (initialRfqs) setRfqs(initialRfqs);
+  }, [initialRfqs]);
+
+  useEffect(() => {
+    if (initialConversations) setConversations(initialConversations);
+  }, [initialConversations]);
 
   function handleSelectFactoryPlan(tierId: FactoryPlanTier, tierName: string) {
     setProfile((prev) => ({
@@ -201,6 +269,7 @@ export function FactoryDashboard({
         categoryId: newProd.categoryId,
         specs: newProd.specs,
       });
+      router.refresh();
     } catch (err) {
       console.error("Failed to persist product to factory backend:", err);
     }
@@ -215,6 +284,7 @@ export function FactoryDashboard({
 
     try {
       await getApi().factory.deleteProduct(id);
+      router.refresh();
     } catch (err) {
       console.error("Failed to delete product from backend:", err);
     }
@@ -235,6 +305,7 @@ export function FactoryDashboard({
         videoUrl: newSeek.videoUrl,
         durationSec: newSeek.durationSeconds,
       });
+      router.refresh();
     } catch (err) {
       console.error("Failed to persist reel to factory backend:", err);
     }
@@ -249,6 +320,7 @@ export function FactoryDashboard({
 
     try {
       await getApi().factory.deleteSeek(id);
+      router.refresh();
     } catch (err) {
       console.error("Failed to delete reel from backend:", err);
     }
