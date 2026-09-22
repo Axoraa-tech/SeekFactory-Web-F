@@ -35,11 +35,14 @@ export function AuthCard({
   const [method, setMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState(initialPassword);
+  const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+
+  const passwordErrors = validatePassword(password);
+  const isPasswordValid = passwordErrors.length===0;
 
   // Sync state if initialEmail / initialPassword props change (e.g. on auto-fill)
   if (initialEmail && email !== initialEmail && !email) {
@@ -56,8 +59,8 @@ export function AuthCard({
 
     if (method === "email") {
       const pwd = String(form.get("password") ?? password ?? "");
-      if (pwd.length < 8) {
-        setError("Password must be at least 8 characters.");
+      if (!isPasswordValid) {
+        setError("Invalid Password");
         return;
       }
     } else {
@@ -123,6 +126,18 @@ export function AuthCard({
   }
 
 
+  //? To Validate Password 
+  function validatePassword(password: string) {
+    const errors:string[] = [];
+    if(password.length<8) errors.push("At least 8 characters")
+    if(!/[A-Z]/.test(password)) errors.push("At least one Uppercase letter");
+    if(!/[a-z]/.test(password)) errors.push("At least one Lowercase letter");
+    if(!/[0-9]/.test(password)) errors.push("At least one Number letter");
+    if(!/[^A-Za-z0-9]/.test(password)) errors.push("At least one Special character letter");
+
+    return mode==="join"? errors : [""];
+  }
+
   const containerClasses = embedded
     ? "w-full"
     : "w-full max-w-[400px] rounded-xl border border-line bg-white px-5 sm:px-6 py-6 sm:py-8 shadow-card";
@@ -180,7 +195,11 @@ export function AuthCard({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password (8+ characters)"
-                className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 pr-10 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                className={`h-11 sm:h-12 w-full rounded-lg border px-3 pr-10 text-sm outline-none transition-colors ${
+                  password && passwordErrors.length > 0 
+                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" 
+                    : "border-[#8c8c8c] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                }`}
               />
               <button
                 type="button"
@@ -190,6 +209,14 @@ export function AuthCard({
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
+
+            {password && !isPasswordValid && (
+              <ul className="mt-1 text-xs text-red-500 space-y-0.5">
+                {passwordErrors.map((err) => (
+                  <li key={err}>• {err}</li>
+                ))}
+              </ul>
+            )}
           </>
         ) : (
           <>
