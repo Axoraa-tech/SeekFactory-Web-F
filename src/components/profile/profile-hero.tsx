@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Crown, FileText, LogOut, MapPin, ShieldCheck, Sparkles } from "lucide-react";
+import { Crown, FileText, LogOut, MapPin, ShieldCheck, Sparkles, ChevronLeft } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
@@ -50,10 +50,19 @@ export function ProfileHero({
           }}
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/80 to-transparent" />
+
+        <Link href={"/"} className="absolute right-48 top-4 hidden sm:flex items-center gap-1.5 rounded-full  px-3 py-1 text-[12px] font-semibold text-white bg-brand-blue">
+
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Home
+
+        </Link>
+
         <div className="absolute right-4 top-4 hidden sm:flex items-center gap-1.5 rounded-full glass-liquid-item px-3 py-1 text-[11px] font-semibold text-brand-blue">
           <ShieldCheck className="h-3.5 w-3.5" />
           Trade Assurance Buyer
         </div>
+        
       </div>
 
       {/* Identity block */}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Monitor, Smartphone } from "lucide-react";
+import { Monitor, Smartphone, Eye, EyeOff } from "lucide-react";
 import { RoleToggle } from "@/features/auth/role-toggle";
 
 import { postAuthPath } from "@/features/auth/session-cookie";
@@ -35,10 +35,14 @@ export function AuthCard({
   const [method, setMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState(initialPassword);
+  const [showPassword, setShowPassword] = useState<boolean>(false)
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const passwordErrors = validatePassword(password);
+  const isPasswordValid = passwordErrors.length===0;
 
   // Sync state if initialEmail / initialPassword props change (e.g. on auto-fill)
   if (initialEmail && email !== initialEmail && !email) {
@@ -55,8 +59,8 @@ export function AuthCard({
 
     if (method === "email") {
       const pwd = String(form.get("password") ?? password ?? "");
-      if (pwd.length < 8) {
-        setError("Password must be at least 8 characters.");
+      if (!isPasswordValid) {
+        setError("Invalid Password");
         return;
       }
     } else {
@@ -122,6 +126,18 @@ export function AuthCard({
   }
 
 
+  //? To Validate Password 
+  function validatePassword(password: string) {
+    const errors:string[] = [];
+    if(password.length<8) errors.push("At least 8 characters")
+    if(!/[A-Z]/.test(password)) errors.push("At least one Uppercase letter");
+    if(!/[a-z]/.test(password)) errors.push("At least one Lowercase letter");
+    if(!/[0-9]/.test(password)) errors.push("At least one Number letter");
+    if(!/[^A-Za-z0-9]/.test(password)) errors.push("At least one Special character letter");
+
+    return mode==="join"? errors : [""];
+  }
+
   const containerClasses = embedded
     ? "w-full"
     : "w-full max-w-[400px] rounded-xl border border-line bg-white px-5 sm:px-6 py-6 sm:py-8 shadow-card";
@@ -170,16 +186,38 @@ export function AuthCard({
               placeholder="Email"
               className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
+            <div className="relative">
             <input
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password (8+ characters)"
-              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-            />
+              className={
+                `h-11 pr-10 sm:h-12 w-full rounded-lg border  px-3 text-sm outline-none 
+                
+                ${
+                  password && passwordErrors ? "border-red-500 focus:border-red-500 focus:ring-1-red-500" : " border-[#8c8c8c] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                }
+
+            `}/>
+
+            <button type="button" onClick={() => setShowPassword((p)=>!p)} className="absolute right-3 -translate-y-2 top-1/2 text-[#8c8c8c]">
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+
+            </div>
+
+            {password && !isPasswordValid && (
+              <ul className="mt-1 text-xs text-red-500 space-y-0.5">
+                {passwordErrors.map((err) => (
+                  <li key={err}>• {err}</li>
+                ))}
+              </ul>
+            )}
+
           </>
         ) : (
           <>
