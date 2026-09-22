@@ -168,6 +168,7 @@ interface BackendFeedItem {
   reel: BackendReel;
   manufacturer: BackendManufacturer;
   primary_product_slug?: string;
+  primaryProductSlug?: string;
 }
 
 interface BackendCategory {
