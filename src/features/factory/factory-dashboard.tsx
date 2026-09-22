@@ -226,7 +226,7 @@ export function FactoryDashboard({
         commentsCount: s.comments,
         inquiriesGenerated: s.saves,
         durationSeconds: s.durationSec,
-        category: s.category || "Manufacturing",
+        category: s.categoryIds && s.categoryIds.length > 0 ? s.categoryIds[0] : "Manufacturing",
         status: "Published" as const,
         createdAt: "Recently",
       })));
@@ -234,7 +234,21 @@ export function FactoryDashboard({
   }, [initialSeeks]);
 
   useEffect(() => {
-    if (initialRfqs) setRfqs(initialRfqs);
+    if (initialRfqs) {
+      setRfqs(initialRfqs.map((r) => ({
+        id: r.id,
+        buyerName: "Unknown Buyer",
+        buyerCompany: r.companyName || "Unknown Company",
+        buyerCountry: "Unknown",
+        productName: r.productName,
+        productCategory: "Uncategorized",
+        quantityRequested: `${r.quantity} ${r.unit || ""}`,
+        deliveryPort: r.incoterm || "Unknown",
+        status: "New",
+        createdAt: r.createdAt,
+        requirements: r.details || "",
+      })));
+    }
   }, [initialRfqs]);
 
   useEffect(() => {
