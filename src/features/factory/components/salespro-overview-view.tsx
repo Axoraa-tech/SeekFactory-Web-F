@@ -23,6 +23,8 @@ export function SalesproOverviewView({
   profile: _profile,
   onOpenQuoteModal,
 }: Props) {
+  const ENABLE_CHARTS = false;
+
   return (
     <div className="space-y-6 pt-5">
       {/* Subheader Banner */}
@@ -93,17 +95,19 @@ export function SalesproOverviewView({
       </div>
 
       {/* Middle Grid: Area Step Chart (Equal Left 6 cols) + India Sourcing Hubs Demand (Equal Right 6 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
-        {/* Left: Video Seeks vs RFQ Conversion Trend */}
-        <div className="flex flex-col">
-          <SalesproAnalyticsChart />
-        </div>
+      {ENABLE_CHARTS && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+          {/* Left: Video Seeks vs RFQ Conversion Trend */}
+          <div className="flex flex-col">
+            <SalesproAnalyticsChart />
+          </div>
 
-        {/* Right: India Industrial Sourcing Hubs & Ports */}
-        <div className="flex flex-col">
-          <SalesproIndiaDemand />
+          {/* Right: India Industrial Sourcing Hubs & Ports */}
+          <div className="flex flex-col">
+            <SalesproIndiaDemand />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Full-Width: Active India Equipment RFQs Table */}
       <div>

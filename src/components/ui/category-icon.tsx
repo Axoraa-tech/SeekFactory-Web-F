@@ -304,6 +304,84 @@ function IconDefault({ className, size = 24 }: IconProps) {
   );
 }
 
+function IconTool({ className, size = 24 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      {/* Black CNC Chuck */}
+      <rect x="4" y="8" width="16" height="8" rx="1.5" stroke="#0F172A" strokeWidth="1.8" />
+      <path d="M7 8V4h10v4M7 16v4h10v-4" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
+      {/* Blue Drill Bit */}
+      <path d="M12 11v6" stroke="#1A73E8" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="2 2" />
+      <circle cx="12" cy="12" r="1.5" fill="#1A73E8" />
+    </svg>
+  );
+}
+
+function IconFlame({ className, size = 24 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      {/* Black Crucible / Mold */}
+      <path d="M5 8h14l-2 10H7L5 8z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M8 8V5a2 2 0 0 1 4 0v3M16 8V6" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
+      {/* Blue Flame Core */}
+      <path d="M12 11c-1.5 1.5-1.5 3.5 0 5 1.5-1.5 1.5-3.5 0-5z" fill="#1A73E8" />
+    </svg>
+  );
+}
+
+function IconBox({ className, size = 24 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      {/* Black Injection Mold Block */}
+      <rect x="4" y="6" width="16" height="12" rx="2" stroke="#0F172A" strokeWidth="1.8" />
+      <path d="M4 12h16" stroke="#0F172A" strokeWidth="1.8" strokeDasharray="4 2" />
+      <circle cx="8" cy="12" r="1.5" fill="#0F172A" />
+      <circle cx="16" cy="12" r="1.5" fill="#0F172A" />
+      {/* Blue Molded Part */}
+      <rect x="10.5" y="9" width="3" height="6" rx="1" fill="#1A73E8" />
+    </svg>
+  );
+}
+
+function IconLayers({ className, size = 24 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      {/* Black Sheet Metal Stack */}
+      <path d="M3 10l9-5 9 5-9 5-9-5z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M3 14l9 5 9-5" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
+      {/* Blue Laser Cut Accent */}
+      <path d="M12 9l3-1.5" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="10" r="1.5" fill="#1A73E8" />
+    </svg>
+  );
+}
+
+function IconCpu({ className, size = 24 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      {/* Black Processor Frame */}
+      <rect x="6" y="6" width="12" height="12" rx="2" stroke="#0F172A" strokeWidth="1.8" />
+      <path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
+      {/* Blue Automation Brain */}
+      <path d="M10 10h4v4h-4z" fill="#1A73E8" />
+      <path d="M14 14l3 3" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconZap({ className, size = 24 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      {/* Black Optical Head */}
+      <path d="M8 4h8v5a4 4 0 0 1-4 4 4 4 0 0 1-4-4V4z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M10 13v3h4v-3" stroke="#0F172A" strokeWidth="1.8" />
+      {/* Blue Laser Beam */}
+      <path d="M12 16v6" stroke="#1A73E8" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="12" cy="7" r="1.5" fill="#1A73E8" />
+    </svg>
+  );
+}
+
 const iconComponentMap: Record<CategoryIconKey | "for-you", (props: IconProps) => ReactElement> = {
   "for-you": IconForYou,
   agriculture: IconAgriculture,
@@ -325,6 +403,12 @@ const iconComponentMap: Record<CategoryIconKey | "for-you", (props: IconProps) =
   transport: IconTransport,
   waste: IconWaste,
   woodworking: IconWoodworking,
+  tool: IconTool,
+  flame: IconFlame,
+  box: IconBox,
+  layers: IconLayers,
+  cpu: IconCpu,
+  zap: IconZap,
   other: IconDefault,
 };
 
