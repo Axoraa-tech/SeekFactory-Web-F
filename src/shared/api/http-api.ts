@@ -973,7 +973,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       }
     },
 
-    onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void {
+    onMessageStream(conversationId: string, callback: (message: any) => void): () => void {
       if (typeof window === "undefined") return () => {};
       
       const evtSource = new EventSource(`/api/v1/conversations/${conversationId}/stream`);
