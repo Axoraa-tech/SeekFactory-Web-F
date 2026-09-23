@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
+import { Analytics } from '@vercel/analytics/react';
+
 import { brand } from "@/shared/config/brand";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { RegionalSettingsProvider } from "@/shared/i18n/regional-context";
@@ -31,6 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <LoadingScreen />
           <BuyerPlanProvider>
             {children}
+            <Analytics />
             <UpgradePlanModal />
           </BuyerPlanProvider>
         </RegionalSettingsProvider>
