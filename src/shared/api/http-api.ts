@@ -210,6 +210,14 @@ interface BackendConversation {
   manufacturer_id?: string;
   manufacturerId?: string;
   manufacturer?: BackendManufacturer;
+  buyerId?: string;
+  buyer_id?: string;
+  buyerName?: string;
+  buyer_name?: string;
+  buyerCompany?: string;
+  buyer_company?: string;
+  buyerAvatarUrl?: string;
+  buyer_avatar_url?: string;
   unread_count?: number;
   unreadCount?: number;
   last_message?: string | {
