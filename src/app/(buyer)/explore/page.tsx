@@ -7,6 +7,8 @@ import { getApi } from "@/shared/api";
 import { formatPriceInr } from "@/shared/lib/format";
 import { Package, ShieldCheck } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<{ q?: string; category?: string; sub?: string }>;
 };

@@ -13,6 +13,7 @@ import type {
   RfqRepository,
   SessionRepository,
   FactoryRepository,
+  MessageItem,
 } from "@/shared/api/contracts";
 import type { Category, CategoryIconKey } from "@/entities/category";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
@@ -304,7 +305,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
   const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
 
   // Request Memoization Cache to prevent duplicate GET requests
-  const pendingRequests = new Map<string, Promise<any>>();
+  const pendingRequests = new Map<string, Promise<unknown>>();
 
   /**
    * Helper to get JWT auth header from cookie on client or server
@@ -973,7 +974,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       }
     },
 
-    onMessageStream(conversationId: string, callback: (message: any) => void): () => void {
+    onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void {
       if (typeof window === "undefined") return () => {};
       
       const evtSource = new EventSource(`/api/v1/conversations/${conversationId}/stream`);

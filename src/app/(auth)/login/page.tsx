@@ -6,6 +6,8 @@ import { WorkingIllustrationAnimation } from "@/components/auth/working-illustra
 
 export const metadata = { title: "Sign in | SeekFactory" };
 
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-8 lg:gap-12 py-2 sm:py-6 px-2 sm:px-4">
