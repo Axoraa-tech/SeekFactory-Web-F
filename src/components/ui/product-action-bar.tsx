@@ -43,10 +43,14 @@ export function ProductActionBar({
   const handleBuyNow = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsBuying(true);
-    // Simulate instant checkout redirect / RFQ confirmation
+    
     setTimeout(() => {
       setIsBuying(false);
-      window.location.href = productSlug ? `/products/${productSlug}?action=checkout` : "/rfq/new";
+      if (manufacturerSlug && productSlug) {
+        window.location.href = `/messages?with=${manufacturerSlug}&action=buy&product=${productSlug}`;
+      } else {
+        window.location.href = productSlug ? `/products/${productSlug}?action=checkout` : "/rfq/new";
+      }
     }, 400);
   };
 

@@ -87,8 +87,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                   className="flex items-center gap-2.5 min-w-0 flex-1 group"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={manufacturer.logoUrl}
+                  <img loading="lazy" decoding="async" src={manufacturer.logoUrl}
                     alt=""
                     className="h-9 w-9 rounded-full object-cover border border-slate-200 shrink-0 group-hover:scale-105 transition-transform"
                   />
@@ -186,8 +185,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
             >
               <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden bg-neutral-100 mb-2.5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={m.coverUrl || m.logoUrl}
+                <img src={m.coverUrl || m.logoUrl}
                   alt={m.name}
                   className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -241,3 +239,4 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
     </section>
   );
 }
+

@@ -231,7 +231,7 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-lg overflow-hidden border border-line shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={deviceFileSelected} alt="Preview" className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async" src={deviceFileSelected} alt="Preview" className="h-full w-full object-cover" />
                   </div>
                   <div className="text-left">
                     <p className="text-xs font-bold text-ink flex items-center gap-1">
@@ -373,3 +373,4 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
     </div>
   );
 }
+

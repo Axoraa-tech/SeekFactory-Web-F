@@ -283,7 +283,7 @@ export function OverviewTab({
               <div key={prod.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-canvas transition border border-line">
                 <div className="relative h-14 w-14 rounded-lg overflow-hidden shrink-0 bg-canvas border border-line">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={prod.imageUrl} alt="" className="h-full w-full object-cover" />
+                  <img loading="lazy" decoding="async" src={prod.imageUrl} alt="" className="h-full w-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-ink truncate">{prod.name}</p>
@@ -370,3 +370,4 @@ export function OverviewTab({
     </div>
   );
 }
+

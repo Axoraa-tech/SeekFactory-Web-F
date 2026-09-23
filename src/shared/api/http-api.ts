@@ -295,6 +295,9 @@ interface BackendFactoryStats {
 export function createHttpApi(baseUrl: string): ApiClient {
   const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
 
+  // Request Memoization Cache to prevent duplicate GET requests
+  const pendingRequests = new Map<string, Promise<any>>();
+
   /**
    * Helper to get JWT auth header from cookie on client or server
    */
@@ -332,35 +335,60 @@ export function createHttpApi(baseUrl: string): ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const defaultHeaders = await getAuthHeaders();
-    // Route browser requests through our secure proxy, server requests go direct
-    const url = typeof window !== "undefined" ? `/api/proxy${endpoint}` : `${cleanBaseUrl}${endpoint}`;
+    const isGet = !options.method || options.method.toUpperCase() === "GET";
+    const cacheKey = isGet ? endpoint : null;
 
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...(options.headers || {}),
-      },
-    });
-
-    if (!res.ok) {
-      let errorMsg = `HTTP ${res.status} on ${endpoint}`;
-      try {
-        const errJson = (await res.json()) as { message?: string; error?: string; errors?: Record<string, string> };
-        if (errJson.errors && typeof errJson.errors === "object" && Object.keys(errJson.errors).length > 0) {
-          errorMsg = Object.values(errJson.errors).join(", ");
-        } else {
-          errorMsg = errJson.message || errJson.error || errorMsg;
-        }
-      } catch {
-        // Response was not JSON
-      }
-      throw new Error(errorMsg);
+    if (cacheKey && pendingRequests.has(cacheKey)) {
+      return pendingRequests.get(cacheKey) as Promise<T>;
     }
 
-    const json = (await res.json()) as BackendResponse<T>;
-    return json.data;
+    const requestPromise = (async () => {
+      const defaultHeaders = await getAuthHeaders();
+      // Route browser requests through our secure proxy, server requests go direct
+      let url = typeof window !== "undefined" ? `/api/proxy${endpoint}` : `${cleanBaseUrl}${endpoint}`;
+      
+      // Fix Node 18+ IPv6 localhost resolution bug causing ECONNREFUSED
+      if (typeof window === "undefined") {
+        url = url.replace("localhost", "127.0.0.1");
+      }
+
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          ...defaultHeaders,
+          ...(options.headers || {}),
+        },
+      });
+
+      if (!res.ok) {
+        let errorMsg = `HTTP ${res.status} on ${endpoint}`;
+        try {
+          const errJson = (await res.json()) as { message?: string; error?: string; errors?: Record<string, string> };
+          if (errJson.errors && typeof errJson.errors === "object" && Object.keys(errJson.errors).length > 0) {
+            errorMsg = Object.values(errJson.errors).join(", ");
+          } else {
+            errorMsg = errJson.message || errJson.error || errorMsg;
+          }
+        } catch {
+          // Response was not JSON
+        }
+        throw new Error(errorMsg);
+      }
+
+      const json = (await res.json()) as BackendResponse<T>;
+      return json.data;
+    })();
+
+    if (cacheKey) {
+      pendingRequests.set(cacheKey, requestPromise);
+      requestPromise.finally(() => {
+        setTimeout(() => {
+          pendingRequests.delete(cacheKey);
+        }, 1500);
+      }).catch(() => {}); // Prevent UnhandledPromiseRejection from the finally chain
+    }
+
+    return requestPromise;
   }
 
   // ── 1. SESSION REPOSITORY ──────────────────────────────────────
@@ -382,15 +410,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
           phone: user.phone,
         };
       } catch {
-        // Fall back to local cookie if server is unreachable
-        if (typeof window === "undefined") {
-          const { cookies } = await import("next/headers");
-          const jar = await cookies();
-          const payload = parseSessionCookie(jar.get(SESSION_COOKIE)?.value);
-          return payload ? payloadToProfile(payload) : null;
-        }
-        const payload = readBrowserCookie();
-        return payload ? payloadToProfile(payload) : null;
+        // Return null if backend auth fails
+        return null;
       }
     },
 
@@ -438,7 +459,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       if (input.method === "phone" && input.phone) {
         res = await fetchJson<BackendAuthResponse>("/api/v1/auth/login/phone", {
           method: "POST",
-          body: JSON.stringify({ phone: input.phone, otp: "123456" }),
+          body: JSON.stringify({ phone: input.phone, otp: "123456", role: input.role }),
         });
       } else {
         res = await fetchJson<BackendAuthResponse>("/api/v1/auth/login", {
@@ -837,6 +858,10 @@ export function createHttpApi(baseUrl: string): ApiClient {
           return {
             id: item.id,
             manufacturerId: item.manufacturerId || item.manufacturer?.id || "mfg-01",
+            buyerId: item.buyerId || "b-0",
+            buyerName: item.buyerName || "Buyer",
+            buyerCompany: item.buyerCompany || item.manufacturer?.name || "Global Buyer",
+            buyerAvatarUrl: item.buyerAvatarUrl || item.manufacturer?.logoUrl || "https://images.seekfactory.com/logos/default.png",
             lastMessage: lastMsg,
             lastMessageAt: lastAt,
             unreadCount: item.unreadCount ?? item.unread_count ?? 0,
@@ -938,6 +963,40 @@ export function createHttpApi(baseUrl: string): ApiClient {
       } catch {
         // Safe ignore
       }
+    },
+
+    onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void {
+      if (typeof window === "undefined") return () => {};
+      
+      const evtSource = new EventSource(`/api/v1/conversations/${conversationId}/stream`);
+      
+      evtSource.addEventListener("message", (event) => {
+        try {
+          const m: BackendMessage = JSON.parse(event.data);
+          const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
+          const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
+          
+          callback({
+            id: m.id,
+            conversationId: m.conversationId || m.conversation_id || conversationId,
+            sender,
+            text: m.messageText || m.message_text || "",
+            time: m.createdAt || m.created_at || "Just now",
+            attachment: (m.attachmentName || m.attachment_name) ? {
+              name: m.attachmentName || m.attachment_name || "attachment",
+              size: m.attachmentSize || m.attachment_size || "",
+              url: m.attachmentUrl || m.attachment_url,
+            } : undefined,
+            isRead: m.isRead ?? m.is_read ?? false,
+          });
+        } catch (e) {
+          console.error("Failed to parse SSE message", e);
+        }
+      });
+      
+      return () => {
+        evtSource.close();
+      };
     },
   };
 

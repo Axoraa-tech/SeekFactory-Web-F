@@ -61,8 +61,7 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
                     className="flex items-start gap-2.5 min-w-0 flex-1"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={m.logoUrl}
+                    <img loading="lazy" decoding="async" src={m.logoUrl}
                       alt={m.name}
                       className="h-10 w-10 shrink-0 rounded-xl border border-slate-200 object-cover shadow-2xs transition-transform group-hover:scale-105"
                     />
@@ -178,3 +177,4 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
     </div>
   );
 }
+

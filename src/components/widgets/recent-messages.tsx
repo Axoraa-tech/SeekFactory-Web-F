@@ -26,8 +26,7 @@ export function RecentMessages({ messages }: Props) {
           <li key={message.id}>
             <Link href="/messages" className="flex items-start gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={message.manufacturer.logoUrl}
+              <img loading="lazy" decoding="async" src={message.manufacturer.logoUrl}
                 alt=""
                 className="h-9 w-9 rounded-full object-cover"
               />
@@ -50,3 +49,4 @@ export function RecentMessages({ messages }: Props) {
     </Card>
   );
 }
+

@@ -17,8 +17,7 @@ export function CommentComposer({ inputRef, value, onChange, onSubmit, isSubmitt
       className="flex items-center gap-3 px-5 py-3.5 border-b border-line bg-canvas/60"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
+      <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
         alt="Current user"
         className="h-9 w-9 rounded-full object-cover border border-line flex-shrink-0"
       />
@@ -44,3 +43,4 @@ export function CommentComposer({ inputRef, value, onChange, onSubmit, isSubmitt
     </form>
   );
 }
+

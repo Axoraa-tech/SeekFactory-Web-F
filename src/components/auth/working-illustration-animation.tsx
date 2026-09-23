@@ -13,8 +13,7 @@ export function WorkingIllustrationAnimation({ className }: { className?: string
       >
         {/* Fallback for browsers that block object embed */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/online-work.svg"
+        <img loading="lazy" decoding="async" src="/images/online-work.svg"
           alt="Online Work Animation"
           className="w-full h-full object-contain"
         />
@@ -22,3 +21,4 @@ export function WorkingIllustrationAnimation({ className }: { className?: string
     </div>
   );
 }
+

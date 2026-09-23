@@ -88,6 +88,7 @@ export interface MessageRepository {
   ): Promise<MessageItem>;
   startConversation(manufacturerId: string, initialMessage?: string): Promise<Conversation & { manufacturer: Manufacturer }>;
   markAsRead(conversationId: string): Promise<void>;
+  onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void;
 }
 
 export interface CategoryRepository {

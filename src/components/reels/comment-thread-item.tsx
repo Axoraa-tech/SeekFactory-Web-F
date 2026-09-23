@@ -47,8 +47,7 @@ export function CommentThreadItem({
     <div className="pt-4 first:pt-0">
       <div className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={comment.authorAvatarUrl}
+        <img loading="lazy" decoding="async" src={comment.authorAvatarUrl}
           alt=""
           className="h-8 w-8 rounded-full object-cover border border-line flex-shrink-0 mt-0.5"
         />
@@ -166,8 +165,7 @@ export function CommentThreadItem({
                     return (
                       <div key={reply.id} className="flex items-start gap-2.5">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={reply.authorAvatarUrl}
+                        <img src={reply.authorAvatarUrl}
                           alt=""
                           className="h-6 w-6 rounded-full object-cover border border-line flex-shrink-0 mt-0.5"
                         />
@@ -216,3 +214,4 @@ export function CommentThreadItem({
     </div>
   );
 }
+
