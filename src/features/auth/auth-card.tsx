@@ -135,7 +135,7 @@ export function AuthCard({
     if(!/[0-9]/.test(password)) errors.push("At least one Number letter");
     if(!/[^A-Za-z0-9]/.test(password)) errors.push("At least one Special character letter");
 
-    return mode==="join"? errors : [""];
+    return mode==="join"? errors : [];
   }
 
   const containerClasses = embedded
@@ -199,7 +199,7 @@ export function AuthCard({
                 `h-11 pr-10 sm:h-12 w-full rounded-lg border  px-3 text-sm outline-none 
                 
                 ${
-                  password && passwordErrors ? "border-red-500 focus:border-red-500 focus:ring-1-red-500" : " border-[#8c8c8c] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                  password && passwordErrors && mode==="join" ? "border-red-500 focus:border-red-500 focus:ring-1-red-500" : " border-[#8c8c8c] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                 }
 
             `}/>
