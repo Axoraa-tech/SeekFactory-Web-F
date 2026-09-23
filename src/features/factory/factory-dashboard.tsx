@@ -411,6 +411,10 @@ export function FactoryDashboard({
   }
 
   function handleSendMessage(conversationId: string, text: string) {
+    if (!text.trim()) return;
+    
+    // Optimistic UI update
+    const tempId = `msg-${Date.now()}`;
     setConversations((prev) =>
       prev.map((c) =>
         c.id === conversationId
@@ -422,7 +426,7 @@ export function FactoryDashboard({
               messages: [
                 ...c.messages,
                 {
-                  id: `msg-${Date.now()}`,
+                  id: tempId,
                   sender: "seller",
                   text,
                   timestamp: "Just now",
@@ -432,10 +436,92 @@ export function FactoryDashboard({
           : c
       )
     );
+
+    // Call actual backend API
+    getApi()
+      .messages.sendMessage(conversationId, text)
+      .then((savedMsg) => {
+        // We could update the message ID here if needed, but optimistic is fine for now
+      })
+      .catch((err) => {
+        console.error("Failed to send message", err);
+      });
   }
 
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Fetch real messages when opening a conversation
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    let isMounted = true;
+    
+    // Fetch initial messages unconditionally to always get latest when switching
+    getApi()
+      .messages.getMessages(activeConversationId)
+      .then((msgs) => {
+        if (!isMounted) return;
+        setConversations((prev) =>
+          prev.map((c) => {
+            if (c.id === activeConversationId) {
+              return {
+                ...c,
+                messages: msgs.map((m) => ({
+                  id: m.id,
+                  sender: m.sender === "factory" ? "seller" : "buyer",
+                  text: m.text,
+                  timestamp: m.time,
+                  attachmentType: m.attachment ? "image" : undefined,
+                  attachmentData: m.attachment ? { title: m.attachment.name, detail: m.attachment.size } : undefined,
+                })),
+                unreadCount: 0,
+              };
+            }
+            return c;
+          })
+        );
+      })
+      .catch(console.error);
+    
+    // Also mark as read on backend
+    void getApi().messages.markAsRead(activeConversationId);
+
+    // Subscribe to SSE stream
+    const unsubscribe = getApi().messages.onMessageStream(activeConversationId, (newMsg) => {
+      setConversations((prev) =>
+        prev.map((c) => {
+          if (c.id === activeConversationId) {
+            if (c.messages.some(m => m.id === newMsg.id)) {
+              return c;
+            }
+            return {
+              ...c,
+              lastMessage: newMsg.text,
+              lastMessageTime: newMsg.time,
+              messages: [
+                ...c.messages,
+                {
+                  id: newMsg.id,
+                  sender: newMsg.sender === "factory" ? "seller" : "buyer",
+                  text: newMsg.text,
+                  timestamp: newMsg.time,
+                  attachmentType: newMsg.attachment ? "image" : undefined,
+                  attachmentData: newMsg.attachment ? { title: newMsg.attachment.name, detail: newMsg.attachment.size } : undefined,
+                },
+              ],
+            };
+          }
+          return c;
+        })
+      );
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [activeConversationId]); // Only re-run when active thread changes
 
   function handleOpenChatWithBuyer(buyerCompany: string) {
     const targetConv = conversations.find(
@@ -523,6 +609,7 @@ export function FactoryDashboard({
               <MessagesTab
                 conversations={conversations}
                 activeConversationId={activeConversationId}
+                onSelectConversation={setActiveConversationId}
                 onSendMessage={handleSendMessage}
               />
             </div>

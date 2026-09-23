@@ -12,8 +12,14 @@ export const GUEST_BUYER_FALLBACK: BuyerProfile = {
   country: "India",
 };
 
-export async function requireUser(_nextPath?: string): Promise<BuyerProfile> {
+import { redirect } from "next/navigation";
+
+export async function requireUser(nextPath?: string): Promise<BuyerProfile> {
   const user = await getApi().session.getCurrentUser();
+  if (!user && nextPath) {
+    const roleParam = nextPath.startsWith("/factory") ? "?role=manufacturer" : "";
+    redirect(`/login${roleParam}`);
+  }
   return user ?? GUEST_BUYER_FALLBACK;
 }
 

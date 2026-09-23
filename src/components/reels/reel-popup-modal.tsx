@@ -212,7 +212,7 @@ export function ReelPopupModal({ items }: Props) {
                 loop
                 playsInline
                 muted={isMuted}
-                preload="auto"
+                preload="none"
                 onTimeUpdate={() => {
                   if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
                 }}
@@ -225,8 +225,7 @@ export function ReelPopupModal({ items }: Props) {
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={reel.posterUrl}
+              <img loading="lazy" decoding="async" src={reel.posterUrl}
                 alt={reel.title}
                 className="h-full w-full object-cover"
               />
@@ -379,8 +378,7 @@ export function ReelPopupModal({ items }: Props) {
                 onClick={close}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={manufacturer.logoUrl}
+                <img src={manufacturer.logoUrl}
                   alt=""
                   className="h-9 w-9 rounded-lg border border-neutral-200 object-cover flex-shrink-0"
                 />
@@ -514,3 +512,4 @@ export function ReelPopupModal({ items }: Props) {
     </>
   );
 }
+

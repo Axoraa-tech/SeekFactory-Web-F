@@ -33,8 +33,7 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
           >
             <div className="flex items-start gap-3 min-w-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={m.logoUrl}
+              <img loading="lazy" decoding="async" src={m.logoUrl}
                 alt={m.name}
                 className="h-12 w-12 rounded-xl object-cover border border-white/80 shrink-0 shadow-sm"
               />
@@ -84,3 +83,4 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
     </div>
   );
 }
+

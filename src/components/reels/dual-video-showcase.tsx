@@ -388,7 +388,7 @@ function DualTrackCard({ item, isActive, onFocus }: CardProps) {
           loop
           playsInline
           muted={isMuted}
-          preload="metadata"
+          preload="none"
           onWaiting={() => setIsBuffering(true)}
           onPlaying={() => setIsBuffering(false)}
           className={cn(

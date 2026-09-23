@@ -71,8 +71,7 @@ export function ChatThreadList({
             >
               <div className="relative shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={thread.manufacturer.logoUrl}
+                <img loading="lazy" decoding="async" src={thread.manufacturer.logoUrl}
                   alt={thread.manufacturer.name}
                   className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs"
                 />
@@ -117,3 +116,4 @@ export function ChatThreadList({
     </div>
   );
 }
+

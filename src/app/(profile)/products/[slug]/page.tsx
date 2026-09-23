@@ -56,7 +56,7 @@ export default async function ProductPage({ params }: Props) {
           <Card className="overflow-hidden border-slate-200/90 shadow-2xs">
             <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-900">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <img loading="lazy" decoding="async"
                 src={product.imageUrl}
                 alt={product.name}
                 className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"

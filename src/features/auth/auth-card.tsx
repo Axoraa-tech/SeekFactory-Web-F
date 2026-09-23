@@ -135,7 +135,7 @@ export function AuthCard({
     if(!/[0-9]/.test(password)) errors.push("At least one Number letter");
     if(!/[^A-Za-z0-9]/.test(password)) errors.push("At least one Special character letter");
 
-    return mode==="join"? errors : [];
+    return mode === "join" ? errors : [];
   }
 
   const containerClasses = embedded
@@ -181,7 +181,7 @@ export function AuthCard({
               name="email"
               type="email"
               required
-              value={email}
+              value={email || ""}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
@@ -192,7 +192,7 @@ export function AuthCard({
                 type={showPassword ? "text" : "password"}
                 required
                 minLength={8}
-                value={password}
+                value={password || ""}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password (8+ characters)"
                 className={`h-11 sm:h-12 w-full rounded-lg border px-3 pr-10 text-sm outline-none transition-colors ${

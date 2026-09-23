@@ -256,8 +256,7 @@ export function UploadCertificateModal({
               <div className="flex flex-col items-center justify-center h-32 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 p-2 relative overflow-hidden shadow-xs">
                 {imageUrl && !previewError ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={imageUrl}
+                  <img loading="lazy" decoding="async" src={imageUrl}
                     alt="Certificate Preview"
                     onError={() => setPreviewError(true)}
                     className="h-full w-full object-contain rounded-lg border border-amber-300 shadow-sm"
@@ -317,3 +316,4 @@ export function UploadCertificateModal({
     </div>
   );
 }
+

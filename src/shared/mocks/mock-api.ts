@@ -10,6 +10,7 @@ import type {
   RfqRepository,
   SessionRepository,
   FactoryRepository,
+  MessageItem,
 } from "@/shared/api/contracts";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import {
@@ -187,6 +188,12 @@ const messages: MessageRepository = {
       attachment,
     });
   },
+  async markAsRead(conversationId: string) {
+    return delay(undefined);
+  },
+  onMessageStream(conversationId: string, callback: (message: MessageItem) => void) {
+    return () => {};
+  },
   async startConversation(manufacturerId: string, initialMessage?: string) {
     const mfg = manufacturers.find((m) => m.id === manufacturerId) || manufacturers[0];
     const newConv = {
@@ -198,9 +205,6 @@ const messages: MessageRepository = {
       manufacturer: mfg,
     };
     return delay(newConv);
-  },
-  async markAsRead() {
-    return delay(undefined);
   },
 };
 

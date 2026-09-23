@@ -307,7 +307,7 @@ export function SalesproSidebar({
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative h-9 w-9 rounded-full overflow-hidden border border-[#E6E8EB] shrink-0 bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
             {profile.logoUrl && !profile.logoUrl.includes('default.png') ? (
-              <img src={profile.logoUrl} alt={profile.name} className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={profile.logoUrl} alt={profile.name} className="h-full w-full object-cover" />
             ) : (
               <span>{profile.name.charAt(0).toUpperCase()}</span>
             )}
@@ -323,3 +323,4 @@ export function SalesproSidebar({
     </>
   );
 }
+

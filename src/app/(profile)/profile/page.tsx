@@ -2,6 +2,8 @@ import { UserProfileDashboardLazy } from "@/components/profile/user-profile-dash
 import { requireUser } from "@/features/auth/require-user";
 import { getApi } from "@/shared/api";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProfilePage() {
   const user = await requireUser("/profile");
   const api = getApi();

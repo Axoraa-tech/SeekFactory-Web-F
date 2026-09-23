@@ -171,7 +171,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
                 className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <img loading="lazy" decoding="async"
                   src={manufacturer.logoUrl}
                   alt=""
                   className="h-10 w-10 rounded-lg border border-neutral-200 object-cover shadow-xs flex-shrink-0"
@@ -236,7 +236,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
                 loop
                 playsInline
                 muted={isMuted}
-                preload="metadata"
+                preload="none"
                 onTimeUpdate={() => {
                   if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
                 }}
@@ -249,8 +249,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={reel.posterUrl}
+              <img src={reel.posterUrl}
                 alt={reel.title}
                 className="h-full w-full object-cover"
               />
@@ -452,3 +451,4 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
     </>
   );
 }
+

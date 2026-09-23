@@ -165,7 +165,7 @@ function AdminSetupContent() {
               {qrCodeUri && (
                 <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl inline-block mx-auto shadow-sm">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrCodeUri} alt="TOTP QR Code" className="w-48 h-48" />
+                  <img loading="lazy" decoding="async" src={qrCodeUri} alt="TOTP QR Code" className="w-48 h-48" />
                 </div>
               )}
 
@@ -199,3 +199,4 @@ export default function AdminSetupPage() {
     </Suspense>
   );
 }
+

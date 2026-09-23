@@ -2,6 +2,8 @@ import { HomeSeeksInteractiveFeed } from "@/features/feed/home-seeks-interactive
 import { loadFeed, parseFeedTab } from "@/features/feed/load-feed";
 import { getApi } from "@/shared/api";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<{
     tab?: string;

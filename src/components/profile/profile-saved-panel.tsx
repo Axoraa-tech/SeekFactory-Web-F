@@ -48,8 +48,7 @@ export function ProfileSavedPanel({ savedProducts, onRemoveSaved }: Props) {
             >
               <div className="flex items-start gap-3 min-w-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.imageUrl}
+                <img loading="lazy" decoding="async" src={p.imageUrl}
                   alt={p.name}
                   className="h-20 w-20 rounded-xl object-cover border border-white/80 shrink-0 shadow-sm"
                 />
@@ -104,3 +103,4 @@ export function ProfileSavedPanel({ savedProducts, onRemoveSaved }: Props) {
     </div>
   );
 }
+

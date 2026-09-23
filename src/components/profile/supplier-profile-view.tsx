@@ -128,7 +128,7 @@ export function SupplierProfileView({
         {/* Blurred preview of the manufacturer behind frosted glass */}
         <div className="absolute inset-0 filter blur-[12px] opacity-35 select-none pointer-events-none scale-105">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={manufacturer.coverUrl} alt="" className="w-full h-48 sm:h-64 object-cover" />
+          <img loading="lazy" decoding="async" src={manufacturer.coverUrl} alt="" className="w-full h-48 sm:h-64 object-cover" />
           <div className="p-8 space-y-4 bg-slate-50">
             <div className="flex items-center gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -243,8 +243,7 @@ export function SupplierProfileView({
         {/* Cover Photo */}
         <div className="relative h-48 sm:h-60 md:h-72 w-full overflow-hidden bg-slate-900">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={manufacturer.coverUrl}
+          <img src={manufacturer.coverUrl}
             alt={manufacturer.name}
             className="h-full w-full object-cover brightness-90"
           />
@@ -282,8 +281,7 @@ export function SupplierProfileView({
             <div className="flex items-end gap-4 min-w-0">
               <div className="relative shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={manufacturer.logoUrl}
+                <img src={manufacturer.logoUrl}
                   alt={manufacturer.name}
                   className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl border-4 border-white object-cover shadow-lg bg-white"
                 />
@@ -500,8 +498,7 @@ export function SupplierProfileView({
                         className="relative block h-48 sm:h-52 w-full overflow-hidden bg-slate-100"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={product.imageUrl}
+                        <img src={product.imageUrl}
                           alt={product.name}
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
@@ -670,3 +667,4 @@ export function SupplierProfileView({
     </div>
   );
 }
+
