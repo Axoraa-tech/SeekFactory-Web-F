@@ -12,8 +12,8 @@ type Props = {
 };
 
 const SAMPLE_VIDEOS = [
-  { label: "Factory Line 1 (Heavy CNC)", url: "/videos/reel1.mp4", duration: 32 },
-  { label: "Factory Line 2 (Hot Forging)", url: "/videos/reel2.mp4", duration: 28 },
+  { label: "Factory Line 1 (Heavy CNC)", url: "/videos/reel-3-cnc-milling.mp4", duration: 32 },
+  { label: "Factory Line 2 (Hot Forging)", url: "/videos/reel-6-hydraulic-testing.mp4", duration: 28 },
 ];
 
 export function AddSeekModal({ isOpen, onClose, products, onAddSeek }: Props) {
@@ -43,7 +43,8 @@ export function AddSeekModal({ isOpen, onClose, products, onAddSeek }: Props) {
     if (!title.trim()) return;
 
     const taggedProd = products.find((p) => p.id === taggedProductId);
-    const finalVideoUrl = deviceVideoSelected || selectedVideo.url;
+    // Replace blob URLs with a real file path for the prototype so it doesn't break on reload
+    const finalVideoUrl = deviceVideoSelected ? "/videos/reel-5-automated-assembly.mp4" : selectedVideo.url;
 
     const newSeek: SellerSeek = {
       id: `seek-apex-${Date.now()}`,

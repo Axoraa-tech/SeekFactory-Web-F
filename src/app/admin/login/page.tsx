@@ -71,8 +71,7 @@ export default function AdminLoginPage() {
 
         const data = await adminApi.login(email, password, code);
 
-        // Success: save token in cookie
-        document.cookie = `admin_token=${data.accessToken}; path=/`;
+        // Success: cookie is set by the server route
         router.push("/admin/dashboard");
       }
     } catch (err: unknown) {

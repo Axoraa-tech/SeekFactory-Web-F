@@ -168,6 +168,7 @@ interface BackendFeedItem {
   reel: BackendReel;
   manufacturer: BackendManufacturer;
   primary_product_slug?: string;
+  primaryProductSlug?: string;
 }
 
 interface BackendCategory {
@@ -304,14 +305,13 @@ export function createHttpApi(baseUrl: string): ApiClient {
       try {
         const { cookies } = await import("next/headers");
         const jar = await cookies();
-        const session = parseSessionCookie(jar.get(SESSION_COOKIE)?.value);
-        token = session?.token;
+        token = jar.get("sf-access-token")?.value;
       } catch {
         // Fallback for non-cookie server contexts
       }
     } else {
-      const session = readBrowserCookie();
-      token = session?.token;
+      // Client-side requests go to /api/proxy, browser sends HttpOnly cookies automatically
+      token = undefined;
     }
 
     const headers: Record<string, string> = {
@@ -333,7 +333,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const defaultHeaders = await getAuthHeaders();
-    const url = `${cleanBaseUrl}${endpoint}`;
+    // Route browser requests through our secure proxy, server requests go direct
+    const url = typeof window !== "undefined" ? `/api/proxy${endpoint}` : `${cleanBaseUrl}${endpoint}`;
 
     const res = await fetch(url, {
       ...options,
@@ -425,8 +426,6 @@ export function createHttpApi(baseUrl: string): ApiClient {
         role: userRole,
         email: userEmail,
         companyName: userCompany,
-        token: res.accessToken || res.access_token,
-        refreshToken: res.refreshToken || res.refresh_token,
       };
 
       writeBrowserCookie(sessionData);
@@ -463,8 +462,6 @@ export function createHttpApi(baseUrl: string): ApiClient {
         role: userRole,
         email: userEmail,
         companyName: userCompany,
-        token: res.accessToken || res.access_token,
-        refreshToken: res.refreshToken || res.refresh_token,
       };
 
       writeBrowserCookie(sessionData);
@@ -521,28 +518,28 @@ export function createHttpApi(baseUrl: string): ApiClient {
   // ── 2. FEED REPOSITORY ─────────────────────────────────────────
   const feed: FeedRepository = {
     async list(tab: FeedTab) {
-      const data = await fetchJson<BackendFeedItem[]>(`/api/v1/feed?tab=${tab}`);
+      const data = await fetchJson<BackendFeedItem[]>(`/api/v1/feed?tab=${tab}`, { cache: "no-store" });
       return data.map((item) => ({
         reel: {
           id: item.reel.id,
-          manufacturerId: item.manufacturer?.id || item.reel.manufacturer_id || "mfg-01",
+          manufacturerId: item.manufacturer?.id || item.reel.manufacturerId || item.reel.manufacturer_id || "mfg-01",
           title: item.reel.title || item.reel.caption || "Industrial Reel",
           description: item.reel.description || "",
           hashtags: item.reel.hashtags || [],
-          posterUrl: item.reel.poster_url || "https://images.seekfactory.com/posters/default.jpg",
-          videoUrl: item.reel.video_url,
-          durationSec: item.reel.duration_sec || 30,
-          startSec: item.reel.start_sec || 0,
+          posterUrl: item.reel.posterUrl || item.reel.poster_url || "https://images.seekfactory.com/posters/default.jpg",
+          videoUrl: item.reel.videoUrl || item.reel.video_url,
+          durationSec: item.reel.durationSec || item.reel.duration_sec || 30,
+          startSec: item.reel.startSec || item.reel.start_sec || 0,
           views: item.reel.views || 0,
-          likes: item.reel.likes || item.reel.likes_count || 0,
-          comments: item.reel.comments || item.reel.comments_count || 0,
+          likes: item.reel.likes || item.reel.likesCount || item.reel.likes_count || 0,
+          comments: item.reel.comments || item.reel.commentsCount || item.reel.comments_count || 0,
           shares: item.reel.shares || 0,
-          saves: item.reel.saves || item.reel.saves_count || 0,
+          saves: item.reel.saves || item.reel.savesCount || item.reel.saves_count || 0,
           tab: tab,
-          productIds: item.reel.product_ids || [],
+          productIds: item.reel.productIds || item.reel.product_ids || [],
         },
         manufacturer: normalizeManufacturer(item.manufacturer || {}),
-        primaryProductSlug: item.primary_product_slug,
+        primaryProductSlug: item.primaryProductSlug || item.primary_product_slug,
       }));
     },
 
@@ -1005,7 +1002,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
   // ── 10. FACTORY REPOSITORY ────────────────────────────────────
   const factory: FactoryRepository = {
     async getProfile(): Promise<Manufacturer> {
-      const data = await fetchJson<BackendManufacturer>("/api/v1/factory/profile");
+      const data = await fetchJson<BackendManufacturer>("/api/v1/factory/profile", { cache: "no-store" });
       return normalizeManufacturer(data);
     },
 
@@ -1031,7 +1028,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getStats(): Promise<SellerStats | null> {
       try {
-        const res = await fetchJson<BackendFactoryStats>("/api/v1/factory/stats");
+        const res = await fetchJson<BackendFactoryStats>("/api/v1/factory/stats", { cache: "no-store" });
         if (!res) return null;
         return normalizeFactoryStats(res);
       } catch {
@@ -1041,9 +1038,10 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getProducts(): Promise<Product[]> {
       try {
-        const list = await fetchJson<BackendProduct[]>("/api/v1/factory/products");
+        const list = await fetchJson<BackendProduct[]>("/api/v1/factory/products", { cache: "no-store" });
         return list.map(normalizeProduct);
-      } catch {
+      } catch (e) {
+        console.error("Failed to fetch factory products:", e);
         return [];
       }
     },
@@ -1073,24 +1071,24 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getSeeks(): Promise<Reel[]> {
       try {
-        const list = await fetchJson<BackendReel[]>("/api/v1/factory/seeks");
+        const list = await fetchJson<BackendReel[]>("/api/v1/factory/seeks", { cache: "no-store" });
         return list.map((r) => ({
           id: r.id,
-          manufacturerId: r.manufacturer_id || "",
+          manufacturerId: r.manufacturerId || r.manufacturer_id || "",
           title: r.title || r.caption || "Factory Seek",
           description: r.description || "",
           hashtags: r.hashtags || [],
-          posterUrl: r.poster_url || "",
-          videoUrl: r.video_url,
-          durationSec: r.duration_sec || 30,
+          posterUrl: r.posterUrl || r.poster_url || "",
+          videoUrl: r.videoUrl || r.video_url,
+          durationSec: r.durationSec || r.duration_sec || 30,
           startSec: 0,
           views: r.views || 0,
-          likes: r.likes || 0,
-          comments: r.comments || 0,
-          shares: 0,
-          saves: r.saves || 0,
+          likes: r.likes || r.likesCount || r.likes_count || 0,
+          comments: r.comments || r.commentsCount || r.comments_count || 0,
+          shares: r.shares || 0,
+          saves: r.saves || r.savesCount || r.saves_count || 0,
           tab: "for-you",
-          productIds: r.product_ids || [],
+          productIds: r.productIds || r.product_ids || [],
         }));
       } catch {
         return [];

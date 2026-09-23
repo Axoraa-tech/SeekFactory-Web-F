@@ -18,6 +18,12 @@ export type CategoryIconKey =
   | "transport"
   | "waste"
   | "woodworking"
+  | "tool"
+  | "flame"
+  | "box"
+  | "layers"
+  | "cpu"
+  | "zap"
   | "other";
 
 export type Category = {
