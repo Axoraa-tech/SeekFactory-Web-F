@@ -10,5 +10,6 @@ export { LoadingScreen } from "./loading-screen";
 export { PageHeader } from "./page-header";
 export { ProductActionBar } from "./product-action-bar";
 export { VerifiedBadge } from "./verified-badge";
+export { Skeleton } from "./skeleton";
 
 
