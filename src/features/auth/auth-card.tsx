@@ -135,7 +135,7 @@ export function AuthCard({
     if(!/[0-9]/.test(password)) errors.push("At least one Number letter");
     if(!/[^A-Za-z0-9]/.test(password)) errors.push("At least one Special character letter");
 
-    return mode==="join"? errors : [""];
+    return mode==="join"? errors : [];
   }
 
   const containerClasses = embedded
