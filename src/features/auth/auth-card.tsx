@@ -9,6 +9,10 @@ import { RoleToggle } from "@/features/auth/role-toggle";
 import { postAuthPath } from "@/features/auth/session-cookie";
 import { getApi } from "@/shared/api";
 
+import { isValidPhoneNumber } from "libphonenumber-js";
+import { PhoneInput } from 'react-international-phone';
+
+
 type Mode = "join" | "login";
 
 interface AuthCardProps {
@@ -17,6 +21,7 @@ interface AuthCardProps {
   hideHeader?: boolean;
   initialEmail?: string;
   initialPassword?: string;
+  initialPhone?:string;
 }
 
 export function AuthCard({
@@ -25,6 +30,7 @@ export function AuthCard({
   hideHeader = false,
   initialEmail = "",
   initialPassword = "",
+  initialPhone = "",
 }: AuthCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,6 +41,7 @@ export function AuthCard({
   const [method, setMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState(initialPassword);
+  const [phone, setPhone] = useState(initialPhone);
   const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
@@ -58,13 +65,16 @@ export function AuthCard({
     const form = new FormData(event.currentTarget);
 
     if (method === "email") {
-      const pwd = String(form.get("password") ?? password ?? "");
       if (!isPasswordValid) {
         setError("Invalid Password");
         return;
       }
     } else {
       if (!otpSent) {
+        if(!isValidPhoneNumber(phone || "")) {
+          setError("Enter a Valid Phone Number");
+          return
+        }
         setOtpSent(true);
         setNotice("Mock code sent. Use 123456.");
         return;
@@ -82,7 +92,7 @@ export function AuthCard({
       name: String(form.get("name") ?? "") || undefined,
       email: String(form.get("email") ?? email) || undefined,
       password: String(form.get("password") ?? password) || undefined,
-      phone: String(form.get("phone") ?? "") || undefined,
+      phone: phone || undefined,
       companyName: String(form.get("companyName") ?? "") || undefined,
     };
     try {
@@ -220,12 +230,17 @@ export function AuthCard({
           </>
         ) : (
           <>
-            <input
-              name="phone"
-              required
-              placeholder="Mobile number"
-              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+            <PhoneInput
+              defaultCountry="cn"
+              value={phone}
+              onChange={setPhone}
+              className="w-full"
+              inputClassName="!h-11 sm:!h-12 !w-full !rounded-l-none !rounded-r-lg !border-[#8c8c8c] !text-sm !outline-none focus:!border-brand-blue focus:!ring-1 focus:!ring-brand-blue"
+              countrySelectorStyleProps={{
+                buttonClassName: "!h-11 sm:!h-12 !rounded-l-lg !rounded-r-none !border-[#8c8c8c] ",
+              }}
             />
+
             {otpSent ? (
               <input
                 name="otp"
