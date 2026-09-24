@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef,useMemo  } from "react";
 import Link from "next/link";
 import { Plus, Building2 } from "lucide-react";
 import { BrandLogo } from "@/components/ui/brand-logo";
@@ -19,6 +19,8 @@ type Props = {
   messageCount: number;
   notificationCount: number;
   categories: Category[];
+  allCategories?: Category[];
+   
 };
 
 /**
@@ -190,8 +192,18 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
   );
 }
 
-export function TopNav({ user, messageCount, notificationCount, categories }: Props) {
+export function TopNav({ user, messageCount, notificationCount, categories, allCategories }: Props) {
   const { t } = useRegionalSettings();
+
+  const childrenByParentId = useMemo(() => {
+    const map: Record<string, Category[]> = {};
+    for (const item of allCategories ?? []) {
+      if (!item.parentId) continue;
+      if (!map[item.parentId]) map[item.parentId] = [];
+      map[item.parentId].push(item);
+    }
+    return map;
+  }, [allCategories]);
 
   return (
     <header className="sticky top-0 z-40 w-full select-none transform-gpu will-change-transform">
@@ -290,6 +302,8 @@ export function TopNav({ user, messageCount, notificationCount, categories }: Pr
             <div className="pl-11 sm:pl-14 pr-14 sm:pr-18">
               <DynamicCategoryNav
                 categories={categories}
+                allCategories={allCategories}
+                childrenByParentId={childrenByParentId}
                 forYouHref="/"
                 sticky={false}
                 className="rounded-none border-0 bg-transparent shadow-none"
