@@ -31,6 +31,7 @@ import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useReelPopup } from "@/components/reels/use-reel-popup";
 import type { FeedItem } from "@/shared/api/contracts";
+import { useReelImpression } from "@/hooks/use-reel-impression";
 
 interface Props {
   items: FeedItem[];
@@ -47,6 +48,7 @@ export function ReelPopupModal({ items }: Props) {
 
   // Per-reel video state – reset when index changes
   const videoRef = useRef<HTMLVideoElement>(null);
+  const trackImpression = useReelImpression(reel?.id);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -213,7 +215,8 @@ export function ReelPopupModal({ items }: Props) {
                 playsInline
                 muted={isMuted}
                 preload="none"
-                onTimeUpdate={() => {
+                onTimeUpdate={(e) => {
+                  trackImpression(e.currentTarget);
                   if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
                 }}
                 onLoadedMetadata={() => {

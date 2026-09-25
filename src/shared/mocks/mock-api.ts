@@ -114,6 +114,11 @@ const feed: FeedRepository = {
   },
   likeReel: () => delay({ liked: true, likesCount: 43 }),
   saveReel: () => delay({ saved: true, savesCount: 15 }),
+  async recordView(reelId) {
+    const reel = reels.find((item) => item.id === reelId);
+    if (reel) reel.views += 1;
+    return delay(undefined);
+  },
 };
 
 const manufacturerRepo: ManufacturerRepository = {
@@ -154,6 +159,8 @@ const productRepo: ProductRepository = {
     products.unshift(product);
     return delay(undefined);
   },
+  // Mock mode has no event store; product views are only tracked by the real backend.
+  recordView: () => delay(undefined),
 };
 
 const messages: MessageRepository = {

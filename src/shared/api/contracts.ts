@@ -47,6 +47,8 @@ export interface FeedRepository {
   addReel(reel: Reel): Promise<void>;
   likeReel(reelId: string): Promise<{ liked: boolean; likesCount: number }>;
   saveReel(reelId: string): Promise<{ saved: boolean; savesCount: number }>;
+  /** Seek impression for seller analytics; viewerId dedupes guests. Never throws for tracking failures. */
+  recordView(reelId: string, viewerId?: string): Promise<void>;
 }
 
 export interface ManufacturerRepository {
@@ -60,6 +62,8 @@ export interface ProductRepository {
   getBySlug(slug: string): Promise<ProductDetail | null>;
   listByCategory(categoryId: string): Promise<Product[]>;
   addProduct(product: Product): Promise<void>;
+  /** Product detail view for seller analytics; viewerId dedupes guests. Never throws for tracking failures. */
+  recordView(productId: string, viewerId?: string): Promise<void>;
 }
 
 export type MessageAttachment = {

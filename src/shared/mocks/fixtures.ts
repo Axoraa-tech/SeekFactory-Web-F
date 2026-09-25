@@ -9,6 +9,18 @@ import { categories } from "@/shared/mocks/machinery-taxonomy";
 
 export { categories };
 
+/**
+ * Next.js (Turbopack dev especially) can load this module once per route bundle.
+ * Mutable fixtures live on globalThis so seller-hub writes made from /factory are
+ * visible on /, /explore and /products/* in the same server process.
+ */
+function shared<T>(key: string, initial: T): T {
+  const store = globalThis as typeof globalThis & { __sfFixtures?: Record<string, unknown> };
+  store.__sfFixtures ??= {};
+  return (store.__sfFixtures[key] ??= initial) as T;
+}
+
+
 const img = {
   forging:
     "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1400&q=80",
@@ -49,7 +61,7 @@ export const currentUser: BuyerProfile = {
   country: "India",
 };
 
-export const manufacturers: Manufacturer[] = [
+export const manufacturers = shared<Manufacturer[]>("manufacturers", [
   {
     id: "mfr-apex",
     slug: "apex-forgings",
@@ -159,9 +171,9 @@ export const manufacturers: Manufacturer[] = [
     chairmanName: "Li Ming",
     websiteUrl: "https://www.kaiyuanfluid.com",
   },
-];
+]);
 
-export const products: Product[] = [
+export const products = shared<Product[]>("products", [
   {
     id: "prd-cnc-comp",
     slug: "cnc-machined-components",
@@ -448,9 +460,9 @@ export const products: Product[] = [
     description:
       "Custom forged engine crankshafts and heavy-duty drivetrain components manufactured to client drawings.",
   },
-];
+]);
 
-export const reels: Reel[] = [
+export const reels = shared<Reel[]>("reels", [
   {
     id: "reel-agri-machinery",
     manufacturerId: "mfr-steelforge",
@@ -714,9 +726,9 @@ export const reels: Reel[] = [
       "cat-marine-equipment",
     ],
   },
-];
+]);
 
-export const mockComments: ReelComment[] = [
+export const mockComments = shared<ReelComment[]>("mockComments", [
   {
     id: "cmt-1",
     reelId: "reel-agri-machinery",
@@ -959,7 +971,7 @@ export const mockComments: ReelComment[] = [
       },
     ],
   },
-];
+]);
 
 export const conversations: Conversation[] = [
   {

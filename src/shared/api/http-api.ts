@@ -15,6 +15,7 @@ import type {
   FactoryRepository,
   MessageItem,
 } from "@/shared/api/contracts";
+import type { FactoryCertificate } from "@/entities/factory-certificate";
 import type { Category, CategoryIconKey } from "@/entities/category";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { FeedTab, Reel } from "@/entities/reel";
@@ -161,6 +162,13 @@ interface BackendManufacturer {
   categoryIds?: string[];
   chairman_name?: string;
   chairmanName?: string;
+  website_url?: string;
+  websiteUrl?: string;
+  annual_turnover?: string;
+  annualTurnover?: string;
+  production_lines?: number;
+  productionLines?: number;
+  certificates?: FactoryCertificate[];
   products?: BackendProduct[];
   reels?: BackendReel[];
 }
@@ -170,6 +178,7 @@ interface BackendFeedItem {
   manufacturer: BackendManufacturer;
   primary_product_slug?: string;
   primaryProductSlug?: string;
+  products?: BackendProduct[];
 }
 
 interface BackendCategory {
@@ -361,6 +370,11 @@ export function createHttpApi(baseUrl: string): ApiClient {
         url = url.replace("localhost", "127.0.0.1");
       }
 
+      // Multipart bodies must let fetch set Content-Type with the boundary.
+      if (options.body instanceof FormData) {
+        delete defaultHeaders["Content-Type"];
+      }
+
       const res = await fetch(url, {
         ...options,
         headers: {
@@ -410,7 +424,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
         return {
           id: user.id,
           name: user.name,
-          role: user.role === "ROLE_SUPPLIER" || user.role === "SUPPLIER" ? "Supplier" : "Buyer",
+          role: mapBackendRole(user.role),
           avatarUrl: user.avatar_url || user.avatarUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
           companyName: user.company_name || user.companyName || "Enterprise Member",
           industry: user.industry || "Manufacturing",
@@ -446,7 +460,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       const userEmail = res.user?.email || res.email || payload.email || "";
       const roleRaw = res.user?.role || res.role || input.role;
       const userRole: "Buyer" | "Supplier" =
-        roleRaw === "ROLE_SUPPLIER" || roleRaw === "SUPPLIER" || roleRaw === "Supplier" ? "Supplier" : "Buyer";
+        mapBackendRole(roleRaw);
       const userCompany =
         res.user?.company_name || res.company_name || res.companyName || payload.companyName;
 
@@ -482,7 +496,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       const userEmail = res.user?.email || res.email || input.email || "";
       const roleRaw = res.user?.role || res.role || input.role;
       const userRole: "Buyer" | "Supplier" =
-        roleRaw === "ROLE_SUPPLIER" || roleRaw === "SUPPLIER" || roleRaw === "Supplier" ? "Supplier" : "Buyer";
+        mapBackendRole(roleRaw);
       const userCompany =
         res.user?.companyName || res.user?.company_name || res.companyName || res.company_name || "Enterprise Member";
 
@@ -549,28 +563,18 @@ export function createHttpApi(baseUrl: string): ApiClient {
   const feed: FeedRepository = {
     async list(tab: FeedTab) {
       const data = await fetchJson<BackendFeedItem[]>(`/api/v1/feed?tab=${tab}`, { cache: "no-store" });
-      return data.map((item) => ({
-        reel: {
-          id: item.reel.id,
-          manufacturerId: item.manufacturer?.id || item.reel.manufacturerId || item.reel.manufacturer_id || "mfg-01",
-          title: item.reel.title || item.reel.caption || "Industrial Reel",
-          description: item.reel.description || "",
-          hashtags: item.reel.hashtags || [],
-          posterUrl: item.reel.posterUrl || item.reel.poster_url || "https://images.seekfactory.com/posters/default.jpg",
-          videoUrl: item.reel.videoUrl || item.reel.video_url,
-          durationSec: item.reel.durationSec || item.reel.duration_sec || 30,
-          startSec: item.reel.startSec || item.reel.start_sec || 0,
-          views: item.reel.views || 0,
-          likes: item.reel.likes || item.reel.likesCount || item.reel.likes_count || 0,
-          comments: item.reel.comments || item.reel.commentsCount || item.reel.comments_count || 0,
-          shares: item.reel.shares || 0,
-          saves: item.reel.saves || item.reel.savesCount || item.reel.saves_count || 0,
-          tab: tab,
-          productIds: item.reel.productIds || item.reel.product_ids || [],
-        },
-        manufacturer: normalizeManufacturer(item.manufacturer || {}),
-        primaryProductSlug: item.primaryProductSlug || item.primary_product_slug,
-      }));
+      return data.map((item) => {
+        const reel = normalizeReel(item.reel, item.manufacturer?.id, tab);
+        return {
+          reel: {
+            ...reel,
+            posterUrl: reel.posterUrl || "https://images.seekfactory.com/posters/default.jpg",
+          },
+          manufacturer: normalizeManufacturer(item.manufacturer || {}),
+          primaryProductSlug: item.primaryProductSlug || item.primary_product_slug,
+          products: (item.products || []).map(normalizeProduct),
+        };
+      });
     },
 
     async addReel(reel: Reel): Promise<void> {
@@ -592,6 +596,17 @@ export function createHttpApi(baseUrl: string): ApiClient {
         return res;
       } catch {
         return { liked: true, likesCount: 1 };
+      }
+    },
+
+    async recordView(reelId: string, viewerId?: string): Promise<void> {
+      try {
+        await fetchJson<unknown>(`/api/v1/feed/${encodeURIComponent(reelId)}/view`, {
+          method: "POST",
+          body: JSON.stringify({ viewerId }),
+        });
+      } catch {
+        // Analytics must never break playback
       }
     },
 
@@ -621,28 +636,15 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getBySlug(slug: string): Promise<ManufacturerDetail | null> {
       try {
-        const detail = await fetchJson<BackendManufacturer>(`/api/v1/manufacturers/${slug}`);
+        // Backend returns { manufacturer, products, reels }; older builds returned a flat manufacturer.
+        const detail = await fetchJson<
+          BackendManufacturer & { manufacturer?: BackendManufacturer }
+        >(`/api/v1/manufacturers/${slug}`);
+        const manufacturer = detail.manufacturer ?? detail;
         return {
-          manufacturer: normalizeManufacturer(detail),
+          manufacturer: normalizeManufacturer(manufacturer),
           products: (detail.products || []).map(normalizeProduct),
-          reels: (detail.reels || []).map((r: BackendReel) => ({
-            id: r.id,
-            manufacturerId: detail.id || "",
-            title: r.title || r.caption || "Factory Reel",
-            description: r.description || "",
-            hashtags: r.hashtags || [],
-            posterUrl: r.poster_url || "",
-            videoUrl: r.video_url,
-            durationSec: r.duration_sec || 30,
-            startSec: 0,
-            views: r.views || 0,
-            likes: r.likes || 0,
-            comments: r.comments || 0,
-            shares: 0,
-            saves: r.saves || 0,
-            tab: "for-you",
-            productIds: [],
-          })),
+          reels: (detail.reels || []).map((r) => normalizeReel(r, manufacturer.id)),
         };
       } catch {
         return null;
@@ -659,10 +661,14 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getBySlug(slug: string): Promise<ProductDetail | null> {
       try {
-        const detail = await fetchJson<BackendProduct>(`/api/v1/products/${slug}`);
+        // Backend returns { product, manufacturer, related }; older builds returned a flat product.
+        const detail = await fetchJson<
+          BackendProduct & { product?: BackendProduct; related?: BackendProduct[] }
+        >(`/api/v1/products/${slug}`);
+        const product = detail.product ?? detail;
         return {
-          product: normalizeProduct(detail),
-          manufacturer: normalizeManufacturer(detail.manufacturer || {}),
+          product: normalizeProduct(product),
+          manufacturer: normalizeManufacturer(detail.manufacturer || product.manufacturer || {}),
         };
       } catch {
         return null;
@@ -672,6 +678,17 @@ export function createHttpApi(baseUrl: string): ApiClient {
     async listByCategory(categoryId: string): Promise<Product[]> {
       const list = await fetchJson<BackendProduct[]>(`/api/v1/products/category/${categoryId}`);
       return list.map(normalizeProduct);
+    },
+
+    async recordView(productId: string, viewerId?: string): Promise<void> {
+      try {
+        await fetchJson<unknown>(`/api/v1/products/${encodeURIComponent(productId)}/view`, {
+          method: "POST",
+          body: JSON.stringify({ viewerId }),
+        });
+      } catch {
+        // Analytics must never break the product page
+      }
     },
 
     async addProduct(product: Product): Promise<void> {
@@ -1269,13 +1286,63 @@ export function createHttpApi(baseUrl: string): ApiClient {
 }
 
 // ── NORMALIZATION HELPERS (Convert Backend Snake_Case ➔ Frontend CamelCase) ──
+
+/** Backend has returned the role as ROLE_SUPPLIER, SUPPLIER and Supplier across endpoints. */
+function mapBackendRole(role: string | undefined): "Buyer" | "Supplier" {
+  return role?.toUpperCase().replace(/^ROLE_/, "") === "SUPPLIER" ? "Supplier" : "Buyer";
+}
+
+const BACKEND_MEDIA_PREFIX = "/api/v1/media/";
+const MEDIA_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/+$/, "");
+
+/**
+ * Backend uploads are stored as server-relative paths (/api/v1/media/<key>) so the DB
+ * survives a backend host change. Prefix them with the API origin for <img>/<video>.
+ * Other relative paths (e.g. /videos/*.mp4) are frontend assets and pass through.
+ */
+export function resolveMediaUrl(url: string | undefined): string | undefined {
+  if (url && url.startsWith(BACKEND_MEDIA_PREFIX) && MEDIA_ORIGIN) return MEDIA_ORIGIN + url;
+  return url;
+}
+
+/** Inverse of resolveMediaUrl: store backend media as relative paths. */
+function toStoredMediaUrl(url: string): string;
+function toStoredMediaUrl(url: string | undefined): string | undefined;
+function toStoredMediaUrl(url: string | undefined) {
+  if (url && MEDIA_ORIGIN && url.startsWith(MEDIA_ORIGIN + BACKEND_MEDIA_PREFIX)) {
+    return url.slice(MEDIA_ORIGIN.length);
+  }
+  return url;
+}
+
+function normalizeReel(r: BackendReel, fallbackManufacturerId = "", tab: FeedTab = "for-you"): Reel {
+  return {
+    id: r.id,
+    manufacturerId: r.manufacturerId || r.manufacturer_id || fallbackManufacturerId,
+    title: r.title || r.caption || "Factory Seek",
+    description: r.description || "",
+    hashtags: r.hashtags || [],
+    posterUrl: resolveMediaUrl(r.posterUrl || r.poster_url) || "",
+    videoUrl: resolveMediaUrl(r.videoUrl || r.video_url),
+    durationSec: r.durationSec || r.duration_sec || 30,
+    startSec: r.startSec || r.start_sec || 0,
+    views: r.views || 0,
+    likes: r.likes || r.likesCount || r.likes_count || 0,
+    comments: r.comments || r.commentsCount || r.comments_count || 0,
+    shares: r.shares || 0,
+    saves: r.saves || r.savesCount || r.saves_count || 0,
+    tab,
+    productIds: r.productIds || r.product_ids || [],
+  };
+}
+
 function normalizeManufacturer(m: BackendManufacturer): Manufacturer {
   return {
     id: m.id || "",
     slug: m.slug || "",
     name: m.name || "Verified Factory",
-    logoUrl: m.logoUrl || m.logo_url || "https://images.seekfactory.com/logos/default.png",
-    coverUrl: m.coverUrl || m.cover_url || "https://images.seekfactory.com/covers/default.jpg",
+    logoUrl: resolveMediaUrl(m.logoUrl || m.logo_url) || "https://images.seekfactory.com/logos/default.png",
+    coverUrl: resolveMediaUrl(m.coverUrl || m.cover_url) || "https://images.seekfactory.com/covers/default.jpg",
     country: m.country || "China",
     location: m.location || "Zhejiang, China",
     verified: m.verified ?? true,
@@ -1288,6 +1355,10 @@ function normalizeManufacturer(m: BackendManufacturer): Manufacturer {
     followerCount: m.followerCount ?? m.follower_count ?? 1200,
     categoryIds: m.categoryIds || m.category_ids || [],
     chairmanName: m.chairmanName || m.chairman_name,
+    websiteUrl: m.websiteUrl || m.website_url,
+    annualTurnover: m.annualTurnover || m.annual_turnover,
+    productionLines: m.productionLines ?? m.production_lines,
+    certificates: m.certificates,
   };
 }
 
@@ -1304,7 +1375,9 @@ function normalizeProduct(p: BackendProduct): Product {
     slug: p.slug || "",
     manufacturerId: p.manufacturerId || p.manufacturer_id || p.manufacturer?.id || "",
     name: p.name || "",
-    imageUrl: p.imageUrl || p.primaryImageUrl || p.primary_image_url || p.image_url || "https://images.seekfactory.com/products/default.jpg",
+    imageUrl:
+      resolveMediaUrl(p.imageUrl || p.primaryImageUrl || p.primary_image_url || p.image_url) ||
+      "https://images.seekfactory.com/products/default.jpg",
     description: p.description || "",
     priceInr: p.priceInr ?? p.price_inr ?? 150000,
     unit: p.unit || "SET",

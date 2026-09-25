@@ -21,6 +21,7 @@ import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
+import { useReelImpression } from "@/hooks/use-reel-impression";
 
 type Props = {
   reel: Reel;
@@ -98,6 +99,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
     }
   }, []);
 
+  const trackImpression = useReelImpression(reel.id);
   const { togglePlay: handleTogglePlay, toggleMute: handleToggleMute } = useSeekAutoplay({
     videoRef,
     containerRef: videoWrapperRef,
@@ -205,7 +207,8 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
             playsInline
             muted={isMuted}
             preload="none"
-            onTimeUpdate={() => {
+            onTimeUpdate={(e) => {
+              trackImpression(e.currentTarget);
               if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
             }}
             onLoadedMetadata={() => {

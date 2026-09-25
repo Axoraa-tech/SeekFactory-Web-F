@@ -11,6 +11,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
+import { TrackProductView } from "@/features/analytics/track-product-view";
 import { getApi } from "@/shared/api";
 import { formatPriceInr } from "@/shared/lib/format";
 
@@ -41,6 +42,8 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <section className="space-y-6">
+      <TrackProductView productId={product.id} />
+
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-slate-500 font-medium">
         <Link href="/" className="hover:text-brand-blue transition-colors">Home</Link>
