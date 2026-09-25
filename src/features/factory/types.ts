@@ -1,16 +1,25 @@
 export type SellerTab = "overview" | "products" | "seeks" | "rfqs" | "messages" | "profile";
 
+/**
+ * Seller KPIs. `null` means "not enough data yet" (e.g. no views in the previous period,
+ * no RFQs received) and must be shown as such, never replaced with a made-up number.
+ */
 export type SellerStats = {
+  /** Window (days) covered by the view counts; change % compares with the window before. */
+  periodDays?: number;
   totalProductViews: number;
-  productViewsChange: number; // e.g. +18.4%
+  productViewsChange: number | null; // e.g. +18.4 (%)
   factoryProfileVisits: number;
-  profileVisitsChange: number; // e.g. +12.1%
+  profileVisitsChange: number | null;
   videoSeekPlays: number;
-  videoPlaysChange: number; // e.g. +34.2%
+  videoPlaysChange: number | null;
   activeRfqsCount: number;
+  /** Active RFQs this factory has not quoted yet. */
   pendingRfqsCount: number;
-  responseRatePercent: number;
-  avgResponseTimeHours: number;
+  responseRatePercent: number | null;
+  avgResponseTimeHours: number | null;
+  /** Window (days) of RFQs considered for response rate/speed. */
+  responseWindowDays?: number;
   followerCount: number;
   totalProductsCount: number;
   totalSeeksCount: number;

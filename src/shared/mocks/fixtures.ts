@@ -3,6 +3,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
 import type { AppNotification } from "@/entities/notification";
 import type { Product } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
+import type { RfqItem } from "@/entities/rfq";
 import type { ReelComment } from "@/entities/comment";
 import type { BuyerProfile } from "@/entities/user";
 import { categories } from "@/shared/mocks/machinery-taxonomy";
@@ -1048,3 +1049,57 @@ export const notifications: AppNotification[] = [
     read: false,
   },
 ];
+
+/** Buyer RFQs routed to the demo factory (manufacturers[0]) in the seller hub. */
+export const factoryRfqs = shared<RfqItem[]>("factoryRfqs", [
+  {
+    id: "rfq-seed-1",
+    referenceNumber: "RFQ-2026-418207",
+    productName: "Closed-Die Forged Crankshaft Blanks (EN19)",
+    quantity: "2,000",
+    unit: "Pieces",
+    targetPrice: "4200000",
+    currency: "INR",
+    incoterm: "CIF Nhava Sheva",
+    details: "[Forging Parts] Heat treated to 28-32 HRC, UT tested per ASTM A388, PPAP level 3 documentation required.",
+    status: "SUBMITTED",
+    createdAt: "2026-09-22T09:14:00.000Z",
+    companyName: "Mehta Auto Components",
+    buyerName: "Arjun Mehta",
+    buyerCountry: "India",
+  },
+  {
+    id: "rfq-seed-2",
+    referenceNumber: "RFQ-2026-552913",
+    productName: "Hydraulic Open-Die Forging Press, 1600T",
+    quantity: "1",
+    unit: "Set",
+    targetPrice: "Negotiable",
+    currency: "INR",
+    incoterm: "FOB Ningbo",
+    details: "[Engineering Capital Machinery] Includes manipulator, PLC controls, installation and operator training at Rajkot plant.",
+    status: "SUBMITTED",
+    createdAt: "2026-09-19T05:40:00.000Z",
+    companyName: "Saurashtra Heavy Engineering",
+    buyerName: "Priya Patel",
+    buyerCountry: "India",
+  },
+  {
+    id: "rfq-seed-3",
+    referenceNumber: "RFQ-2026-301784",
+    productName: "Forged Steel Flanges ASME B16.5 (6\" – 24\")",
+    quantity: "800",
+    unit: "Pieces",
+    targetPrice: "1850000",
+    currency: "INR",
+    incoterm: "FOB",
+    details: "[Forging Parts] ASTM A105N, weld neck, RF face. Mill test certificates EN 10204 3.1.",
+    status: "QUOTED",
+    createdAt: "2026-09-12T11:02:00.000Z",
+    companyName: "Gulf Process Piping LLC",
+    buyerName: "Omar Haddad",
+    buyerCountry: "UAE",
+    quotedPriceInr: 1790000,
+    leadTimeDays: 35,
+  },
+]);

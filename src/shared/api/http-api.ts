@@ -12,8 +12,13 @@ import type {
   ProductRepository,
   RfqRepository,
   SessionRepository,
+  FactoryQuote,
   FactoryRepository,
+  MediaKind,
   MessageItem,
+  NewFactoryProduct,
+  NewFactorySeek,
+  UploadedMedia,
 } from "@/shared/api/contracts";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
 import type { Category, CategoryIconKey } from "@/entities/category";
@@ -279,6 +284,8 @@ interface BackendNotification {
 }
 
 interface BackendFactoryStats {
+  periodDays?: number;
+  responseWindowDays?: number;
   total_product_views?: number;
   totalProductViews?: number;
   product_views_change?: number;
@@ -1096,13 +1103,19 @@ export function createHttpApi(baseUrl: string): ApiClient {
         name: data.name,
         logoUrl: data.logoUrl,
         coverUrl: data.coverUrl,
+        country: data.country,
         location: data.location,
+        yearsEstablished: data.yearsEstablished,
         factorySize: data.factorySize,
         employees: data.employees,
+        annualTurnover: data.annualTurnover,
+        productionLines: data.productionLines,
         description: data.description,
+        websiteUrl: data.websiteUrl,
         exportCountries: data.exportCountries,
         categoryIds: data.categoryIds,
         chairmanName: data.chairmanName,
+        certificates: data.certificates,
       };
       const res = await fetchJson<BackendManufacturer>("/api/v1/factory/profile", {
         method: "PUT",
@@ -1121,6 +1134,24 @@ export function createHttpApi(baseUrl: string): ApiClient {
       }
     },
 
+    async uploadMedia(file: File, kind: MediaKind): Promise<UploadedMedia> {
+      // Assumed backend contract: multipart `file` + `kind` → { url, contentType, size }.
+      // Backend should store to Aliyun OSS (video → VOD/HLS) and return a public or CDN URL.
+      const body = new FormData();
+      body.append("file", file);
+      body.append("kind", kind);
+      const res = await fetchJson<{ url?: string; contentType?: string; content_type?: string; size?: number }>(
+        "/api/v1/factory/media",
+        { method: "POST", body },
+      );
+      if (!res?.url) throw new Error("Upload succeeded but no media URL was returned");
+      return {
+        url: res.url,
+        contentType: res.contentType || res.content_type || file.type,
+        size: res.size ?? file.size,
+      };
+    },
+
     async getProducts(): Promise<Product[]> {
       try {
         const list = await fetchJson<BackendProduct[]>("/api/v1/factory/products", { cache: "no-store" });
@@ -1131,19 +1162,10 @@ export function createHttpApi(baseUrl: string): ApiClient {
       }
     },
 
-    async addProduct(data: {
-      name: string;
-      imageUrl: string;
-      description?: string;
-      priceInr: number;
-      unit?: string;
-      moq?: string;
-      categoryId: string;
-      specs?: Record<string, string>;
-    }): Promise<Product> {
+    async addProduct(data: NewFactoryProduct): Promise<Product> {
       const res = await fetchJson<BackendProduct>("/api/v1/factory/products", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, imageUrl: toStoredMediaUrl(data.imageUrl) }),
       });
       return normalizeProduct(res);
     },
@@ -1157,59 +1179,22 @@ export function createHttpApi(baseUrl: string): ApiClient {
     async getSeeks(): Promise<Reel[]> {
       try {
         const list = await fetchJson<BackendReel[]>("/api/v1/factory/seeks", { cache: "no-store" });
-        return list.map((r) => ({
-          id: r.id,
-          manufacturerId: r.manufacturerId || r.manufacturer_id || "",
-          title: r.title || r.caption || "Factory Seek",
-          description: r.description || "",
-          hashtags: r.hashtags || [],
-          posterUrl: r.posterUrl || r.poster_url || "",
-          videoUrl: r.videoUrl || r.video_url,
-          durationSec: r.durationSec || r.duration_sec || 30,
-          startSec: 0,
-          views: r.views || 0,
-          likes: r.likes || r.likesCount || r.likes_count || 0,
-          comments: r.comments || r.commentsCount || r.comments_count || 0,
-          shares: r.shares || 0,
-          saves: r.saves || r.savesCount || r.saves_count || 0,
-          tab: "for-you",
-          productIds: r.productIds || r.product_ids || [],
-        }));
+        return list.map((r) => normalizeReel(r));
       } catch {
         return [];
       }
     },
 
-    async addSeek(data: {
-      title: string;
-      description?: string;
-      posterUrl: string;
-      videoUrl?: string;
-      durationSec?: number;
-      hashtags?: string[];
-    }): Promise<Reel> {
+    async addSeek(data: NewFactorySeek): Promise<Reel> {
       const res = await fetchJson<BackendReel>("/api/v1/factory/seeks", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          posterUrl: toStoredMediaUrl(data.posterUrl),
+          videoUrl: toStoredMediaUrl(data.videoUrl),
+        }),
       });
-      return {
-        id: res.id,
-        manufacturerId: res.manufacturer_id || "",
-        title: res.title || data.title,
-        description: res.description || data.description || "",
-        hashtags: res.hashtags || data.hashtags || [],
-        posterUrl: res.poster_url || data.posterUrl,
-        videoUrl: res.video_url || data.videoUrl,
-        durationSec: res.duration_sec || data.durationSec || 30,
-        startSec: 0,
-        views: 0,
-        likes: 0,
-        comments: 0,
-        shares: 0,
-        saves: 0,
-        tab: "for-you",
-        productIds: [],
-      };
+      return { ...normalizeReel(res), categoryIds: data.categoryIds };
     },
 
     async deleteSeek(id: string): Promise<void> {
@@ -1237,8 +1222,17 @@ export function createHttpApi(baseUrl: string): ApiClient {
           createdAt?: string;
           created_at?: string;
           companyName?: string;
+          company_name?: string;
+          buyerName?: string;
+          buyer_name?: string;
+          buyerCountry?: string;
+          buyer_country?: string;
+          quotePrice?: number;
+          quote_price?: number;
+          leadTimeDays?: number;
+          lead_time_days?: number;
         }
-        const list = await fetchJson<BackendRfqItem[]>("/api/v1/factory/rfqs");
+        const list = await fetchJson<BackendRfqItem[]>("/api/v1/factory/rfqs", { cache: "no-store" });
         return list.map((item) => ({
           id: item.id,
           referenceNumber: item.referenceNumber || item.reference_number || `RFQ-${item.id.slice(0, 8)}`,
@@ -1251,19 +1245,18 @@ export function createHttpApi(baseUrl: string): ApiClient {
           details: item.details || "",
           status: item.status || "SUBMITTED",
           createdAt: item.createdAt || item.created_at || "Just now",
-          companyName: item.companyName,
+          companyName: item.companyName || item.company_name,
+          buyerName: item.buyerName || item.buyer_name,
+          buyerCountry: item.buyerCountry || item.buyer_country,
+          quotedPriceInr: item.quotePrice ?? item.quote_price,
+          leadTimeDays: item.leadTimeDays ?? item.lead_time_days,
         }));
       } catch {
         return [];
       }
     },
 
-    async submitQuote(rfqId: string, quote: {
-      quotePrice: number;
-      currency?: string;
-      leadTimeDays: number;
-      notes?: string;
-    }): Promise<void> {
+    async submitQuote(rfqId: string, quote: FactoryQuote): Promise<void> {
       await fetchJson<void>(`/api/v1/factory/rfqs/${rfqId}/quote`, {
         method: "POST",
         body: JSON.stringify(quote),
@@ -1398,18 +1391,21 @@ function normalizeCategory(c: BackendCategory): Category {
   };
 }
 
+// Backend omits null KPIs ("not enough data"); keep them null rather than inventing values.
 function normalizeFactoryStats(res: BackendFactoryStats): SellerStats {
   return {
+    periodDays: res.periodDays,
     totalProductViews: res.totalProductViews ?? res.total_product_views ?? 0,
-    productViewsChange: res.productViewsChange ?? res.product_views_change ?? 0,
+    productViewsChange: res.productViewsChange ?? res.product_views_change ?? null,
     factoryProfileVisits: res.factoryProfileVisits ?? res.factory_profile_visits ?? 0,
-    profileVisitsChange: res.profileVisitsChange ?? res.profile_visits_change ?? 0,
+    profileVisitsChange: res.profileVisitsChange ?? res.profile_visits_change ?? null,
     videoSeekPlays: res.videoSeekPlays ?? res.video_seek_plays ?? 0,
-    videoPlaysChange: res.videoPlaysChange ?? res.video_plays_change ?? 0,
+    videoPlaysChange: res.videoPlaysChange ?? res.video_plays_change ?? null,
     activeRfqsCount: res.activeRfqsCount ?? res.active_rfqs_count ?? 0,
     pendingRfqsCount: res.pendingRfqsCount ?? res.pending_rfqs_count ?? 0,
-    responseRatePercent: res.responseRatePercent ?? res.response_rate_percent ?? 100,
-    avgResponseTimeHours: res.avgResponseTimeHours ?? res.avg_response_time_hours ?? 1.5,
+    responseRatePercent: res.responseRatePercent ?? res.response_rate_percent ?? null,
+    avgResponseTimeHours: res.avgResponseTimeHours ?? res.avg_response_time_hours ?? null,
+    responseWindowDays: res.responseWindowDays,
     followerCount: res.followerCount ?? res.follower_count ?? 0,
     totalProductsCount: res.totalProductsCount ?? res.total_products_count ?? 0,
     totalSeeksCount: res.totalSeeksCount ?? res.total_seeks_count ?? 0,
