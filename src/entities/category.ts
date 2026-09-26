@@ -33,4 +33,5 @@ export type Category = {
   listingCount: number;
   parentId: string | null;
   icon: CategoryIconKey;
+  subcategories?: Category[];
 };

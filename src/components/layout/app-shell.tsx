@@ -14,6 +14,7 @@ import type { BuyerProfile } from "@/entities/user";
 type Props = {
   user: BuyerProfile | null;
   categories: Category[];
+  allCategories?: Category[];
   manufacturers: Manufacturer[];
   products: Product[];
   messages: (Conversation & { manufacturer: Manufacturer })[];
@@ -26,6 +27,7 @@ type Props = {
 export function AppShell({
   user,
   categories,
+  allCategories,
   manufacturers,
   products,
   messages,
@@ -39,6 +41,7 @@ export function AppShell({
       <TopNav
         user={user}
         categories={categories}
+        allCategories={allCategories}
         messageCount={messageCount}
         notificationCount={notificationCount}
       />
@@ -67,4 +70,3 @@ export function AppShell({
     </div>
   );
 }
-

@@ -9,6 +9,7 @@ export default async function BuyerLayout({ children }: { children: ReactNode })
     <AppShell
       user={shell.user}
       categories={shell.categories}
+      allCategories={shell.allCategories}
       manufacturers={shell.manufacturers}
       products={shell.products}
       messages={shell.messages}
