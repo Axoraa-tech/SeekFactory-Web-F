@@ -26,11 +26,11 @@ export default async function FactoryHomePage() {
   // Map Backend Conversations to SellerConversations for the Dashboard
   const initialConversations = convosRaw.map((c) => ({
     id: c.id,
-    buyerId: "b-0", // Default or extract if backend provides
-    buyerName: "Buyer", 
-    buyerCompany: c.manufacturer?.name || "Global Buyer",
-    buyerCountry: c.manufacturer?.country || "Unknown",
-    buyerAvatarUrl: c.manufacturer?.logoUrl || "https://images.seekfactory.com/logos/default.png",
+    buyerId: c.buyerId || "b-0",
+    buyerName: c.buyerName || "Buyer", 
+    buyerCompany: c.buyerCompany || "Global Buyer",
+    buyerCountry: "Global", // Can be added to backend later if needed
+    buyerAvatarUrl: c.buyerAvatarUrl || "https://images.seekfactory.com/logos/default.png",
     lastMessage: c.lastMessage || "",
     lastMessageTime: c.lastMessageAt || "Recently",
     unreadCount: c.unreadCount || 0,

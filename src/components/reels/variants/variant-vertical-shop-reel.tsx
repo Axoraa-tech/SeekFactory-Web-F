@@ -21,6 +21,7 @@ import { formatCount } from "@/shared/lib/format";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
+import { useReelImpression } from "@/hooks/use-reel-impression";
 
 type Props = {
   reel: Reel;
@@ -66,6 +67,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
     }
   }, []);
 
+  const trackImpression = useReelImpression(reel.id);
   const { togglePlay: handleTogglePlay, toggleMute: handleToggleMute } = useSeekAutoplay({
     videoRef,
     containerRef: videoWrapperRef,
@@ -164,8 +166,9 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
               loop
               playsInline
               muted={isMuted}
-              preload="metadata"
-              onTimeUpdate={() => {
+              preload="none"
+              onTimeUpdate={(e) => {
+                trackImpression(e.currentTarget);
                 if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
               }}
               onLoadedMetadata={() => {
@@ -177,7 +180,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
             />
           ) : (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={reel.posterUrl} alt={reel.title} className="h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={reel.posterUrl} alt={reel.title} className="h-full w-full object-cover" />
           )}
 
           {/* Buffering Indicator */}
@@ -224,8 +227,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
                 className="inline-flex items-center gap-2 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white hover:bg-black/80 transition-colors border border-white/10 shadow-xs"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={manufacturer.logoUrl}
+                <img src={manufacturer.logoUrl}
                   alt={manufacturer.name}
                   className="h-5 w-5 rounded-full object-cover"
                 />
@@ -391,3 +393,4 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
     </>
   );
 }
+

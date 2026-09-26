@@ -31,6 +31,7 @@ import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useReelPopup } from "@/components/reels/use-reel-popup";
 import type { FeedItem } from "@/shared/api/contracts";
+import { useReelImpression } from "@/hooks/use-reel-impression";
 
 interface Props {
   items: FeedItem[];
@@ -47,6 +48,7 @@ export function ReelPopupModal({ items }: Props) {
 
   // Per-reel video state – reset when index changes
   const videoRef = useRef<HTMLVideoElement>(null);
+  const trackImpression = useReelImpression(reel?.id);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -212,8 +214,9 @@ export function ReelPopupModal({ items }: Props) {
                 loop
                 playsInline
                 muted={isMuted}
-                preload="auto"
-                onTimeUpdate={() => {
+                preload="none"
+                onTimeUpdate={(e) => {
+                  trackImpression(e.currentTarget);
                   if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
                 }}
                 onLoadedMetadata={() => {
@@ -225,8 +228,7 @@ export function ReelPopupModal({ items }: Props) {
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={reel.posterUrl}
+              <img loading="lazy" decoding="async" src={reel.posterUrl}
                 alt={reel.title}
                 className="h-full w-full object-cover"
               />
@@ -379,8 +381,7 @@ export function ReelPopupModal({ items }: Props) {
                 onClick={close}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={manufacturer.logoUrl}
+                <img src={manufacturer.logoUrl}
                   alt=""
                   className="h-9 w-9 rounded-lg border border-neutral-200 object-cover flex-shrink-0"
                 />
@@ -514,3 +515,4 @@ export function ReelPopupModal({ items }: Props) {
     </>
   );
 }
+

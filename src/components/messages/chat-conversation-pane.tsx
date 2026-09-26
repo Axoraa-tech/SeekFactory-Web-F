@@ -62,8 +62,7 @@ export function ChatConversationPane({
           </button>
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={activeThread.manufacturer.logoUrl}
+          <img loading="lazy" decoding="async" src={activeThread.manufacturer.logoUrl}
             alt={activeThread.manufacturer.name}
             className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
           />
@@ -126,8 +125,7 @@ export function ChatConversationPane({
             >
               {!isUser && (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={activeThread.manufacturer.logoUrl}
+                <img src={activeThread.manufacturer.logoUrl}
                   alt=""
                   className="h-7 w-7 rounded-lg object-cover border border-slate-200 shrink-0 mt-0.5"
                 />
@@ -179,8 +177,7 @@ export function ChatConversationPane({
         {isTyping && (
           <div className="flex items-center gap-2 text-xs text-slate-400 italic">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={activeThread.manufacturer.logoUrl}
+            <img src={activeThread.manufacturer.logoUrl}
               alt=""
               className="h-6 w-6 rounded-md object-cover"
             />
@@ -260,3 +257,4 @@ export function ChatConversationPane({
     </div>
   );
 }
+

@@ -7,6 +7,8 @@ import { getApi } from "@/shared/api";
 import { formatPriceInr } from "@/shared/lib/format";
 import { Package, ShieldCheck } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<{ q?: string; category?: string; sub?: string }>;
 };
@@ -110,8 +112,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               <Card className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white hover:border-brand-orange/40 hover:shadow-md transition-all flex flex-col h-full">
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={product.imageUrl}
+                  <img loading="lazy" decoding="async" src={product.imageUrl}
                     alt={product.name}
                     className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -204,3 +205,4 @@ function matchesAssigned(
 
   return false;
 }
+

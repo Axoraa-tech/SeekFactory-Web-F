@@ -162,7 +162,7 @@ export function SalesproDataTable({
                     <div className="flex items-center gap-2.5 max-w-[240px]">
                       <div className="h-9 w-9 rounded-lg overflow-hidden shrink-0 border border-[#E6E8EB] bg-[#F3F4F6]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={row.imageUrl} alt="" className="h-full w-full object-cover" />
+                        <img loading="lazy" decoding="async" src={row.imageUrl} alt="" className="h-full w-full object-cover" />
                       </div>
                       <span className="font-bold text-[#1C1C1C] truncate">{row.name}</span>
                     </div>
@@ -209,3 +209,4 @@ export function SalesproDataTable({
     </div>
   );
 }
+

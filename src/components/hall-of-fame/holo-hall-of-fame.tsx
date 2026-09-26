@@ -185,8 +185,7 @@ export function HoloHallOfFame({
               {/* Holographic Certificate Document Image */}
               <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-neutral-900 shadow-inner">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={activeCert.imageUrl}
+                <img loading="lazy" decoding="async" src={activeCert.imageUrl}
                   alt={activeCert.title}
                   className="h-full w-full object-cover select-none transition-transform duration-700 group-hover:scale-105"
                 />
@@ -305,8 +304,7 @@ export function HoloHallOfFame({
                   {/* Thumbnail Image */}
                   <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-neutral-900">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={cert.imageUrl}
+                    <img src={cert.imageUrl}
                       alt={cert.title}
                       className="h-full w-full object-cover"
                     />
@@ -337,3 +335,4 @@ export function HoloHallOfFame({
     </div>
   );
 }
+

@@ -92,10 +92,8 @@ export function LoadingScreen({ minDurationMs = 5800 }: LoadingScreenProps) {
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={step.src}
+                <img loading="lazy" decoding="async" src={step.src}
                   alt={step.label}
-                  decoding="async"
                   style={{ imageRendering: "-webkit-optimize-contrast" }}
                   className="w-full h-full object-contain md:object-cover object-center filter contrast-[1.05]"
                 />
@@ -121,3 +119,4 @@ export function LoadingScreen({ minDurationMs = 5800 }: LoadingScreenProps) {
     </div>
   );
 }
+

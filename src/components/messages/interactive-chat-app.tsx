@@ -52,59 +52,119 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
     if (!selectedThreadId) return;
 
     let isMounted = true;
-    const currentThread = threads.find((t) => t.id === selectedThreadId);
 
-    // Only fetch if messages haven't been loaded yet
-    if (currentThread && currentThread.messages.length === 0) {
-      getApi()
-        .messages.getMessages(selectedThreadId)
-        .then((msgs) => {
-          if (!isMounted) return;
-          setThreads((prev) =>
-            prev.map((t) => {
-              if (t.id === selectedThreadId) {
-                // If backend has no messages yet, provide a friendly manufacturer welcome greeting
-                const finalMessages: ChatMessage[] = msgs.length > 0 ? msgs.map((m) => ({
-                  id: m.id,
-                  sender: m.sender,
-                  text: m.text,
-                  time: m.time,
-                  attachment: m.attachment,
-                })) : [
-                  {
-                    id: `welcome-${t.id}`,
-                    sender: "factory",
-                    text: `Hello! Welcome to ${t.manufacturer.name}. We specialize in precision engineering and OEM manufacturing. How can we assist your production requirement?`,
-                    time: "Just now",
-                  },
-                ];
-                return { ...t, messages: finalMessages };
-              }
-              return t;
-            })
-          );
-        })
-        .catch(() => {
-          // Fallback gracefully
-        });
-    }
+    // Fetch messages for active thread
+    getApi()
+      .messages.getMessages(selectedThreadId)
+      .then((msgs) => {
+        if (!isMounted) return;
+        setThreads((prev) =>
+          prev.map((t) => {
+            if (t.id === selectedThreadId) {
+              const finalMessages: ChatMessage[] = msgs.length > 0 ? msgs.map((m) => ({
+                id: m.id,
+                sender: m.sender,
+                text: m.text,
+                time: m.time,
+                attachment: m.attachment,
+              })) : [
+                {
+                  id: `welcome-${t.id}`,
+                  sender: "factory",
+                  text: `Hello! Welcome to ${t.manufacturer.name}. We specialize in precision engineering and OEM manufacturing. How can we assist your production requirement?`,
+                  time: "Just now",
+                },
+              ];
+              return { ...t, messages: finalMessages };
+            }
+            return t;
+          })
+        );
+      })
+      .catch(() => {
+        // Fallback gracefully
+      });
 
     // Mark as read in backend
     void getApi().messages.markAsRead(selectedThreadId);
 
+    // Subscribe to SSE stream
+    const unsubscribe = getApi().messages.onMessageStream(selectedThreadId, (newMsg) => {
+      setThreads((prev) =>
+        prev.map((t) => {
+          if (t.id === selectedThreadId) {
+            // Check if message already exists
+            if (t.messages.some(m => m.id === newMsg.id)) {
+              return t;
+            }
+            return {
+              ...t,
+              messages: [...t.messages, {
+                id: newMsg.id,
+                sender: newMsg.sender,
+                text: newMsg.text,
+                time: newMsg.time,
+                attachment: newMsg.attachment,
+              }],
+            };
+          }
+          return t;
+        })
+      );
+    });
+
     return () => {
       isMounted = false;
+      unsubscribe();
     };
-  }, [selectedThreadId, threads]);
+  }, [selectedThreadId]);
+
+  const buyActionHandledRef = useRef(false);
 
   // Handle direct navigation with ?with=slug parameter
   useEffect(() => {
     if (!withSlug) return;
 
+    const action = searchParams.get("action");
+    const productSlug = searchParams.get("product");
+    
+    // Auto-send Buy Order Request message
+    const sendBuyRequest = async (convId: string) => {
+      if (action === "buy" && productSlug && !buyActionHandledRef.current) {
+        buyActionHandledRef.current = true;
+        const text = `🛒 **ORDER REQUEST**\nProduct: ${productSlug.replace(/-/g, " ")}\n\nPlease provide details to proceed with the purchase.`;
+        try {
+          await getApi().messages.sendMessage(convId, text);
+          // Reload messages right after to show it
+          const msgs = await getApi().messages.getMessages(convId);
+          setThreads((prev) =>
+            prev.map((t) => {
+              if (t.id === convId) {
+                return {
+                  ...t,
+                  messages: msgs.map((m) => ({
+                    id: m.id,
+                    sender: m.sender,
+                    text: m.text,
+                    time: m.time,
+                    attachment: m.attachment,
+                  })),
+                };
+              }
+              return t;
+            })
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
     const existing = threads.find((t) => t.manufacturer.slug === withSlug);
     if (existing) {
       setSelectedThreadId(existing.id);
       setMobileShowChat(true);
+      void sendBuyRequest(existing.id);
       return;
     }
 
@@ -120,12 +180,13 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
           });
           setSelectedThreadId(newConv.id);
           setMobileShowChat(true);
+          void sendBuyRequest(newConv.id);
         })
         .catch(() => {
           // Handled
         });
     }
-  }, [withSlug, allManufacturers, threads]);
+  }, [withSlug, allManufacturers, threads, searchParams]);
 
   const handleSelectThread = (id: string) => {
     setSelectedThreadId(id);

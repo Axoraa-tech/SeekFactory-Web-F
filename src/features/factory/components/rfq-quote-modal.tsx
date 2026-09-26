@@ -1,30 +1,55 @@
 "use client";
 
 import { useState } from "react";
-import { X, Send, FileText } from "lucide-react";
+import { X, Send, FileText, Loader2 } from "lucide-react";
+import type { FactoryQuote } from "@/shared/api/contracts";
 import type { SellerRfq } from "../types";
 
 type Props = {
   rfq: SellerRfq | null;
   isOpen: boolean;
   onClose: () => void;
-  onSubmitQuote: (rfqId: string, quotedPriceInr: number, leadTimeDays: number, replyNotes: string) => void;
+  /** Persists the quote; rejects with a user-facing message on failure. */
+  onSubmitQuote: (rfqId: string, quote: FactoryQuote) => Promise<void>;
 };
 
+const INCOTERMS = ["FOB", "CIF", "CFR", "EXW", "DAP", "DDP"];
+
+function initialIncoterm(deliveryPort: string | undefined) {
+  const code = deliveryPort?.trim().split(/\s+/)[0]?.toUpperCase();
+  return code && INCOTERMS.includes(code) ? code : "FOB";
+}
+
 export function RfqQuoteModal({ rfq, isOpen, onClose, onSubmitQuote }: Props) {
-  const [priceInr, setPriceInr] = useState<number>(rfq?.targetBudgetInr || 2800000);
-  const [leadTimeDays, setLeadTimeDays] = useState<number>(30);
+  const [priceInr, setPriceInr] = useState<number>(rfq?.quotedPriceInr || rfq?.targetBudgetInr || 2800000);
+  const [leadTimeDays, setLeadTimeDays] = useState<number>(rfq?.leadTimeDays || 30);
+  const [incoterm, setIncoterm] = useState(() => initialIncoterm(rfq?.deliveryPort));
   const [replyNotes, setReplyNotes] = useState(
     "Thank you for your RFQ. We confirm we can manufacture this machinery to your required specifications with full on-site commissioning and 2-year warranty."
   );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen || !rfq) return null;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!rfq) return;
-    onSubmitQuote(rfq.id, Number(priceInr), Number(leadTimeDays), replyNotes);
-    onClose();
+    if (!rfq || saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await onSubmitQuote(rfq.id, {
+        quotePrice: Number(priceInr),
+        currency: "INR",
+        leadTimeDays: Number(leadTimeDays),
+        incoterm,
+        notes: replyNotes.trim(),
+      });
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send quotation. Please retry.");
+      setSaving(false);
+    }
   }
 
   return (
@@ -70,7 +95,7 @@ export function RfqQuoteModal({ rfq, isOpen, onClose, onSubmitQuote }: Props) {
           </div>
 
           {/* Quotation Inputs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
                 Total Quotation Amount (INR ₹) <span className="text-red-500">*</span>
@@ -98,6 +123,23 @@ export function RfqQuoteModal({ rfq, isOpen, onClose, onSubmitQuote }: Props) {
                 className="w-full rounded-xl border border-neutral-300 px-3.5 py-2.5 text-sm text-neutral-900 focus:border-brand-blue focus:outline-hidden"
               />
             </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
+                Trade Terms (Incoterm)
+              </label>
+              <select
+                value={incoterm}
+                onChange={(e) => setIncoterm(e.target.value)}
+                className="w-full rounded-xl border border-neutral-300 px-3.5 py-2.5 text-sm text-neutral-900 focus:border-brand-blue focus:outline-hidden bg-white"
+              >
+                {INCOTERMS.map((term) => (
+                  <option key={term} value={term}>
+                    {term}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Reply Message */}
@@ -113,21 +155,29 @@ export function RfqQuoteModal({ rfq, isOpen, onClose, onSubmitQuote }: Props) {
             />
           </div>
 
+          {error && (
+            <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+              {error}
+            </p>
+          )}
+
           {/* Footer Actions */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-line">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas transition"
+              disabled={saving}
+              className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-bold shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+              disabled={saving}
+              className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-bold shadow-md transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-70 disabled:active:scale-100"
             >
-              <Send className="h-4 w-4" />
-              <span>Send Official Quotation</span>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              <span>{saving ? "Sending…" : "Send Official Quotation"}</span>
             </button>
           </div>
         </form>

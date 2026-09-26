@@ -211,8 +211,7 @@ export function AlibabaCertSection({
                     {/* Official Document Paper Image Box */}
                     <div className="relative aspect-[3/4] w-full rounded-md overflow-hidden bg-white border border-slate-200 shadow-2xs flex items-center justify-center p-1.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={cert.imageUrl}
+                      <img loading="lazy" decoding="async" src={cert.imageUrl}
                         alt={cert.title}
                         className="h-full w-full object-contain rounded-xs transition-transform duration-200 group-hover:scale-102"
                       />
@@ -284,3 +283,4 @@ export function AlibabaCertSection({
     </div>
   );
 }
+

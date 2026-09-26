@@ -52,8 +52,7 @@ export function CertificateLightboxModal({
           <div className="relative p-2 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-600 to-amber-700 shadow-2xl max-w-full">
             <div className="p-1 rounded-xl bg-neutral-900">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={certificate.imageUrl}
+              <img loading="lazy" decoding="async" src={certificate.imageUrl}
                 alt={certificate.title}
                 className="max-h-[70vh] w-auto object-contain rounded-lg shadow-inner select-none"
               />
@@ -160,3 +159,4 @@ export function CertificateLightboxModal({
     </div>
   );
 }
+

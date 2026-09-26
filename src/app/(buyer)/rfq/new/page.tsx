@@ -2,6 +2,8 @@ import { requireUser } from "@/features/auth/require-user";
 import { RfqForm } from "@/features/rfq/rfq-form";
 import { getApi } from "@/shared/api";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Post RFQ | SeekFactory",
 };

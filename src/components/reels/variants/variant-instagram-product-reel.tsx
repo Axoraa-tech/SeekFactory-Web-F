@@ -142,8 +142,7 @@ export function VariantInstagramProductReel({
             <div className="relative flex-1 min-h-0 w-full flex items-center justify-center p-2 my-auto overflow-hidden">
               <div className="relative h-full w-full flex items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  key={activeProduct.id}
+                <img loading="lazy" decoding="async" key={activeProduct.id}
                   src={activeProduct.imageUrl}
                   alt={activeProduct.name}
                   className="max-h-full max-w-full object-contain drop-shadow-md transition-all duration-300 group-hover:scale-105"
@@ -206,8 +205,7 @@ export function VariantInstagramProductReel({
                       title={p.name}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={p.imageUrl}
+                      <img src={p.imageUrl}
                         alt={p.name}
                         className="h-full w-full object-cover rounded-md"
                       />
@@ -231,8 +229,7 @@ export function VariantInstagramProductReel({
                   className="flex items-center gap-2.5 min-w-0 group"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={manufacturer.logoUrl}
+                  <img src={manufacturer.logoUrl}
                     alt={manufacturer.name}
                     className="h-9 w-9 rounded-xl border border-slate-200 object-cover shrink-0 shadow-2xs"
                   />
@@ -456,8 +453,7 @@ export function VariantInstagramProductReel({
               className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={manufacturer.logoUrl}
+              <img src={manufacturer.logoUrl}
                 alt=""
                 className="h-10 w-10 rounded-lg border border-neutral-200 object-cover shadow-xs flex-shrink-0"
               />
@@ -541,8 +537,7 @@ export function VariantInstagramProductReel({
                         {/* Product Photo with hover scale */}
                         <div className="relative flex-1 w-full flex items-center justify-center p-1 overflow-hidden">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={prod.imageUrl}
+                          <img src={prod.imageUrl}
                             alt={translateProduct(prod.name)}
                             className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover/item:scale-105"
                           />
@@ -766,3 +761,4 @@ export function VariantInstagramProductReel({
     </>
   );
 }
+

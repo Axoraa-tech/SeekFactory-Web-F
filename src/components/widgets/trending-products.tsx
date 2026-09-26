@@ -32,8 +32,7 @@ export function TrendingProducts({ products }: Props) {
         {visible.map((product) => (
           <Link key={product.id} href={`/products/${product.slug}`} className="block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={product.imageUrl}
+            <img loading="lazy" decoding="async" src={product.imageUrl}
               alt={translateProduct(product.name)}
               className="h-24 w-full rounded-lg object-cover"
             />
@@ -63,3 +62,4 @@ export function TrendingProducts({ products }: Props) {
     </Card>
   );
 }
+

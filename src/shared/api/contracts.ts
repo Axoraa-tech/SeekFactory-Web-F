@@ -47,6 +47,8 @@ export interface FeedRepository {
   addReel(reel: Reel): Promise<void>;
   likeReel(reelId: string): Promise<{ liked: boolean; likesCount: number }>;
   saveReel(reelId: string): Promise<{ saved: boolean; savesCount: number }>;
+  /** Seek impression for seller analytics; viewerId dedupes guests. Never throws for tracking failures. */
+  recordView(reelId: string, viewerId?: string): Promise<void>;
 }
 
 export interface ManufacturerRepository {
@@ -60,6 +62,8 @@ export interface ProductRepository {
   getBySlug(slug: string): Promise<ProductDetail | null>;
   listByCategory(categoryId: string): Promise<Product[]>;
   addProduct(product: Product): Promise<void>;
+  /** Product detail view for seller analytics; viewerId dedupes guests. Never throws for tracking failures. */
+  recordView(productId: string, viewerId?: string): Promise<void>;
 }
 
 export type MessageAttachment = {
@@ -88,6 +92,7 @@ export interface MessageRepository {
   ): Promise<MessageItem>;
   startConversation(manufacturerId: string, initialMessage?: string): Promise<Conversation & { manufacturer: Manufacturer }>;
   markAsRead(conversationId: string): Promise<void>;
+  onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void;
 }
 
 export interface CategoryRepository {
@@ -116,39 +121,58 @@ export interface CommentRepository {
   addReply(commentId: string, content: string, user?: { name: string; avatarUrl: string; companyName?: string }): Promise<ReelCommentReply>;
 }
 
+export type MediaKind = "image" | "video";
+
+export type UploadedMedia = {
+  url: string;
+  contentType: string;
+  size: number;
+};
+
+export type NewFactoryProduct = {
+  name: string;
+  imageUrl: string;
+  description?: string;
+  priceInr: number;
+  unit?: string;
+  moq?: string;
+  categoryId: string;
+  specs?: Record<string, string>;
+};
+
+export type NewFactorySeek = {
+  title: string;
+  description?: string;
+  posterUrl: string;
+  videoUrl?: string;
+  durationSec?: number;
+  hashtags?: string[];
+  productIds?: string[];
+  categoryIds?: string[];
+};
+
+export type FactoryQuote = {
+  quotePrice: number;
+  currency?: string;
+  leadTimeDays: number;
+  incoterm?: string;
+  notes?: string;
+};
+
 export interface FactoryRepository {
   getProfile(): Promise<Manufacturer>;
   updateProfile(data: Partial<Manufacturer>): Promise<Manufacturer>;
   getStats(): Promise<SellerStats | null>;
+  /** Browser-only: uploads a device file and returns a URL usable in addProduct/addSeek/profile. */
+  uploadMedia(file: File, kind: MediaKind): Promise<UploadedMedia>;
   getProducts(): Promise<Product[]>;
-  addProduct(data: {
-    name: string;
-    imageUrl: string;
-    description?: string;
-    priceInr: number;
-    unit?: string;
-    moq?: string;
-    categoryId: string;
-    specs?: Record<string, string>;
-  }): Promise<Product>;
+  addProduct(data: NewFactoryProduct): Promise<Product>;
   deleteProduct(id: string): Promise<void>;
   getSeeks(): Promise<Reel[]>;
-  addSeek(data: {
-    title: string;
-    description?: string;
-    posterUrl: string;
-    videoUrl?: string;
-    durationSec?: number;
-    hashtags?: string[];
-  }): Promise<Reel>;
+  addSeek(data: NewFactorySeek): Promise<Reel>;
   deleteSeek(id: string): Promise<void>;
   getRfqs(): Promise<RfqItem[]>;
-  submitQuote(rfqId: string, quote: {
-    quotePrice: number;
-    currency?: string;
-    leadTimeDays: number;
-    notes?: string;
-  }): Promise<void>;
+  submitQuote(rfqId: string, quote: FactoryQuote): Promise<void>;
 }
 
 export interface ApiClient {

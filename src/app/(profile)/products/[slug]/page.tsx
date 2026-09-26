@@ -11,6 +11,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
+import { TrackProductView } from "@/features/analytics/track-product-view";
 import { getApi } from "@/shared/api";
 import { formatPriceInr } from "@/shared/lib/format";
 
@@ -41,6 +42,8 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <section className="space-y-6">
+      <TrackProductView productId={product.id} />
+
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-slate-500 font-medium">
         <Link href="/" className="hover:text-brand-blue transition-colors">Home</Link>
@@ -56,7 +59,7 @@ export default async function ProductPage({ params }: Props) {
           <Card className="overflow-hidden border-slate-200/90 shadow-2xs">
             <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-900">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <img loading="lazy" decoding="async"
                 src={product.imageUrl}
                 alt={product.name}
                 className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"

@@ -2,6 +2,8 @@ import { InteractiveNotificationsCenter } from "@/components/notifications/inter
 import { getApi } from "@/shared/api";
 import { requireUser } from "@/features/auth/require-user";
 
+export const dynamic = "force-dynamic";
+
 export default async function NotificationsPage() {
   await requireUser("/notifications");
   const items = await getApi().notifications.list();

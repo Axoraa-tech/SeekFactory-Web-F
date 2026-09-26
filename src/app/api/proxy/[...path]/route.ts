@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.BACKEND_URL?.replace("localhost", "127.0.0.1") || "http://127.0.0.1:8080";
 
+const HOP_BY_HOP_HEADERS = [
+  "host",
+  "connection",
+  "keep-alive",
+  "expect",
+  "transfer-encoding",
+  "te",
+  "upgrade",
+  "proxy-connection",
+  "content-length",
+];
+
 async function handleProxy(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
     const resolvedParams = await params;
@@ -10,8 +22,9 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     const url = `${BACKEND_URL}/${path}${searchParams ? `?${searchParams}` : ""}`;
 
     const headers = new Headers(req.headers);
-    headers.delete("host");
-    headers.delete("connection");
+    // Hop-by-hop / connection-level headers must not be forwarded. Node's fetch rejects
+    // `expect` (curl sends `Expect: 100-continue` for bodies > 1MB) and recomputes length.
+    for (const name of HOP_BY_HOP_HEADERS) headers.delete(name);
 
     // Add Authorization header from HttpOnly cookie
     const token = req.cookies.get("sf-access-token")?.value;
@@ -19,13 +32,15 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
       headers.set("Authorization", `Bearer ${token}`);
     }
 
-    const init: RequestInit = {
+    const init: RequestInit & { duplex?: "half" } = {
       method: req.method,
       headers,
     };
 
-    if (req.method !== "GET" && req.method !== "HEAD") {
-      init.body = await req.arrayBuffer();
+    if (req.method !== "GET" && req.method !== "HEAD" && req.body) {
+      // Stream instead of buffering so 100MB seek uploads don't sit in Next.js memory.
+      init.body = req.body;
+      init.duplex = "half";
     }
 
     const backendRes = await fetch(url, init);

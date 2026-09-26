@@ -2,6 +2,8 @@ import { InteractiveChatAppLazy } from "@/components/messages/interactive-chat-a
 import { getApi } from "@/shared/api";
 import { requireUser } from "@/features/auth/require-user";
 
+export const dynamic = "force-dynamic";
+
 export default async function MessagesPage() {
   await requireUser("/messages");
   const [threads, allManufacturers] = await Promise.all([

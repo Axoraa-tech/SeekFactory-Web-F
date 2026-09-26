@@ -31,6 +31,7 @@ import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
 import { getApi } from "@/shared/api";
+import { useReelImpression } from "@/hooks/use-reel-impression";
 
 type Props = {
   reel: Reel;
@@ -77,6 +78,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
     }
   }, []);
 
+  const trackImpression = useReelImpression(reel.id);
   const { togglePlay: handleTogglePlay, toggleMute: handleToggleMute } = useSeekAutoplay({
     videoRef,
     containerRef: videoWrapperRef,
@@ -171,7 +173,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
                 className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <img loading="lazy" decoding="async"
                   src={manufacturer.logoUrl}
                   alt=""
                   className="h-10 w-10 rounded-lg border border-neutral-200 object-cover shadow-xs flex-shrink-0"
@@ -236,8 +238,9 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
                 loop
                 playsInline
                 muted={isMuted}
-                preload="metadata"
-                onTimeUpdate={() => {
+                preload="none"
+                onTimeUpdate={(e) => {
+                  trackImpression(e.currentTarget);
                   if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
                 }}
                 onLoadedMetadata={() => {
@@ -249,8 +252,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={reel.posterUrl}
+              <img src={reel.posterUrl}
                 alt={reel.title}
                 className="h-full w-full object-cover"
               />
@@ -452,3 +454,4 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
     </>
   );
 }
+

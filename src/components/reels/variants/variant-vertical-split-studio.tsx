@@ -21,6 +21,7 @@ import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
+import { useReelImpression } from "@/hooks/use-reel-impression";
 
 type Props = {
   reel: Reel;
@@ -98,6 +99,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
     }
   }, []);
 
+  const trackImpression = useReelImpression(reel.id);
   const { togglePlay: handleTogglePlay, toggleMute: handleToggleMute } = useSeekAutoplay({
     videoRef,
     containerRef: videoWrapperRef,
@@ -204,8 +206,9 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
             loop
             playsInline
             muted={isMuted}
-            preload="metadata"
-            onTimeUpdate={() => {
+            preload="none"
+            onTimeUpdate={(e) => {
+              trackImpression(e.currentTarget);
               if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
             }}
             onLoadedMetadata={() => {
@@ -217,7 +220,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
           />
         ) : (
           /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={reel.posterUrl} alt={reel.title} className="h-full w-full object-cover" />
+          <img loading="lazy" decoding="async" src={reel.posterUrl} alt={reel.title} className="h-full w-full object-cover" />
         )}
 
         {/* Buffering Indicator */}
@@ -293,8 +296,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
                 className="flex items-center gap-2.5 min-w-0 group"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={manufacturer.logoUrl}
+                <img src={manufacturer.logoUrl}
                   alt={manufacturer.name}
                   className="h-9 w-9 rounded-xl border border-slate-200 object-cover shrink-0 shadow-2xs"
                 />
@@ -454,3 +456,4 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
     </article>
   );
 }
+

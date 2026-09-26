@@ -90,8 +90,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
               <div className="flex items-center gap-3">
                 <div className="relative h-10 w-10 rounded-full overflow-hidden bg-canvas border border-line shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={
+                  <img loading="lazy" decoding="async" src={
                       rfq.buyerAvatarUrl ||
                       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
                     }
@@ -198,3 +197,4 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
     </div>
   );
 }
+

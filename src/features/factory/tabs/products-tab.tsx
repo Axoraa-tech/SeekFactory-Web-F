@@ -115,8 +115,7 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
                 title={`View ${product.name}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={product.imageUrl}
+                <img loading="lazy" decoding="async" src={product.imageUrl}
                   alt={product.name}
                   className="h-full w-full object-cover group-hover/img:scale-110 transition-transform duration-300"
                 />
@@ -219,3 +218,4 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
     </div>
   );
 }
+

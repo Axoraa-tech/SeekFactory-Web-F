@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 import { getApi } from "@/shared/api";
+import type { FactoryQuote, NewFactoryProduct, NewFactorySeek } from "@/shared/api/contracts";
 import type { BuyerProfile } from "@/entities/user";
 import type {
   SellerConversation,
@@ -13,6 +14,21 @@ import type {
   SellerStats,
   SellerTab,
 } from "./types";
+import {
+  createProductAction,
+  createSeekAction,
+  deleteProductAction,
+  deleteSeekAction,
+  submitQuoteAction,
+  updateFactoryProfileAction,
+} from "./actions";
+import {
+  toManufacturerUpdate,
+  toSellerProduct,
+  toSellerProfile,
+  toSellerRfq,
+  toSellerSeek,
+} from "./mappers";
 
 import { SalesproSidebar } from "./components/salespro-sidebar";
 import { SalesproTopbar } from "./components/salespro-topbar";
@@ -44,215 +60,83 @@ type Props = {
   allCategories?: Category[];
 };
 
+// Stable defaults: fresh `[]` literals would retrigger the prop-sync effects every render.
+const NO_PRODUCTS: Product[] = [];
+const NO_SEEKS: Reel[] = [];
+const NO_RFQS: RfqItem[] = [];
+const NO_CONVERSATIONS: SellerConversation[] = [];
+const NO_CATEGORIES: Category[] = [];
+
+const EMPTY_STATS: SellerStats = {
+  totalProductViews: 0,
+  productViewsChange: null,
+  factoryProfileVisits: 0,
+  profileVisitsChange: null,
+  videoSeekPlays: 0,
+  videoPlaysChange: null,
+  activeRfqsCount: 0,
+  pendingRfqsCount: 0,
+  responseRatePercent: null,
+  avgResponseTimeHours: null,
+  followerCount: 0,
+  totalProductsCount: 0,
+  totalSeeksCount: 0,
+};
+
 export function FactoryDashboard({
   user,
   initialProfile,
   initialStats,
-  initialProducts = [],
-  initialSeeks = [],
-  initialRfqs = [],
-  initialConversations = [],
-  allCategories: _allCategories = [],
+  initialProducts = NO_PRODUCTS,
+  initialSeeks = NO_SEEKS,
+  initialRfqs = NO_RFQS,
+  initialConversations = NO_CONVERSATIONS,
+  allCategories = NO_CATEGORIES,
 }: Props) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<SellerTab>("overview");
-
-  const [stats, setStats] = useState<SellerStats>(() => {
-    if (initialStats) {
-      return initialStats;
-    }
-    return {
-      totalProductViews: 0,
-      productViewsChange: 0,
-      factoryProfileVisits: 0,
-      profileVisitsChange: 0,
-      videoSeekPlays: 0,
-      videoPlaysChange: 0,
-      activeRfqsCount: 0,
-      pendingRfqsCount: 0,
-      responseRatePercent: 0,
-      avgResponseTimeHours: 0,
-      followerCount: 0,
-      totalProductsCount: 0,
-      totalSeeksCount: 0,
-    };
-  });
-
-  const [products, setProducts] = useState<SellerProduct[]>(() => {
-    if (initialProducts && initialProducts.length > 0) {
-      return initialProducts.map((p) => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        imageUrl: p.imageUrl,
-        category: "Industrial Machinery",
-        categoryId: p.categoryId,
-        priceInr: p.priceInr,
-        unit: p.unit,
-        moq: p.moq,
-        status: "Active" as const,
-        viewsCount: 1420,
-        inquiriesCount: 18,
-        specs: p.specs,
-        description: p.description,
-        createdAt: "Recently",
-      }));
-    }
-    return [];
-  });
-
-  const [seeks, setSeeks] = useState<SellerSeek[]>(() => {
-    if (initialSeeks && initialSeeks.length > 0) {
-      return initialSeeks.map((s) => ({
-        id: s.id,
-        title: s.title,
-        videoUrl: s.videoUrl || "",
-        thumbnailUrl: s.posterUrl,
-        durationSeconds: s.durationSec,
-        viewsCount: s.views,
-        likesCount: s.likes,
-        commentsCount: s.comments,
-        inquiriesGenerated: 12,
-        category: "Factory Production",
-        createdAt: "Recently",
-        status: "Published" as const,
-      }));
-    }
-    return [];
-  });
-
-  const [rfqs, setRfqs] = useState<SellerRfq[]>(() => {
-    if (initialRfqs && initialRfqs.length > 0) {
-      return initialRfqs.map((r) => ({
-        id: r.id,
-        buyerName: r.companyName || "Verified Industrial Buyer",
-        buyerCompany: r.companyName || "Global Sourcing Ltd",
-        buyerCountry: "India",
-        productName: r.productName,
-        productCategory: r.details?.split("]")[0]?.replace("[", "") || "Machinery",
-        quantityRequested: `${r.quantity} ${r.unit || "Pieces"}`,
-        targetBudgetInr: r.targetPrice && !isNaN(Number(r.targetPrice)) ? Number(r.targetPrice) : undefined,
-        deliveryPort: r.incoterm || "FOB",
-        status: (r.status === "SUBMITTED" ? "New" : "Responded") as SellerRfq["status"],
-        createdAt: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "Recent",
-        requirements: r.details || "",
-      }));
-    }
-    return [];
-  });
-
-  const [conversations, setConversations] = useState<SellerConversation[]>(
-    initialConversations
+  const [stats, setStats] = useState<SellerStats>(initialStats ?? EMPTY_STATS);
+  const [products, setProducts] = useState<SellerProduct[]>(() =>
+    initialProducts.map((p) => toSellerProduct(p, allCategories))
   );
+  const [seeks, setSeeks] = useState<SellerSeek[]>(() =>
+    initialSeeks.map((s) => toSellerSeek(s, allCategories, initialProducts))
+  );
+  const [rfqs, setRfqs] = useState<SellerRfq[]>(() => initialRfqs.map(toSellerRfq));
+  const [conversations, setConversations] = useState<SellerConversation[]>(initialConversations);
+  const [profile, setProfile] = useState<SellerFactoryProfile>(() => toSellerProfile(initialProfile, user));
+  // Surfaces failures from actions that have no modal of their own (e.g. deletes).
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const [profile, setProfile] = useState<SellerFactoryProfile>(() => {
-    if (initialProfile) {
-      return {
-        name: initialProfile.name,
-        slug: initialProfile.slug,
-        logoUrl: initialProfile.logoUrl,
-        coverUrl: initialProfile.coverUrl,
-        country: initialProfile.country,
-        location: initialProfile.location,
-        yearsEstablished: initialProfile.yearsEstablished,
-        factorySize: initialProfile.factorySize,
-        employees: initialProfile.employees,
-        annualTurnover: "$10M - $25M USD",
-        exportCountries: initialProfile.exportCountries,
-        certifications: ["ISO 9001:2015", "CE Certified", "RoHS Compliant"],
-        description: initialProfile.description,
-        productionLines: 8,
-        verified: initialProfile.verified,
-        tier: "Gold Plus Verified",
-      };
-    }
-    return {
-      name: user.companyName || "Verified Factory",
-      slug: "",
-      logoUrl: "https://images.seekfactory.com/logos/default.png",
-      coverUrl: "https://images.seekfactory.com/covers/default.jpg",
-      country: "China",
-      location: "Zhejiang, China",
-      yearsEstablished: 12,
-      factorySize: "20,000 sq.m",
-      employees: "200-500",
-      annualTurnover: "$10M - $25M USD",
-      exportCountries: ["India", "USA", "Germany"],
-      certifications: ["ISO 9001:2015", "CE Certified", "RoHS Compliant"],
-      description: "",
-      productionLines: 8,
-      verified: true,
-      tier: "Verified",
-    };
-  });
   // Modals state
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddSeekOpen, setIsAddSeekOpen] = useState(false);
   const [quotingRfq, setQuotingRfq] = useState<SellerRfq | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
 
-  // Sync state with server props on Next.js soft navigation or refresh
+  // Server actions revalidate /factory, which re-renders with fresh props: adopt them.
   useEffect(() => {
-    if (initialProducts) {
-      setProducts(initialProducts.map((p) => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        imageUrl: p.imageUrl,
-        category: "Industrial Machinery",
-        categoryId: p.categoryId,
-        priceInr: p.priceInr,
-        unit: p.unit,
-        moq: p.moq,
-        status: "Active" as const,
-        viewsCount: 1420,
-        inquiriesCount: 18,
-        specs: p.specs,
-        description: p.description,
-        createdAt: "Recently",
-      })));
-    }
-  }, [initialProducts]);
+    setProducts(initialProducts.map((p) => toSellerProduct(p, allCategories)));
+  }, [initialProducts, allCategories]);
 
   useEffect(() => {
-    if (initialSeeks) {
-      setSeeks(initialSeeks.map((s) => ({
-        id: s.id,
-        title: s.title,
-        thumbnailUrl: s.posterUrl,
-        videoUrl: s.videoUrl || "",
-        viewsCount: s.views,
-        likesCount: s.likes,
-        commentsCount: s.comments,
-        inquiriesGenerated: s.saves,
-        durationSeconds: s.durationSec,
-        category: s.categoryIds && s.categoryIds.length > 0 ? s.categoryIds[0] : "Manufacturing",
-        status: "Published" as const,
-        createdAt: "Recently",
-      })));
-    }
-  }, [initialSeeks]);
+    setSeeks(initialSeeks.map((s) => toSellerSeek(s, allCategories, initialProducts)));
+  }, [initialSeeks, allCategories, initialProducts]);
 
   useEffect(() => {
-    if (initialRfqs) {
-      setRfqs(initialRfqs.map((r) => ({
-        id: r.id,
-        buyerName: "Unknown Buyer",
-        buyerCompany: r.companyName || "Unknown Company",
-        buyerCountry: "Unknown",
-        productName: r.productName,
-        productCategory: "Uncategorized",
-        quantityRequested: `${r.quantity} ${r.unit || ""}`,
-        deliveryPort: r.incoterm || "Unknown",
-        status: "New",
-        createdAt: r.createdAt,
-        requirements: r.details || "",
-      })));
-    }
+    setRfqs(initialRfqs.map(toSellerRfq));
   }, [initialRfqs]);
 
   useEffect(() => {
-    if (initialConversations) setConversations(initialConversations);
+    // Plan tier is local-only until billing exists, so keep it across refreshes.
+    setProfile((prev) => toSellerProfile(initialProfile, user, prev.tier));
+  }, [initialProfile, user]);
+
+  useEffect(() => {
+    if (initialStats) setStats(initialStats);
+  }, [initialStats]);
+
+  useEffect(() => {
+    setConversations(initialConversations);
   }, [initialConversations]);
 
   function handleSelectFactoryPlan(tierId: FactoryPlanTier, tierName: string) {
@@ -267,88 +151,60 @@ export function FactoryDashboard({
   const unreadMessagesCount = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
   const newRfqsCount = rfqs.filter((r) => r.status === "New").length;
 
-  // Handlers
-  async function handleAddProduct(newProd: SellerProduct) {
-    setProducts((prev) => [newProd, ...prev]);
-    setStats((prev) => ({
-      ...prev,
-      totalProductsCount: prev.totalProductsCount + 1,
-    }));
-
-    try {
-      await getApi().factory.addProduct({
-        name: newProd.name,
-        imageUrl: newProd.imageUrl,
-        description: newProd.description,
-        priceInr: newProd.priceInr,
-        unit: newProd.unit,
-        moq: newProd.moq,
-        categoryId: newProd.categoryId,
-        specs: newProd.specs,
-      });
-      router.refresh();
-    } catch (err) {
-      console.error("Failed to persist product to factory backend:", err);
-    }
+  // Handlers — add/quote/profile throw on failure so the calling modal or form can show the error.
+  async function handleAddProduct(input: NewFactoryProduct) {
+    const result = await createProductAction(input);
+    if (!result.ok) throw new Error(result.error);
+    const created = toSellerProduct(result.data, allCategories);
+    setProducts((prev) => [created, ...prev.filter((p) => p.id !== created.id)]);
+    setStats((prev) => ({ ...prev, totalProductsCount: prev.totalProductsCount + 1 }));
   }
 
   async function handleDeleteProduct(id: string) {
+    const previous = products;
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    setStats((prev) => ({
-      ...prev,
-      totalProductsCount: Math.max(0, prev.totalProductsCount - 1),
-    }));
-
-    try {
-      await getApi().factory.deleteProduct(id);
-      router.refresh();
-    } catch (err) {
-      console.error("Failed to delete product from backend:", err);
+    const result = await deleteProductAction(id);
+    if (!result.ok) {
+      setProducts(previous);
+      setNotice(`Could not delete product: ${result.error}`);
+      return;
     }
+    setStats((prev) => ({ ...prev, totalProductsCount: Math.max(0, prev.totalProductsCount - 1) }));
   }
 
-  async function handleAddSeek(newSeek: SellerSeek) {
-    setSeeks((prev) => [newSeek, ...prev]);
-    setStats((prev) => ({
-      ...prev,
-      totalSeeksCount: prev.totalSeeksCount + 1,
-    }));
-
-    try {
-      await getApi().factory.addSeek({
-        title: newSeek.title,
-        description: newSeek.title,
-        posterUrl: newSeek.thumbnailUrl,
-        videoUrl: newSeek.videoUrl,
-        durationSec: newSeek.durationSeconds,
-      });
-      router.refresh();
-    } catch (err) {
-      console.error("Failed to persist reel to factory backend:", err);
-    }
+  async function handleAddSeek(input: NewFactorySeek) {
+    const result = await createSeekAction(input);
+    if (!result.ok) throw new Error(result.error);
+    const created = toSellerSeek(result.data, allCategories, initialProducts);
+    setSeeks((prev) => [created, ...prev.filter((s) => s.id !== created.id)]);
+    setStats((prev) => ({ ...prev, totalSeeksCount: prev.totalSeeksCount + 1 }));
   }
 
   async function handleDeleteSeek(id: string) {
+    const previous = seeks;
     setSeeks((prev) => prev.filter((s) => s.id !== id));
-    setStats((prev) => ({
-      ...prev,
-      totalSeeksCount: Math.max(0, prev.totalSeeksCount - 1),
-    }));
-
-    try {
-      await getApi().factory.deleteSeek(id);
-      router.refresh();
-    } catch (err) {
-      console.error("Failed to delete reel from backend:", err);
+    const result = await deleteSeekAction(id);
+    if (!result.ok) {
+      setSeeks(previous);
+      setNotice(`Could not delete video seek: ${result.error}`);
+      return;
     }
+    setStats((prev) => ({ ...prev, totalSeeksCount: Math.max(0, prev.totalSeeksCount - 1) }));
   }
 
-  async function handleSubmitQuote(
-    rfqId: string,
-    quotedPriceInr: number,
-    leadTimeDays: number,
-    replyNotes: string
-  ) {
+  async function handleUpdateProfile(updated: Partial<SellerFactoryProfile>) {
+    const result = await updateFactoryProfileAction(toManufacturerUpdate(updated));
+    if (!result.ok) throw new Error(result.error);
+    setProfile((prev) => toSellerProfile(result.data, user, prev.tier));
+  }
+
+  async function handleSubmitQuote(rfqId: string, quote: FactoryQuote) {
+    const result = await submitQuoteAction(rfqId, quote);
+    if (!result.ok) throw new Error(result.error);
+
+    const quotedPriceInr = quote.quotePrice;
+    const leadTimeDays = quote.leadTimeDays;
+    const replyNotes = quote.notes ?? "";
     setRfqs((prev) =>
       prev.map((r) =>
         r.id === rfqId
@@ -361,17 +217,6 @@ export function FactoryDashboard({
           : r
       )
     );
-
-    try {
-      await getApi().factory.submitQuote(rfqId, {
-        quotePrice: quotedPriceInr,
-        currency: "INR",
-        leadTimeDays,
-        notes: replyNotes,
-      });
-    } catch (err) {
-      console.error("Failed to submit quotation to backend:", err);
-    }
 
     // Also send quotation into trade messenger if buyer conversation exists
     const targetRfq = rfqs.find((r) => r.id === rfqId);
@@ -397,7 +242,7 @@ export function FactoryDashboard({
                       attachmentType: "quote",
                       attachmentData: {
                         title: `Official Quotation for ${targetRfq.productName}`,
-                        detail: `Lead time: ${leadTimeDays} days. Delivery Port: ${targetRfq.deliveryPort}`,
+                        detail: `Lead time: ${leadTimeDays} days. Terms: ${quote.incoterm || targetRfq.deliveryPort}`,
                         price: quotedPriceInr,
                       },
                     },
@@ -411,6 +256,10 @@ export function FactoryDashboard({
   }
 
   function handleSendMessage(conversationId: string, text: string) {
+    if (!text.trim()) return;
+    
+    // Optimistic UI update
+    const tempId = `msg-${Date.now()}`;
     setConversations((prev) =>
       prev.map((c) =>
         c.id === conversationId
@@ -422,7 +271,7 @@ export function FactoryDashboard({
               messages: [
                 ...c.messages,
                 {
-                  id: `msg-${Date.now()}`,
+                  id: tempId,
                   sender: "seller",
                   text,
                   timestamp: "Just now",
@@ -432,10 +281,92 @@ export function FactoryDashboard({
           : c
       )
     );
+
+    // Call actual backend API
+    getApi()
+      .messages.sendMessage(conversationId, text)
+      .then((savedMsg) => {
+        // We could update the message ID here if needed, but optimistic is fine for now
+      })
+      .catch((err) => {
+        console.error("Failed to send message", err);
+      });
   }
 
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Fetch real messages when opening a conversation
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    let isMounted = true;
+    
+    // Fetch initial messages unconditionally to always get latest when switching
+    getApi()
+      .messages.getMessages(activeConversationId)
+      .then((msgs) => {
+        if (!isMounted) return;
+        setConversations((prev) =>
+          prev.map((c) => {
+            if (c.id === activeConversationId) {
+              return {
+                ...c,
+                messages: msgs.map((m) => ({
+                  id: m.id,
+                  sender: m.sender === "factory" ? "seller" : "buyer",
+                  text: m.text,
+                  timestamp: m.time,
+                  attachmentType: m.attachment ? "image" : undefined,
+                  attachmentData: m.attachment ? { title: m.attachment.name, detail: m.attachment.size } : undefined,
+                })),
+                unreadCount: 0,
+              };
+            }
+            return c;
+          })
+        );
+      })
+      .catch(console.error);
+    
+    // Also mark as read on backend
+    void getApi().messages.markAsRead(activeConversationId);
+
+    // Subscribe to SSE stream
+    const unsubscribe = getApi().messages.onMessageStream(activeConversationId, (newMsg) => {
+      setConversations((prev) =>
+        prev.map((c) => {
+          if (c.id === activeConversationId) {
+            if (c.messages.some(m => m.id === newMsg.id)) {
+              return c;
+            }
+            return {
+              ...c,
+              lastMessage: newMsg.text,
+              lastMessageTime: newMsg.time,
+              messages: [
+                ...c.messages,
+                {
+                  id: newMsg.id,
+                  sender: newMsg.sender === "factory" ? "seller" : "buyer",
+                  text: newMsg.text,
+                  timestamp: newMsg.time,
+                  attachmentType: newMsg.attachment ? "image" : undefined,
+                  attachmentData: newMsg.attachment ? { title: newMsg.attachment.name, detail: newMsg.attachment.size } : undefined,
+                },
+              ],
+            };
+          }
+          return c;
+        })
+      );
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [activeConversationId]); // Only re-run when active thread changes
 
   function handleOpenChatWithBuyer(buyerCompany: string) {
     const targetConv = conversations.find(
@@ -475,6 +406,23 @@ export function FactoryDashboard({
             profile={profile}
             onOpenMobileMenu={() => setIsMobileSidebarOpen(true)}
           />
+
+          {notice && (
+            <div
+              role="alert"
+              className="mt-4 flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700"
+            >
+              <span>{notice}</span>
+              <button
+                type="button"
+                onClick={() => setNotice(null)}
+                aria-label="Dismiss"
+                className="shrink-0 rounded p-0.5 hover:bg-red-100"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
 
           {/* Tab Views */}
           {activeTab === "overview" && (
@@ -523,6 +471,7 @@ export function FactoryDashboard({
               <MessagesTab
                 conversations={conversations}
                 activeConversationId={activeConversationId}
+                onSelectConversation={setActiveConversationId}
                 onSendMessage={handleSendMessage}
               />
             </div>
@@ -532,9 +481,7 @@ export function FactoryDashboard({
             <div className="pt-5">
               <ProfileTab
                 profile={profile}
-                onUpdateProfile={(updated) =>
-                  setProfile((prev) => ({ ...prev, ...updated }))
-                }
+                onUpdateProfile={handleUpdateProfile}
                 onOpenUpgradeModal={() => setIsPricingModalOpen(true)}
               />
             </div>
@@ -542,26 +489,35 @@ export function FactoryDashboard({
         </main>
       </div>
 
-      {/* Modals with Device File Uploads */}
-      <AddProductModal
-        isOpen={isAddProductOpen}
-        onClose={() => setIsAddProductOpen(false)}
-        onAddProduct={handleAddProduct}
-      />
+      {/* Modals with Device File Uploads — mounted only while open so each opens with a fresh form */}
+      {isAddProductOpen && (
+        <AddProductModal
+          isOpen
+          onClose={() => setIsAddProductOpen(false)}
+          categories={allCategories}
+          onAddProduct={handleAddProduct}
+        />
+      )}
 
-      <AddSeekModal
-        isOpen={isAddSeekOpen}
-        onClose={() => setIsAddSeekOpen(false)}
-        products={products}
-        onAddSeek={handleAddSeek}
-      />
+      {isAddSeekOpen && (
+        <AddSeekModal
+          isOpen
+          onClose={() => setIsAddSeekOpen(false)}
+          products={products}
+          categories={allCategories}
+          onAddSeek={handleAddSeek}
+        />
+      )}
 
-      <RfqQuoteModal
-        rfq={quotingRfq}
-        isOpen={!!quotingRfq}
-        onClose={() => setQuotingRfq(null)}
-        onSubmitQuote={handleSubmitQuote}
-      />
+      {quotingRfq && (
+        <RfqQuoteModal
+          key={quotingRfq.id}
+          rfq={quotingRfq}
+          isOpen
+          onClose={() => setQuotingRfq(null)}
+          onSubmitQuote={handleSubmitQuote}
+        />
+      )}
 
       {/* Global Chairman Membership Pricing Modal */}
       <FactoryPricingModal

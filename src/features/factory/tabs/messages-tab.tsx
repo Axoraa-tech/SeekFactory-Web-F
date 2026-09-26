@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Send,
   Search,
@@ -13,20 +13,26 @@ import type { SellerConversation } from "../types";
 type Props = {
   conversations: SellerConversation[];
   activeConversationId?: string;
+  onSelectConversation: (id: string) => void;
   onSendMessage: (conversationId: string, text: string) => void;
 };
 
 export function MessagesTab({
   conversations,
   activeConversationId,
+  onSelectConversation,
   onSendMessage,
 }: Props) {
-  const [selectedId, setSelectedId] = useState<string>(
-    activeConversationId || conversations[0]?.id || ""
-  );
   const [inputText, setInputText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    if (!activeConversationId && conversations.length > 0) {
+      onSelectConversation(conversations[0].id);
+    }
+  }, [activeConversationId, conversations, onSelectConversation]);
+
+  const selectedId = activeConversationId || conversations[0]?.id || "";
   const activeConv =
     conversations.find((c) => c.id === selectedId) || conversations[0];
 
@@ -81,14 +87,14 @@ export function MessagesTab({
               <button
                 key={conv.id}
                 type="button"
-                onClick={() => setSelectedId(conv.id)}
+                onClick={() => onSelectConversation(conv.id)}
                 className={`w-full text-left p-3.5 flex items-start gap-3 transition ${
                   isSelected ? "bg-white border-l-4 border-l-brand-blue shadow-2xs" : "hover:bg-neutral-200/50"
                 }`}
               >
                 <div className="relative h-10 w-10 rounded-full overflow-hidden bg-neutral-200 shrink-0 border border-line">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={conv.buyerAvatarUrl} alt="" className="h-full w-full object-cover" />
+                  <img loading="lazy" decoding="async" src={conv.buyerAvatarUrl} alt="" className="h-full w-full object-cover" />
                   {conv.unreadCount > 0 && (
                     <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-600 ring-2 ring-white" />
                   )}
@@ -236,3 +242,4 @@ export function MessagesTab({
     </div>
   );
 }
+

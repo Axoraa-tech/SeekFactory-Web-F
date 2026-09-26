@@ -85,7 +85,7 @@ export function FactoryHeader({
           <div className="flex items-center gap-2 border-l border-line pl-2 sm:pl-3">
             <div className="relative h-9 w-9 rounded-lg overflow-hidden border border-line bg-canvas">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={profile.logoUrl} alt={profile.name} className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={profile.logoUrl} alt={profile.name} className="h-full w-full object-cover" />
             </div>
             <div className="hidden lg:block text-left">
               <p className="text-xs font-bold text-ink truncate max-w-[130px]">{profile.name}</p>
@@ -100,3 +100,4 @@ export function FactoryHeader({
     </header>
   );
 }
+
