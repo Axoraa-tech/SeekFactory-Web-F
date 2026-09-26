@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { X, Plus, Trash2, PackagePlus, UploadCloud, Info, Image as ImageIcon, Check } from "lucide-react";
-import type { SellerProduct } from "../types";
+import { X, Plus, Trash2, PackagePlus, UploadCloud, Info, Image as ImageIcon, Check, Loader2 } from "lucide-react";
+import { getApi } from "@/shared/api";
+import type { NewFactoryProduct } from "@/shared/api/contracts";
+import type { Category } from "@/entities/category";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onAddProduct: (product: SellerProduct) => void;
+  categories: Category[];
+  /** Persists the product; rejects with a user-facing message on failure. */
+  onAddProduct: (product: NewFactoryProduct) => Promise<void>;
 };
 
 const SAMPLE_IMAGES = [
@@ -18,26 +22,21 @@ const SAMPLE_IMAGES = [
   "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?auto=format&fit=crop&w=900&q=80",
 ];
 
-const CATEGORIES = [
-  "CNC Machine",
-  "Die Casting & Forging",
-  "Laser Cutting",
-  "Engineering Capital Machinery",
-  "Forging Parts",
-  "Agricultural Equipment",
-  "Packaging Machinery",
-  "Plastics & Injection Molding",
-];
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
-export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
+export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Remember the last upload so a failed save can retry without re-sending the photo.
+  const uploadedRef = useRef<{ file: File; url: string } | null>(null);
+  const roots = categories.filter((c) => c.parentId === null);
   const [name, setName] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [rootCategoryId, setRootCategoryId] = useState(roots[0]?.id ?? "");
+  const [subCategoryId, setSubCategoryId] = useState("");
   const [priceInr, setPriceInr] = useState<number>(2500000);
   const [unit, setUnit] = useState("Set");
   const [moq, setMoq] = useState("1 Set");
   const [imageUrl, setImageUrl] = useState(SAMPLE_IMAGES[0]);
-  const [customImageUrl, setCustomImageUrl] = useState("");
+  const [deviceFile, setDeviceFile] = useState<File | null>(null);
   const [deviceFileSelected, setDeviceFileSelected] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>([
@@ -45,16 +44,26 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
     { key: "Table Size / Capacity", value: "1200 x 600 mm" },
     { key: "Certification", value: "ISO 9001 / CE" },
   ]);
+  const [status, setStatus] = useState<"idle" | "uploading" | "saving">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const busy = status !== "idle";
+  const subCategories = categories.filter((c) => c.parentId === rootCategoryId);
 
   if (!isOpen) return null;
 
   function handleDeviceFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > MAX_IMAGE_BYTES) {
+        setError("Photo is larger than 20MB. Please choose a smaller file.");
+        return;
+      }
+      if (deviceFileSelected) URL.revokeObjectURL(deviceFileSelected);
       const objectUrl = URL.createObjectURL(file);
+      setError(null);
+      setDeviceFile(file);
       setDeviceFileSelected(objectUrl);
       setImageUrl(objectUrl);
-      setCustomImageUrl("");
     }
   }
 
@@ -72,9 +81,14 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || busy) return;
+    const categoryId = subCategoryId || rootCategoryId;
+    if (!categoryId) {
+      setError("Choose a category for this product.");
+      return;
+    }
 
     const specsRecord: Record<string, string> = {};
     specs.forEach((s) => {
@@ -83,30 +97,39 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
       }
     });
 
-    const finalImage = deviceFileSelected || customImageUrl.trim() || imageUrl;
+    setError(null);
+    try {
+      let finalImage = imageUrl;
+      if (deviceFile) {
+        let uploaded = uploadedRef.current;
+        if (uploaded?.file !== deviceFile) {
+          setStatus("uploading");
+          const media = await getApi().factory.uploadMedia(deviceFile, "image");
+          uploaded = { file: deviceFile, url: media.url };
+          uploadedRef.current = uploaded;
+        }
+        finalImage = uploaded.url;
+      }
 
-    const newProd: SellerProduct = {
-      id: `prod-apex-${Date.now()}`,
-      name: name.trim(),
-      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      imageUrl: finalImage,
-      category,
-      categoryId: `cat-${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-      priceInr: Number(priceInr) || 100000,
-      unit,
-      moq,
-      status: "Active",
-      viewsCount: 0,
-      inquiriesCount: 0,
-      specs: specsRecord,
-      description:
-        description.trim() ||
-        `${name} manufactured to international quality standards for OEM/ODM export.`,
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-
-    onAddProduct(newProd);
-    onClose();
+      setStatus("saving");
+      await onAddProduct({
+        name: name.trim(),
+        imageUrl: finalImage,
+        categoryId,
+        priceInr: Number(priceInr) || 100000,
+        unit,
+        moq,
+        specs: specsRecord,
+        description:
+          description.trim() ||
+          `${name.trim()} manufactured to international quality standards for OEM/ODM export.`,
+      });
+      if (deviceFileSelected) URL.revokeObjectURL(deviceFileSelected);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not publish product. Please retry.");
+      setStatus("idle");
+    }
   }
 
   return (
@@ -124,7 +147,9 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            disabled={busy}
             aria-label="Close"
             className="rounded-lg p-1.5 text-ink-muted hover:bg-canvas hover:text-ink transition"
           >
@@ -156,16 +181,34 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
                 Category <span className="text-red-500">*</span>
               </label>
               <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={rootCategoryId}
+                onChange={(e) => {
+                  setRootCategoryId(e.target.value);
+                  setSubCategoryId("");
+                }}
                 className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm text-ink focus:border-brand-blue focus:ring-2 focus:ring-brand-blue-soft focus:outline-hidden bg-surface"
               >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                {roots.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
                   </option>
                 ))}
               </select>
+              {subCategories.length > 0 && (
+                <select
+                  value={subCategoryId}
+                  onChange={(e) => setSubCategoryId(e.target.value)}
+                  aria-label="Subcategory"
+                  className="mt-2 w-full rounded-lg border border-line px-3.5 py-2 text-xs text-ink focus:border-brand-blue focus:outline-hidden bg-surface"
+                >
+                  <option value="">All subcategories</option>
+                  {subCategories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div>
@@ -265,11 +308,11 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
                     type="button"
                     onClick={() => {
                       setImageUrl(imgSrc);
+                      setDeviceFile(null);
                       setDeviceFileSelected(null);
-                      setCustomImageUrl("");
                     }}
                     className={`relative aspect-4/3 rounded-lg overflow-hidden border-2 transition ${
-                      imageUrl === imgSrc && !deviceFileSelected && !customImageUrl
+                      imageUrl === imgSrc && !deviceFileSelected
                         ? "border-brand-blue ring-2 ring-brand-blue-soft"
                         : "border-line hover:border-neutral-400 opacity-70 hover:opacity-100"
                     }`}
@@ -351,21 +394,31 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: Props) {
             </p>
           </div>
 
+          {error && (
+            <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+              {error}
+            </p>
+          )}
+
           {/* Footer Actions */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-line">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-line px-4 py-2 text-xs font-bold text-ink hover:bg-canvas transition"
+              disabled={busy}
+              className="rounded-lg border border-line px-4 py-2 text-xs font-bold text-ink hover:bg-canvas transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
+              disabled={busy}
+              className="rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-70 disabled:active:scale-100"
             >
-              <UploadCloud className="h-4 w-4" />
-              <span>Publish Product</span>
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
+              <span>
+                {status === "uploading" ? "Uploading photo…" : status === "saving" ? "Publishing…" : "Publish Product"}
+              </span>
             </button>
           </div>
         </form>

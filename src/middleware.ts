@@ -43,6 +43,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|ico)$).*)",
+    // api/proxy is excluded: middleware buffers request bodies (10MB cap), which truncates
+    // seek video uploads. The proxy returns the backend's own security headers.
+    "/((?!_next/static|_next/image|favicon.ico|api/proxy/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|ico)$).*)",
   ],
 };
