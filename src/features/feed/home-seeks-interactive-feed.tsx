@@ -10,6 +10,12 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { ReelsFeed } from "@/components/reels/reels-feed";
+import { SingleSeekShowcase } from "@/components/reels/single-seek-showcase";
+import { FeedListShowcase } from "@/components/reels/feed-list-showcase";
+import { CompactListShowcase } from "@/components/reels/compact-list-showcase";
+import { GridTilesShowcase } from "@/components/reels/grid-tiles-showcase";
+import { SpotlightRailShowcase } from "@/components/reels/spotlight-rail-showcase";
+import { DEFAULT_SHOWCASE, type FeedShowcase } from "@/features/feed/load-showcase";
 import { ReelCard } from "@/components/reels/reel-card";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { cn } from "@/shared/lib/cn";
@@ -28,6 +34,7 @@ type Props = {
   initialCategorySlug?: string;
   initialSubcategorySlug?: string;
   initialQuery?: string;
+  showcase?: FeedShowcase;
 };
 
 export function HomeSeeksInteractiveFeed({
@@ -40,6 +47,7 @@ export function HomeSeeksInteractiveFeed({
   initialCategorySlug = "",
   initialSubcategorySlug = "",
   initialQuery = "",
+  showcase = DEFAULT_SHOWCASE,
 }: Props) {
   const searchParams = useSearchParams();
   const { t, translateCategory } = useRegionalSettings();
@@ -472,8 +480,20 @@ export function HomeSeeksInteractiveFeed({
         </div>
       )}
 
-      {/* Complete Page as Dual Video Feeds */}
-      <ReelsFeed items={filteredItems} />
+      {/* Layout is admin-controlled; DUAL is the fallback for anything unrecognised */}
+      {showcase.mode === "SINGLE" ? (
+        <SingleSeekShowcase items={filteredItems} settings={showcase} />
+      ) : showcase.mode === "FEED" ? (
+        <FeedListShowcase items={filteredItems} settings={showcase} />
+      ) : showcase.mode === "COMPACT" ? (
+        <CompactListShowcase items={filteredItems} settings={showcase} />
+      ) : showcase.mode === "GRID" ? (
+        <GridTilesShowcase items={filteredItems} settings={showcase} />
+      ) : showcase.mode === "SPOTLIGHT" ? (
+        <SpotlightRailShowcase items={filteredItems} settings={showcase} />
+      ) : (
+        <ReelsFeed items={filteredItems} />
+      )}
     </section>
   );
 }

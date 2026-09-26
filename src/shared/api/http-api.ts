@@ -170,6 +170,7 @@ interface BackendFeedItem {
   manufacturer: BackendManufacturer;
   primary_product_slug?: string;
   primaryProductSlug?: string;
+  products?: BackendProduct[];
 }
 
 interface BackendCategory {
@@ -570,6 +571,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
         },
         manufacturer: normalizeManufacturer(item.manufacturer || {}),
         primaryProductSlug: item.primaryProductSlug || item.primary_product_slug,
+        products: (item.products || []).map(normalizeProduct),
       }));
     },
 

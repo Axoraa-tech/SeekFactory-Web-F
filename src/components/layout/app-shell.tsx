@@ -42,23 +42,28 @@ export function AppShell({
         messageCount={messageCount}
         notificationCount={notificationCount}
       />
-      <div className="mx-auto flex max-w-[1440px] gap-5 px-4 pt-3 pb-4 lg:px-6">
-        <LeftSidebar
-          categories={categories}
-          manufacturers={manufacturers}
-          products={products}
-          messages={messages}
-          messageCount={messageCount}
-          notificationCount={notificationCount}
-        />
-        <main className="min-w-0 flex-1">{children}</main>
-        {showRight ? (
-          <RightAside
+      {/* data-app-shell: the single seek showcase hides the shell sidebars via CSS (see globals.css) */}
+      <div data-app-shell className="mx-auto flex max-w-[1440px] gap-5 px-4 pt-3 pb-4 lg:px-6">
+        <div data-shell-sidebar className="contents">
+          <LeftSidebar
+            categories={categories}
             manufacturers={manufacturers}
             products={products}
             messages={messages}
-            categories={categories}
+            messageCount={messageCount}
+            notificationCount={notificationCount}
           />
+        </div>
+        <main className="min-w-0 flex-1">{children}</main>
+        {showRight ? (
+          <div data-shell-sidebar className="contents">
+            <RightAside
+              manufacturers={manufacturers}
+              products={products}
+              messages={messages}
+              categories={categories}
+            />
+          </div>
         ) : null}
       </div>
       <MobileNav messageCount={messageCount} notificationCount={notificationCount} />

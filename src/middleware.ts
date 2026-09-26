@@ -13,11 +13,15 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Protect Admin routes
+  // Protect Admin routes. The design preview is exempt only in development; the
+  // page itself 404s in a production build, so it can never be reached live.
+  const isDevPreview = process.env.NODE_ENV !== "production" && pathname.startsWith("/admin/preview");
+
   if (
     pathname.startsWith("/admin") &&
     !pathname.startsWith("/admin/login") &&
-    !pathname.startsWith("/admin/setup")
+    !pathname.startsWith("/admin/setup") &&
+    !isDevPreview
   ) {
     const adminToken = request.cookies.get("admin_token");
     if (!adminToken) {
@@ -27,7 +31,9 @@ export function middleware(request: NextRequest) {
 
   const response = NextResponse.next();
 
-  response.headers.set("X-Frame-Options", "DENY");
+  // SAMEORIGIN (not DENY) so the admin Seek Showcase page can preview the home page in an iframe;
+  // other sites still cannot frame SeekFactory
+  response.headers.set("X-Frame-Options", "SAMEORIGIN");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
