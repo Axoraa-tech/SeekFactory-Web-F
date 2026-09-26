@@ -17,5 +17,7 @@ export type Manufacturer = {
   categoryIds: string[];
   chairmanName?: string;
   websiteUrl?: string;
+  annualTurnover?: string;
+  productionLines?: number;
   certificates?: import("./factory-certificate").FactoryCertificate[];
 };

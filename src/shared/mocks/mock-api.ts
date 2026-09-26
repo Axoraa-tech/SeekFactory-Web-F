@@ -16,6 +16,7 @@ import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import {
   categories,
   conversations,
+  factoryRfqs,
   manufacturers,
   mockComments,
   notifications,
@@ -114,6 +115,11 @@ const feed: FeedRepository = {
   },
   likeReel: () => delay({ liked: true, likesCount: 43 }),
   saveReel: () => delay({ saved: true, savesCount: 15 }),
+  async recordView(reelId) {
+    const reel = reels.find((item) => item.id === reelId);
+    if (reel) reel.views += 1;
+    return delay(undefined);
+  },
 };
 
 const manufacturerRepo: ManufacturerRepository = {
@@ -154,6 +160,8 @@ const productRepo: ProductRepository = {
     products.unshift(product);
     return delay(undefined);
   },
+  // Mock mode has no event store; product views are only tracked by the real backend.
+  recordView: () => delay(undefined),
 };
 
 const messages: MessageRepository = {
@@ -292,47 +300,137 @@ const commentsRepo: CommentRepository = {
   },
 };
 
+// Mock mode has no supplier→factory mapping, so every signed-in manufacturer
+// manages the first fixture factory. Mutations write to the shared fixtures so
+// buyer pages (/, /explore, /products/[slug]) see them — call these from the
+// server (see features/factory/actions.ts), not the browser.
+const ownFactory = () => manufacturers[0];
+
+function uniqueProductSlug(name: string) {
+  const base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "product";
+  let slug = base;
+  for (let n = 2; products.some((item) => item.slug === slug); n++) slug = `${base}-${n}`;
+  return slug;
+}
+
+function removeWhere<T>(list: T[], match: (item: T) => boolean) {
+  const index = list.findIndex(match);
+  if (index >= 0) list.splice(index, 1);
+}
+
 const factoryRepo: FactoryRepository = {
-  getProfile: () => delay(manufacturers[0]),
-  updateProfile: (data) => delay({ ...manufacturers[0], ...data }),
-  getStats: () => delay(null),
-  getProducts: () => delay(products),
-  addProduct: (data) => delay({
-    id: `prod-${Date.now()}`,
-    manufacturerId: "mfg-01",
-    name: data.name,
-    slug: data.name.toLowerCase().replace(/\s+/g, "-"),
-    imageUrl: data.imageUrl,
-    description: data.description || "",
-    priceInr: data.priceInr,
-    unit: data.unit || "Piece",
-    moq: data.moq || "1 Piece",
-    categoryId: data.categoryId,
-    specs: data.specs || {},
-  }),
-  deleteProduct: () => delay(undefined),
-  getSeeks: () => delay(reels),
-  addSeek: (data) => delay({
-    id: `reel-${Date.now()}`,
-    manufacturerId: "mfg-01",
-    title: data.title,
-    description: data.description || "",
-    hashtags: [],
-    posterUrl: data.posterUrl,
-    videoUrl: data.videoUrl,
-    durationSec: data.durationSec || 30,
-    startSec: 0,
-    views: 0,
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    saves: 0,
-    tab: "for-you",
-    productIds: [],
-  }),
-  deleteSeek: () => delay(undefined),
-  getRfqs: () => delay([]),
-  submitQuote: () => delay(undefined),
+  getProfile: () => delay(ownFactory()),
+  async updateProfile(data) {
+    // Identity and trust flags are not seller-editable.
+    const editable = { ...data };
+    delete editable.id;
+    delete editable.slug;
+    delete editable.verified;
+    delete editable.premium;
+    Object.assign(ownFactory(), editable);
+    return delay({ ...ownFactory() });
+  },
+  // Derived from fixtures only; values mock mode cannot know (period change, quote timing) stay null.
+  async getStats() {
+    const mfrId = ownFactory().id;
+    const ownReels = reels.filter((item) => item.manufacturerId === mfrId);
+    const active = factoryRfqs.filter((item) => ["SUBMITTED", "QUOTED"].includes(item.status));
+    const quoted = factoryRfqs.filter((item) => item.status === "QUOTED");
+    return delay({
+      periodDays: 30,
+      videoSeekPlays: ownReels.reduce((sum, item) => sum + item.views, 0),
+      videoPlaysChange: null,
+      totalProductViews: 0,
+      productViewsChange: null,
+      factoryProfileVisits: 0,
+      profileVisitsChange: null,
+      activeRfqsCount: active.length,
+      pendingRfqsCount: active.filter((item) => item.status !== "QUOTED").length,
+      responseRatePercent: factoryRfqs.length
+        ? Math.round((1000 * quoted.length) / factoryRfqs.length) / 10
+        : null,
+      avgResponseTimeHours: null,
+      responseWindowDays: 90,
+      followerCount: ownFactory().followerCount,
+      totalProductsCount: products.filter((item) => item.manufacturerId === mfrId).length,
+      totalSeeksCount: ownReels.length,
+    });
+  },
+  async uploadMedia(file, kind) {
+    if (typeof window === "undefined") {
+      throw new Error("uploadMedia must be called from the browser");
+    }
+    const body = new FormData();
+    body.append("file", file);
+    body.append("kind", kind);
+    const res = await fetch("/api/mock-media", { method: "POST", body });
+    const json = (await res.json().catch(() => null)) as
+      | { success: boolean; message?: string; data: Awaited<ReturnType<FactoryRepository["uploadMedia"]>> }
+      | null;
+    if (!res.ok || !json?.success) {
+      throw new Error(json?.message || `Upload failed (HTTP ${res.status})`);
+    }
+    return json.data;
+  },
+  getProducts: () => delay(products.filter((item) => item.manufacturerId === ownFactory().id)),
+  async addProduct(data) {
+    const product = {
+      id: `prd-${Date.now()}`,
+      manufacturerId: ownFactory().id,
+      name: data.name,
+      slug: uniqueProductSlug(data.name),
+      imageUrl: data.imageUrl,
+      description: data.description || "",
+      priceInr: data.priceInr,
+      unit: data.unit || "Piece",
+      moq: data.moq || "1 Piece",
+      categoryId: data.categoryId,
+      specs: data.specs || {},
+    };
+    products.unshift(product);
+    return delay(product);
+  },
+  async deleteProduct(id) {
+    removeWhere(products, (item) => item.id === id && item.manufacturerId === ownFactory().id);
+    return delay(undefined);
+  },
+  getSeeks: () => delay(reels.filter((item) => item.manufacturerId === ownFactory().id)),
+  async addSeek(data) {
+    const reel = {
+      id: `reel-${Date.now()}`,
+      manufacturerId: ownFactory().id,
+      title: data.title,
+      description: data.description || "",
+      hashtags: data.hashtags || [],
+      posterUrl: data.posterUrl,
+      videoUrl: data.videoUrl,
+      durationSec: data.durationSec || 30,
+      startSec: 0,
+      views: 0,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      saves: 0,
+      tab: "for-you" as const,
+      productIds: data.productIds || [],
+      categoryIds: data.categoryIds,
+    };
+    reels.unshift(reel);
+    return delay(reel);
+  },
+  async deleteSeek(id) {
+    removeWhere(reels, (item) => item.id === id && item.manufacturerId === ownFactory().id);
+    return delay(undefined);
+  },
+  getRfqs: () => delay(factoryRfqs.map((item) => ({ ...item }))),
+  async submitQuote(rfqId, quote) {
+    const target = factoryRfqs.find((item) => item.id === rfqId);
+    if (!target) throw new Error(`RFQ ${rfqId} not found`);
+    target.status = "QUOTED";
+    target.quotedPriceInr = quote.quotePrice;
+    target.leadTimeDays = quote.leadTimeDays;
+    return delay(undefined);
+  },
 };
 
 export const mockApi: ApiClient = {

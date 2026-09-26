@@ -21,6 +21,7 @@ import { formatCount } from "@/shared/lib/format";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
+import { useReelImpression } from "@/hooks/use-reel-impression";
 
 type Props = {
   reel: Reel;
@@ -66,6 +67,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
     }
   }, []);
 
+  const trackImpression = useReelImpression(reel.id);
   const { togglePlay: handleTogglePlay, toggleMute: handleToggleMute } = useSeekAutoplay({
     videoRef,
     containerRef: videoWrapperRef,
@@ -165,7 +167,8 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
               playsInline
               muted={isMuted}
               preload="none"
-              onTimeUpdate={() => {
+              onTimeUpdate={(e) => {
+                trackImpression(e.currentTarget);
                 if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
               }}
               onLoadedMetadata={() => {

@@ -12,6 +12,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
+import { getApi } from "@/shared/api";
 
 interface UploadCertificateModalProps {
   isOpen: boolean;
@@ -49,6 +50,8 @@ export function UploadCertificateModal({
   const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState<FactoryCertificate["category"]>("Quality");
   const [previewError, setPreviewError] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -61,23 +64,26 @@ export function UploadCertificateModal({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload immediately so the certificate is saved with a shareable URL, not a data: blob.
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setImageUrl(event.target.result as string);
-          setPreviewError(false);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    setUploadError(null);
+    setIsUploading(true);
+    try {
+      const media = await getApi().factory.uploadMedia(file, "image");
+      setImageUrl(media.url);
+      setPreviewError(false);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed. Please retry.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !issuer.trim()) return;
+    if (!title.trim() || !issuer.trim() || isUploading) return;
 
     const newCert: FactoryCertificate = {
       id: `cert-${Date.now()}`,
@@ -87,7 +93,8 @@ export function UploadCertificateModal({
       issueDate: issueDate || new Date().toISOString().slice(0, 10),
       expiryDate: expiryDate || "2027-12-31",
       imageUrl: imageUrl || PRESET_IMAGES[0].url,
-      verified: true,
+      // Seller-uploaded documents are unverified until SeekFactory reviews them.
+      verified: false,
       category,
     };
 
@@ -224,18 +231,24 @@ export function UploadCertificateModal({
                 <label className="flex flex-col items-center justify-center border-2 border-dashed border-neutral-300 hover:border-amber-500 rounded-2xl p-4 cursor-pointer bg-neutral-50 hover:bg-amber-50/20 transition group text-center">
                   <UploadCloud className="h-6 w-6 text-neutral-400 group-hover:text-amber-600 transition" />
                   <span className="font-bold text-neutral-800 text-xs mt-1">
-                    Upload Certificate Image
+                    {isUploading ? "Uploading…" : "Upload Certificate Image"}
                   </span>
                   <span className="text-[10px] text-neutral-400 mt-0.5">
-                    Supports PNG, JPG, WEBP, or scanned PDF
+                    Supports PNG, JPG or WEBP up to 20MB
                   </span>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp"
                     onChange={handleFileChange}
+                    disabled={isUploading}
                     className="hidden"
                   />
                 </label>
+                {uploadError && (
+                  <p role="alert" className="mt-1 text-[11px] font-semibold text-red-600">
+                    {uploadError}
+                  </p>
+                )}
 
                 <div className="mt-2">
                   <span className="text-[10px] text-neutral-400 font-semibold block mb-1">Or paste image URL:</span>
@@ -305,7 +318,8 @@ export function UploadCertificateModal({
             </button>
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 font-bold px-5 py-2 transition shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
+              disabled={isUploading}
+              className="disabled:opacity-60 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 font-bold px-5 py-2 transition shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
             >
               <CheckCircle2 className="h-4 w-4" />
               <span>Publish to Hall of Fame</span>

@@ -31,6 +31,8 @@ const eslintConfig = [
     files: [
       "src/shared/api/**/*.{ts,tsx}",
       "src/shared/mocks/**/*.{ts,tsx}",
+      // Mock-mode upload endpoint (backend stand-in, not UI); 404s when NEXT_PUBLIC_API_URL is set.
+      "src/app/api/mock-media/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",

@@ -27,4 +27,8 @@ export type RfqItem = {
   status: string;
   createdAt: string;
   companyName?: string;
+  buyerName?: string;
+  buyerCountry?: string;
+  quotedPriceInr?: number;
+  leadTimeDays?: number;
 };

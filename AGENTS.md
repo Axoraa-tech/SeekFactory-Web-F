@@ -242,6 +242,8 @@ const roots = await api.categories.listRoots();
 | `src/shared/api/index.ts` | `getApi()` seam |
 | `src/shared/mocks/mock-api.ts` | Mock implementations (feed, comments, mfrs) |
 | `src/shared/mocks/machinery-taxonomy.ts` | Category tree |
+| `src/features/factory/actions.ts` | Seller hub server actions (products, seeks, RFQ quotes, profile) + revalidation |
+| `src/app/api/mock-media/` | Mock-mode upload store behind `factory.uploadMedia()`; 404s when `NEXT_PUBLIC_API_URL` is set |
 | `src/styles/globals.css` | Design tokens |
 | `docs/FRONTEND_AUDIT.md` | Architecture & security audit |
 
