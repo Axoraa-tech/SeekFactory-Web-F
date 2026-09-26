@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       await adminApi.login(email, password, "000000");
     } catch (err: unknown) {
       const msg = (err as Error).message || "";
-      if (msg.includes("Invalid email or password") || msg.includes("deactivated") || msg.includes("not configured")) {
+      if (msg.includes("Invalid email or password") || msg.includes("Admin role required") || msg.includes("deactivated") || msg.includes("not configured")) {
         setError(msg);
         setIsLoading(false);
         return;

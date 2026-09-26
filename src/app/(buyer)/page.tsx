@@ -1,5 +1,6 @@
 import { HomeSeeksInteractiveFeed } from "@/features/feed/home-seeks-interactive-feed";
 import { loadFeed, parseFeedTab } from "@/features/feed/load-feed";
+import { loadShowcase } from "@/features/feed/load-showcase";
 import { getApi } from "@/shared/api";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ type Props = {
     category?: string;
     sub?: string;
     q?: string;
+    layout?: string;
   }>;
 };
 
@@ -23,10 +25,11 @@ export default async function HomePage({ searchParams }: Props) {
   const q = params.q || "";
 
   const api = getApi();
-  const [roots, allCategories, items] = await Promise.all([
+  const [roots, allCategories, items, showcase] = await Promise.all([
     api.categories.listRoots(),
     api.categories.list(),
     loadFeed(tab),
+    loadShowcase(params.layout),
   ]);
 
   // Pre-fetch all children for every root category (same as Explore page)
@@ -50,6 +53,7 @@ export default async function HomePage({ searchParams }: Props) {
       initialCategorySlug={category}
       initialSubcategorySlug={sub}
       initialQuery={q}
+      showcase={showcase}
     />
   );
 }

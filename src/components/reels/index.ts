@@ -10,4 +10,9 @@ export { VariantVerticalSplitStudio } from "./variants/variant-vertical-split-st
 export { VariantVerticalCatalogSplit } from "./variants/variant-vertical-catalog-split";
 export { VariantVerticalShopReel } from "./variants/variant-vertical-shop-reel";
 export { VariantInstagramProductReel } from "./variants/variant-instagram-product-reel";
-export { DualVideoShowcase } from "./dual-video-showcase";
+export { DualVideoShowcase } from "./dual-video-showcase";
+export { SingleSeekShowcase } from "./single-seek-showcase";
+export { FeedListShowcase } from "./feed-list-showcase";
+export { CompactListShowcase } from "./compact-list-showcase";
+export { GridTilesShowcase } from "./grid-tiles-showcase";
+export { SpotlightRailShowcase } from "./spotlight-rail-showcase";

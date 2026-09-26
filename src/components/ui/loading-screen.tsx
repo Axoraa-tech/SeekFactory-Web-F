@@ -2,11 +2,50 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
 
 type LoadingScreenProps = {
   minDurationMs?: number;
 };
+
+const SEEN_KEY = "sf-intro-seen";
+
+/** Routes that never get the intro: signing in and admin work should start immediately. */
+const SKIP_PREFIXES = ["/admin", "/login", "/join", "/legal"];
+
+/**
+ * Fallback for private browsing, where sessionStorage throws. It survives client-side
+ * navigation but not a reload, so the worst case is once per full page load rather
+ * than once per route change.
+ */
+let shownThisPageLoad = false;
+
+/** True when the intro has already played for this visitor, or this route opts out. */
+function shouldSkipIntro(pathname: string): boolean {
+  if (shownThisPageLoad) return true;
+  if (SKIP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return true;
+  // The admin Showcase preview renders the home page in an iframe; it wants the layout, not the intro
+  try {
+    if (window.self !== window.top) return true;
+  } catch {
+    return true; // cross-origin frame: treat as embedded
+  }
+  try {
+    return window.sessionStorage.getItem(SEEN_KEY) === "1";
+  } catch {
+    return false; // storage blocked: the module flag above is the guard
+  }
+}
+
+function markIntroSeen() {
+  shownThisPageLoad = true;
+  try {
+    window.sessionStorage.setItem(SEEN_KEY, "1");
+  } catch {
+    // Private mode: the module flag still prevents a repeat within this page load
+  }
+}
 
 // 4-step sequence completing the full loop: Image 1 -> Image 2 -> Image 3 -> Image 1
 const STEPS = [
@@ -17,8 +56,23 @@ const STEPS = [
 ];
 
 export function LoadingScreen({ minDurationMs = 5800 }: LoadingScreenProps) {
-  const [phase, setPhase] = useState<"loading" | "fadeout" | "completed">("loading");
+  // "pending" until the browser tells us whether this visitor has seen the intro.
+  // Deciding on the client avoids a flash of the overlay on every navigation.
+  const [phase, setPhase] = useState<"pending" | "loading" | "fadeout" | "completed">("pending");
   const [currentStep, setCurrentStep] = useState(0);
+  const pathname = usePathname();
+
+  // Runs once per mount: play the intro only on a visitor's first eligible page
+  useEffect(() => {
+    if (shouldSkipIntro(pathname)) {
+      setPhase("completed");
+      return;
+    }
+    markIntroSeen();
+    setPhase("loading");
+    // pathname is read once on mount by design: the intro must not restart on navigation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Transition smoothly through steps [0 -> 1 -> 2 -> 3]
   useEffect(() => {
@@ -42,6 +96,8 @@ export function LoadingScreen({ minDurationMs = 5800 }: LoadingScreenProps) {
 
   // Screen completion timer: after minDurationMs, fade out smoothly into the page
   useEffect(() => {
+    if (phase !== "loading") return;
+
     const fadeTimer = setTimeout(() => {
       setPhase("fadeout");
     }, minDurationMs);
@@ -54,9 +110,9 @@ export function LoadingScreen({ minDurationMs = 5800 }: LoadingScreenProps) {
       clearTimeout(fadeTimer);
       clearTimeout(completeTimer);
     };
-  }, [minDurationMs]);
+  }, [phase, minDurationMs]);
 
-  if (phase === "completed") {
+  if (phase === "pending" || phase === "completed") {
     return null;
   }
 
