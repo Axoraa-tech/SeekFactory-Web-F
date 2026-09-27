@@ -8,18 +8,46 @@ import {
   MapPin,
   CheckCircle2,
   Search,
+  Loader2,
 } from "lucide-react";
 import type { SellerRfq } from "../types";
 
 type Props = {
   rfqs: SellerRfq[];
   onOpenQuoteModal: (rfq: SellerRfq) => void;
-  onOpenChatWithBuyer: (buyerCompany: string) => void;
+  /** Opens the chat with the buyer who posted the RFQ; rejects with a user-facing message. */
+  onOpenChatWithBuyer: (rfq: SellerRfq) => Promise<void>;
 };
+
+function initials(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "B"
+  );
+}
 
 export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) {
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [openingChatId, setOpeningChatId] = useState<string | null>(null);
+  const [chatError, setChatError] = useState<{ rfqId: string; message: string } | null>(null);
+
+  async function openChat(rfq: SellerRfq) {
+    if (openingChatId) return;
+    setOpeningChatId(rfq.id);
+    setChatError(null);
+    try {
+      await onOpenChatWithBuyer(rfq);
+    } catch (err) {
+      setChatError({ rfqId: rfq.id, message: err instanceof Error ? err.message : "Could not open the chat." });
+    } finally {
+      setOpeningChatId(null);
+    }
+  }
 
   const filteredRfqs = rfqs.filter((r) => {
     const matchesStatus = selectedStatus === "All" || r.status === selectedStatus;
@@ -33,14 +61,14 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
   return (
     <div className="space-y-5">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+          <h2 className="text-lg font-semibold tracking-tight text-neutral-900 flex items-center gap-2">
             <span>RFQs & Buyer Purchase Inquiries</span>
             <span className="rounded-full bg-red-100 border border-red-200 px-2 py-0.2 text-xs font-bold text-red-600">
               {rfqs.length} Total
             </span>
-          </h1>
+          </h2>
           <p className="text-xs text-ink-muted mt-1">
             Direct high-value manufacturing RFQs from verified Indian & global industrial buyers
           </p>
@@ -61,7 +89,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
         </div>
 
         <div className="flex items-center gap-2">
-          {["All", "New", "Quoted", "Responded"].map((status) => (
+          {["All", "New", "Quoted", "Closed"].map((status) => (
             <button
               key={status}
               type="button"
@@ -72,38 +100,40 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
                   : "bg-white border border-line text-neutral-700 hover:bg-canvas"
               }`}
             >
-              {status}
+              {status} ({status === "All" ? rfqs.length : rfqs.filter((r) => r.status === status).length})
             </button>
           ))}
         </div>
       </div>
 
       {/* RFQ Cards List */}
-      <div className="space-y-3.5">
+      <div className="space-y-3.5 sf-stagger">
         {filteredRfqs.map((rfq) => (
           <div
             key={rfq.id}
-            className="rounded-2xl border border-line bg-white p-5 shadow-xs space-y-3 hover:border-brand-blue transition"
+            className="sf-lift rounded-2xl border border-line bg-white p-5 shadow-xs space-y-3 hover:border-brand-blue/60"
           >
             {/* Top Bar: Buyer Info & Status */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-3">
-                <div className="relative h-10 w-10 rounded-full overflow-hidden bg-canvas border border-line shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img loading="lazy" decoding="async" src={
-                      rfq.buyerAvatarUrl ||
-                      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
-                    }
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                <div className="relative h-10 w-10 rounded-full overflow-hidden bg-brand-blue-soft border border-line shrink-0 flex items-center justify-center text-xs font-bold text-brand-blue">
+                  {rfq.buyerAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img loading="lazy" decoding="async" src={rfq.buyerAvatarUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    initials(rfq.buyerName)
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-bold text-neutral-900">{rfq.buyerCompany}</h3>
-                    <span className="text-xs text-ink-muted font-medium">({rfq.buyerCountry})</span>
+                    {rfq.buyerCountry && (
+                      <span className="text-xs text-ink-muted font-medium">({rfq.buyerCountry})</span>
+                    )}
                   </div>
-                  <p className="text-xs text-ink-muted">Contact: {rfq.buyerName} • Received {rfq.createdAt}</p>
+                  <p className="text-xs text-ink-muted">
+                    {rfq.referenceNumber} • Contact: {rfq.buyerName} • Received {rfq.createdAt}
+                  </p>
                 </div>
               </div>
 
@@ -114,7 +144,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
                       ? "bg-red-100 text-red-700 border border-red-200"
                       : rfq.status === "Quoted"
                       ? "bg-blue-100 text-brand-blue border border-blue-200"
-                      : "bg-canvas text-neutral-700"
+                      : "bg-canvas text-neutral-500 border border-line"
                   }`}
                 >
                   Status: {rfq.status}
@@ -136,7 +166,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-neutral-600">
                 <div className="flex items-center gap-1.5">
                   <MapPin className="h-3.5 w-3.5 text-neutral-400" />
-                  <span>Destination Port: <strong>{rfq.deliveryPort}</strong></span>
+                  <span>Trade terms: <strong>{rfq.deliveryPort}</strong></span>
                 </div>
                 {rfq.targetBudgetInr && (
                   <div>
@@ -151,12 +181,17 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
             </div>
 
             {/* Quoted Information if exists */}
-            {rfq.quotedPriceInr && (
+            {rfq.quotedPriceInr !== undefined && (
               <div className="flex items-center gap-4 rounded-xl bg-emerald-50 border border-emerald-200/80 px-3.5 py-2 text-xs text-emerald-900 font-semibold">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                 <span>
-                  Official Quote Sent: <strong>₹{(rfq.quotedPriceInr ?? 0).toLocaleString()}</strong> • Lead Time:{" "}
-                  <strong>{rfq.leadTimeDays} Days</strong>
+                  Your quote: <strong>₹{rfq.quotedPriceInr.toLocaleString("en-IN")}</strong> • Lead time:{" "}
+                  <strong>{rfq.leadTimeDays} days</strong>
+                  {rfq.quoteIncoterm && (
+                    <>
+                      {" "}• Terms: <strong>{rfq.quoteIncoterm}</strong>
+                    </>
+                  )}
                 </span>
               </div>
             )}
@@ -165,21 +200,37 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
             <div className="flex items-center justify-end gap-2.5 pt-1">
               <button
                 type="button"
-                onClick={() => onOpenChatWithBuyer(rfq.buyerCompany)}
-                className="rounded-xl border border-line bg-canvas hover:bg-neutral-200 text-neutral-800 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5"
+                onClick={() => void openChat(rfq)}
+                disabled={openingChatId === rfq.id}
+                className="rounded-xl border border-line bg-canvas hover:bg-neutral-200 text-neutral-800 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 disabled:opacity-60"
               >
-                <MessageSquare className="h-4 w-4 text-neutral-500" />
+                {openingChatId === rfq.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
+                ) : (
+                  <MessageSquare className="h-4 w-4 text-neutral-500" />
+                )}
                 <span>Chat with Buyer</span>
               </button>
+              {chatError?.rfqId === rfq.id && (
+                <span role="alert" className="text-[11px] font-semibold text-red-600">
+                  {chatError.message}
+                </span>
+              )}
 
-              <button
-                type="button"
-                onClick={() => onOpenQuoteModal(rfq)}
-                className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5"
-              >
-                <Send className="h-4 w-4" />
-                <span>{rfq.status === "Quoted" ? "Edit Quotation" : "Submit Quotation"}</span>
-              </button>
+              {rfq.status === "Closed" ? (
+                <span className="rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-500">
+                  RFQ closed by buyer
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenQuoteModal(rfq)}
+                  className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5"
+                >
+                  <Send className="h-4 w-4" />
+                  <span>{rfq.status === "Quoted" ? "Edit Quotation" : "Submit Quotation"}</span>
+                </button>
+              )}
             </div>
           </div>
         ))}
