@@ -79,8 +79,8 @@ export function AuthCard({
         setNotice("Mock code sent. Use 123456.");
         return;
       }
-      if (String(form.get("otp") ?? "") !== "123456") {
-        setError("Enter the mock code 123456.");
+      if (!String(form.get("otp") ?? "").trim()) {
+        setError("Enter the verification code.");
         return;
       }
     }
@@ -93,6 +93,7 @@ export function AuthCard({
       email: String(form.get("email") ?? email) || undefined,
       password: String(form.get("password") ?? password) || undefined,
       phone: phone || undefined,
+      otp: String(form.get("otp") ?? "").trim() || undefined,
       companyName: String(form.get("companyName") ?? "") || undefined,
     };
     try {
@@ -114,27 +115,13 @@ export function AuthCard({
     }
   }
 
-  async function handleGuestLogin(view: "landscape" | "vertical") {
-    setError("");
-    setNotice("");
-    setSaving(true);
-    const input = {
-      role: "Buyer" as const,
-      method: "email" as const,
-      email: "guest.buyer@seekfactory.com",
-      companyName: "Global Sourcing Corp (Guest)",
-    };
-    try {
-      const api = getApi();
-      await api.session.login(input);
-      router.push(`/?view=${view}`);
-      router.refresh();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Guest login failed.");
-      setSaving(false);
-    }
-  }
 
+
+
+  /** Guests browse without an account; sign-in is only needed to like, save, message or order. */
+  function handleGuestLogin(view: "landscape" | "vertical") {
+    router.push(`/?view=${view}`);
+  }
 
   //? To Validate Password 
   function validatePassword(password: string) {

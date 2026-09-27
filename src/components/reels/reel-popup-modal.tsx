@@ -32,6 +32,7 @@ import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useReelPopup } from "@/components/reels/use-reel-popup";
 import type { FeedItem } from "@/shared/api/contracts";
 import { useReelImpression } from "@/hooks/use-reel-impression";
+import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
 
 interface Props {
   items: FeedItem[];
@@ -57,11 +58,9 @@ export function ReelPopupModal({ items }: Props) {
   const [isScrubbing, setIsScrubbing] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
-  // Engagement state (per reel key)
-  const [liked, setLiked] = useState(false);
-  const [reposted, setReposted] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [following, setFollowing] = useState(false);
+  // Engagement state comes from the backend for the seek being shown
+  const { liked, likes, saved, shares, shared, toggleLike, toggleSave, share } = useReelEngagement(reel);
+  const { following, toggleFollow } = useFollow(manufacturer?.id, item?.followingManufacturer, manufacturer?.followerCount);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
 
@@ -72,10 +71,6 @@ export function ReelPopupModal({ items }: Props) {
     setCurrentTime(0);
     setDuration(0);
     setIsBuffering(false);
-    setLiked(false);
-    setReposted(false);
-    setSaved(false);
-    setFollowing(false);
     setIsCommentsOpen(false);
     setCommentCount(reel?.comments ?? 0);
 
@@ -180,8 +175,6 @@ export function ReelPopupModal({ items }: Props) {
 
   const totalDuration = duration > 0 ? duration : 1;
   const progressPercent = Math.min(100, Math.max(0, (currentTime / totalDuration) * 100));
-  const displayLikes = liked ? reel.likes + 1 : reel.likes;
-  const displayReposts = reposted ? reel.shares + 1 : reel.shares;
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === items.length - 1;
 
@@ -397,7 +390,7 @@ export function ReelPopupModal({ items }: Props) {
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 <button
                   type="button"
-                  onClick={() => setFollowing((v) => !v)}
+                  onClick={toggleFollow}
                   className={cn(
                     "rounded-lg px-3 py-1 text-xs font-semibold transition border",
                     following
@@ -439,27 +432,29 @@ export function ReelPopupModal({ items }: Props) {
               {/* Repost */}
               <button
                 type="button"
-                onClick={() => setReposted((v) => !v)}
+                onClick={share}
+                aria-label="Share seek"
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-emerald-600 hover:shadow-xs transition",
-                  reposted && "text-emerald-600 bg-white shadow-xs"
+                  shared && "text-emerald-600 bg-white shadow-xs"
                 )}
               >
                 <Repeat2 className="h-3.5 w-3.5" />
-                <span className="font-medium text-[11px]">{formatCount(displayReposts)}</span>
+                <span className="font-medium text-[11px]">{formatCount(shares)}</span>
               </button>
               <span className="h-4 w-px bg-neutral-200" />
               {/* Like */}
               <button
                 type="button"
-                onClick={() => setLiked((v) => !v)}
+                onClick={toggleLike}
+                aria-label={liked ? "Unlike seek" : "Like seek"}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-rose-600 hover:shadow-xs transition",
                   liked && "text-rose-600 bg-white shadow-xs"
                 )}
               >
                 <Heart className={cn("h-3.5 w-3.5", liked && "fill-rose-500")} />
-                <span className="font-medium text-[11px]">{formatCount(displayLikes)}</span>
+                <span className="font-medium text-[11px]">{formatCount(likes)}</span>
               </button>
               <span className="h-4 w-px bg-neutral-200" />
               {/* Views */}
@@ -471,7 +466,8 @@ export function ReelPopupModal({ items }: Props) {
               {/* Save */}
               <button
                 type="button"
-                onClick={() => setSaved((v) => !v)}
+                onClick={toggleSave}
+                aria-label={saved ? "Remove from saved" : "Save seek"}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition",
                   saved && "text-brand-blue bg-white shadow-xs"

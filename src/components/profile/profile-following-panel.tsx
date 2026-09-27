@@ -25,6 +25,21 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
         </span>
       </div>
 
+      {followedSuppliers.length === 0 && (
+        <div className="glass-panel-liquid p-12 text-center space-y-2">
+          <p className="font-bold text-sm text-ink">You are not following any factories yet</p>
+          <p className="text-xs text-ink-muted">
+            Follow factories from their profile or a seek to see their new seeks in your Following feed.
+          </p>
+          <Link
+            href="/explore"
+            className="inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white"
+          >
+            Explore factories
+          </Link>
+        </div>
+      )}
+
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {followedSuppliers.map((m) => (
           <div
@@ -43,10 +58,10 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
                   {m.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
                 </div>
                 <p className="text-[11px] text-ink-muted truncate">
-                  {m.location}, {m.country}
+                  {[m.location, m.country].filter(Boolean).join(", ")}
                 </p>
                 <p className="text-[10px] text-ink-faint mt-0.5">
-                  Est. {m.yearsEstablished} • {m.factorySize}
+                  {[m.yearsEstablished > 0 ? `Est. ${m.yearsEstablished}` : "", m.factorySize].filter(Boolean).join(" • ")}
                 </p>
               </div>
             </div>

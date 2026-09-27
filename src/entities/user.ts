@@ -1,3 +1,5 @@
+export type BuyerPlanTier = "free" | "pro" | "enterprise";
+
 export type BuyerProfile = {
   id: string;
   name: string;
@@ -9,4 +11,10 @@ export type BuyerProfile = {
   email?: string;
   phone?: string;
   emailVerified?: boolean;
+  taxId?: string;
+  address?: string;
+  /** Buyer membership tier. */
+  plan?: BuyerPlanTier;
+  /** ISO timestamp of account creation. */
+  memberSince?: string;
 };

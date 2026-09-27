@@ -13,7 +13,14 @@ import type {
   OrderRepository,
   MessageItem,
   AccountRepository,
+  SearchRepository,
+  MediaRepository,
+  PlatformRepository,
+  FeedItem,
 } from "@/shared/api/contracts";
+import type { Cart } from "@/entities/order";
+import type { RfqItem } from "@/entities/rfq";
+import type { BuyerPlanTier } from "@/entities/user";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { OrderRequest } from "@/entities/order";
 import {
@@ -47,16 +54,38 @@ function delay<T>(value: T, ms = 40): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms));
 }
 
+// In-memory viewer state for mock mode (resets on server restart)
+let mockPlan: BuyerPlanTier = "free";
+const likedReels = new Set<string>();
+const savedReels = new Set<string>();
+const savedProducts = new Set<string>();
+const followedFactories = new Set<string>();
+const likedComments = new Set<string>();
+
+function toFeedItem(reel: (typeof reels)[number]): FeedItem {
+  const manufacturer = manufacturers.find((item) => item.id === reel.manufacturerId);
+  if (!manufacturer) {
+    throw new Error(`Missing manufacturer for reel ${reel.id}`);
+  }
+  return {
+    reel: { ...reel, likedByMe: likedReels.has(reel.id), savedByMe: savedReels.has(reel.id) },
+    manufacturer,
+    primaryProductSlug: products.find((item) => item.id === reel.productIds[0])?.slug,
+    products: products.filter((item) => reel.productIds.includes(item.id) && isListed(item)),
+    followingManufacturer: followedFactories.has(manufacturer.id),
+  };
+}
+
 const session: SessionRepository = {
   async getCurrentUser() {
     if (typeof window === "undefined") {
       const { cookies } = await import("next/headers");
       const jar = await cookies();
       const payload = parseSessionCookie(jar.get(SESSION_COOKIE)?.value);
-      return delay(payload ? payloadToProfile(payload) : null);
+      return delay(payload ? { ...payloadToProfile(payload), plan: mockPlan } : null);
     }
     const payload = readBrowserCookie();
-    return delay(payload ? payloadToProfile(payload) : null);
+    return delay(payload ? { ...payloadToProfile(payload), plan: mockPlan } : null);
   },
   async join(input: JoinInput) {
     const payload = buildPayload(input);
@@ -85,45 +114,54 @@ const session: SessionRepository = {
     }
     return delay({
       id: "mock-user",
-      name: input.name || "Member",
+      name: input.name || "",
       role: "Buyer" as const,
-      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-      companyName: input.companyName || "Global Industrial",
-      industry: input.industry || "Machinery",
-      country: input.country || "India",
+      avatarUrl: input.avatarUrl || "",
+      companyName: input.companyName || "",
+      industry: input.industry || "",
+      country: input.country || "",
+      taxId: input.taxId,
+      address: input.address,
+      plan: mockPlan,
     });
+  },
+  async updatePlan(plan) {
+    mockPlan = plan;
+    const profile = await session.getCurrentUser();
+    if (!profile) throw new Error("Sign in to change your plan");
+    return profile;
   },
 };
 
 const feed: FeedRepository = {
   async list(tab) {
-    const list =
-      tab === "following"
-        ? reels.filter((r) => ["mfr-apex", "mfr-bharat", "mfr-metalcraft"].includes(r.manufacturerId))
-        : reels;
-    const visible = products.filter(isListed);
-
-    const items = list.filter(isListed).map((reel) => {
-      const manufacturer = manufacturers.find((item) => item.id === reel.manufacturerId);
-      if (!manufacturer) {
-        throw new Error(`Missing manufacturer for reel ${reel.id}`);
-      }
-      const reelProducts = visible.filter((item) => reel.productIds.includes(item.id));
-      return {
-        reel,
-        manufacturer,
-        primaryProductSlug: visible.find((item) => item.id === reel.productIds[0])?.slug,
-        products: reelProducts,
-      };
-    });
-    return delay(items);
+    const list = (tab === "following" ? reels.filter((r) => followedFactories.has(r.manufacturerId)) : reels).filter(isListed);
+    return delay(list.map(toFeedItem));
   },
   async addReel(reel) {
     reels.unshift(reel);
     return delay(undefined);
   },
-  likeReel: () => delay({ liked: true, likesCount: 43 }),
-  saveReel: () => delay({ saved: true, savesCount: 15 }),
+  async likeReel(reelId) {
+    const reel = reels.find((item) => item.id === reelId);
+    const liked = !likedReels.delete(reelId);
+    if (liked) likedReels.add(reelId);
+    if (reel) reel.likes = Math.max(0, reel.likes + (liked ? 1 : -1));
+    return delay({ liked, likesCount: reel?.likes ?? 0 });
+  },
+  async saveReel(reelId) {
+    const reel = reels.find((item) => item.id === reelId);
+    const saved = !savedReels.delete(reelId);
+    if (saved) savedReels.add(reelId);
+    if (reel) reel.saves = Math.max(0, reel.saves + (saved ? 1 : -1));
+    return delay({ saved, savesCount: reel?.saves ?? 0 });
+  },
+  async shareReel(reelId) {
+    const reel = reels.find((item) => item.id === reelId);
+    if (reel) reel.shares += 1;
+    return delay({ sharesCount: reel?.shares ?? 0 });
+  },
+  listSaved: () => delay(reels.filter((r) => savedReels.has(r.id)).map(toFeedItem)),
   async recordView(reelId) {
     const reel = reels.find((item) => item.id === reelId);
     if (reel) reel.views += 1;
@@ -142,8 +180,20 @@ const manufacturerRepo: ManufacturerRepository = {
       manufacturer,
       products: products.filter((item) => item.manufacturerId === manufacturer.id && isListed(item)),
       reels: reels.filter((item) => item.manufacturerId === manufacturer.id && isListed(item)),
+      certifications: (manufacturer.certificates || []).map((c) => c.title),
+      responseRatePercent: null,
+      avgResponseTimeHours: null,
+      followedByMe: followedFactories.has(manufacturer.id),
     });
   },
+  async toggleFollow(manufacturerId) {
+    const manufacturer = manufacturers.find((item) => item.id === manufacturerId);
+    const following = !followedFactories.delete(manufacturerId);
+    if (following) followedFactories.add(manufacturerId);
+    if (manufacturer) manufacturer.followerCount = Math.max(0, manufacturer.followerCount + (following ? 1 : -1));
+    return delay({ following, followerCount: manufacturer?.followerCount ?? 0 });
+  },
+  listFollowing: () => delay(manufacturers.filter((m) => followedFactories.has(m.id))),
 };
 
 const productRepo: ProductRepository = {
@@ -153,8 +203,15 @@ const productRepo: ProductRepository = {
     if (!product) return delay(null);
     const manufacturer = manufacturers.find((item) => item.id === product.manufacturerId);
     if (!manufacturer) return delay(null);
-    return delay({ product, manufacturer });
+    const related = products.filter((item) => item.manufacturerId === manufacturer.id && item.id !== product.id).slice(0, 6);
+    return delay({ product: { ...product, savedByMe: savedProducts.has(product.id) }, manufacturer, related });
   },
+  async toggleSave(productId) {
+    const saved = !savedProducts.delete(productId);
+    if (saved) savedProducts.add(productId);
+    return delay({ saved });
+  },
+  listSaved: () => delay(products.filter((p) => savedProducts.has(p.id)).map((p) => ({ ...p, savedByMe: true }))),
   listByCategory: (categoryId) =>
     delay(
       products.filter((item) => {
@@ -279,13 +336,54 @@ const notificationRepo: NotificationRepository = {
   deleteNotification: () => delay(undefined),
 };
 
+const myRfqs: RfqItem[] = [];
+
+function findMyRfq(rfqId: string) {
+  const found = myRfqs.find((item) => item.id === rfqId);
+  if (!found) throw new Error(`RFQ ${rfqId} not found`);
+  return found;
+}
+
 const rfq: RfqRepository = {
-  submit: async (_draft) => delay({
-    ok: true as const,
-    id: `rfq-${Date.now()}`,
-    referenceNumber: `RFQ-2026-${Math.floor(100000 + Math.random() * 900000)}`,
-  }),
-  listMyRfqs: async () => delay([]),
+  async submit(draft) {
+    const item: RfqItem = {
+      id: `rfq-${Date.now()}`,
+      referenceNumber: `RFQ-MOCK-${String(myRfqs.length + 1).padStart(6, "0")}`,
+      productName: draft.productName,
+      quantity: draft.quantity,
+      unit: draft.unit,
+      targetPrice: draft.targetPrice,
+      currency: draft.currency,
+      incoterm: draft.incoterm,
+      details: draft.details,
+      companyName: draft.companyName,
+      categoryId: draft.categoryId,
+      status: "SUBMITTED",
+      createdAt: new Date().toISOString(),
+      quoteCount: 0,
+      quotes: [],
+    };
+    myRfqs.unshift(item);
+    return delay({ ok: true as const, id: item.id, referenceNumber: item.referenceNumber });
+  },
+  listMyRfqs: async () => delay(myRfqs.map((item) => ({ ...item, quotes: undefined }))),
+  getMine: async (rfqId) => delay({ ...findMyRfq(rfqId) }),
+  async cancel(rfqId) {
+    const item = findMyRfq(rfqId);
+    item.status = "CANCELLED";
+    return delay({ ...item });
+  },
+  async acceptQuote(rfqId, quoteId) {
+    const item = findMyRfq(rfqId);
+    item.status = "ACCEPTED";
+    item.quotes = item.quotes?.map((q) => ({ ...q, status: q.id === quoteId ? "ACCEPTED" : "REJECTED" }));
+    return delay({ ...item });
+  },
+  async rejectQuote(rfqId, quoteId) {
+    const item = findMyRfq(rfqId);
+    item.quotes = item.quotes?.map((q) => (q.id === quoteId ? { ...q, status: "REJECTED" } : q));
+    return delay({ ...item });
+  },
 };
 
 let dynamicComments: ReelComment[] = [...mockComments];
@@ -339,6 +437,14 @@ const commentsRepo: CommentRepository = {
       if (reel) reel.comments += 1;
     }
     return delay({ ...newReply });
+  },
+  async toggleLike(commentId) {
+    const all = dynamicComments.flatMap((c) => [c, ...c.replies]);
+    const target = all.find((c) => c.id === commentId);
+    const liked = !likedComments.delete(commentId);
+    if (liked) likedComments.add(commentId);
+    if (target) target.likes = Math.max(0, target.likes + (liked ? 1 : -1));
+    return delay({ liked, likes: target?.likes ?? 0 });
   },
 };
 
@@ -639,8 +745,56 @@ const ordersRepo: OrderRepository = {
         phone: user.phone,
       },
     };
+    Object.assign(order, {
+      source: "DIRECT",
+      contactName: input.contactName,
+      contactPhone: input.contactPhone,
+      deliveryAddress: input.deliveryAddress,
+      cancellable: true,
+    });
     orderRequests.unshift(order);
     return delay({ ...order, buyer: { ...order.buyer, email: undefined, phone: undefined } });
+  },
+  async cancel(orderId, reason) {
+    const order = orderRequests.find((item) => item.id === orderId);
+    if (!order) throw new Error("Order not found");
+    Object.assign(order, {
+      status: "CANCELLED",
+      cancellable: false,
+      cancelReason: reason?.trim() || undefined,
+      statusUpdatedAt: new Date().toISOString(),
+    });
+    return delay({ ...order, buyer: { ...order.buyer, email: undefined, phone: undefined } });
+  },
+  getCart: () => delay(buildCart()),
+  async addToCart(productId, quantity) {
+    const line = mockCart.find((l) => l.productId === productId);
+    if (line) line.quantity += quantity;
+    else mockCart.push({ id: `cart-${Date.now()}`, productId, quantity });
+    return delay(buildCart());
+  },
+  async updateCartQuantity(cartItemId, quantity) {
+    const line = mockCart.find((l) => l.id === cartItemId);
+    if (line) line.quantity = quantity;
+    return delay(buildCart());
+  },
+  async removeFromCart(cartItemId) {
+    mockCart = mockCart.filter((l) => l.id !== cartItemId);
+    return delay(buildCart());
+  },
+  async checkout(contact) {
+    const placed: OrderRequest[] = [];
+    for (const line of mockCart) {
+      const product = products.find((p) => p.id === line.productId);
+      if (!product) continue;
+      const order = await ordersRepo.place({ productSlug: product.slug, quantity: line.quantity, note: contact.note,
+        contactName: contact.contactName, contactPhone: contact.contactPhone, deliveryAddress: contact.deliveryAddress });
+      const stored = orderRequests.find((item) => item.id === order.id);
+      if (stored) stored.source = "CART";
+      placed.push({ ...order, source: "CART" });
+    }
+    mockCart = [];
+    return placed;
   },
   async listMine() {
     const user = await session.getCurrentUser();
@@ -661,6 +815,77 @@ const accountRepo: AccountRepository = {
   verifyEmail: () => delay(undefined),
 };
 
+const searchRepo: SearchRepository = {
+  async query({ q = "", category = "", limit = 30 }) {
+    const needle = q.trim().toLowerCase();
+    const selected = categories.find((c) => c.id === category || c.slug === category);
+    const inCategory = (categoryId: string) =>
+      !category ||
+      (!!selected &&
+        (categoryId === selected.id || categories.find((c) => c.id === categoryId)?.parentId === selected.id));
+    const matches = (...fields: (string | undefined)[]) =>
+      !needle || fields.some((f) => f?.toLowerCase().includes(needle));
+    return delay({
+      products: products
+        .filter((p) => matches(p.name, p.description) && inCategory(p.categoryId))
+        .slice(0, limit),
+      manufacturers: manufacturers
+        .filter((m) => matches(m.name, m.location, m.description) && (!category || m.categoryIds.some(inCategory)))
+        .slice(0, limit),
+      reels: reels
+        .filter((r) => matches(r.title, r.description, ...r.hashtags))
+        .filter((r) => !category || products.some((p) => r.productIds.includes(p.id) && inCategory(p.categoryId)))
+        .slice(0, limit)
+        .map(toFeedItem),
+    });
+  },
+};
+
+// Mock cart keeps the same shape as the backend; prices use the product's base price.
+let mockCart: { id: string; productId: string; quantity: number }[] = [];
+
+function buildCart(): Cart {
+  const items = mockCart.flatMap((line) => {
+    const product = products.find((p) => p.id === line.productId);
+    const manufacturer = manufacturers.find((m) => m.id === product?.manufacturerId);
+    if (!product || !manufacturer) return [];
+    return [{
+      id: line.id,
+      product,
+      manufacturer,
+      quantity: line.quantity,
+      minQuantity: 1,
+      unitPrice: product.priceInr,
+      lineTotal: product.priceInr * line.quantity,
+    }];
+  });
+  return {
+    items,
+    itemCount: items.length,
+    totalAmount: items.reduce((sum, i) => sum + (i.lineTotal ?? 0), 0),
+    currency: "INR",
+  };
+}
+
+const mediaRepo: MediaRepository = {
+  async upload(file) {
+    if (typeof window === "undefined") throw new Error("upload must be called from the browser");
+    // Mock mode keeps the file in this tab only
+    return { url: URL.createObjectURL(file), contentType: file.type, size: file.size };
+  },
+};
+
+const platformRepo: PlatformRepository = {
+  listBuyerPlans: () =>
+    delay([
+      { code: "free" as const, name: "Free", priceInr: 0, priceCny: 0, features: ["Browse seeks and products", "Post RFQs"] },
+      { code: "pro" as const, name: "Pro", priceInr: 1, priceCny: 10, features: ["Unlimited RFQs and quotes", "Full verified factory profiles"] },
+      { code: "enterprise" as const, name: "Enterprise", priceInr: 10, priceCny: 50, features: ["Everything in Pro", "Dedicated sourcing manager"] },
+    ]),
+  getExchangeRates: () =>
+    delay({ base: "INR", rates: { INR: 1, USD: 0.01149, EUR: 0.01053, GBP: 0.00893, CNY: 0.0833, JPY: 1.724, AED: 0.0422 } }),
+};
+
 export const mockApi: ApiClient = {
   session,
   feed,
@@ -672,6 +897,9 @@ export const mockApi: ApiClient = {
   rfq,
   comments: commentsRepo,
   factory: factoryRepo,
+  search: searchRepo,
   orders: ordersRepo,
+  media: mediaRepo,
+  platform: platformRepo,
   account: accountRepo,
 };

@@ -217,7 +217,7 @@ export function AlibabaCertSection({
                       {/* Logo Badge + Short Name */}
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="rounded bg-[#0052cc]/10 px-1.5 py-0.5 text-[10px] font-extrabold text-[#0052cc]">
-                          ISO
+                          {cert.title.toUpperCase().startsWith("ISO") ? "ISO" : "CERT"}
                         </span>
                         <h4 className="text-xs font-bold text-slate-900 truncate">
                           {shortCertTitle}
@@ -227,10 +227,11 @@ export function AlibabaCertSection({
                       {/* Certificate Number + Copy Icon */}
                       <div className="flex items-center justify-between text-slate-500 text-[11px] pt-1">
                         <span className="truncate max-w-[140px] font-mono text-[11px]">
-                          {cert.certNumber}
+                          {cert.certNumber || "Declared by factory"}
                         </span>
 
                         <div className="flex items-center gap-1">
+                          {cert.certNumber && (
                           <button
                             type="button"
                             onClick={(e) => handleCopy(e, cert.certNumber, cert.id)}
@@ -243,6 +244,7 @@ export function AlibabaCertSection({
                               <Copy className="h-3.5 w-3.5" />
                             )}
                           </button>
+                          )}
 
                           {isOwner && onDeleteCertificate && (
                             <button

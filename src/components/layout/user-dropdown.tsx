@@ -13,9 +13,17 @@ import {
   LogOut,
   ChevronDown,
   Sparkles,
+  Package,
+  ShoppingCart,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
-import type { BuyerProfile } from "@/entities/user";
+import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
+
+const PLAN_LABELS: Record<BuyerPlanTier, string> = {
+  free: "Buyer",
+  pro: "Pro Buyer",
+  enterprise: "Enterprise Buyer",
+};
 import { getApi } from "@/shared/api";
 
 type UserDropdownProps = {
@@ -120,7 +128,7 @@ export function UserDropdown({
                 <div className="mt-1.5 flex items-center gap-1.5">
                   <span className="inline-flex items-center gap-1 rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-semibold text-brand-blue">
                     <Sparkles className="h-3 w-3 text-brand-blue" />
-                    {user.role === "Supplier" ? "Verified Manufacturer" : "Verified Buyer"}
+                    {user.role === "Supplier" ? "Manufacturer" : PLAN_LABELS[user.plan ?? "free"]}
                   </span>
                 </div>
               </div>
@@ -188,13 +196,35 @@ export function UserDropdown({
             </Link>
 
             <Link
-              href="/rfq/new"
+              href="/profile?tab=rfqs"
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-canvas hover:text-brand-blue transition-colors group"
             >
               <div className="flex items-center gap-2.5">
                 <FileText className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>My RFQs & Orders</span>
+                <span>My RFQs & Quotes</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/orders"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-canvas hover:text-brand-blue transition-colors group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Package className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
+                <span>My Orders</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/cart"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-canvas hover:text-brand-blue transition-colors group"
+            >
+              <div className="flex items-center gap-2.5">
+                <ShoppingCart className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
+                <span>Cart</span>
               </div>
             </Link>
           </div>

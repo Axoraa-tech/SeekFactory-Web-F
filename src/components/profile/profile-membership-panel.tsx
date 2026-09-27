@@ -3,7 +3,7 @@
 import { CheckCircle2, Globe } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import type { MembershipTier } from "./profile-types";
-import { useBuyerPlan } from "@/features/subscription";
+import { useBuyerPlan, planPriceLabel } from "@/features/subscription";
 
 function IndiaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
   return (
@@ -44,7 +44,7 @@ type Props = {
 };
 
 export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
-  const { region, setRegion, pricing } = useBuyerPlan();
+  const { region, setRegion, pricing, plans } = useBuyerPlan();
 
   return (
     <div className="glass-fade-in w-full space-y-6">
@@ -79,7 +79,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
                 region === "india" ? "bg-white/20 text-white" : "bg-blue-50 text-brand-blue"
               )}
             >
-              ₹1 (1 Rs)
+              {planPriceLabel(plans, "pro", "india")}
             </span>
           </button>
           <button
@@ -100,7 +100,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
                 region === "china" ? "bg-white/20 text-white" : "bg-rose-50 text-rose-700"
               )}
             >
-              10 Yuan (¥10)
+              {planPriceLabel(plans, "pro", "china")}
             </span>
           </button>
         </div>
@@ -206,8 +206,8 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             {currentTier === "pro"
               ? "Current Plan Active"
               : region === "india"
-              ? "Upgrade to Pro • ₹1 (1 Rs)"
-              : "Upgrade to Pro • 10 Yuan (¥10)"}
+              ? `Upgrade to Pro • ${planPriceLabel(plans, "pro", "india")}`
+              : `Upgrade to Pro • ${planPriceLabel(plans, "pro", "china")}`}
           </button>
         </div>
 
@@ -260,8 +260,8 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             {currentTier === "enterprise"
               ? "Current Plan Active"
               : region === "india"
-              ? "Upgrade to Enterprise (₹10)"
-              : "Upgrade to Enterprise (50 Yuan)"}
+              ? `Upgrade to Enterprise (${planPriceLabel(plans, "enterprise", "india")})`
+              : `Upgrade to Enterprise (${planPriceLabel(plans, "enterprise", "china")})`}
           </button>
         </div>
       </div>

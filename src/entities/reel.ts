@@ -18,6 +18,9 @@ export type Reel = {
   tab: FeedTab;
   productIds: string[];
   categoryIds?: string[];
+  /** Signed-in viewer's own state; undefined for guests. */
+  likedByMe?: boolean;
+  savedByMe?: boolean;
   subcategoryIds?: string[];
   /** false = paused by the seller (hidden from the feed). */
   listed?: boolean;

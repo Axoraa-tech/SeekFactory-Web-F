@@ -101,17 +101,21 @@ export function ProfileHero({
               </div>
 
               <p className="text-xs sm:text-sm text-ink-muted font-medium truncate">
-                {formData.companyName} · {formData.industry}
+                {[formData.companyName, formData.industry].filter(Boolean).join(" · ")}
               </p>
               <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-ink-faint">
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {formData.country}
-                </span>
-                <span>·</span>
-                <span>Member since 2024</span>
-                <span>·</span>
-                <span className="text-emerald-600 font-semibold">Verified Trade Assurance</span>
+                {formData.country && (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {formData.country}
+                  </span>
+                )}
+                {user.memberSince && (
+                  <>
+                    {formData.country && <span>·</span>}
+                    <span>Member since {new Date(user.memberSince).getFullYear()}</span>
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -153,7 +157,7 @@ export function ProfileHero({
           </div>
           <div className="glass-liquid-item px-3 py-2">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">Saved Wishlist</p>
-            <p className="mt-0.5 text-sm font-extrabold text-ink">{savedCount} Products</p>
+            <p className="mt-0.5 text-sm font-extrabold text-ink">{savedCount} {savedCount === 1 ? "Item" : "Items"}</p>
           </div>
           <div className="glass-liquid-item px-3 py-2">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">Following Plants</p>

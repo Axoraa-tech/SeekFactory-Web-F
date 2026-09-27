@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Loader2, Mail, MessageSquare, Phone, Search, ShoppingBag } from "lucide-react";
 import type { OrderRequest, OrderStatus } from "@/entities/order";
-import { ORDER_STATUSES, ORDER_STATUS_META } from "@/features/orders/order-status";
+import { ORDER_STATUSES, ORDER_STATUS_META, formatMoney } from "@/features/orders/order-status";
 import { formatPriceInr } from "@/shared/lib/format";
 import { ProductThumb } from "@/features/orders/product-thumb";
 
@@ -185,7 +185,12 @@ function OrderCard({
             )}
             <p className="text-xs text-neutral-600 mt-0.5">
               Quantity: <strong className="text-neutral-900">{order.quantity.toLocaleString("en-IN")} {order.unit}</strong>
-              {order.estimatedTotalInr !== undefined && (
+              {order.quotedTotal != null ? (
+                <>
+                  {" "}• Accepted quote{" "}
+                  <strong className="text-neutral-900">{formatMoney(order.quotedTotal, order.currency || "INR")}</strong>
+                </>
+              ) : order.estimatedTotalInr !== undefined && (
                 <>
                   {" "}• Est. value <strong className="text-neutral-900">{formatPriceInr(order.estimatedTotalInr)}</strong>
                   <span className="text-ink-muted"> at listing price</span>
@@ -243,6 +248,13 @@ function OrderCard({
         {order.buyerNote && (
           <p className="sm:col-span-2 pt-2 border-t border-line text-neutral-700 leading-relaxed">
             &ldquo;{order.buyerNote}&rdquo;
+          </p>
+        )}
+        {/* Delivery contact the buyer entered at checkout (cart, Buy Now or accepted quote) */}
+        {(order.deliveryAddress || order.contactPhone) && (
+          <p className="sm:col-span-2 pt-2 border-t border-line text-neutral-700 leading-relaxed">
+            <span className="font-bold text-neutral-900">Deliver to:</span>{" "}
+            {[order.contactName, order.contactPhone, order.deliveryAddress].filter(Boolean).join(" · ")}
           </p>
         )}
       </div>

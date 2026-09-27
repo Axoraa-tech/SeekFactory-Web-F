@@ -1,3 +1,5 @@
+import { rateFromInr } from "@/shared/lib/exchange-rates";
+
 export function formatCount(value: number): string {
   if (value >= 1_000_000) {
     return `${(value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1)}M`;
@@ -9,17 +11,17 @@ export function formatCount(value: number): string {
   return String(value);
 }
 
-const CURRENCY_RATES: Record<string, { symbol: string; rate: number }> = {
-  INR: { symbol: "₹", rate: 1.0 },
-  USD: { symbol: "$", rate: 0.01149 },
-  EUR: { symbol: "€", rate: 0.01053 },
-  GBP: { symbol: "£", rate: 0.00893 },
-  CNY: { symbol: "¥", rate: 0.0833 },
-  JPY: { symbol: "¥", rate: 1.724 },
-  AED: { symbol: "AED ", rate: 0.0422 },
-  CAD: { symbol: "CA$", rate: 0.0161 },
-  AUD: { symbol: "AU$", rate: 0.0178 },
-  SGD: { symbol: "SG$", rate: 0.0151 },
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  INR: "₹",
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  CNY: "¥",
+  JPY: "¥",
+  AED: "AED ",
+  CAD: "CA$",
+  AUD: "AU$",
+  SGD: "SG$",
 };
 
 export function formatPriceInr(value: number, targetCurrencyCode?: string): string {
@@ -29,12 +31,14 @@ export function formatPriceInr(value: number, targetCurrencyCode?: string): stri
       curr = localStorage.getItem("seek_curr") || undefined;
     } catch {}
   }
-  const config = (curr && CURRENCY_RATES[curr]) || CURRENCY_RATES.INR;
-  const converted = value * config.rate;
-
-  if (curr === "INR" || !curr) {
-    return `${config.symbol}${value.toLocaleString("en-IN")}`;
+  // Rates come from the backend; unknown currency or rate → show the INR price itself
+  const rate = curr ? rateFromInr(curr) : undefined;
+  if (!curr || curr === "INR" || rate === undefined || !CURRENCY_SYMBOLS[curr]) {
+    return `${CURRENCY_SYMBOLS.INR}${value.toLocaleString("en-IN")}`;
   }
+  const config = { symbol: CURRENCY_SYMBOLS[curr] };
+  const converted = value * rate;
+
   if (curr === "JPY") {
     return `${config.symbol}${Math.round(converted).toLocaleString("ja-JP")}`;
   }
@@ -51,4 +55,23 @@ export function formatDuration(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = Math.floor(totalSeconds % 60);
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+/**
+ * "just now", "5m ago", "3h ago", "2d ago", then a short date. Non-date strings pass through
+ * unchanged; an empty value renders as an empty string.
+ */
+export function formatRelativeTime(value: string | undefined): string {
+  if (!value) return "";
+  const time = Date.parse(value);
+  if (Number.isNaN(time)) return value;
+  const seconds = Math.round((Date.now() - time) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(time).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }

@@ -14,7 +14,7 @@ import {
   Globe,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
-import { useBuyerPlan, type BuyerPlanTier } from "@/features/subscription";
+import { useBuyerPlan, type BuyerPlanTier, planPriceLabel } from "@/features/subscription";
 
 /**
  * Crisp SVG flag components to avoid OS emoji rendering issues (e.g. "IN" / "CN" text on Windows)
@@ -53,33 +53,17 @@ function ChinaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
 }
 
 export function UpgradePlanModal() {
-  const {
-    tier,
-    region,
-    pricing,
-    isUpgradeModalOpen,
-    closeUpgradeModal,
-    setRegion,
-    upgradeTier,
-  } = useBuyerPlan();
+  const { tier, region, pricing, isUpgradeModalOpen, closeUpgradeModal, setRegion, upgradeTier, plans } = useBuyerPlan();
 
   const [upgradeFeedback, setUpgradeFeedback] = useState<string | null>(null);
 
   if (!isUpgradeModalOpen) return null;
 
-  const handleUpgrade = (targetTier: BuyerPlanTier) => {
-    if (targetTier === "pro") {
-      const msg =
-        region === "india"
-          ? "Subscription successfully updated to Pro Plan (1 Rs / ₹1)! Direct supplier contacts & audits unlocked."
-          : "Subscription successfully updated to Pro Plan (10 Yuan / ¥10)! Direct supplier contacts & audits unlocked.";
-      setUpgradeFeedback(msg);
-      setTimeout(() => {
-        upgradeTier("pro");
-        setUpgradeFeedback(null);
-      }, 1000);
-    } else {
-      upgradeTier(targetTier);
+  const handleUpgrade = async (targetTier: BuyerPlanTier) => {
+    const result = await upgradeTier(targetTier);
+    if (!result.ok) {
+      setUpgradeFeedback(result.message);
+      setTimeout(() => setUpgradeFeedback(null), 3000);
     }
   };
 
@@ -173,7 +157,7 @@ export function UpgradePlanModal() {
                     region === "india" ? "bg-white/20 text-white" : "bg-blue-50 text-blue-700"
                   )}
                 >
-                  ₹1 (1 Rs)
+                  {planPriceLabel(plans, "pro", "india")}
                 </span>
               </button>
               <button
@@ -194,7 +178,7 @@ export function UpgradePlanModal() {
                     region === "china" ? "bg-white/20 text-white" : "bg-rose-50 text-rose-700"
                   )}
                 >
-                  10 Yuan (¥10)
+                  {planPriceLabel(plans, "pro", "china")}
                 </span>
               </button>
             </div>
@@ -387,8 +371,8 @@ export function UpgradePlanModal() {
                     {tier === "pro" || tier === "enterprise"
                       ? "Pro Plan Active (Unlocked)"
                       : region === "india"
-                      ? "Upgrade to Pro • ₹1 (1 Rs)"
-                      : "Upgrade to Pro • 10 Yuan (¥10)"}
+                      ? `Upgrade to Pro • ${planPriceLabel(plans, "pro", "india")}`
+                      : `Upgrade to Pro • ${planPriceLabel(plans, "pro", "china")}`}
                   </span>
                   <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                 </button>

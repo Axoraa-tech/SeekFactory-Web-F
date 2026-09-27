@@ -1,18 +1,15 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import {
-  Send,
-  Paperclip,
-  Building2,
-  FileText,
-  CheckCheck,
-  ChevronLeft,
-  Sparkles,
-} from "lucide-react";
+import { Send, Paperclip, Building2, FileText, CheckCheck, ChevronLeft, Loader2, X, MessageSquare } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
+import { CHAT_ATTACHMENT_ACCEPT, formatChatTime } from "@/shared/lib/chat";
+import type { MessageAttachment } from "@/shared/api/contracts";
+import type { OrderRequest } from "@/entities/order";
 import type { ThreadWithMessages } from "./chat-types";
+import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "./message-extras";
 
 type Props = {
   activeThread: ThreadWithMessages;
@@ -22,11 +19,19 @@ type Props = {
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   quickInquiries: string[];
   onSendMessage: (e?: React.FormEvent, customText?: string) => void;
-  attachedFile: { name: string; size: string } | null;
-  onClearAttachment: () => void;
-  onAttachMockFile: () => void;
   inputMessage: string;
   onInputChange: (value: string) => void;
+  /** Uploaded (not yet sent) attachment. */
+  attachment: MessageAttachment | null;
+  attachmentUploading: boolean;
+  attachmentError: string | null;
+  onPickFile: (file: File | undefined) => void;
+  onClearAttachment: () => void;
+  /** Orders between this buyer and factory, for the "About order" picker. */
+  orders: OrderRequest[];
+  contextOrderId: string;
+  onContextChange: (orderId: string) => void;
+  sendError: string | null;
 };
 
 export function ChatConversationPane({
@@ -37,12 +42,21 @@ export function ChatConversationPane({
   messagesEndRef,
   quickInquiries,
   onSendMessage,
-  attachedFile,
-  onClearAttachment,
-  onAttachMockFile,
   inputMessage,
   onInputChange,
+  attachment,
+  attachmentUploading,
+  attachmentError,
+  onPickFile,
+  onClearAttachment,
+  orders,
+  contextOrderId,
+  onContextChange,
+  sendError,
 }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const canSend = (inputMessage.trim().length > 0 || attachment !== null) && !attachmentUploading;
+
   return (
     <div
       className={cn(
@@ -76,16 +90,9 @@ export function ChatConversationPane({
                 <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />
               )}
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-500">
-              <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Online Sourcing Engineer
-              </span>
-              <span>•</span>
-              <span>
-                {activeThread.manufacturer.location}, {activeThread.manufacturer.country}
-              </span>
-            </div>
+            <p className="text-[11px] text-slate-500 truncate">
+              {[activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).join(", ")}
+            </p>
           </div>
         </div>
 
@@ -108,12 +115,15 @@ export function ChatConversationPane({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
-        <div className="mx-auto max-w-md text-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-100 px-3 py-1 text-[11px] text-brand-blue font-medium shadow-2xs">
-            <Sparkles className="h-3 w-3 text-brand-blue" />
-            <span>Verified OEM Direct Channel · Trade Assurance Escrow Protected</span>
+        {activeThread.messages.length === 0 && (
+          <div className="mx-auto mt-10 max-w-sm text-center text-slate-500">
+            <MessageSquare className="mx-auto mb-2 h-8 w-8 text-slate-300" />
+            <p className="text-sm font-semibold text-slate-700">Start the conversation</p>
+            <p className="mt-1 text-xs">
+              Ask {activeThread.manufacturer.name} about pricing, specs or delivery. You can attach images or PDFs.
+            </p>
           </div>
-        </div>
+        )}
 
         {activeThread.messages.map((msg) => {
           const isUser = msg.sender === "user";
@@ -131,7 +141,7 @@ export function ChatConversationPane({
                 />
               )}
 
-              <div className="space-y-1">
+              <div className="space-y-1 min-w-0">
                 <div
                   className={cn(
                     "rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-xs",
@@ -140,24 +150,9 @@ export function ChatConversationPane({
                       : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs"
                   )}
                 >
-                  <p>{msg.text}</p>
-
-                  {msg.attachment && (
-                    <div
-                      className={cn(
-                        "mt-2 p-2 rounded-xl flex items-center gap-2 border text-xs",
-                        isUser
-                          ? "bg-white/10 border-white/20 text-white"
-                          : "bg-slate-50 border-slate-200 text-slate-800"
-                      )}
-                    >
-                      <Paperclip className="h-4 w-4 shrink-0" />
-                      <div className="min-w-0 flex-1 truncate">
-                        <p className="font-bold truncate">{msg.attachment.name}</p>
-                        <p className="text-[10px] opacity-80">{msg.attachment.size}</p>
-                      </div>
-                    </div>
-                  )}
+                  {msg.order && <MessageOrderTag order={msg.order} tone={isUser ? "own" : "other"} />}
+                  {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
+                  {msg.attachment && <MessageAttachmentView attachment={msg.attachment} tone={isUser ? "own" : "other"} />}
                 </div>
 
                 <div
@@ -166,7 +161,7 @@ export function ChatConversationPane({
                     isUser ? "justify-end" : "justify-start"
                   )}
                 >
-                  <span>{msg.time}</span>
+                  <span>{formatChatTime(msg.time)}</span>
                   {isUser && <CheckCheck className="h-3 w-3 text-brand-blue" />}
                 </div>
               </div>
@@ -176,12 +171,7 @@ export function ChatConversationPane({
 
         {isTyping && (
           <div className="flex items-center gap-2 text-xs text-slate-400 italic">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={activeThread.manufacturer.logoUrl}
-              alt=""
-              className="h-6 w-6 rounded-md object-cover"
-            />
-            <span>{activeThread.manufacturer.name} engineer is typing...</span>
+            <span>{activeThread.manufacturer.name} is typing...</span>
           </div>
         )}
 
@@ -201,21 +191,35 @@ export function ChatConversationPane({
         ))}
       </div>
 
-      {attachedFile && (
-        <div className="px-4 py-1.5 bg-blue-50/60 border-t border-blue-100 flex items-center justify-between text-xs text-brand-blue">
+      {orders.length > 0 && (
+        <div className="px-4 py-1.5 bg-white border-t border-slate-100">
+          <OrderContextPicker orders={orders} value={contextOrderId} onChange={onContextChange} />
+        </div>
+      )}
+
+      {(attachment || attachmentUploading || attachmentError || sendError) && (
+        <div
+          className={cn(
+            "px-4 py-1.5 border-t flex items-center justify-between text-xs",
+            attachmentError || sendError ? "bg-red-50 border-red-100 text-red-700" : "bg-blue-50/60 border-blue-100 text-brand-blue"
+          )}
+          role={attachmentError || sendError ? "alert" : undefined}
+        >
           <span className="flex items-center gap-1.5 font-semibold truncate">
-            <Paperclip className="h-3.5 w-3.5 shrink-0" />
-            <span>
-              Attached: {attachedFile.name} ({attachedFile.size})
+            {attachmentUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Paperclip className="h-3.5 w-3.5 shrink-0" />}
+            <span className="truncate">
+              {attachmentError ?? sendError ?? (attachmentUploading ? "Uploading…" : `Attached: ${attachment?.name} (${attachment?.size})`)}
             </span>
           </span>
-          <button
-            type="button"
-            onClick={onClearAttachment}
-            className="font-bold text-red-500 hover:underline text-[11px] ml-2"
-          >
-            Remove
-          </button>
+          {attachment && !attachmentUploading && (
+            <button
+              type="button"
+              onClick={onClearAttachment}
+              className="font-bold text-red-500 hover:underline text-[11px] ml-2 inline-flex items-center gap-0.5"
+            >
+              <X className="h-3 w-3" /> Remove
+            </button>
+          )}
         </div>
       )}
 
@@ -223,13 +227,25 @@ export function ChatConversationPane({
         onSubmit={(e) => onSendMessage(e)}
         className="p-3 sm:p-4 bg-white border-t border-slate-100 flex items-center gap-2 shrink-0"
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={CHAT_ATTACHMENT_ACCEPT}
+          className="hidden"
+          onChange={(e) => {
+            onPickFile(e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
         <button
           type="button"
-          onClick={onAttachMockFile}
-          title="Attach technical drawing or CAD file"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={attachmentUploading}
+          title="Attach an image or PDF"
+          aria-label="Attach an image or PDF"
           className={cn(
-            "p-2 rounded-xl border transition-colors shadow-2xs",
-            attachedFile
+            "p-2 rounded-xl border transition-colors shadow-2xs disabled:opacity-50",
+            attachment
               ? "bg-blue-100 text-brand-blue border-brand-blue"
               : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
           )}
@@ -241,13 +257,14 @@ export function ChatConversationPane({
           type="text"
           value={inputMessage}
           onChange={(e) => onInputChange(e.target.value)}
-          placeholder={`Message ${activeThread.manufacturer.name} technical sales...`}
+          maxLength={5000}
+          placeholder={`Message ${activeThread.manufacturer.name}...`}
           className="flex-1 h-10 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs sm:text-sm outline-none focus:border-brand-blue focus:bg-white transition-colors"
         />
 
         <button
           type="submit"
-          disabled={!inputMessage.trim() && !attachedFile}
+          disabled={!canSend}
           className="h-10 px-4 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs disabled:opacity-50"
         >
           <Send className="h-3.5 w-3.5" />
@@ -257,4 +274,3 @@ export function ChatConversationPane({
     </div>
   );
 }
-

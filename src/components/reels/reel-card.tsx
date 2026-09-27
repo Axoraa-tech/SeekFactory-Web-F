@@ -15,6 +15,8 @@ export type ReelCardProps = {
   viewMode?: "landscape" | "vertical";
   /** Feed-level index used to open the popup at the correct position */
   itemIndex?: number;
+  /** Whether the viewer follows this factory; undefined for guests. */
+  followingManufacturer?: boolean;
 };
 
 /**
@@ -29,6 +31,7 @@ export function ReelCard({
   variantIndex = 0,
   viewMode = "landscape",
   itemIndex = 0,
+  followingManufacturer,
 }: ReelCardProps) {
   const { openAt } = useReelPopup();
 
@@ -38,6 +41,8 @@ export function ReelCard({
       manufacturer={manufacturer}
       productSlug={productSlug}
       onExpand={() => openAt(itemIndex)}
+      followingManufacturer={followingManufacturer}
+      product={products[0]}
     />
   );
 }
