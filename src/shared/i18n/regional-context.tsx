@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, type ReactNode, useSyncExternalStore } from "react";
+import { getApi } from "@/shared/api";
+import {
+  getExchangeRatesSnapshot,
+  rateFromInr,
+  setExchangeRates,
+  subscribeExchangeRates,
+} from "@/shared/lib/exchange-rates";
 
 export type LanguageOption = {
   code: string;
@@ -13,7 +20,6 @@ export type CurrencyOption = {
   code: string;
   name: string;
   symbol: string;
-  rateFromInr: number; // 1 INR = rateFromInr TargetCurrency
 };
 
 export const LANGUAGES: LanguageOption[] = [
@@ -30,16 +36,16 @@ export const LANGUAGES: LanguageOption[] = [
 ];
 
 export const CURRENCIES: CurrencyOption[] = [
-  { code: "EUR", name: "Euro", symbol: "€", rateFromInr: 0.01053 },
-  { code: "USD", name: "US Dollar", symbol: "$", rateFromInr: 0.01149 },
-  { code: "INR", name: "Indian Rupee", symbol: "₹", rateFromInr: 1.0 },
-  { code: "CNY", name: "Chinese Yuan", symbol: "¥", rateFromInr: 0.0833 },
-  { code: "GBP", name: "British Pound", symbol: "£", rateFromInr: 0.00893 },
-  { code: "JPY", name: "Japanese Yen", symbol: "¥", rateFromInr: 1.724 },
-  { code: "AED", name: "UAE Dirham", symbol: "AED ", rateFromInr: 0.0422 },
-  { code: "CAD", name: "Canadian Dollar", symbol: "CA$", rateFromInr: 0.0161 },
-  { code: "AUD", name: "Australian Dollar", symbol: "AU$", rateFromInr: 0.0178 },
-  { code: "SGD", name: "Singapore Dollar", symbol: "SG$", rateFromInr: 0.0151 },
+  { code: "EUR", name: "Euro", symbol: "€" },
+  { code: "USD", name: "US Dollar", symbol: "$" },
+  { code: "INR", name: "Indian Rupee", symbol: "₹" },
+  { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
+  { code: "GBP", name: "British Pound", symbol: "£" },
+  { code: "JPY", name: "Japanese Yen", symbol: "¥" },
+  { code: "AED", name: "UAE Dirham", symbol: "AED " },
+  { code: "CAD", name: "Canadian Dollar", symbol: "CA$" },
+  { code: "AUD", name: "Australian Dollar", symbol: "AU$" },
+  { code: "SGD", name: "Singapore Dollar", symbol: "SG$" },
 ];
 
 // Dictionary of translations for top UI keys
@@ -1491,6 +1497,17 @@ export function RegionalSettingsProvider({ children }: { children: ReactNode }) 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(LANGUAGES[0]);
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyOption>(CURRENCIES[0]);
 
+  // Re-render prices once the backend exchange rates arrive
+  useSyncExternalStore(subscribeExchangeRates, getExchangeRatesSnapshot, getExchangeRatesSnapshot);
+  useEffect(() => {
+    getApi()
+      .platform.getExchangeRates()
+      .then((res) => setExchangeRates(res.rates))
+      .catch(() => {
+        // Prices stay in INR when rates are unavailable
+      });
+  }, []);
+
   // Load from localStorage on mount
   useEffect(() => {
     try {
@@ -1537,12 +1554,13 @@ export function RegionalSettingsProvider({ children }: { children: ReactNode }) 
   };
 
   const formatPrice = (amountInr: number): string => {
-    const converted = amountInr * selectedCurrency.rateFromInr;
-    const sym = selectedCurrency.symbol;
-
-    if (selectedCurrency.code === "INR") {
-      return `${sym}${amountInr.toLocaleString("en-IN")}`;
+    // Rates come from the backend; until they load (or for an unknown currency) show INR
+    const rate = rateFromInr(selectedCurrency.code);
+    if (selectedCurrency.code === "INR" || rate === undefined) {
+      return `₹${amountInr.toLocaleString("en-IN")}`;
     }
+    const converted = amountInr * rate;
+    const sym = selectedCurrency.symbol;
 
     if (selectedCurrency.code === "JPY") {
       return `${sym}${Math.round(converted).toLocaleString("ja-JP")}`;

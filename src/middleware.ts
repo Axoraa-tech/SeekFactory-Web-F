@@ -1,16 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  ACCESS_COOKIE,
+  REFRESH_COOKIE,
+  clearTokenCookies,
+  isExpired,
+  refreshTokens,
+  setTokenCookies,
+  type TokenPair,
+} from "@/features/auth/auth-tokens";
+import { SESSION_COOKIE } from "@/features/auth/session-cookie";
 
 /**
- * Middleware skeleton (mock-safe).
+ * Security headers, admin gate, and backend session refresh.
  *
- * Today: baseline security headers only. Auth remains per-page via `requireUser()`
- * because the demo session cookie is client-writable and must not be treated as trusted.
- *
- * When real backend auth lands: verify HttpOnly session here and redirect guests
- * away from /messages, /notifications, /profile, /rfq/* before rendering.
+ * Server components call the backend with the HttpOnly access-token cookie. When it has expired
+ * but the refresh token is still valid, a new pair is fetched here, before rendering, so the page
+ * sees the signed-in user. Per-page auth stays in `requireUser()`.
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect Admin routes. The design preview is exempt only in development; the
@@ -29,7 +37,24 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.next();
+  let tokens: TokenPair | null = null;
+  let sessionEnded = false;
+  const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
+  if (refreshToken && isExpired(request.cookies.get(ACCESS_COOKIE)?.value)) {
+    tokens = await refreshTokens(refreshToken);
+    sessionEnded = !tokens;
+    // Make the outcome visible to server components rendering this same request
+    if (tokens) request.cookies.set(ACCESS_COOKIE, tokens.accessToken);
+    else request.cookies.delete([ACCESS_COOKIE, REFRESH_COOKIE, SESSION_COOKIE]);
+  }
+
+  const response = NextResponse.next({ request: { headers: request.headers } });
+  if (tokens) {
+    setTokenCookies(response, tokens);
+  } else if (sessionEnded) {
+    clearTokenCookies(response);
+    response.cookies.delete(SESSION_COOKIE);
+  }
 
   // SAMEORIGIN (not DENY) so the admin Seek Showcase page can preview the home page in an iframe;
   // other sites still cannot frame SeekFactory

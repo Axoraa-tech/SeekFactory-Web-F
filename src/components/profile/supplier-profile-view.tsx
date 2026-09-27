@@ -18,7 +18,6 @@ import {
   Package,
   Film,
   FileCheck,
-  Star,
   CheckCircle2,
   Lock,
   Sparkles,
@@ -42,6 +41,8 @@ import type { FactoryCertificate } from "@/entities/factory-certificate";
 import { CertificateLightboxModal } from "@/components/profile/certificate-lightbox-modal";
 import { AlibabaCertSection } from "@/components/profile/alibaba-cert-section";
 import { cn } from "@/shared/lib/cn";
+import { useFollow } from "@/features/engagement/use-engagement";
+import { PLACEHOLDER_IMAGE } from "@/shared/api/http-api";
 
 
 type Props = {
@@ -49,6 +50,12 @@ type Props = {
   products: Product[];
   reels: Reel[];
   allManufacturers: Manufacturer[];
+  /** Certification names the factory declared; empty shows the empty state. */
+  certifications: string[];
+  responseRatePercent: number | null;
+  avgResponseTimeHours: number | null;
+  /** Undefined for guests. */
+  followedByMe?: boolean;
 };
 
 export function SupplierProfileView({
@@ -56,62 +63,38 @@ export function SupplierProfileView({
   products,
   reels,
   allManufacturers,
+  certifications,
+  responseRatePercent,
+  avgResponseTimeHours,
+  followedByMe,
 }: Props) {
   const [activeTab, setActiveTab] = useState<"products" | "videos" | "about">("products");
-  const [isFollowing, setIsFollowing] = useState(false);
+  const { following: isFollowing, followerCount, toggleFollow } = useFollow(
+    manufacturer.id,
+    followedByMe,
+    manufacturer.followerCount,
+  );
   const [copiedLink, setCopiedLink] = useState(false);
   const [inspectingCert, setInspectingCert] = useState<FactoryCertificate | null>(null);
   const { isSupplierLocked, upgradeTier, openUpgradeModal, pricing } = useBuyerPlan();
 
+  // Certificates with documents (seller hub) when present; otherwise the names the factory declared.
+  // Declared names carry no document, so they are shown unverified and are not inspectable.
   const displayCertificates: FactoryCertificate[] =
     manufacturer.certificates && manufacturer.certificates.length > 0
       ? manufacturer.certificates
-      : [
-          {
-            id: "cert-iso-9001",
-            title: "ISO 9001:2015 Quality Management",
-            issuer: "TUV Rheinland Certification Body",
-            certNumber: "TUV-QM-984210-IN",
-            issueDate: "2023-04-12",
-            expiryDate: "2026-04-11",
-            imageUrl: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=1200&q=80",
-            verified: true,
-            category: "Quality",
-          },
-          {
-            id: "cert-ce-machinery",
-            title: "CE Conformity - Machinery Directive 2006/42/EC",
-            issuer: "Eurofins Product Testing EU",
-            certNumber: "CE-EU-448102-M",
-            issueDate: "2022-09-18",
-            expiryDate: "2027-09-17",
-            imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80",
-            verified: true,
-            category: "Safety & CE",
-          },
-          {
-            id: "cert-rohs",
-            title: "RoHS 2011/65/EU Environmental Compliance",
-            issuer: "SGS Global Standards Authority",
-            certNumber: "SGS-ROHS-77219",
-            issueDate: "2023-01-15",
-            expiryDate: "2026-01-14",
-            imageUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80",
-            verified: true,
-            category: "Environmental",
-          },
-          {
-            id: "cert-tuv-audit",
-            title: "TUV On-Site Gold Factory Audit & Capacity Verification",
-            issuer: "TUV Rheinland Global Inspection",
-            certNumber: "TUV-FAC-2024-889",
-            issueDate: "2024-02-10",
-            expiryDate: "2027-02-09",
-            imageUrl: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80",
-            verified: true,
-            category: "Audit Report",
-          },
-        ];
+      : certifications.map((name) => ({
+          id: name,
+          title: name,
+          issuer: "",
+          certNumber: "",
+          imageUrl: PLACEHOLDER_IMAGE,
+          verified: false,
+        }));
+  const hasDocuments = Boolean(manufacturer.certificates?.length);
+  const certificationNames = displayCertificates.map((c) => c.title);
+  const isoCertified = certificationNames.some((name) => /iso\s*9001/i.test(name));
+  const established = manufacturer.yearsEstablished > 0 ? manufacturer.yearsEstablished : null;
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -251,14 +234,18 @@ export function SupplierProfileView({
 
           {/* Floating Badges on Cover */}
           <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-amber-400 border border-white/10 shadow-xs">
-              <Award className="h-3.5 w-3.5" />
-              Verified OEM Manufacturer
-            </span>
-            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white/90 border border-white/10 shadow-xs">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-              ISO 9001 Audited
-            </span>
+            {manufacturer.verified && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-amber-400 border border-white/10 shadow-xs">
+                <Award className="h-3.5 w-3.5" />
+                Verified OEM Manufacturer
+              </span>
+            )}
+            {isoCertified && (
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white/90 border border-white/10 shadow-xs">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                ISO 9001 Certified
+              </span>
+            )}
           </div>
 
           <div className="absolute top-4 right-4 flex items-center gap-2">
@@ -307,17 +294,21 @@ export function SupplierProfileView({
                 <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-slate-600 font-medium">
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                    {manufacturer.location}, {manufacturer.country}
+                    {[manufacturer.location, manufacturer.country].filter(Boolean).join(", ")}
                   </span>
+                  {established && (
+                    <>
+                      <span>•</span>
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                        Est. {established} ({new Date().getFullYear() - established} yrs)
+                      </span>
+                    </>
+                  )}
                   <span>•</span>
-                  <span className="inline-flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                    Est. {manufacturer.yearsEstablished} ({new Date().getFullYear() - manufacturer.yearsEstablished} yrs)
-                  </span>
-                  <span>•</span>
-                  <span className="inline-flex items-center gap-1 text-amber-600 font-semibold">
-                    <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-                    4.9 / 5.0 (140+ reviews)
+                  <span className="inline-flex items-center gap-1 text-slate-700 font-semibold">
+                    <Users className="h-3.5 w-3.5 text-slate-400" />
+                    {followerCount.toLocaleString()} {followerCount === 1 ? "follower" : "followers"}
                   </span>
                 </p>
               </div>
@@ -325,22 +316,24 @@ export function SupplierProfileView({
 
             {/* Header Action Buttons */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 pt-2 md:pt-0">
-              {/* Official Seller Website */}
-              <a
-                href={manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
-                title="Visit Official Seller Website"
-              >
-                <Globe2 className="h-4 w-4 text-brand-blue group-hover:text-white transition-colors" />
-                <span>Visit Website</span>
-                <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100" />
-              </a>
+              {/* Official Seller Website (only when the factory gave one) */}
+              {manufacturer.websiteUrl && (
+                <a
+                  href={manufacturer.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
+                  title="Visit Official Seller Website"
+                >
+                  <Globe2 className="h-4 w-4 text-brand-blue group-hover:text-white transition-colors" />
+                  <span>Visit Website</span>
+                  <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100" />
+                </a>
+              )}
 
               <button
                 type="button"
-                onClick={() => setIsFollowing((v) => !v)}
+                onClick={toggleFollow}
                 className={cn(
                   "inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-bold transition-all border shadow-2xs active:scale-95",
                   isFollowing
@@ -385,7 +378,7 @@ export function SupplierProfileView({
               <Building2 className="h-4 w-4 text-brand-blue shrink-0" />
               <div>
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Plant Area</p>
-                <p className="font-bold text-slate-800">{manufacturer.factorySize}</p>
+                <p className="font-bold text-slate-800">{manufacturer.factorySize || "—"}</p>
               </div>
             </div>
 
@@ -393,7 +386,7 @@ export function SupplierProfileView({
               <Users className="h-4 w-4 text-brand-blue shrink-0" />
               <div>
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Workforce</p>
-                <p className="font-bold text-slate-800">{manufacturer.employees} Employees</p>
+                <p className="font-bold text-slate-800">{manufacturer.employees ? `${manufacturer.employees} Employees` : "—"}</p>
               </div>
             </div>
 
@@ -401,7 +394,7 @@ export function SupplierProfileView({
               <Globe2 className="h-4 w-4 text-brand-blue shrink-0" />
               <div>
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Exports To</p>
-                <p className="font-bold text-slate-800 truncate">{manufacturer.exportCountries.slice(0, 3).join(", ")}</p>
+                <p className="font-bold text-slate-800 truncate">{manufacturer.exportCountries.slice(0, 3).join(", ") || "—"}</p>
               </div>
             </div>
 
@@ -409,7 +402,11 @@ export function SupplierProfileView({
               <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
               <div>
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Response Rate</p>
-                <p className="font-bold text-emerald-600">98.4% (&lt; 2h)</p>
+                <p className="font-bold text-emerald-600">
+                  {responseRatePercent === null
+                    ? "No RFQs yet"
+                    : `${responseRatePercent}%${avgResponseTimeHours !== null ? ` (~${Math.max(1, Math.round(avgResponseTimeHours))}h)` : ""}`}
+                </p>
               </div>
             </div>
           </div>
@@ -469,7 +466,7 @@ export function SupplierProfileView({
               <FileCheck className="h-4 w-4" />
               <span>Overview & Audits</span>
               <span className="rounded-full bg-slate-100 text-slate-700 px-2 py-0.5 text-xs font-semibold">
-                {displayCertificates.length} Verified
+                {displayCertificates.length} {displayCertificates.length === 1 ? "Certification" : "Certifications"}
               </span>
             </button>
           </div>
@@ -524,6 +521,7 @@ export function SupplierProfileView({
                     {/* Integrated Commerce Action Bar (Price, Buy Now Red, Add to Cart Orange, Chat) */}
                     <div className="p-4 pt-1 border-t border-slate-100 bg-slate-50/50">
                       <ProductActionBar
+                        productId={product.id}
                         priceInr={product.priceInr}
                         unit={product.unit}
                         moq={product.moq}
@@ -557,7 +555,8 @@ export function SupplierProfileView({
                       key={reel.id}
                       reel={reel}
                       manufacturer={manufacturer}
-                      productSlug={products[0]?.slug}
+                      product={products.find((p) => reel.productIds.includes(p.id))}
+                      followingManufacturer={followedByMe}
                     />
                   ))}
                 </div>
@@ -577,16 +576,18 @@ export function SupplierProfileView({
                       Managing Director / Chairman: <strong className="text-slate-900">{manufacturer.chairmanName}</strong>
                     </p>
                   )}
-                  <a
-                    href={manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
-                  >
-                    <Globe2 className="h-3.5 w-3.5" />
-                    <span>Official Factory Website: {manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                  {manufacturer.websiteUrl && (
+                    <a
+                      href={manufacturer.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
+                    >
+                      <Globe2 className="h-3.5 w-3.5" />
+                      <span>Official Factory Website: {manufacturer.websiteUrl}</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
                 </div>
               </Card>
 
@@ -596,19 +597,17 @@ export function SupplierProfileView({
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between border-b border-slate-100 pb-1.5">
                       <span className="text-slate-500">Factory Floor Space</span>
-                      <span className="font-semibold text-slate-800">{manufacturer.factorySize}</span>
+                      <span className="font-semibold text-slate-800">{manufacturer.factorySize || "—"}</span>
                     </div>
                     <div className="flex justify-between border-b border-slate-100 pb-1.5">
                       <span className="text-slate-500">Full-Time Staff</span>
-                      <span className="font-semibold text-slate-800">{manufacturer.employees}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Years in Operation</span>
-                      <span className="font-semibold text-slate-800">{new Date().getFullYear() - manufacturer.yearsEstablished} Years</span>
+                      <span className="font-semibold text-slate-800">{manufacturer.employees || "—"}</span>
                     </div>
                     <div className="flex justify-between pb-1">
-                      <span className="text-slate-500">Customization</span>
-                      <span className="font-semibold text-brand-blue">Full OEM & ODM Supported</span>
+                      <span className="text-slate-500">Years in Operation</span>
+                      <span className="font-semibold text-slate-800">
+                        {established ? `${new Date().getFullYear() - established} Years` : "—"}
+                      </span>
                     </div>
                   </div>
                 </Card>
@@ -618,19 +617,19 @@ export function SupplierProfileView({
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between border-b border-slate-100 pb-1.5">
                       <span className="text-slate-500">Main Export Markets</span>
-                      <span className="font-semibold text-slate-800">{manufacturer.exportCountries.join(", ")}</span>
+                      <span className="font-semibold text-slate-800">{manufacturer.exportCountries.join(", ") || "—"}</span>
                     </div>
                     <div className="flex justify-between border-b border-slate-100 pb-1.5">
                       <span className="text-slate-500">Quality Certifications</span>
-                      <span className="font-semibold text-emerald-600">ISO 9001:2015, CE Certified</span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Inspection Standard</span>
-                      <span className="font-semibold text-slate-800">100% Pre-Shipment QA</span>
+                      <span className="font-semibold text-emerald-600 text-right">
+                        {certificationNames.length ? certificationNames.join(", ") : "None listed"}
+                      </span>
                     </div>
                     <div className="flex justify-between pb-1">
-                      <span className="text-slate-500">Audit Status</span>
-                      <span className="font-semibold text-slate-800">Verified On-Site</span>
+                      <span className="text-slate-500">Verification</span>
+                      <span className="font-semibold text-slate-800">
+                        {manufacturer.verified ? "Approved by SeekFactory" : "Pending review"}
+                      </span>
                     </div>
                   </div>
                 </Card>
@@ -642,7 +641,7 @@ export function SupplierProfileView({
                   certificates={displayCertificates}
                   manufacturer={manufacturer}
                   isOwner={false}
-                  onInspect={(cert) => setInspectingCert(cert)}
+                  onInspect={hasDocuments ? (cert) => setInspectingCert(cert) : undefined}
                 />
               </div>
             </div>

@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_URL?.replace("localhost", "127.0.0.1") || "http://127.0.0.1:8080";
+import {
+  ACCESS_COOKIE,
+  BACKEND_URL,
+  REFRESH_COOKIE,
+  clearTokenCookies,
+  readTokenPair,
+  refreshTokens,
+  setTokenCookies,
+  type TokenPair,
+} from "@/features/auth/auth-tokens";
 
 const HOP_BY_HOP_HEADERS = [
   "host",
@@ -14,6 +22,9 @@ const HOP_BY_HOP_HEADERS = [
   "content-length",
 ];
 
+/** Endpoints whose response carries a fresh token pair. */
+const TOKEN_ISSUING_PATHS = ["auth/login", "auth/login/phone", "auth/register", "auth/refresh"];
+
 async function handleProxy(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
     const resolvedParams = await params;
@@ -25,28 +36,52 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     // Hop-by-hop / connection-level headers must not be forwarded. Node's fetch rejects
     // `expect` (curl sends `Expect: 100-continue` for bodies > 1MB) and recomputes length.
     for (const name of HOP_BY_HOP_HEADERS) headers.delete(name);
+    // Credentials come only from our HttpOnly cookies, never from the browser
+    headers.delete("authorization");
+    headers.delete("cookie");
+    // Server-to-server call: a forwarded browser Origin would make Spring apply CORS and 403
+    // any web host missing from its allowed-origins list
+    headers.delete("origin");
 
-    // Add Authorization header from HttpOnly cookie
-    const token = req.cookies.get("sf-access-token")?.value;
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
+    const hasBody = req.method !== "GET" && req.method !== "HEAD" && req.body !== null;
+    const isMultipart = (req.headers.get("content-type") || "").startsWith("multipart/");
+    // JSON bodies are small: buffer them so the request can be replayed after a token refresh.
+    // Uploads are streamed so 100MB seek videos don't sit in Next.js memory, and are not replayed.
+    const bufferedBody = hasBody && !isMultipart ? await req.arrayBuffer() : undefined;
 
-    const init: RequestInit & { duplex?: "half" } = {
-      method: req.method,
-      headers,
-      // Abort the upstream call when the browser goes away (e.g. a closed chat's SSE stream),
-      // otherwise long-lived backend streams would leak.
-      signal: req.signal,
+    const send = (token: string | undefined) => {
+      const outgoing = new Headers(headers);
+      if (token) outgoing.set("Authorization", `Bearer ${token}`);
+      const init: RequestInit & { duplex?: "half" } = {
+        method: req.method,
+        headers: outgoing,
+        // Abort the upstream call when the browser goes away (e.g. a closed chat's SSE stream),
+        // otherwise long-lived backend streams would leak.
+        signal: req.signal,
+      };
+      if (bufferedBody) {
+        init.body = bufferedBody;
+      } else if (hasBody) {
+        init.body = req.body;
+        init.duplex = "half";
+      }
+      return fetch(url, init);
     };
 
-    if (req.method !== "GET" && req.method !== "HEAD" && req.body) {
-      // Stream instead of buffering so 100MB seek uploads don't sit in Next.js memory.
-      init.body = req.body;
-      init.duplex = "half";
-    }
+    let refreshed: TokenPair | null = null;
+    let sessionEnded = false;
+    let backendRes = await send(req.cookies.get(ACCESS_COOKIE)?.value);
 
-    const backendRes = await fetch(url, init);
+    // Expired access token: refresh once and replay the request
+    const refreshToken = req.cookies.get(REFRESH_COOKIE)?.value;
+    if (backendRes.status === 401 && refreshToken && !TOKEN_ISSUING_PATHS.some((p) => path.endsWith(p))) {
+      refreshed = await refreshTokens(refreshToken);
+      if (refreshed && (!hasBody || bufferedBody)) {
+        backendRes = await send(refreshed.accessToken);
+      } else if (!refreshed) {
+        sessionEnded = true;
+      }
+    }
 
     // Copy headers and status from backend
     const responseHeaders = new Headers(backendRes.headers);
@@ -57,28 +92,17 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
       headers: responseHeaders,
     });
 
-    // Intercept auth endpoints to manage HttpOnly cookie
-    if (backendRes.ok && (path.endsWith("auth/login") || path.endsWith("auth/login/phone") || path.endsWith("auth/register"))) {
+    if (backendRes.ok && TOKEN_ISSUING_PATHS.some((p) => path.endsWith(p))) {
       try {
-        const clone = response.clone();
-        const data = await clone.json();
-        
-        const tokenStr = data?.data?.accessToken || data?.data?.access_token;
-        if (tokenStr) {
-          response.cookies.set({
-            name: "sf-access-token",
-            value: tokenStr,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/"
-          });
-        }
+        const tokens = readTokenPair(await response.clone().json());
+        if (tokens) setTokenCookies(response, tokens);
       } catch (e) {
         console.error("Failed to parse auth response in proxy", e);
       }
-    } else if (backendRes.ok && path.endsWith("auth/logout")) {
-      response.cookies.delete("sf-access-token");
+    } else if (path.endsWith("auth/logout") || sessionEnded) {
+      clearTokenCookies(response);
+    } else if (refreshed) {
+      setTokenCookies(response, refreshed);
     }
 
     return response;

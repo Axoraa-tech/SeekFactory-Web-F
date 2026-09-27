@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { VerifiedManufacturersSection } from "@/features/explore/verified-manufacturers-section";
-import type { Category } from "@/entities/category";
 import { getApi } from "@/shared/api";
+import { buildCategoryTree } from "@/features/categories/category-tree";
 import { formatPriceInr } from "@/shared/lib/format";
 import { Package, ShieldCheck } from "lucide-react";
 
@@ -16,27 +16,18 @@ type Props = {
 export default async function ExplorePage({ searchParams }: Props) {
   const { q = "", category = "", sub = "" } = await searchParams;
   const api = getApi();
-  const [roots, allCategories, manufacturers, products] = await Promise.all([
-    api.categories.listRoots(),
-    api.categories.list(),
-    api.manufacturers.listAll(),
-    api.products.listTrending(50),
-  ]);
+  const { roots, childrenByRoot } = buildCategoryTree(await api.categories.list());
 
   const selectedRoot = roots.find((item) => item.slug === category) ?? null;
-  const children = selectedRoot ? await api.categories.listChildren(selectedRoot.id) : [];
+  const children = selectedRoot ? childrenByRoot[selectedRoot.id] ?? [] : [];
   const selectedSub = children.find((item) => item.slug === sub) ?? null;
   const selected = selectedSub ?? selectedRoot;
-  const query = q.trim().toLowerCase();
 
-  const visibleManufacturers = manufacturers.filter((item) => {
-    const matchesQuery = !query || item.name.toLowerCase().includes(query);
-    return matchesQuery && matchesAssigned(item.categoryIds, selected, allCategories);
-  });
-
-  const visibleProducts = products.filter((item) => {
-    const matchesQuery = !query || item.name.toLowerCase().includes(query);
-    return matchesQuery && matchesAssigned([item.categoryId], selected, allCategories);
+  // The backend searches name/description/location and includes every subcategory of the selection
+  const { manufacturers: visibleManufacturers, products: visibleProducts } = await api.search.query({
+    q: q.trim(),
+    category: selected?.id ?? "",
+    limit: 60,
   });
 
   return (
@@ -126,7 +117,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                     <p className="font-bold text-xs sm:text-sm text-ink group-hover:text-brand-blue transition line-clamp-1">
                       {product.name}
                     </p>
-                    <p className="text-[11px] text-neutral-500 mt-0.5">MOQ: 1 Set • Fast Lead Time</p>
+                    {product.moq ? <p className="text-[11px] text-neutral-500 mt-0.5">MOQ: {product.moq}</p> : null}
                   </div>
                   <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
                     <p className="text-xs sm:text-sm font-bold text-brand-orange">
@@ -156,53 +147,3 @@ export default async function ExplorePage({ searchParams }: Props) {
     </section>
   );
 }
-
-const PARENT_ALIASES: Record<string, string[]> = {
-  "cat-agricultural-machinery": ["cat-agriculture"],
-  "cat-agriculture": ["cat-agricultural-machinery"],
-  "cat-food-processing-machinery": ["cat-food-and-beverage-processing"],
-  "cat-food-and-beverage-processing": ["cat-food-processing-machinery"],
-  "cat-fashion-machinery": ["cat-textile-and-leather-manufacturing"],
-  "cat-textile-and-leather-manufacturing": ["cat-fashion-machinery"],
-  "cat-engineering-capital-machinery": ["cat-construction", "cat-machine-tools"],
-  "cat-construction": ["cat-engineering-capital-machinery"],
-  "cat-machine-tools": ["cat-engineering-capital-machinery"],
-  "cat-renewable-energy-machinery": ["cat-energy"],
-  "cat-energy": ["cat-renewable-energy-machinery"],
-  "cat-transaportation-machinery": ["cat-transportation-and-trailers"],
-  "cat-transportation-and-trailers": ["cat-transaportation-machinery"],
-  "cat-healthcare-machinery": ["cat-test-lab-medical-equipment"],
-  "cat-test-lab-medical-equipment": ["cat-healthcare-machinery", "cat-pharmaceutical-machinery"],
-  "cat-packaging-machinery": ["cat-processing"],
-  "cat-processing": ["cat-packaging-machinery"],
-  "cat-electronics-manufacturing-machinery": ["cat-semiconductors", "cat-industrial-automation"],
-  "cat-robots": ["cat-industrial-automation"],
-};
-
-function matchesAssigned(
-  assignedIds: string[],
-  selected: Category | null,
-  all: Category[],
-): boolean {
-  if (!selected) return true;
-  if (assignedIds.includes(selected.id)) return true;
-
-  // Root category selected: match products belonging to any child or alias parent
-  if (selected.parentId === null) {
-    const matchingParents = new Set([selected.id, ...(PARENT_ALIASES[selected.id] || [])]);
-    const childIds = all
-      .filter((item) => item.parentId && matchingParents.has(item.parentId))
-      .map((item) => item.id);
-    return assignedIds.some((id) => matchingParents.has(id) || childIds.includes(id));
-  }
-
-  // Subcategory selected: direct match or parent category match
-  const parentId = selected.parentId;
-  if (parentId) {
-    const matchingParents = new Set([parentId, ...(PARENT_ALIASES[parentId] || [])]);
-    if (assignedIds.some((id) => matchingParents.has(id))) return true;
-  }
-
-  return false;
-}
-

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Conversation } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { getApi } from "@/shared/api";
+import { formatRelativeTime } from "@/shared/lib/format";
 
 type MessagesDropdownProps = {
   initialCount: number;
@@ -138,7 +139,7 @@ export function MessagesDropdown({
                         {item.manufacturer.name}
                       </p>
                       <span className="text-[10px] text-ink-faint shrink-0 ml-2">
-                        {item.lastMessageAt}
+                        {formatRelativeTime(item.lastMessageAt)}
                       </span>
                     </div>
                     <p

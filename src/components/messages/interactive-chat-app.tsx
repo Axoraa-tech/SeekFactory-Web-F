@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Conversation } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
-import type { ChatMessage, ThreadWithMessages } from "./chat-types";
+import type { ChatMessage, ThreadWithMessages, ChatAttachment } from "./chat-types";
 import { ChatThreadList } from "./chat-thread-list";
 import { ChatConversationPane } from "./chat-conversation-pane";
 import { getApi } from "@/shared/api";
@@ -26,6 +26,8 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
   });
 
   const [selectedThreadId, setSelectedThreadId] = useState<string>(() => {
+    const conversationId = searchParams.get("conversation");
+    if (conversationId && initialThreads.some((t) => t.id === conversationId)) return conversationId;
     if (withSlug) {
       const found = initialThreads.find((t) => t.manufacturer.slug === withSlug);
       if (found) return found.id;
@@ -35,7 +37,9 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
 
   const [searchQuery, setSearchQuery] = useState("");
   const [inputMessage, setInputMessage] = useState("");
-  const [attachedFile, setAttachedFile] = useState<{ name: string; size: string } | null>(null);
+  const [attachedFile, setAttachedFile] = useState<ChatAttachment | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [mobileShowChat, setMobileShowChat] = useState(Boolean(withSlug));
 
@@ -61,20 +65,14 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
         setThreads((prev) =>
           prev.map((t) => {
             if (t.id === selectedThreadId) {
-              const finalMessages: ChatMessage[] = msgs.length > 0 ? msgs.map((m) => ({
+              // Only real messages; a new conversation starts empty with the quick prompts
+              const finalMessages: ChatMessage[] = msgs.map((m) => ({
                 id: m.id,
                 sender: m.sender,
                 text: m.text,
                 time: m.time,
                 attachment: m.attachment,
-              })) : [
-                {
-                  id: `welcome-${t.id}`,
-                  sender: "factory",
-                  text: `Hello! Welcome to ${t.manufacturer.name}. We specialize in precision engineering and OEM manufacturing. How can we assist your production requirement?`,
-                  time: "Just now",
-                },
-              ];
+              }));
               return { ...t, messages: finalMessages };
             }
             return t;
@@ -230,6 +228,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
     const fileToSend = attachedFile;
     setInputMessage("");
     setAttachedFile(null);
+    setChatError(null);
 
     try {
       // Send real message to backend
@@ -245,28 +244,44 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
           if (t.id === currentThreadId) {
             return {
               ...t,
-              messages: t.messages.map((m) => (m.id === tempId ? {
-                id: savedMsg.id,
-                sender: savedMsg.sender,
-                text: savedMsg.text,
-                time: savedMsg.time,
-                attachment: savedMsg.attachment,
-              } : m)),
+              // The live stream may already have delivered the saved message; then drop the placeholder
+              messages: t.messages.some((m) => m.id === savedMsg.id)
+                ? t.messages.filter((m) => m.id !== tempId)
+                : t.messages.map((m) => (m.id === tempId ? {
+                    id: savedMsg.id,
+                    sender: savedMsg.sender,
+                    text: savedMsg.text,
+                    time: savedMsg.time,
+                    attachment: savedMsg.attachment,
+                  } : m)),
             };
           }
           return t;
         })
       );
     } catch (err) {
-      console.error("Failed to send message:", err);
+      // Take the unsent message back out and keep the text so the buyer can retry
+      setThreads((prev) =>
+        prev.map((t) => (t.id === currentThreadId ? { ...t, messages: t.messages.filter((m) => m.id !== tempId) } : t))
+      );
+      setInputMessage(textToSend);
+      setAttachedFile(fileToSend);
+      setChatError(err instanceof Error ? err.message : "Message not sent. Please try again.");
     }
   };
 
-  const handleAttachMockFile = () => {
-    setAttachedFile({
-      name: "RFQ-Technical-Drawing-rev2.dwg",
-      size: "2.4 MB",
-    });
+  const handleAttachFile = async (file: File) => {
+    setUploading(true);
+    setChatError(null);
+    try {
+      const uploaded = await getApi().media.upload(file, file.type.startsWith("image/") ? "image" : "document");
+      const size = file.size >= 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(file.size / 1024))} KB`;
+      setAttachedFile({ name: file.name, size, url: uploaded.url });
+    } catch (err) {
+      setChatError(err instanceof Error ? err.message : "Could not upload the file");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const quickInquiries = [
@@ -305,7 +320,9 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
           onSendMessage={handleSendMessage}
           attachedFile={attachedFile}
           onClearAttachment={() => setAttachedFile(null)}
-          onAttachMockFile={handleAttachMockFile}
+          onAttachFile={handleAttachFile}
+          uploading={uploading}
+          error={chatError}
           inputMessage={inputMessage}
           onInputChange={setInputMessage}
         />

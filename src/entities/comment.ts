@@ -8,6 +8,7 @@ export type ReelCommentReply = {
   content: string;
   createdAt: string;
   likes: number;
+  likedByMe?: boolean;
 };
 
 export type ReelComment = {
@@ -21,5 +22,6 @@ export type ReelComment = {
   content: string;
   createdAt: string;
   likes: number;
+  likedByMe?: boolean;
   replies: ReelCommentReply[];
 };

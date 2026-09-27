@@ -12,14 +12,3 @@ export type ProfileFormData = {
   taxId: string;
   address: string;
 };
-
-export type ProfileRfq = {
-  id: string;
-  title: string;
-  category: string;
-  targetQty: string;
-  targetPrice: string;
-  status: string;
-  statusColor: string;
-  date: string;
-};

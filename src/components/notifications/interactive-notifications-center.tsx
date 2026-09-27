@@ -18,6 +18,8 @@ import { cn } from "@/shared/lib/cn";
 import type { AppNotification } from "@/entities/notification";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { getApi } from "@/shared/api";
+import { formatRelativeTime } from "@/shared/lib/format";
+import { notificationHref } from "@/features/notifications/notification-links";
 
 type Props = {
   initialNotifications: AppNotification[];
@@ -36,63 +38,73 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
     setTimeout(() => setToastMessage(null), 2400);
   };
 
-  const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    showToast("All notifications marked as read");
-    getApi().notifications.markAllAsRead().catch(() => {});
+  /** Optimistic update that is rolled back if the backend call fails. */
+  const optimistic = async (next: AppNotification[], request: () => Promise<unknown>, success?: string) => {
+    const previous = notifications;
+    setNotifications(next);
+    try {
+      await request();
+      if (success) showToast(success);
+    } catch (err) {
+      setNotifications(previous);
+      showToast(err instanceof Error ? err.message : "Could not update notifications");
+    }
   };
 
-  const handleClearAll = () => {
-    setNotifications([]);
-    showToast("All notifications cleared");
-    getApi().notifications.markAllAsRead().catch(() => {});
-  };
+  const handleMarkAllRead = () =>
+    optimistic(
+      notifications.map((n) => ({ ...n, read: true })),
+      () => getApi().notifications.markAllAsRead(),
+      "All notifications marked as read",
+    );
+
+  const handleClearAll = () =>
+    optimistic(
+      [],
+      () => Promise.all(notifications.map((n) => getApi().notifications.deleteNotification(n.id))),
+      "All notifications cleared",
+    );
 
   const handleToggleRead = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n))
+    const target = notifications.find((n) => n.id === id);
+    if (!target || target.read) return; // there is no "mark unread" on the server
+    void optimistic(
+      notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+      () => getApi().notifications.markAsRead(id),
     );
-    getApi().notifications.markAsRead(id).catch(() => {});
   };
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    showToast("Notification removed");
-    getApi().notifications.deleteNotification(id).catch(() => {});
+    void optimistic(
+      notifications.filter((n) => n.id !== id),
+      () => getApi().notifications.deleteNotification(id),
+      "Notification removed",
+    );
   };
 
-  // Filter based on tab
+  // Filter based on tab, using the notification type the backend assigns
   const filteredNotifications = notifications.filter((n) => {
     if (activeTab === "unread") return !n.read;
-    if (activeTab === "quotes") return n.title.toLowerCase().includes("quote") || n.title.toLowerCase().includes("rfq") || n.body.toLowerCase().includes("sample") || n.body.toLowerCase().includes("shaft");
-    if (activeTab === "system") return n.title.toLowerCase().includes("system") || n.title.toLowerCase().includes("security") || n.title.toLowerCase().includes("welcome") || n.title.toLowerCase().includes("profile");
+    if (activeTab === "quotes") return n.type === "quote" || n.type === "rfq" || n.type === "order";
+    if (activeTab === "system") return n.type === "system" || n.type === "follow";
     return true;
   });
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const getNotificationIcon = (title: string) => {
-    const t = title.toLowerCase();
-    if (t.includes("quote") || t.includes("rfq") || t.includes("sample")) {
+  const getNotificationIcon = (n: AppNotification) => {
+    if (n.type === "quote" || n.type === "rfq" || n.type === "order") {
       return <FileSpreadsheet className="h-4 w-4 text-brand-orange" />;
     }
-    if (t.includes("message") || t.includes("chat")) {
+    if (n.type === "message") {
       return <MessageSquare className="h-4 w-4 text-brand-blue" />;
     }
-    if (t.includes("verified") || t.includes("factory")) {
+    if (n.type === "follow") {
       return <Building2 className="h-4 w-4 text-emerald-600" />;
     }
     return <ShieldCheck className="h-4 w-4 text-purple-600" />;
-  };
-
-  const getActionLink = (title: string, body: string) => {
-    const t = `${title} ${body}`.toLowerCase();
-    if (t.includes("quote") || t.includes("rfq")) return "/rfq/new";
-    if (t.includes("message") || t.includes("chat") || t.includes("shafts") || t.includes("sample")) return "/messages";
-    if (t.includes("factory") || t.includes("manufacturer")) return "/explore";
-    return "/profile";
   };
 
   return (
@@ -194,7 +206,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <span>Quotations & RFQs</span>
+          <span>Quotes, RFQs & Orders</span>
         </button>
 
         <button
@@ -228,7 +240,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
         ) : (
           filteredNotifications.map((item) => {
             const isUnread = !item.read;
-            const actionHref = getActionLink(item.title, item.body);
+            const actionHref = notificationHref(item);
 
             return (
               <div
@@ -247,7 +259,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                     isUnread ? "bg-white border-blue-200" : "bg-slate-50 border-slate-200"
                   )}
                 >
-                  {getNotificationIcon(item.title)}
+                  {getNotificationIcon(item)}
                 </div>
 
                 {/* Content */}
@@ -261,7 +273,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                         <span className="h-2 w-2 rounded-full bg-brand-blue shrink-0" />
                       )}
                     </div>
-                    <span className="text-[10px] text-slate-400 shrink-0 font-medium">{item.createdAt}</span>
+                    <span className="text-[10px] text-slate-400 shrink-0 font-medium">{formatRelativeTime(item.createdAt)}</span>
                   </div>
 
                   <p className="text-xs text-slate-600 mt-1 leading-relaxed">{item.body}</p>

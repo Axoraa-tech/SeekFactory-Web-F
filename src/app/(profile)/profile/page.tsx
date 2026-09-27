@@ -7,19 +7,23 @@ export const dynamic = "force-dynamic";
 export default async function ProfilePage() {
   const user = await requireUser("/profile");
   const api = getApi();
-  const [products, manufacturers, myRfqs] = await Promise.all([
-    api.products.listTrending(6),
-    api.manufacturers.listAll(),
+  const [savedProducts, savedSeeks, following, myRfqs, categories] = await Promise.all([
+    api.products.listSaved(),
+    api.feed.listSaved(),
+    api.manufacturers.listFollowing(),
     api.rfq.listMyRfqs(),
+    api.categories.list(),
   ]);
 
   return (
     <section className="space-y-4">
       <UserProfileDashboardLazy
         user={user}
-        initialProducts={products}
-        initialManufacturers={manufacturers}
+        initialSavedProducts={savedProducts}
+        initialSavedSeeks={savedSeeks}
+        initialFollowing={following}
         initialRfqs={myRfqs}
+        categories={categories}
       />
     </section>
   );

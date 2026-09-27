@@ -6,6 +6,8 @@ import { Bell, CheckCheck, ChevronRight, FileText, Video, Eye, UserCheck, Trendi
 import { Badge } from "@/components/ui/badge";
 import type { AppNotification } from "@/entities/notification";
 import { getApi } from "@/shared/api";
+import { formatRelativeTime } from "@/shared/lib/format";
+import { notificationHref } from "@/features/notifications/notification-links";
 
 type NotificationsDropdownProps = {
   initialCount: number;
@@ -122,7 +124,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
               notifications.map((item) => (
                 <Link
                   key={item.id}
-                  href="/notifications"
+                  href={notificationHref(item)}
                   onClick={() => setIsOpen(false)}
                   className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-slate-50 ${
                     !item.read ? "bg-blue-50/30" : ""
@@ -137,7 +139,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
                         {item.title}
                       </p>
                       <span className="text-[10px] text-ink-faint shrink-0 ml-2">
-                        {item.createdAt}
+                        {formatRelativeTime(item.createdAt)}
                       </span>
                     </div>
                     <p className="text-xs text-ink-muted mt-0.5 line-clamp-2 leading-relaxed">

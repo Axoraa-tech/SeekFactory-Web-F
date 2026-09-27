@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
 import type { ThreadWithMessages } from "./chat-types";
+import { formatRelativeTime } from "@/shared/lib/format";
 
 type Props = {
   threads: ThreadWithMessages[];
@@ -89,7 +90,7 @@ export function ChatThreadList({
                     )}
                   </div>
                   <span className="text-[10px] text-slate-400 shrink-0 font-medium">
-                    {thread.lastMessageAt}
+                    {formatRelativeTime(thread.lastMessageAt)}
                   </span>
                 </div>
 
@@ -99,8 +100,6 @@ export function ChatThreadList({
 
                 <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400 font-medium">
                   <span>{thread.manufacturer.country}</span>
-                  <span>•</span>
-                  <span className="text-emerald-600 font-semibold">Replies &lt; 2h</span>
                 </div>
               </div>
 

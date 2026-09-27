@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, Zap, MessageSquare, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingCart, Zap, MessageSquare, Check, FileText } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { getApi } from "@/shared/api";
+import { ApiError } from "@/shared/api/http-api";
+import { minimumOrderQuantity } from "@/shared/lib/quantity";
+import { useRequireSignIn } from "@/features/engagement/use-engagement";
 
 type ProductActionBarProps = {
+  /** Required for Order / Buy Now; without it only Chat and Request Quote are offered. */
+  productId?: string;
   priceInr?: number;
   unit?: string;
   moq?: string | number;
@@ -19,8 +26,9 @@ type ProductActionBarProps = {
 };
 
 export function ProductActionBar({
+  productId,
   priceInr,
-  unit = "Unit",
+  unit = "",
   moq,
   productSlug,
   manufacturerSlug,
@@ -30,28 +38,38 @@ export function ProductActionBar({
   className,
 }: ProductActionBarProps) {
   const { t, formatPrice } = useRegionalSettings();
+  const router = useRouter();
+  const requireSignIn = useRequireSignIn();
   const [isAdded, setIsAdded] = useState(false);
-  const [isBuying, setIsBuying] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const hasPrice = priceInr !== undefined && priceInr > 0;
+  const canOrder = Boolean(productId) && hasPrice;
+  const minQty = minimumOrderQuantity(moq);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    if (!productId || isAdding) return;
+    setIsAdding(true);
+    setError(null);
+    try {
+      await getApi().orders.addToCart(productId, minQty);
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2000);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) return requireSignIn();
+      setError(err instanceof Error ? err.message : "Could not add to cart");
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsBuying(true);
-    
-    setTimeout(() => {
-      setIsBuying(false);
-      if (manufacturerSlug && productSlug) {
-        window.location.href = `/messages?with=${manufacturerSlug}&action=buy&product=${productSlug}`;
-      } else {
-        window.location.href = productSlug ? `/products/${productSlug}?action=checkout` : "/rfq/new";
-      }
-    }, 400);
+    if (!productSlug) return;
+    router.push(`/checkout?product=${encodeURIComponent(productSlug)}&qty=${minQty}`);
   };
 
   const isSmall = size === "sm";
@@ -69,19 +87,25 @@ export function ProductActionBar({
       {showPrice && priceInr !== undefined && (
         <div className="min-w-0">
           <div className="flex items-baseline gap-1">
-            <span
-              className={cn(
-                "font-extrabold tracking-tight text-slate-900",
-                isSmall ? "text-sm" : isLarge ? "text-2xl" : "text-lg"
-              )}
-            >
-              {formatPrice(priceInr)}
-            </span>
-            <span className="text-xs text-slate-500 font-medium">/{unit}</span>
+            {hasPrice ? (
+              <>
+                <span
+                  className={cn(
+                    "font-extrabold tracking-tight text-slate-900",
+                    isSmall ? "text-sm" : isLarge ? "text-2xl" : "text-lg"
+                  )}
+                >
+                  {formatPrice(priceInr)}
+                </span>
+                {unit ? <span className="text-xs text-slate-500 font-medium">/{unit}</span> : null}
+              </>
+            ) : (
+              <span className={cn("font-bold text-slate-700", isSmall ? "text-xs" : "text-sm")}>Price on request</span>
+            )}
           </div>
-          {moq !== undefined && (
+          {moq !== undefined && moq !== "" && (
             <p className="text-[11px] text-slate-500 font-medium">
-              Min. order: <span className="font-semibold text-slate-700">{typeof moq === "number" ? `${moq} ${unit}s` : moq}</span>
+              Min. order: <span className="font-semibold text-slate-700">{typeof moq === "number" ? `${moq} ${unit}` : moq}</span>
             </p>
           )}
         </div>
@@ -108,45 +132,68 @@ export function ProductActionBar({
           <span>{t("common.chat", "Chat")}</span>
         </Link>
 
-        {/* 2. Add to Cart Button */}
-        <button
-          type="button"
-          onClick={handleAddToCart}
-          className={cn(
-            "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
-            "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
-            isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs",
-            isAdded && "from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
-          )}
-        >
-          {isAdded ? (
-            <>
-              <Check className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-              <span>{t("common.order", "Added")}</span>
-            </>
-          ) : (
-            <>
-              <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-              <span>{t("common.order", "Order")}</span>
-            </>
-          )}
-        </button>
+        {canOrder ? (
+          <>
+            {/* 2. Add to Cart Button */}
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={isAdding}
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap disabled:opacity-75",
+                "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
+                isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs",
+                isAdded && "from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              )}
+            >
+              {isAdded ? (
+                <>
+                  <Check className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
+                  <span>{t("common.added", "Added")}</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
+                  <span>{t("common.order", "Order")}</span>
+                </>
+              )}
+            </button>
 
-        {/* 3. Buy Now Button */}
-        <button
-          type="button"
-          disabled={isBuying}
-          onClick={handleBuyNow}
-          className={cn(
-            "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
-            "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 disabled:opacity-75",
-            isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs"
-          )}
-        >
-          <Zap className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "fill-white/80")} />
-          <span>{isBuying ? "Processing..." : t("common.buyNow", "Buy Now")}</span>
-        </button>
+            {/* 3. Buy Now Button */}
+            <button
+              type="button"
+              onClick={handleBuyNow}
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
+                "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 disabled:opacity-75",
+                isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs"
+              )}
+            >
+              <Zap className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "fill-white/80")} />
+              <span>{t("common.buyNow", "Buy Now")}</span>
+            </button>
+          </>
+        ) : (
+          /* No listed price: the factory quotes on request */
+          <Link
+            href={productSlug ? `/rfq/new?product=${productSlug}` : "/rfq/new"}
+            onClick={(e) => e.stopPropagation()}
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-blue hover:bg-brand-blue-dark",
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs"
+            )}
+          >
+            <FileText className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
+            <span>Request Quote</span>
+          </Link>
+        )}
       </div>
+
+      {error ? (
+        <p role="alert" className="text-[11px] font-semibold text-rose-600">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

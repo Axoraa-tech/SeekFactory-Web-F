@@ -14,6 +14,25 @@ import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { TrackProductView } from "@/features/analytics/track-product-view";
 import { getApi } from "@/shared/api";
 import { formatPriceInr } from "@/shared/lib/format";
+import { minimumOrderQuantity } from "@/shared/lib/quantity";
+import type { Product } from "@/entities/product";
+
+type PriceBand = { label: string; priceInr: number; savingPercent: number };
+
+/** Quantity bands from the factory's own price tiers; one band (the base price) when it set none. */
+function priceBands(product: Product): PriceBand[] {
+  const minQty = minimumOrderQuantity(product.moq);
+  const unit = product.unit ? ` ${product.unit}` : "";
+  const tiers = (product.priceTiers ?? []).filter((t) => t.minQty > minQty).sort((a, b) => a.minQty - b.minQty);
+  const starts = [{ minQty, priceInr: product.priceInr }, ...tiers];
+  return starts.map((band, i) => {
+    const next = starts[i + 1];
+    const label = next ? `${band.minQty} - ${next.minQty - 1}${unit}` : `${band.minQty}+${unit}`;
+    const savingPercent =
+      product.priceInr > 0 ? Math.round((100 * (product.priceInr - band.priceInr)) / product.priceInr) : 0;
+    return { label, priceInr: band.priceInr, savingPercent };
+  });
+}
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -30,15 +49,18 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const detail = await getApi().products.getBySlug(slug);
+  const api = getApi();
+  const [detail, categories] = await Promise.all([api.products.getBySlug(slug), api.categories.list()]);
   if (!detail) notFound();
   const { product, manufacturer } = detail;
 
-  // Calculate tiered bulk pricing
-  const basePrice = product.priceInr;
-  const tier1Price = basePrice;
-  const tier2Price = Math.round(basePrice * 0.92);
-  const tier3Price = Math.round(basePrice * 0.85);
+  const category = categories.find((c) => c.id === product.categoryId);
+  const parentCategory = category?.parentId ? categories.find((c) => c.id === category.parentId) : undefined;
+  const categoryHref = parentCategory
+    ? `/explore?category=${parentCategory.slug}&sub=${category?.slug}`
+    : `/explore?category=${category?.slug}`;
+  const hasPrice = product.priceInr > 0;
+  const bands = hasPrice ? priceBands(product) : [];
 
   return (
     <section className="space-y-6">
@@ -89,7 +111,8 @@ export default async function ProductPage({ params }: Props) {
                     {manufacturer.verified && <VerifiedBadge className="h-4 w-4 shrink-0" />}
                   </div>
                   <p className="text-xs text-slate-500 truncate">
-                    {manufacturer.location}, {manufacturer.country} • Est. {manufacturer.yearsEstablished}
+                    {[manufacturer.location, manufacturer.country].filter(Boolean).join(", ")}
+                    {manufacturer.yearsEstablished > 0 ? ` • Est. ${manufacturer.yearsEstablished}` : ""}
                   </p>
                 </div>
               </Link>
@@ -111,18 +134,12 @@ export default async function ProductPage({ params }: Props) {
               <span>Technical Specifications</span>
             </h3>
             <dl className="divide-y divide-slate-100 text-xs sm:text-sm">
-              <div className="flex justify-between py-2">
-                <dt className="text-slate-500 font-medium">Minimum Order Quantity (MOQ)</dt>
-                <dd className="font-bold text-slate-900">{product.moq} {product.unit}s</dd>
-              </div>
-              <div className="flex justify-between py-2">
-                <dt className="text-slate-500 font-medium">Delivery Lead Time</dt>
-                <dd className="font-bold text-slate-900">15 - 25 Days</dd>
-              </div>
-              <div className="flex justify-between py-2">
-                <dt className="text-slate-500 font-medium">Customization</dt>
-                <dd className="font-bold text-brand-blue">Custom Logo, Packaging & Graphics</dd>
-              </div>
+              {product.moq && (
+                <div className="flex justify-between py-2">
+                  <dt className="text-slate-500 font-medium">Minimum Order Quantity (MOQ)</dt>
+                  <dd className="font-bold text-slate-900">{product.moq}</dd>
+                </div>
+              )}
               {Object.entries(product.specs).map(([key, value]) => (
                 <div key={key} className="flex justify-between py-2">
                   <dt className="text-slate-500 font-medium">{key}</dt>
@@ -138,13 +155,24 @@ export default async function ProductPage({ params }: Props) {
           <Card className="p-6 border-slate-200/90 shadow-2xs space-y-5">
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded-md bg-brand-blue/10 px-2 py-0.5 text-xs font-semibold text-brand-blue">
-                  Industrial Machinery
-                </span>
-                <span className="text-xs text-slate-400">•</span>
-                <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" /> Ready to Order
-                </span>
+                {category && (
+                  <>
+                    <Link
+                      href={categoryHref}
+                      className="rounded-md bg-brand-blue/10 px-2 py-0.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue/15"
+                    >
+                      {category.name}
+                    </Link>
+                    <span className="text-xs text-slate-400">•</span>
+                  </>
+                )}
+                {hasPrice ? (
+                  <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" /> Ready to Order
+                  </span>
+                ) : (
+                  <span className="text-xs text-slate-500 font-semibold">Price on request</span>
+                )}
               </div>
               <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
                 {product.name}
@@ -154,44 +182,51 @@ export default async function ProductPage({ params }: Props) {
               </p>
             </div>
 
-            {/* Tiered Bulk Quantity Pricing Table */}
-            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
-                Bulk Wholesale Pricing
-              </p>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="rounded-xl bg-white p-2.5 border border-slate-200 shadow-2xs">
-                  <p className="text-[11px] text-slate-500 font-medium">{product.moq} - 9 {product.unit}s</p>
-                  <p className="mt-1 text-sm sm:text-base font-extrabold text-slate-900">
-                    {formatPriceInr(tier1Price)}
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-medium">Standard</p>
-                </div>
-
-                <div className="rounded-xl bg-white p-2.5 border border-brand-blue/30 shadow-2xs relative">
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-brand-blue px-1.5 py-0.2 text-[9px] font-bold text-white uppercase">
-                    Popular
-                  </span>
-                  <p className="text-[11px] text-slate-500 font-medium">10 - 49 {product.unit}s</p>
-                  <p className="mt-1 text-sm sm:text-base font-extrabold text-brand-blue">
-                    {formatPriceInr(tier2Price)}
-                  </p>
-                  <p className="text-[10px] text-emerald-600 font-bold">Save 8%</p>
-                </div>
-
-                <div className="rounded-xl bg-white p-2.5 border border-slate-200 shadow-2xs">
-                  <p className="text-[11px] text-slate-500 font-medium">50+ {product.unit}s</p>
-                  <p className="mt-1 text-sm sm:text-base font-extrabold text-slate-900">
-                    {formatPriceInr(tier3Price)}
-                  </p>
-                  <p className="text-[10px] text-emerald-600 font-bold">Save 15%</p>
+            {/* Tiered Bulk Quantity Pricing Table (the factory's own price breaks) */}
+            {bands.length > 0 && (
+              <div className="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
+                  {bands.length > 1 ? "Bulk Wholesale Pricing" : "Wholesale Price"}
+                </p>
+                <div
+                  className={
+                    bands.length === 1 ? "grid grid-cols-1 gap-2 text-center" : `grid gap-2 text-center ${bands.length === 2 ? "grid-cols-2" : "grid-cols-3"}`
+                  }
+                >
+                  {bands.slice(0, 3).map((band, index) => (
+                    <div
+                      key={band.label}
+                      className={
+                        index === 1
+                          ? "rounded-xl bg-white p-2.5 border border-brand-blue/30 shadow-2xs"
+                          : "rounded-xl bg-white p-2.5 border border-slate-200 shadow-2xs"
+                      }
+                    >
+                      <p className="text-[11px] text-slate-500 font-medium">{band.label}</p>
+                      <p
+                        className={
+                          index === 1
+                            ? "mt-1 text-sm sm:text-base font-extrabold text-brand-blue"
+                            : "mt-1 text-sm sm:text-base font-extrabold text-slate-900"
+                        }
+                      >
+                        {formatPriceInr(band.priceInr)}
+                      </p>
+                      {band.savingPercent > 0 ? (
+                        <p className="text-[10px] text-emerald-600 font-bold">Save {band.savingPercent}%</p>
+                      ) : (
+                        <p className="text-[10px] text-slate-400 font-medium">Standard</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Prominent Commerce Action Bar (Price, Buy Now Red, Add to Cart Orange, Chat) */}
             <div className="pt-2">
               <ProductActionBar
+                productId={product.id}
                 priceInr={product.priceInr}
                 unit={product.unit}
                 moq={product.moq}

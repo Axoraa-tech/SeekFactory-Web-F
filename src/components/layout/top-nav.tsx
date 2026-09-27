@@ -13,6 +13,7 @@ import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
 import type { BuyerProfile } from "@/entities/user";
 import type { Category } from "@/entities/category";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { useBuyerPlan } from "@/features/subscription";
 
 type Props = {
   user: BuyerProfile | null;
@@ -194,6 +195,12 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
 
 export function TopNav({ user, messageCount, notificationCount, categories, allCategories }: Props) {
   const { t } = useRegionalSettings();
+
+  // The buyer plan lives on the account; keep the (root-level) plan provider in step with it
+  const { syncPlan } = useBuyerPlan();
+  useEffect(() => {
+    syncPlan(user ? user.plan ?? "free" : null);
+  }, [user, syncPlan]);
 
   const childrenByParentId = useMemo(() => {
     const map: Record<string, Category[]> = {};

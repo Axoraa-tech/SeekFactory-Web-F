@@ -50,3 +50,22 @@ export function defaultOrderQuantity(moq: string | number | undefined): number {
   const value = match ? Number(match[0].replace(/,/g, "")) : 1;
   return Number.isFinite(value) && value > 0 ? value : 1;
 }
+
+/** The deal's progress, left to right (a cancelled request is shown on its own). */
+export const ORDER_STEPS: OrderStatus[] = ["PENDING", "CONTACTED", "NEGOTIATING", "CONFIRMED", "COMPLETED"];
+
+/** SeekFactory takes no payment; price and payment terms are agreed with the factory. */
+export const PAYMENT_NOTE =
+  "No payment is taken online. The factory contacts you to confirm the price, payment terms and delivery.";
+
+export function formatMoney(amount: number, currency: string) {
+  try {
+    return new Intl.NumberFormat(currency === "INR" ? "en-IN" : undefined, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toLocaleString()}`;
+  }
+}

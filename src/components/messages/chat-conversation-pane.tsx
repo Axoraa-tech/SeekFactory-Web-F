@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import {
   Send,
@@ -12,7 +13,8 @@ import {
 } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
-import type { ThreadWithMessages } from "./chat-types";
+import type { ThreadWithMessages, ChatAttachment } from "./chat-types";
+import { formatRelativeTime } from "@/shared/lib/format";
 
 type Props = {
   activeThread: ThreadWithMessages;
@@ -22,9 +24,11 @@ type Props = {
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   quickInquiries: string[];
   onSendMessage: (e?: React.FormEvent, customText?: string) => void;
-  attachedFile: { name: string; size: string } | null;
+  attachedFile: ChatAttachment | null;
   onClearAttachment: () => void;
-  onAttachMockFile: () => void;
+  onAttachFile: (file: File) => void;
+  uploading: boolean;
+  error: string | null;
   inputMessage: string;
   onInputChange: (value: string) => void;
 };
@@ -39,10 +43,13 @@ export function ChatConversationPane({
   onSendMessage,
   attachedFile,
   onClearAttachment,
-  onAttachMockFile,
+  onAttachFile,
+  uploading,
+  error,
   inputMessage,
   onInputChange,
 }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   return (
     <div
       className={cn(
@@ -77,13 +84,8 @@ export function ChatConversationPane({
               )}
             </div>
             <div className="flex items-center gap-2 text-[11px] text-slate-500">
-              <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Online Sourcing Engineer
-              </span>
-              <span>•</span>
               <span>
-                {activeThread.manufacturer.location}, {activeThread.manufacturer.country}
+                {[activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).join(", ")}
               </span>
             </div>
           </div>
@@ -153,7 +155,13 @@ export function ChatConversationPane({
                     >
                       <Paperclip className="h-4 w-4 shrink-0" />
                       <div className="min-w-0 flex-1 truncate">
-                        <p className="font-bold truncate">{msg.attachment.name}</p>
+                        {msg.attachment.url ? (
+                          <a href={msg.attachment.url} target="_blank" rel="noopener noreferrer" className="font-bold truncate block hover:underline">
+                            {msg.attachment.name}
+                          </a>
+                        ) : (
+                          <p className="font-bold truncate">{msg.attachment.name}</p>
+                        )}
                         <p className="text-[10px] opacity-80">{msg.attachment.size}</p>
                       </div>
                     </div>
@@ -166,7 +174,7 @@ export function ChatConversationPane({
                     isUser ? "justify-end" : "justify-start"
                   )}
                 >
-                  <span>{msg.time}</span>
+                  <span>{formatRelativeTime(msg.time)}</span>
                   {isUser && <CheckCheck className="h-3 w-3 text-brand-blue" />}
                 </div>
               </div>
@@ -219,14 +227,32 @@ export function ChatConversationPane({
         </div>
       )}
 
+      {error && (
+        <p role="alert" className="px-4 py-1.5 bg-rose-50 border-t border-rose-100 text-xs font-semibold text-rose-700">
+          {error}
+        </p>
+      )}
+
       <form
         onSubmit={(e) => onSendMessage(e)}
         className="p-3 sm:p-4 bg-white border-t border-slate-100 flex items-center gap-2 shrink-0"
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,.pdf,.step,.stp,.dwg,.dxf,.igs,.iges,.stl,.zip,.xlsx,.docx"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file) onAttachFile(file);
+          }}
+        />
         <button
           type="button"
-          onClick={onAttachMockFile}
-          title="Attach technical drawing or CAD file"
+          disabled={uploading}
+          onClick={() => fileInputRef.current?.click()}
+          title={uploading ? "Uploading…" : "Attach technical drawing, CAD file or photo"}
           className={cn(
             "p-2 rounded-xl border transition-colors shadow-2xs",
             attachedFile
@@ -247,7 +273,7 @@ export function ChatConversationPane({
 
         <button
           type="submit"
-          disabled={!inputMessage.trim() && !attachedFile}
+          disabled={uploading || (!inputMessage.trim() && !attachedFile)}
           className="h-10 px-4 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs disabled:opacity-50"
         >
           <Send className="h-3.5 w-3.5" />

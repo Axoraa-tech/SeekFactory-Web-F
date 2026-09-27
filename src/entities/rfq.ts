@@ -37,4 +37,25 @@ export type RfqItem = {
   quoteIncoterm?: string;
   quoteNotes?: string;
   quotedAt?: string;
+  attachmentName?: string;
+  attachmentUrl?: string;
+  quoteCount?: number;
+  /** Present on the single-RFQ detail only. */
+  quotes?: RfqQuote[];
+};
+
+export type RfqQuote = {
+  id: string;
+  manufacturer: import("./manufacturer").Manufacturer;
+  /** Total amount quoted for the whole RFQ quantity. */
+  quotePrice: number;
+  currency: string;
+  leadTimeDays: number;
+  notes?: string;
+  attachmentUrl?: string;
+  /** PENDING, ACCEPTED, REJECTED or EXPIRED */
+  status: string;
+  createdAt: string;
+  /** Set once the quote was accepted and turned into an order. */
+  orderId?: string;
 };
