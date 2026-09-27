@@ -2,9 +2,9 @@
  * Admin-controlled layout for the home feed seek showcase.
  * Server-side only: read on each home render, cached for 30 seconds.
  */
-export type ShowcaseMode = "DUAL" | "SINGLE" | "FEED" | "COMPACT" | "GRID" | "SPOTLIGHT";
+export type ShowcaseMode = "DUAL" | "SINGLE" | "FEED" | "COMPACT" | "GRID" | "SPOTLIGHT" | "SIDEBAR";
 
-export const SHOWCASE_MODES: ShowcaseMode[] = ["DUAL", "SINGLE", "FEED", "COMPACT", "GRID", "SPOTLIGHT"];
+export const SHOWCASE_MODES: ShowcaseMode[] = ["DUAL", "SINGLE", "FEED", "COMPACT", "GRID", "SPOTLIGHT", "SIDEBAR"];
 
 /** Anything unrecognised (older or newer backend) falls back to the dual layout. */
 export function parseShowcaseMode(value: unknown): ShowcaseMode {

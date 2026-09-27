@@ -124,8 +124,6 @@ export const adminData = {
 
   manufacturers: (query: ListQuery & { filter?: string }) =>
     adminRequest<AdminPage<AdminManufacturer>>("manufacturers", { query }),
-  setVerified: (id: string, verified: boolean) =>
-    adminRequest<void>(`manufacturers/${id}/verify`, { method: "PUT", query: { verified: String(verified) } }),
   manufacturer: (id: string) => adminRequest<AdminManufacturerDetail>(`manufacturers/${id}`),
   /** Approve, or reject with a reason the manufacturer will be shown. */
   reviewManufacturer: (id: string, approve: boolean, reason?: string) =>
@@ -216,26 +214,5 @@ export const adminApi = {
       throw Object.assign(new Error(data.message || "Failed to fetch analytics"), { status: res.status });
     }
     return data.data;
-  },
-
-  /**
-   * Fetch admin dashboard statistics.
-   */
-  async getDashboardStats() {
-    const res = await fetch("/api/admin/dashboard/stats", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || "Failed to fetch dashboard stats");
-    }
-
-    return {
-      totalUsers: data.data.total_users || data.data.totalUsers || 0,
-      verifiedFactories: data.data.verified_factories || data.data.verifiedFactories || 0,
-      pendingRfqs: data.data.pending_rfqs || data.data.pendingRfqs || 0
-    };
   },
 };

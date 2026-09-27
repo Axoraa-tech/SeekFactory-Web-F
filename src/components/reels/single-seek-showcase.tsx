@@ -12,6 +12,14 @@ import type { FeedShowcase } from "@/features/feed/load-showcase";
 type Props = {
   items: FeedItem[];
   settings: FeedShowcase;
+  /**
+   * "single"  — the showcase owns the full width; both site sidebars step aside.
+   * "sidebar" — the site's left menu stays put and only photos sit on the right.
+   *
+   * The marker attribute is what the CSS in globals.css keys off, so the choice
+   * has to reach the DOM rather than staying a prop.
+   */
+  variant?: "single" | "sidebar";
 };
 
 /**
@@ -20,8 +28,11 @@ type Props = {
  *   ≥1024px  profile drops out → [video] [photos 280]
  *   <1024px  video full width with a horizontal photo strip underneath
  * The seek in view drives both side panels. Only that seek's video plays.
+ *
+ * In the "sidebar" variant the factory profile panel is never shown: the site's
+ * own left menu occupies that column instead.
  */
-export function SingleSeekShowcase({ items, settings }: Props) {
+export function SingleSeekShowcase({ items, settings, variant = "single" }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const [active, setActive] = useState(0);
@@ -92,12 +103,13 @@ export function SingleSeekShowcase({ items, settings }: Props) {
   // The list can shrink before the reset effect runs, so never read or show past the end
   const safeActive = Math.min(active, items.length - 1);
   const current = items[safeActive];
-  const showProfile = settings.showProfile;
+  // The site's left menu replaces the profile column in the sidebar variant
+  const showProfile = variant === "single" && settings.showProfile;
   const showPhotos = settings.showPhotos;
 
   return (
     <div
-      data-showcase-single
+      {...(variant === "single" ? { "data-showcase-single": "" } : { "data-showcase-sidebar": "" })}
       className={cn(
         "grid grid-cols-[minmax(0,1fr)] gap-5 items-start",
         showPhotos && "lg:grid-cols-[minmax(0,1fr)_280px]",

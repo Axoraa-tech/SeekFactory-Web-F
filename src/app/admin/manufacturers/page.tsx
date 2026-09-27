@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { BadgeCheck, Crown, ExternalLink } from "lucide-react";
 import { ReviewDrawer, StatusPill } from "./review-drawer";
+import { usePendingApprovals } from "@/features/admin/pending-approvals";
 import { adminData, type AdminManufacturer, type AdminPlan } from "@/shared/api/admin-api";
 import {
   DataTable, FilterChips, PageHeader, Pagination, Pill, SearchInput,
@@ -13,10 +15,28 @@ import {
 type Filter = "" | "unverified" | "verified" | "rejected" | "premium";
 const PAGE_SIZE = 20;
 
+const FILTERS: Filter[] = ["", "unverified", "verified", "rejected", "premium"];
+
+/** `?filter=` lets other pages deep-link into a slice of this list. */
+function filterFromUrl(value: string | null): Filter {
+  return FILTERS.includes(value as Filter) ? (value as Filter) : "";
+}
+
 export default function AdminManufacturersPage() {
+  // useSearchParams needs a Suspense boundary in the App Router
+  return (
+    <Suspense fallback={null}>
+      <ManufacturersView />
+    </Suspense>
+  );
+}
+
+function ManufacturersView() {
   const toast = useToast();
+  const { refresh: refreshPending } = usePendingApprovals();
+  const searchParams = useSearchParams();
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<Filter>("");
+  const [filter, setFilter] = useState<Filter>(() => filterFromUrl(searchParams.get("filter")));
   const [page, setPage] = useState(0);
   const [plans, setPlans] = useState<AdminPlan[]>([]);
   const [reviewId, setReviewId] = useState<string | null>(null);
@@ -145,7 +165,11 @@ export default function AdminManufacturersPage() {
       <DataTable columns={columns} rows={data?.items} rowKey={(m) => m.id} loading={loading} error={error} onRetry={reload} empty="No manufacturers match these filters" onRowClick={(m) => setReviewId(m.id)} />
       {data && <Pagination page={page} size={PAGE_SIZE} total={data.total} onPage={setPage} />}
 
-      <ReviewDrawer id={reviewId} onClose={() => setReviewId(null)} onReviewed={reload} />
+      <ReviewDrawer
+        id={reviewId}
+        onClose={() => setReviewId(null)}
+        onReviewed={() => { reload(); refreshPending(); }}
+      />
     </div>
   );
 }

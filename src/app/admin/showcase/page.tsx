@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Monitor, Smartphone, Tablet, Upload, RotateCcw } from "lucide-react";
 import { AdminApiError, adminData, type AdminShowcase } from "@/shared/api/admin-api";
@@ -86,6 +86,17 @@ const LAYOUTS = [
       </div>
     ),
   },
+  {
+    mode: "SIDEBAR",
+    title: "Sidebar + photos",
+    description: "Site menu · seek · photos",
+    supports: { profile: false, photos: true, autoplay: true },
+    thumb: (
+      <div className="grid h-full grid-cols-[2fr_5fr_2fr] gap-1">
+        <Block menu /><Block video /><Block photos />
+      </div>
+    ),
+  },
 ] as const satisfies readonly { mode: ShowcaseMode; title: string; description: string; supports: { profile: boolean; photos: boolean; autoplay: boolean }; thumb: React.ReactNode }[];
 
 /** What each option means in the chosen layout — the wording changes, the stored flag does not. */
@@ -120,6 +131,11 @@ const PANEL_HINTS: Record<ShowcaseMode, { profile: string; photos: string; autop
     photos: "Product strip under the hero seek.",
     autoplay: "Start the hero seek automatically (muted).",
   },
+  SIDEBAR: {
+    profile: "Not used: the site's own left menu fills that column.",
+    photos: "Right panel on wide screens; a photo strip under the video on phones.",
+    autoplay: "Start the seek in view automatically (muted).",
+  },
 };
 
 const RESPONSIVE_NOTES: Record<ShowcaseMode, string[]> = {
@@ -133,6 +149,11 @@ const RESPONSIVE_NOTES: Record<ShowcaseMode, string[]> = {
   COMPACT: ["≥ 640px: thumbnail, details and actions on one row", "< 640px: actions move under the details"],
   GRID: ["≥ 1280px: three tiles per row", "640–1279px: two per row", "< 640px: one per row"],
   SPOTLIGHT: ["≥ 1280px: hero with the factory panel beside it", "< 1280px: hero full width, panel hidden", "Rail scrolls horizontally at every width"],
+  SIDEBAR: [
+    "≥ 1024px: site menu · video · photos",
+    "< 1024px: full-width video with a photo strip underneath",
+    "The site's right-hand widgets are hidden so photos can take that column",
+  ],
 };
 
 const DEVICES = [
@@ -148,17 +169,23 @@ export default function AdminShowcasePage() {
   const [saved, setSaved] = useState<AdminShowcase | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [device, setDevice] = useState<(typeof DEVICES)[number]["key"]>("desktop");
   const [previewKey, setPreviewKey] = useState(0);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoadError(null);
     adminData.showcase()
       .then((s) => { setSaved(s); setDraft({ mode: s.mode, autoplay: s.autoplay, showProfile: s.showProfile, showPhotos: s.showPhotos }); })
       .catch((err) => {
         if (err instanceof AdminApiError && err.status === 401) router.replace("/admin/login");
-        else toast("error", (err as Error).message);
+        // A toast disappears after four seconds; without this the page would sit
+        // on its skeleton for ever with no way to try again.
+        else setLoadError((err as Error).message);
       });
-  }, [router, toast]);
+  }, [router]);
+
+  useEffect(() => { load(); }, [load]);
 
   const dirty = useMemo(() => {
     if (!saved || !draft) return false;
@@ -184,7 +211,17 @@ export default function AdminShowcasePage() {
     return (
       <div>
         <PageHeader title="Seek Showcase" subtitle="How seeks are presented on the website home feed" />
-        <div className="h-96 rounded-xl border border-slate-200 bg-white p-6"><div className="h-full rounded bg-slate-100 animate-pulse" /></div>
+        {loadError ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+            <p className="text-sm font-medium text-red-700">Could not load the showcase settings</p>
+            <p className="mt-1 text-xs text-red-600">{loadError}</p>
+            <button onClick={load} className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500">
+              Try again
+            </button>
+          </div>
+        ) : (
+          <div className="h-96 rounded-xl border border-slate-200 bg-white p-6"><div className="h-full rounded bg-slate-100 animate-pulse" /></div>
+        )}
       </div>
     );
   }
@@ -359,8 +396,10 @@ function LayoutCard({ selected, onSelect, title, description, live, children }: 
   );
 }
 
-function Block({ video, profile, photos, muted }: { video?: boolean; profile?: boolean; photos?: boolean; muted?: boolean }) {
+function Block({ video, profile, photos, muted, menu }: { video?: boolean; profile?: boolean; photos?: boolean; muted?: boolean; menu?: boolean }) {
   if (video) return <div className="rounded-sm bg-slate-800" />;
+  // The site's own left menu, drawn as stacked nav rows
+  if (menu) return <div className="flex flex-col gap-0.5">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="flex-1 rounded-[2px] bg-slate-300" />)}</div>;
   if (profile) return <div className="rounded-sm bg-orange-200" />;
   if (photos) return <div className="grid grid-cols-2 gap-0.5">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="rounded-[2px] bg-blue-200" />)}</div>;
   return <div className={`rounded-sm ${muted ? "bg-slate-100" : "bg-slate-200"}`} />;

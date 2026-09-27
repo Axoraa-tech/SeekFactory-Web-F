@@ -45,9 +45,9 @@ export function AppShell({
         messageCount={messageCount}
         notificationCount={notificationCount}
       />
-      {/* data-app-shell: the single seek showcase hides the shell sidebars via CSS (see globals.css) */}
+      {/* data-app-shell: showcase layouts hide one or both shell sidebars via CSS (see globals.css) */}
       <div data-app-shell className="mx-auto flex max-w-[1440px] gap-5 px-4 pt-3 pb-4 lg:px-6">
-        <div data-shell-sidebar className="contents">
+        <div data-shell-sidebar="left" className="contents">
           <LeftSidebar
             categories={categories}
             manufacturers={manufacturers}
@@ -59,7 +59,7 @@ export function AppShell({
         </div>
         <main className="min-w-0 flex-1">{children}</main>
         {showRight ? (
-          <div data-shell-sidebar className="contents">
+          <div data-shell-sidebar="right" className="contents">
             <RightAside
               manufacturers={manufacturers}
               products={products}

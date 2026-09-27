@@ -5,9 +5,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Single seek showcase brings its own profile and photo panels, so the shell sidebars step aside.
-   Pure CSS keeps this correct in the server-rendered HTML (no flash of sidebars). */
+/* Single seek showcase brings its own profile and photo panels, so both shell
+   sidebars step aside. Pure CSS keeps this correct in the server-rendered HTML
+   (no flash of sidebars). */
 [data-app-shell]:has([data-showcase-single]) > [data-shell-sidebar] {
+  display: none;
+}
+
+/* The sidebar layout keeps the site's left menu and puts photos on the right,
+   so only the right aside gives way. */
+[data-app-shell]:has([data-showcase-sidebar]) > [data-shell-sidebar="right"] {
   display: none;
 }
 

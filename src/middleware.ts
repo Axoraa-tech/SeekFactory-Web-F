@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Middleware skeleton (mock-safe).
+ * Edge middleware.
  *
- * Today: baseline security headers only. Auth remains per-page via `requireUser()`
- * because the demo session cookie is client-writable and must not be treated as trusted.
+ * Admin routes are gated here on the HttpOnly `admin_token` cookie. Buyer and
+ * factory pages still authenticate per-page via `requireUser()`, because their
+ * demo session cookie is client-writable and must not be treated as trusted.
  *
  * When real backend auth lands: verify HttpOnly session here and redirect guests
  * away from /messages, /notifications, /profile, /rfq/* before rendering.
