@@ -3,7 +3,6 @@
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import type { SellerFactoryProfile, SellerProduct, SellerRfq, SellerSeek, SellerStats } from "../types";
 import { SalesproAnalyticsChart } from "./salespro-analytics-chart";
-import { SalesproIndiaDemand } from "./salespro-india-demand";
 import { SalesproDataTable } from "./salespro-data-table";
 
 type Props = {
@@ -13,6 +12,7 @@ type Props = {
   rfqs: SellerRfq[];
   profile: SellerFactoryProfile;
   onOpenQuoteModal: (rfq: SellerRfq) => void;
+  onViewAllRfqs?: () => void;
 };
 
 function formatPercent(value: number) {
@@ -62,13 +62,13 @@ function ChangeBadge({ change, current }: { change: number | null; current: numb
 
 export function SalesproOverviewView({
   stats,
-  products,
+  products: _products,
   seeks: _seeks,
   rfqs,
   profile: _profile,
   onOpenQuoteModal,
+  onViewAllRfqs,
 }: Props) {
-  const ENABLE_CHARTS = false;
   const periodDays = stats?.periodDays ?? 30;
   const responseWindowDays = stats?.responseWindowDays ?? 90;
   const activeRfqs = stats?.activeRfqsCount ?? 0;
@@ -86,11 +86,11 @@ export function SalesproOverviewView({
       </div>
 
       {/* 4 Metric KPI Cards (Blue, Orangish-Yellow, Red) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 sf-stagger">
         {/* Card 1: Video Seek Impressions (Blue #1A73E8) */}
-        <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs space-y-2">
+        <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">Video Seek Impressions</p>
-          <p className="text-2xl font-extrabold text-[#1A73E8]">
+          <p className="text-xl sm:text-2xl font-extrabold tabular-nums text-[#1A73E8]">
             {(stats?.videoSeekPlays ?? 0).toLocaleString()}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
@@ -100,9 +100,9 @@ export function SalesproOverviewView({
         </div>
 
         {/* Card 2: India Buyer RFQs (Orangish-Yellow #F26B21) */}
-        <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs space-y-2">
+        <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">Active India Buyer RFQs</p>
-          <p className="text-2xl font-extrabold text-[#F26B21]">
+          <p className="text-xl sm:text-2xl font-extrabold tabular-nums text-[#F26B21]">
             {activeRfqs} {activeRfqs === 1 ? "Lead" : "Leads"}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
@@ -120,9 +120,9 @@ export function SalesproOverviewView({
         </div>
 
         {/* Card 3: Machinery Product Views */}
-        <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs space-y-2">
+        <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">Catalog Product Views</p>
-          <p className="text-2xl font-extrabold text-[#1C1C1C]">
+          <p className="text-xl sm:text-2xl font-extrabold tabular-nums text-[#1C1C1C]">
             {(stats?.totalProductViews ?? 0).toLocaleString()}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
@@ -132,7 +132,7 @@ export function SalesproOverviewView({
         </div>
 
         {/* Card 4: Response Rate & Lead Speed */}
-        <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs space-y-2">
+        <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">Buyer Response Rate</p>
           <p
             className="text-2xl font-extrabold text-[#1C1C1C]"
@@ -142,34 +142,22 @@ export function SalesproOverviewView({
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
             <span>Avg Response Speed</span>
-            <span className="rounded-full bg-[#E8F1FD] text-[#1A73E8] px-2 py-0.2 text-[10px] font-bold">
+            <span className="whitespace-nowrap rounded-full bg-[#E8F1FD] text-[#1A73E8] px-2 py-0.2 text-[10px] font-bold">
               {formatResponseTime(stats?.avgResponseTimeHours ?? null)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Middle Grid: Area Step Chart (Equal Left 6 cols) + India Sourcing Hubs Demand (Equal Right 6 cols) */}
-      {ENABLE_CHARTS && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
-          {/* Left: Video Seeks vs RFQ Conversion Trend */}
-          <div className="flex flex-col">
-            <SalesproAnalyticsChart />
-          </div>
-
-          {/* Right: India Industrial Sourcing Hubs & Ports */}
-          <div className="flex flex-col">
-            <SalesproIndiaDemand />
-          </div>
-        </div>
-      )}
+      {/* Weekly discovery vs RFQ trend (real data from the stats endpoint) */}
+      <SalesproAnalyticsChart trend={stats?.weeklyTrend ?? []} />
 
       {/* Bottom Full-Width: Active India Equipment RFQs Table */}
       <div>
         <SalesproDataTable
-          products={products}
           rfqs={rfqs}
           onOpenQuoteModal={onOpenQuoteModal}
+          onViewAll={onViewAllRfqs}
         />
       </div>
     </div>
