@@ -63,55 +63,11 @@ export function SupplierProfileView({
   const [inspectingCert, setInspectingCert] = useState<FactoryCertificate | null>(null);
   const { isSupplierLocked, upgradeTier, openUpgradeModal, pricing } = useBuyerPlan();
 
-  const displayCertificates: FactoryCertificate[] =
-    manufacturer.certificates && manufacturer.certificates.length > 0
-      ? manufacturer.certificates
-      : [
-          {
-            id: "cert-iso-9001",
-            title: "ISO 9001:2015 Quality Management",
-            issuer: "TUV Rheinland Certification Body",
-            certNumber: "TUV-QM-984210-IN",
-            issueDate: "2023-04-12",
-            expiryDate: "2026-04-11",
-            imageUrl: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=1200&q=80",
-            verified: true,
-            category: "Quality",
-          },
-          {
-            id: "cert-ce-machinery",
-            title: "CE Conformity - Machinery Directive 2006/42/EC",
-            issuer: "Eurofins Product Testing EU",
-            certNumber: "CE-EU-448102-M",
-            issueDate: "2022-09-18",
-            expiryDate: "2027-09-17",
-            imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80",
-            verified: true,
-            category: "Safety & CE",
-          },
-          {
-            id: "cert-rohs",
-            title: "RoHS 2011/65/EU Environmental Compliance",
-            issuer: "SGS Global Standards Authority",
-            certNumber: "SGS-ROHS-77219",
-            issueDate: "2023-01-15",
-            expiryDate: "2026-01-14",
-            imageUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80",
-            verified: true,
-            category: "Environmental",
-          },
-          {
-            id: "cert-tuv-audit",
-            title: "TUV On-Site Gold Factory Audit & Capacity Verification",
-            issuer: "TUV Rheinland Global Inspection",
-            certNumber: "TUV-FAC-2024-889",
-            issueDate: "2024-02-10",
-            expiryDate: "2027-02-09",
-            imageUrl: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80",
-            verified: true,
-            category: "Audit Report",
-          },
-        ];
+  // Only what the factory actually uploaded: never show placeholder certificates to buyers
+  const displayCertificates: FactoryCertificate[] = manufacturer.certificates ?? [];
+  const certificationNames = Array.from(
+    new Set([...(manufacturer.certifications ?? []), ...displayCertificates.map((cert) => cert.title)]),
+  );
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -326,17 +282,19 @@ export function SupplierProfileView({
             {/* Header Action Buttons */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 pt-2 md:pt-0">
               {/* Official Seller Website */}
-              <a
-                href={manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
-                title="Visit Official Seller Website"
-              >
-                <Globe2 className="h-4 w-4 text-brand-blue group-hover:text-white transition-colors" />
-                <span>Visit Website</span>
-                <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100" />
-              </a>
+              {manufacturer.websiteUrl && (
+                <a
+                  href={manufacturer.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
+                  title="Visit Official Seller Website"
+                >
+                  <Globe2 className="h-4 w-4 text-brand-blue group-hover:text-white transition-colors" />
+                  <span>Visit Website</span>
+                  <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100" />
+                </a>
+              )}
 
               <button
                 type="button"
@@ -528,6 +486,7 @@ export function SupplierProfileView({
                         unit={product.unit}
                         moq={product.moq}
                         productSlug={product.slug}
+                        productName={product.name}
                         manufacturerSlug={manufacturer.slug}
                         size="sm"
                       />
@@ -577,16 +536,18 @@ export function SupplierProfileView({
                       Managing Director / Chairman: <strong className="text-slate-900">{manufacturer.chairmanName}</strong>
                     </p>
                   )}
-                  <a
-                    href={manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
-                  >
-                    <Globe2 className="h-3.5 w-3.5" />
-                    <span>Official Factory Website: {manufacturer.websiteUrl || `https://www.${manufacturer.slug}.com`}</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                  {manufacturer.websiteUrl && (
+                    <a
+                      href={manufacturer.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
+                    >
+                      <Globe2 className="h-3.5 w-3.5" />
+                      <span>Official Factory Website: {manufacturer.websiteUrl}</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
                 </div>
               </Card>
 
@@ -606,10 +567,18 @@ export function SupplierProfileView({
                       <span className="text-slate-500">Years in Operation</span>
                       <span className="font-semibold text-slate-800">{new Date().getFullYear() - manufacturer.yearsEstablished} Years</span>
                     </div>
-                    <div className="flex justify-between pb-1">
-                      <span className="text-slate-500">Customization</span>
-                      <span className="font-semibold text-brand-blue">Full OEM & ODM Supported</span>
-                    </div>
+                    {manufacturer.productionLines != null && manufacturer.productionLines > 0 && (
+                      <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span className="text-slate-500">Production Lines</span>
+                        <span className="font-semibold text-slate-800">{manufacturer.productionLines}</span>
+                      </div>
+                    )}
+                    {manufacturer.annualTurnover && (
+                      <div className="flex justify-between pb-1">
+                        <span className="text-slate-500">Annual Turnover</span>
+                        <span className="font-semibold text-slate-800">{manufacturer.annualTurnover}</span>
+                      </div>
+                    )}
                   </div>
                 </Card>
 
@@ -620,31 +589,33 @@ export function SupplierProfileView({
                       <span className="text-slate-500">Main Export Markets</span>
                       <span className="font-semibold text-slate-800">{manufacturer.exportCountries.join(", ")}</span>
                     </div>
-                    <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Quality Certifications</span>
-                      <span className="font-semibold text-emerald-600">ISO 9001:2015, CE Certified</span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Inspection Standard</span>
-                      <span className="font-semibold text-slate-800">100% Pre-Shipment QA</span>
+                    <div className="flex justify-between gap-3 border-b border-slate-100 pb-1.5">
+                      <span className="shrink-0 text-slate-500">Quality Certifications</span>
+                      <span className={cn("text-right font-semibold", certificationNames.length ? "text-emerald-600" : "text-slate-400")}>
+                        {certificationNames.length ? certificationNames.join(", ") : "Not provided"}
+                      </span>
                     </div>
                     <div className="flex justify-between pb-1">
-                      <span className="text-slate-500">Audit Status</span>
-                      <span className="font-semibold text-slate-800">Verified On-Site</span>
+                      <span className="text-slate-500">SeekFactory Verification</span>
+                      <span className="font-semibold text-slate-800">
+                        {manufacturer.verified ? "Business details verified" : "Not verified"}
+                      </span>
                     </div>
                   </div>
                 </Card>
               </div>
 
               {/* Verified Profile & Certifications Showcase (Alibaba Reference Style) */}
-              <div className="pt-2">
-                <AlibabaCertSection
-                  certificates={displayCertificates}
-                  manufacturer={manufacturer}
-                  isOwner={false}
-                  onInspect={(cert) => setInspectingCert(cert)}
-                />
-              </div>
+              {displayCertificates.length > 0 && (
+                <div className="pt-2">
+                  <AlibabaCertSection
+                    certificates={displayCertificates}
+                    manufacturer={manufacturer}
+                    isOwner={false}
+                    onInspect={(cert) => setInspectingCert(cert)}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

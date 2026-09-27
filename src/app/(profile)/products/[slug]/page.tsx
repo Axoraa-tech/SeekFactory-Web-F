@@ -7,16 +7,20 @@ import {
   CheckCircle2,
   Building2,
   FileSpreadsheet,
+  FileText,
+  Download,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
+import { ProductGallery } from "@/components/ui/product-gallery";
 import { TrackProductView } from "@/features/analytics/track-product-view";
 import { getApi } from "@/shared/api";
 import { formatPriceInr } from "@/shared/lib/format";
 
 type Props = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ order?: string }>;
 };
 
 export async function generateMetadata({ params }: Props) {
@@ -28,8 +32,9 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { order } = await searchParams;
   const detail = await getApi().products.getBySlug(slug);
   if (!detail) notFound();
   const { product, manufacturer } = detail;
@@ -57,17 +62,11 @@ export default async function ProductPage({ params }: Props) {
         {/* Left Column: Image & Factory Trust */}
         <div className="space-y-4">
           <Card className="overflow-hidden border-slate-200/90 shadow-2xs">
-            <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-900">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img loading="lazy" decoding="async"
-                src={product.imageUrl}
-                alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-              />
-              <span className="absolute top-3 left-3 rounded-md bg-black/60 backdrop-blur-md px-2.5 py-1 text-xs font-bold text-white uppercase tracking-wider">
-                OEM Direct
-              </span>
-            </div>
+            <ProductGallery
+              images={product.imageUrls?.length ? product.imageUrls : [product.imageUrl]}
+              alt={product.name}
+              badge="OEM Direct"
+            />
           </Card>
 
           {/* Supplier Mini Profile Bar */}
@@ -130,6 +129,22 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               ))}
             </dl>
+            {product.datasheetUrl && (
+              <a
+                href={product.datasheetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-800 hover:border-brand-blue hover:text-brand-blue transition-colors"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <FileText className="h-4 w-4 shrink-0 text-red-600" />
+                  <span className="truncate">{product.datasheetName || "Technical datasheet"}</span>
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1 text-brand-blue">
+                  <Download className="h-3.5 w-3.5" /> PDF
+                </span>
+              </a>
+            )}
           </Card>
         </div>
 
@@ -196,7 +211,9 @@ export default async function ProductPage({ params }: Props) {
                 unit={product.unit}
                 moq={product.moq}
                 productSlug={product.slug}
+                productName={product.name}
                 manufacturerSlug={manufacturer.slug}
+                autoOpenOrder={order === "1"}
                 size="lg"
                 layout="vertical"
               />
