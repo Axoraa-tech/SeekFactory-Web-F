@@ -81,7 +81,7 @@ export function ProfileSavedPanel({ savedProducts, onRemoveSaved }: Props) {
 
                 <div className="flex items-center gap-1.5">
                   <Link
-                    href={`/products/${p.slug}`}
+                    href={`/products/${p.slug}?order=1`}
                     className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
                     <ShoppingCart className="h-3 w-3" />

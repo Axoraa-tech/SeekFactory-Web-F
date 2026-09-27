@@ -2,16 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, Zap, MessageSquare, Check } from "lucide-react";
+import { ShoppingCart, Zap, MessageSquare } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { OrderRequestModal } from "@/features/orders/order-request-modal";
 
 type ProductActionBarProps = {
   priceInr?: number;
   unit?: string;
   moq?: string | number;
   productSlug?: string;
+  /** Shown in the order request form. */
+  productName?: string;
   manufacturerSlug?: string;
+  /** Open the order request form on mount (e.g. ?order=1 after signing in). */
+  autoOpenOrder?: boolean;
   size?: "sm" | "md" | "lg";
   layout?: "horizontal" | "vertical" | "inline";
   showPrice?: boolean;
@@ -23,21 +28,28 @@ export function ProductActionBar({
   unit = "Unit",
   moq,
   productSlug,
+  productName,
   manufacturerSlug,
+  autoOpenOrder = false,
   size = "md",
   layout = "horizontal",
   showPrice = true,
   className,
 }: ProductActionBarProps) {
   const { t, formatPrice } = useRegionalSettings();
-  const [isAdded, setIsAdded] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
+  const [isOrderOpen, setIsOrderOpen] = useState(autoOpenOrder && Boolean(productSlug));
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  // "Order" sends an order request to the factory (no payment). Without a product slug
+  // (e.g. demo reels) there is nothing to order, so fall back to a custom RFQ.
+  const handleOrder = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    if (productSlug) {
+      setIsOrderOpen(true);
+    } else {
+      window.location.href = "/rfq/new";
+    }
   };
 
   const handleBuyNow = (e: React.MouseEvent) => {
@@ -108,28 +120,19 @@ export function ProductActionBar({
           <span>{t("common.chat", "Chat")}</span>
         </Link>
 
-        {/* 2. Add to Cart Button */}
+        {/* 2. Order Request Button */}
         <button
           type="button"
-          onClick={handleAddToCart}
+          onClick={handleOrder}
           className={cn(
             "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
             "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
-            isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs",
-            isAdded && "from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+            isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs"
           )}
+          title="Send an order request to the factory"
         >
-          {isAdded ? (
-            <>
-              <Check className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-              <span>{t("common.order", "Added")}</span>
-            </>
-          ) : (
-            <>
-              <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-              <span>{t("common.order", "Order")}</span>
-            </>
-          )}
+          <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
+          <span>{t("common.order", "Order")}</span>
         </button>
 
         {/* 3. Buy Now Button */}
@@ -147,6 +150,17 @@ export function ProductActionBar({
           <span>{isBuying ? "Processing..." : t("common.buyNow", "Buy Now")}</span>
         </button>
       </div>
+
+      {isOrderOpen && productSlug && (
+        <OrderRequestModal
+          productSlug={productSlug}
+          productName={productName}
+          priceInr={priceInr}
+          unit={unit}
+          moq={moq}
+          onClose={() => setIsOrderOpen(false)}
+        />
+      )}
     </div>
   );
 }

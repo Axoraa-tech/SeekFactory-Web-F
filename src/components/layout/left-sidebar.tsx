@@ -10,6 +10,7 @@ import {
   UserRound,
   Crown,
   Settings2,
+  ShoppingBag,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { CategoryIcon } from "@/components/ui/category-icon";
@@ -39,6 +40,7 @@ const navItems = [
   { href: "/explore", key: "nav.explore", defaultLabel: "Explore", icon: Compass },
   { href: "/messages", key: "nav.messages", defaultLabel: "Messages", icon: MessageCircle, badgeKey: "messages" as const },
   { href: "/notifications", key: "nav.notifications", defaultLabel: "Notifications", icon: Bell, badgeKey: "notifications" as const },
+  { href: "/orders", key: "nav.orders", defaultLabel: "My Orders", icon: ShoppingBag },
   { href: "/profile", key: "nav.profile", defaultLabel: "Profile", icon: UserRound },
 ];
 
