@@ -19,11 +19,11 @@ export async function POST(req: NextRequest) {
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");
   const kind = form?.get("kind");
-  if (!(file instanceof File) || (kind !== "image" && kind !== "video")) {
+  if (!(file instanceof File) || (kind !== "image" && kind !== "video" && kind !== "document")) {
     return NextResponse.json({ success: false, message: "Expected a file and kind" }, { status: 400 });
   }
 
-  const mediaKind: MediaKind = kind;
+  const mediaKind: MediaKind | "document" = kind;
   if (!MEDIA_TYPES[mediaKind].includes(file.type)) {
     return NextResponse.json(
       { success: false, message: `Unsupported ${mediaKind} type: ${file.type || "unknown"}` },

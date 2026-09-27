@@ -27,8 +27,14 @@ export type RfqItem = {
   status: string;
   createdAt: string;
   companyName?: string;
+  categoryId?: string;
   buyerName?: string;
   buyerCountry?: string;
+  buyerAvatarUrl?: string;
+  /** This factory's own quotation (seller view only). */
   quotedPriceInr?: number;
   leadTimeDays?: number;
+  quoteIncoterm?: string;
+  quoteNotes?: string;
+  quotedAt?: string;
 };

@@ -23,6 +23,17 @@ export type SellerStats = {
   followerCount: number;
   totalProductsCount: number;
   totalSeeksCount: number;
+  /** Weekly activity, oldest first; empty when the backend has none (e.g. mock mode). */
+  weeklyTrend?: SellerTrendPoint[];
+};
+
+export type SellerTrendPoint = {
+  /** ISO date of the week's Monday (UTC). */
+  weekStart: string;
+  seekViews: number;
+  productViews: number;
+  /** RFQs routed to this factory that week. */
+  rfqs: number;
 };
 
 export type SellerProduct = {

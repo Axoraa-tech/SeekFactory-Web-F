@@ -1,9 +1,11 @@
+import type { FactoryVerification } from "@/shared/api/contracts";
 import type { Conversation } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { AppNotification } from "@/entities/notification";
 import type { Product } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
 import type { RfqItem } from "@/entities/rfq";
+import type { OrderRequest } from "@/entities/order";
 import type { ReelComment } from "@/entities/comment";
 import type { BuyerProfile } from "@/entities/user";
 import { categories } from "@/shared/mocks/machinery-taxonomy";
@@ -1103,3 +1105,13 @@ export const factoryRfqs = shared<RfqItem[]>("factoryRfqs", [
     leadTimeDays: 35,
   },
 ]);
+
+/** Order requests placed by buyers in mock mode (starts empty; see mockApi.orders). */
+export const orderRequests = shared<OrderRequest[]>("orderRequests", []);
+
+/** Mock-mode verification application of the seller's factory. */
+export const factoryVerification = shared<FactoryVerification>("factoryVerification", {
+  status: "APPROVED",
+  submitted: false,
+  certifications: [],
+});

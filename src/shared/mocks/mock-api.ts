@@ -10,13 +10,18 @@ import type {
   RfqRepository,
   SessionRepository,
   FactoryRepository,
+  OrderRepository,
   MessageItem,
+  AccountRepository,
 } from "@/shared/api/contracts";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
+import type { OrderRequest } from "@/entities/order";
 import {
   categories,
   conversations,
   factoryRfqs,
+  factoryVerification,
+  orderRequests,
   manufacturers,
   mockComments,
   notifications,
@@ -34,6 +39,9 @@ import {
   writeBrowserCookie,
   type JoinInput,
 } from "@/features/auth/session-cookie";
+
+/** Buyer-facing: products and seeks the seller has not paused. */
+const isListed = (item: { listed?: boolean }) => item.listed !== false;
 
 function delay<T>(value: T, ms = 40): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms));
@@ -93,17 +101,18 @@ const feed: FeedRepository = {
       tab === "following"
         ? reels.filter((r) => ["mfr-apex", "mfr-bharat", "mfr-metalcraft"].includes(r.manufacturerId))
         : reels;
+    const visible = products.filter(isListed);
 
-    const items = list.map((reel) => {
+    const items = list.filter(isListed).map((reel) => {
       const manufacturer = manufacturers.find((item) => item.id === reel.manufacturerId);
       if (!manufacturer) {
         throw new Error(`Missing manufacturer for reel ${reel.id}`);
       }
-      const reelProducts = products.filter((item) => reel.productIds.includes(item.id));
+      const reelProducts = visible.filter((item) => reel.productIds.includes(item.id));
       return {
         reel,
         manufacturer,
-        primaryProductSlug: products.find((item) => item.id === reel.productIds[0])?.slug,
+        primaryProductSlug: visible.find((item) => item.id === reel.productIds[0])?.slug,
         products: reelProducts,
       };
     });
@@ -131,16 +140,16 @@ const manufacturerRepo: ManufacturerRepository = {
     if (!manufacturer) return delay(null);
     return delay({
       manufacturer,
-      products: products.filter((item) => item.manufacturerId === manufacturer.id),
-      reels: reels.filter((item) => item.manufacturerId === manufacturer.id),
+      products: products.filter((item) => item.manufacturerId === manufacturer.id && isListed(item)),
+      reels: reels.filter((item) => item.manufacturerId === manufacturer.id && isListed(item)),
     });
   },
 };
 
 const productRepo: ProductRepository = {
-  listTrending: (limit = 6) => delay(products.slice(0, limit)),
+  listTrending: (limit = 6) => delay(products.filter(isListed).slice(0, limit)),
   async getBySlug(slug) {
-    const product = products.find((item) => item.slug === slug);
+    const product = products.find((item) => item.slug === slug && isListed(item));
     if (!product) return delay(null);
     const manufacturer = manufacturers.find((item) => item.id === product.manufacturerId);
     if (!manufacturer) return delay(null);
@@ -149,6 +158,7 @@ const productRepo: ProductRepository = {
   listByCategory: (categoryId) =>
     delay(
       products.filter((item) => {
+        if (!isListed(item)) return false;
         if (item.categoryId === categoryId) return true;
         const selected = categories.find((category) => category.id === categoryId);
         if (!selected || selected.parentId !== null) return false;
@@ -186,15 +196,47 @@ const messages: MessageRepository = {
       },
     ]);
   },
-  async sendMessage(conversationId: string, text: string, attachment?: { name: string; size: string; url?: string }) {
+  async sendMessage(conversationId, text, attachment, context) {
+    const order = context?.orderId ? orderRequests.find((item) => item.id === context.orderId) : undefined;
     return delay({
       id: `mock-msg-${Date.now()}`,
       conversationId,
       sender: "user" as const,
       text,
-      time: "Just now",
+      time: new Date().toISOString(),
       attachment,
+      order: order && {
+        id: order.id,
+        referenceNumber: order.referenceNumber,
+        productName: order.productName,
+        productSlug: order.productSlug,
+        quantity: order.quantity,
+        unit: order.unit,
+        status: order.status,
+      },
     });
+  },
+  async uploadAttachment(_conversationId, file) {
+    if (typeof window === "undefined") throw new Error("uploadAttachment must be called from the browser");
+    const body = new FormData();
+    body.append("file", file);
+    body.append("kind", file.type === "application/pdf" ? "document" : "image");
+    const res = await fetch("/api/mock-media", { method: "POST", body });
+    const json = (await res.json().catch(() => null)) as
+      | { success: boolean; message?: string; data: { url: string; contentType: string; size: number } }
+      | null;
+    if (!res.ok || !json?.success) throw new Error(json?.message || `Upload failed (HTTP ${res.status})`);
+    const kb = json.data.size / 1024;
+    return {
+      url: json.data.url,
+      name: file.name,
+      size: kb < 1024 ? `${Math.round(kb)} KB` : `${(kb / 1024).toFixed(1)} MB`,
+      contentType: json.data.contentType,
+    };
+  },
+  async listConversationOrders(conversationId) {
+    const conversation = conversations.find((item) => item.id === conversationId);
+    return delay(orderRequests.filter((item) => item.manufacturer.id === conversation?.manufacturerId));
   },
   async markAsRead(conversationId: string) {
     return delay(undefined);
@@ -313,6 +355,18 @@ function uniqueProductSlug(name: string) {
   return slug;
 }
 
+function ownProduct(id: string) {
+  const product = products.find((item) => item.id === id && item.manufacturerId === ownFactory().id);
+  if (!product) throw new Error("Product not found");
+  return product;
+}
+
+function ownReel(id: string) {
+  const reel = reels.find((item) => item.id === id && item.manufacturerId === ownFactory().id);
+  if (!reel) throw new Error("Seek not found");
+  return reel;
+}
+
 function removeWhere<T>(list: T[], match: (item: T) => boolean) {
   const index = list.findIndex(match);
   if (index >= 0) list.splice(index, 1);
@@ -386,9 +440,38 @@ const factoryRepo: FactoryRepository = {
       moq: data.moq || "1 Piece",
       categoryId: data.categoryId,
       specs: data.specs || {},
+      imageUrls: data.imageUrls?.length ? data.imageUrls : [data.imageUrl],
+      datasheetUrl: data.datasheetUrl || undefined,
+      datasheetName: data.datasheetUrl ? data.datasheetName || "Datasheet.pdf" : undefined,
+      listed: true,
     };
+    if (data.imageUrls?.length) product.imageUrl = data.imageUrls[0];
     products.unshift(product);
     return delay(product);
+  },
+  async updateProduct(id, data) {
+    const product = ownProduct(id);
+    if (data.name !== undefined) product.name = data.name;
+    if (data.imageUrls?.length) {
+      product.imageUrls = [...data.imageUrls];
+      product.imageUrl = data.imageUrls[0];
+    }
+    if (data.description !== undefined) product.description = data.description;
+    if (data.priceInr !== undefined) product.priceInr = data.priceInr;
+    if (data.unit) product.unit = data.unit;
+    if (data.moq) product.moq = data.moq;
+    if (data.categoryId) product.categoryId = data.categoryId;
+    if (data.specs) product.specs = { ...data.specs };
+    if (data.datasheetUrl !== undefined) {
+      product.datasheetUrl = data.datasheetUrl || undefined;
+      product.datasheetName = data.datasheetUrl ? data.datasheetName || "Datasheet.pdf" : undefined;
+    }
+    return delay({ ...product });
+  },
+  async setProductListed(id, listed) {
+    const product = ownProduct(id);
+    product.listed = listed;
+    return delay({ ...product });
   },
   async deleteProduct(id) {
     removeWhere(products, (item) => item.id === id && item.manufacturerId === ownFactory().id);
@@ -418,6 +501,57 @@ const factoryRepo: FactoryRepository = {
     reels.unshift(reel);
     return delay(reel);
   },
+  async updateSeek(id, data) {
+    const reel = ownReel(id);
+    if (data.title !== undefined) reel.title = data.title;
+    if (data.description !== undefined) reel.description = data.description;
+    if (data.posterUrl) reel.posterUrl = data.posterUrl;
+    if (data.videoUrl) reel.videoUrl = data.videoUrl;
+    if (data.durationSec) reel.durationSec = data.durationSec;
+    if (data.hashtags) reel.hashtags = [...data.hashtags];
+    if (data.productIds) reel.productIds = [...data.productIds];
+    return delay({ ...reel });
+  },
+  async setSeekListed(id, listed) {
+    const reel = ownReel(id);
+    reel.listed = listed;
+    return delay({ ...reel });
+  },
+  getVerification: () => delay({ ...factoryVerification }),
+  async submitVerification(data) {
+    if (factoryVerification.status === "APPROVED" && factoryVerification.submitted) {
+      throw new Error("Your factory is already verified");
+    }
+    Object.assign(factoryVerification, {
+      ...data,
+      status: "PENDING",
+      submitted: true,
+      submittedAt: new Date().toISOString(),
+      rejectionReason: undefined,
+    });
+    return delay({ ...factoryVerification });
+  },
+  async openRfqConversation(rfqId) {
+    const rfqItem = factoryRfqs.find((item) => item.id === rfqId);
+    if (!rfqItem) throw new Error("RFQ not found");
+    const buyerId = `buyer-${rfqItem.id}`;
+    const existing = conversations.find(
+      (item) => item.manufacturerId === ownFactory().id && item.buyerId === buyerId,
+    );
+    if (existing) return delay({ ...existing });
+    const created = {
+      id: `conv-${Date.now()}`,
+      manufacturerId: ownFactory().id,
+      buyerId,
+      buyerName: rfqItem.buyerName || rfqItem.companyName || "Buyer",
+      buyerCompany: rfqItem.companyName,
+      lastMessage: "",
+      lastMessageAt: new Date().toISOString(),
+      unreadCount: 0,
+    };
+    conversations.unshift(created);
+    return delay({ ...created });
+  },
   async deleteSeek(id) {
     removeWhere(reels, (item) => item.id === id && item.manufacturerId === ownFactory().id);
     return delay(undefined);
@@ -426,11 +560,105 @@ const factoryRepo: FactoryRepository = {
   async submitQuote(rfqId, quote) {
     const target = factoryRfqs.find((item) => item.id === rfqId);
     if (!target) throw new Error(`RFQ ${rfqId} not found`);
+    if (["ACCEPTED", "IN_PRODUCTION", "COMPLETED", "CANCELLED"].includes(target.status)) {
+      throw new Error("This RFQ is closed and no longer accepts quotes");
+    }
     target.status = "QUOTED";
     target.quotedPriceInr = quote.quotePrice;
     target.leadTimeDays = quote.leadTimeDays;
+    target.quoteIncoterm = quote.incoterm;
+    target.quoteNotes = quote.notes;
+    target.quotedAt ??= new Date().toISOString();
     return delay(undefined);
   },
+  getOrders: () =>
+    delay(orderRequests.filter((item) => item.manufacturer.id === ownFactory().id).map((item) => ({ ...item }))),
+  async openOrderConversation(orderId) {
+    const order = orderRequests.find((item) => item.id === orderId && item.manufacturer.id === ownFactory().id);
+    if (!order) throw new Error("Order not found");
+    const existing = conversations.find(
+      (item) => item.manufacturerId === ownFactory().id && item.buyerId === order.buyer.id,
+    );
+    if (existing) return delay({ ...existing });
+    const created = {
+      id: `conv-${Date.now()}`,
+      manufacturerId: ownFactory().id,
+      buyerId: order.buyer.id,
+      buyerName: order.buyer.name,
+      buyerCompany: order.buyer.companyName,
+      lastMessage: "",
+      lastMessageAt: new Date().toISOString(),
+      unreadCount: 0,
+    };
+    conversations.unshift(created);
+    return delay({ ...created });
+  },
+  async updateOrderStatus(orderId, status, note) {
+    const order = orderRequests.find((item) => item.id === orderId && item.manufacturer.id === ownFactory().id);
+    if (!order) throw new Error("Order not found");
+    if (order.status !== status) order.statusUpdatedAt = new Date().toISOString();
+    order.status = status;
+    order.sellerNote = note?.trim() || undefined;
+    return delay({ ...order });
+  },
+};
+
+// Mock mode: the buyer is whoever holds the demo session cookie. Call from the server
+// (features/orders/actions.ts) so orders land in the same fixtures /factory reads.
+const ordersRepo: OrderRepository = {
+  async place(input) {
+    const user = await session.getCurrentUser();
+    if (!user) throw new Error("Sign in to place an order");
+    const product = products.find((item) => item.slug === input.productSlug);
+    if (!product) throw new Error("Product not found");
+    const manufacturer = manufacturers.find((item) => item.id === product.manufacturerId);
+    if (!manufacturer) throw new Error("Manufacturer not found");
+    const now = new Date().toISOString();
+    const order: OrderRequest = {
+      id: `ord-${Date.now()}`,
+      referenceNumber: `ORD-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+      status: "PENDING",
+      statusUpdatedAt: now,
+      createdAt: now,
+      productId: product.id,
+      productSlug: product.slug,
+      productName: product.name,
+      productImageUrl: product.imageUrl,
+      unitPriceInr: product.priceInr,
+      unit: product.unit,
+      quantity: input.quantity,
+      estimatedTotalInr: product.priceInr * input.quantity,
+      buyerNote: input.note?.trim() || undefined,
+      manufacturer: { id: manufacturer.id, name: manufacturer.name, slug: manufacturer.slug },
+      buyer: {
+        id: user.id,
+        name: user.name,
+        companyName: user.companyName,
+        country: user.country,
+        email: user.email,
+        phone: user.phone,
+      },
+    };
+    orderRequests.unshift(order);
+    return delay({ ...order, buyer: { ...order.buyer, email: undefined, phone: undefined } });
+  },
+  async listMine() {
+    const user = await session.getCurrentUser();
+    return delay(
+      orderRequests
+        .filter((item) => item.buyer.id === user?.id)
+        .map((item) => ({ ...item, buyer: { ...item.buyer, email: undefined, phone: undefined } })),
+    );
+  },
+};
+
+// Mock mode has no accounts or email: the flows succeed so the UI can be exercised.
+const accountRepo: AccountRepository = {
+  changePassword: () => delay(undefined),
+  sendEmailVerification: () => delay(undefined),
+  requestPasswordReset: () => delay(undefined),
+  resetPassword: () => delay(undefined),
+  verifyEmail: () => delay(undefined),
 };
 
 export const mockApi: ApiClient = {
@@ -444,4 +672,6 @@ export const mockApi: ApiClient = {
   rfq,
   comments: commentsRepo,
   factory: factoryRepo,
+  orders: ordersRepo,
+  account: accountRepo,
 };
