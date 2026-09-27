@@ -8,6 +8,13 @@ import type { ChatMessage, ThreadWithMessages } from "./chat-types";
 import { ChatThreadList } from "./chat-thread-list";
 import { ChatConversationPane } from "./chat-conversation-pane";
 import { getApi } from "@/shared/api";
+import type { MessageItem } from "@/shared/api/contracts";
+import type { OrderRequest } from "@/entities/order";
+import { useChatAttachment } from "@/hooks/use-chat-attachment";
+
+function toChatMessage(m: MessageItem): ChatMessage {
+  return { id: m.id, sender: m.sender, text: m.text, time: m.time, attachment: m.attachment, order: m.order };
+}
 
 type Props = {
   initialThreads: (Conversation & { manufacturer: Manufacturer })[];
@@ -35,8 +42,11 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
 
   const [searchQuery, setSearchQuery] = useState("");
   const [inputMessage, setInputMessage] = useState("");
-  const [attachedFile, setAttachedFile] = useState<{ name: string; size: string } | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [threadOrders, setThreadOrders] = useState<OrderRequest[]>([]);
+  const [contextOrderId, setContextOrderId] = useState("");
+  const upload = useChatAttachment(selectedThreadId || undefined);
   const [mobileShowChat, setMobileShowChat] = useState(Boolean(withSlug));
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -61,21 +71,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
         setThreads((prev) =>
           prev.map((t) => {
             if (t.id === selectedThreadId) {
-              const finalMessages: ChatMessage[] = msgs.length > 0 ? msgs.map((m) => ({
-                id: m.id,
-                sender: m.sender,
-                text: m.text,
-                time: m.time,
-                attachment: m.attachment,
-              })) : [
-                {
-                  id: `welcome-${t.id}`,
-                  sender: "factory",
-                  text: `Hello! Welcome to ${t.manufacturer.name}. We specialize in precision engineering and OEM manufacturing. How can we assist your production requirement?`,
-                  time: "Just now",
-                },
-              ];
-              return { ...t, messages: finalMessages };
+              return { ...t, messages: msgs.map(toChatMessage) };
             }
             return t;
           })
@@ -97,15 +93,23 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
             if (t.messages.some(m => m.id === newMsg.id)) {
               return t;
             }
+            // Our own message can arrive over the stream before the send request returns:
+            // swap it in for the pending optimistic copy instead of showing it twice.
+            const pendingIdx = t.messages.findIndex(
+              (m) =>
+                m.id.startsWith("temp-") &&
+                m.sender === newMsg.sender &&
+                m.text === newMsg.text &&
+                (m.attachment?.url ?? "") === (newMsg.attachment?.url ?? "")
+            );
+            const messages =
+              pendingIdx >= 0
+                ? t.messages.map((m, i) => (i === pendingIdx ? toChatMessage(newMsg) : m))
+                : [...t.messages, toChatMessage(newMsg)];
             return {
               ...t,
-              messages: [...t.messages, {
-                id: newMsg.id,
-                sender: newMsg.sender,
-                text: newMsg.text,
-                time: newMsg.time,
-                attachment: newMsg.attachment,
-              }],
+              lastMessage: newMsg.text || newMsg.attachment?.name || t.lastMessage,
+              messages,
             };
           }
           return t;
@@ -118,6 +122,26 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
       unsubscribe();
     };
   }, [selectedThreadId]);
+
+  // Orders with this factory, for tagging a message with its order
+  const clearUpload = upload.clear;
+  useEffect(() => {
+    setContextOrderId("");
+    setThreadOrders([]);
+    setSendError(null);
+    clearUpload(); // an upload belongs to one conversation only
+    if (!selectedThreadId) return;
+    let active = true;
+    getApi()
+      .messages.listConversationOrders(selectedThreadId)
+      .then((orders) => {
+        if (active) setThreadOrders(orders);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [selectedThreadId, clearUpload]);
 
   const buyActionHandledRef = useRef(false);
 
@@ -142,13 +166,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
               if (t.id === convId) {
                 return {
                   ...t,
-                  messages: msgs.map((m) => ({
-                    id: m.id,
-                    sender: m.sender,
-                    text: m.text,
-                    time: m.time,
-                    attachment: m.attachment,
-                  })),
+                  messages: msgs.map(toChatMessage),
                 };
               }
               return t;
@@ -197,11 +215,14 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
 
   const handleSendMessage = async (e?: React.FormEvent, customText?: string) => {
     if (e) e.preventDefault();
-    const textToSend = (customText || inputMessage).trim();
-    if (!textToSend && !attachedFile) return;
+    const textToSend = (customText ?? inputMessage).trim();
+    const fileToSend = customText ? null : upload.attachment;
+    if ((!textToSend && !fileToSend) || upload.uploading) return;
 
     const currentThreadId = selectedThreadId;
     if (!currentThreadId) return;
+    const orderId = contextOrderId || undefined;
+    const order = threadOrders.find((o) => o.id === orderId);
 
     // Optimistic message update
     const tempId = `temp-${Date.now()}`;
@@ -209,64 +230,59 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
       id: tempId,
       sender: "user",
       text: textToSend,
-      time: "Just now",
-      attachment: attachedFile || undefined,
+      time: new Date().toISOString(),
+      attachment: fileToSend ?? undefined,
+      order: order && {
+        id: order.id,
+        referenceNumber: order.referenceNumber,
+        productName: order.productName,
+        quantity: order.quantity,
+        unit: order.unit,
+        status: order.status,
+      },
     };
 
     setThreads((prev) =>
-      prev.map((t) => {
-        if (t.id === currentThreadId) {
-          return {
-            ...t,
-            lastMessage: textToSend || `[Sent ${attachedFile?.name}]`,
-            lastMessageAt: "Just now",
-            messages: [...t.messages, optimisticMsg],
-          };
-        }
-        return t;
-      })
+      prev.map((t) =>
+        t.id === currentThreadId
+          ? {
+              ...t,
+              lastMessage: textToSend || `📎 ${fileToSend?.name}`,
+              lastMessageAt: new Date().toISOString(),
+              messages: [...t.messages, optimisticMsg],
+            }
+          : t
+      )
     );
-
-    const fileToSend = attachedFile;
-    setInputMessage("");
-    setAttachedFile(null);
+    setSendError(null);
+    if (!customText) {
+      setInputMessage("");
+      upload.clear();
+    }
 
     try {
-      // Send real message to backend
-      const savedMsg = await getApi().messages.sendMessage(
-        currentThreadId,
-        textToSend,
-        fileToSend || undefined
-      );
-
-      // Replace optimistic message with confirmed backend response
+      const savedMsg = await getApi().messages.sendMessage(currentThreadId, textToSend, fileToSend ?? undefined, { orderId });
       setThreads((prev) =>
-        prev.map((t) => {
-          if (t.id === currentThreadId) {
-            return {
-              ...t,
-              messages: t.messages.map((m) => (m.id === tempId ? {
-                id: savedMsg.id,
-                sender: savedMsg.sender,
-                text: savedMsg.text,
-                time: savedMsg.time,
-                attachment: savedMsg.attachment,
-              } : m)),
-            };
-          }
-          return t;
-        })
+        prev.map((t) =>
+          t.id === currentThreadId
+            ? {
+                ...t,
+                // The live stream may already have delivered it; keep one copy
+                messages: t.messages.some((m) => m.id === savedMsg.id)
+                  ? t.messages.filter((m) => m.id !== tempId)
+                  : t.messages.map((m) => (m.id === tempId ? toChatMessage(savedMsg) : m)),
+              }
+            : t
+        )
       );
     } catch (err) {
       console.error("Failed to send message:", err);
+      setThreads((prev) =>
+        prev.map((t) => (t.id === currentThreadId ? { ...t, messages: t.messages.filter((m) => m.id !== tempId) } : t))
+      );
+      setSendError(err instanceof Error ? `Not sent: ${err.message}` : "Message not sent. Please retry.");
+      if (!customText) setInputMessage(textToSend);
     }
-  };
-
-  const handleAttachMockFile = () => {
-    setAttachedFile({
-      name: "RFQ-Technical-Drawing-rev2.dwg",
-      size: "2.4 MB",
-    });
   };
 
   const quickInquiries = [
@@ -303,11 +319,17 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
           messagesEndRef={messagesEndRef}
           quickInquiries={quickInquiries}
           onSendMessage={handleSendMessage}
-          attachedFile={attachedFile}
-          onClearAttachment={() => setAttachedFile(null)}
-          onAttachMockFile={handleAttachMockFile}
           inputMessage={inputMessage}
           onInputChange={setInputMessage}
+          attachment={upload.attachment}
+          attachmentUploading={upload.uploading}
+          attachmentError={upload.error}
+          onPickFile={upload.pick}
+          onClearAttachment={upload.clear}
+          orders={threadOrders}
+          contextOrderId={contextOrderId}
+          onContextChange={setContextOrderId}
+          sendError={sendError}
         />
       ) : (
         <div className="flex-1 flex items-center justify-center p-8 text-center text-slate-400 text-sm">
