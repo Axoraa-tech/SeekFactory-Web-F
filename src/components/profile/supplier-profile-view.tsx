@@ -78,21 +78,11 @@ export function SupplierProfileView({
   const [inspectingCert, setInspectingCert] = useState<FactoryCertificate | null>(null);
   const { isSupplierLocked, upgradeTier, openUpgradeModal, pricing } = useBuyerPlan();
 
-  // Certificates with documents (seller hub) when present; otherwise the names the factory declared.
-  // Declared names carry no document, so they are shown unverified and are not inspectable.
-  const displayCertificates: FactoryCertificate[] =
-    manufacturer.certificates && manufacturer.certificates.length > 0
-      ? manufacturer.certificates
-      : certifications.map((name) => ({
-          id: name,
-          title: name,
-          issuer: "",
-          certNumber: "",
-          imageUrl: PLACEHOLDER_IMAGE,
-          verified: false,
-        }));
-  const hasDocuments = Boolean(manufacturer.certificates?.length);
-  const certificationNames = displayCertificates.map((c) => c.title);
+  // Only what the factory actually uploaded: never show placeholder certificates to buyers
+  const displayCertificates: FactoryCertificate[] = manufacturer.certificates ?? [];
+  const certificationNames = Array.from(
+    new Set([...(manufacturer.certifications ?? []), ...displayCertificates.map((cert) => cert.title)]),
+  );
   const isoCertified = certificationNames.some((name) => /iso\s*9001/i.test(name));
   const established = manufacturer.yearsEstablished > 0 ? manufacturer.yearsEstablished : null;
 
@@ -316,12 +306,12 @@ export function SupplierProfileView({
 
             {/* Header Action Buttons */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 pt-2 md:pt-0">
-              {/* Official Seller Website (only when the factory gave one) */}
+              {/* Official Seller Website */}
               {manufacturer.websiteUrl && (
                 <a
                   href={manufacturer.websiteUrl}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener noreferrer nofollow"
                   className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
                   title="Visit Official Seller Website"
                 >
@@ -526,6 +516,7 @@ export function SupplierProfileView({
                         unit={product.unit}
                         moq={product.moq}
                         productSlug={product.slug}
+                        productName={product.name}
                         manufacturerSlug={manufacturer.slug}
                         size="sm"
                       />
@@ -580,7 +571,7 @@ export function SupplierProfileView({
                     <a
                       href={manufacturer.websiteUrl}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener noreferrer nofollow"
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
                     >
                       <Globe2 className="h-3.5 w-3.5" />
@@ -603,12 +594,18 @@ export function SupplierProfileView({
                       <span className="text-slate-500">Full-Time Staff</span>
                       <span className="font-semibold text-slate-800">{manufacturer.employees || "—"}</span>
                     </div>
-                    <div className="flex justify-between pb-1">
-                      <span className="text-slate-500">Years in Operation</span>
-                      <span className="font-semibold text-slate-800">
-                        {established ? `${new Date().getFullYear() - established} Years` : "—"}
-                      </span>
-                    </div>
+                    {manufacturer.productionLines != null && manufacturer.productionLines > 0 && (
+                      <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span className="text-slate-500">Production Lines</span>
+                        <span className="font-semibold text-slate-800">{manufacturer.productionLines}</span>
+                      </div>
+                    )}
+                    {manufacturer.annualTurnover && (
+                      <div className="flex justify-between pb-1">
+                        <span className="text-slate-500">Annual Turnover</span>
+                        <span className="font-semibold text-slate-800">{manufacturer.annualTurnover}</span>
+                      </div>
+                    )}
                   </div>
                 </Card>
 
@@ -619,16 +616,16 @@ export function SupplierProfileView({
                       <span className="text-slate-500">Main Export Markets</span>
                       <span className="font-semibold text-slate-800">{manufacturer.exportCountries.join(", ") || "—"}</span>
                     </div>
-                    <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Quality Certifications</span>
-                      <span className="font-semibold text-emerald-600 text-right">
-                        {certificationNames.length ? certificationNames.join(", ") : "None listed"}
+                    <div className="flex justify-between gap-3 border-b border-slate-100 pb-1.5">
+                      <span className="shrink-0 text-slate-500">Quality Certifications</span>
+                      <span className={cn("text-right font-semibold", certificationNames.length ? "text-emerald-600" : "text-slate-400")}>
+                        {certificationNames.length ? certificationNames.join(", ") : "Not provided"}
                       </span>
                     </div>
                     <div className="flex justify-between pb-1">
-                      <span className="text-slate-500">Verification</span>
+                      <span className="text-slate-500">SeekFactory Verification</span>
                       <span className="font-semibold text-slate-800">
-                        {manufacturer.verified ? "Approved by SeekFactory" : "Pending review"}
+                        {manufacturer.verified ? "Business details verified" : "Not verified"}
                       </span>
                     </div>
                   </div>
@@ -636,14 +633,16 @@ export function SupplierProfileView({
               </div>
 
               {/* Verified Profile & Certifications Showcase (Alibaba Reference Style) */}
-              <div className="pt-2">
-                <AlibabaCertSection
-                  certificates={displayCertificates}
-                  manufacturer={manufacturer}
-                  isOwner={false}
-                  onInspect={hasDocuments ? (cert) => setInspectingCert(cert) : undefined}
-                />
-              </div>
+              {displayCertificates.length > 0 && (
+                <div className="pt-2">
+                  <AlibabaCertSection
+                    certificates={displayCertificates}
+                    manufacturer={manufacturer}
+                    isOwner={false}
+                    onInspect={(cert) => setInspectingCert(cert)}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
