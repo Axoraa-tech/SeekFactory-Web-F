@@ -1,4 +1,4 @@
-export type SellerTab = "overview" | "products" | "seeks" | "rfqs" | "messages" | "profile";
+export type SellerTab = "overview" | "products" | "seeks" | "rfqs" | "orders" | "messages" | "profile" | "account";
 
 /**
  * Seller KPIs. `null` means "not enough data yet" (e.g. no views in the previous period,
@@ -46,7 +46,12 @@ export type SellerProduct = {
   priceInr: number;
   unit: string;
   moq: string;
-  status: "Active" | "Under Review" | "Draft";
+  /** Active = visible to buyers; Paused = hidden by the seller (still editable). */
+  status: "Active" | "Paused";
+  /** Gallery in display order (first = imageUrl). */
+  imageUrls: string[];
+  datasheetUrl?: string;
+  datasheetName?: string;
   viewsCount: number;
   inquiriesCount: number;
   specs: Record<string, string>;
@@ -67,11 +72,16 @@ export type SellerSeek = {
   taggedProductName?: string;
   category: string;
   createdAt: string;
-  status: "Published" | "Processing" | "Draft";
+  /** Paused = hidden from the buyer feed by the seller. */
+  status: "Published" | "Processing" | "Paused";
+  description: string;
+  hashtags: string[];
+  productIds: string[];
 };
 
 export type SellerRfq = {
   id: string;
+  referenceNumber: string;
   buyerName: string;
   buyerCompany: string;
   buyerCountry: string;
@@ -81,11 +91,14 @@ export type SellerRfq = {
   quantityRequested: string;
   targetBudgetInr?: number;
   deliveryPort: string;
-  status: "New" | "Responded" | "Quoted" | "Under Review";
+  /** From this factory's point of view: New = not quoted yet, Quoted = our quote sent, Closed = RFQ no longer open. */
+  status: "New" | "Quoted" | "Closed";
   createdAt: string;
   requirements: string;
   quotedPriceInr?: number;
   leadTimeDays?: number;
+  quoteIncoterm?: string;
+  quoteNotes?: string;
 };
 
 export type SellerChatMessage = {
@@ -99,6 +112,10 @@ export type SellerChatMessage = {
     detail: string;
     price?: number;
   };
+  /** Uploaded image/PDF. */
+  attachment?: import("@/shared/api/contracts").MessageAttachment;
+  /** The order this message is about, if the sender picked one. */
+  order?: import("@/entities/message").MessageOrderContext;
 };
 
 export type SellerConversation = {

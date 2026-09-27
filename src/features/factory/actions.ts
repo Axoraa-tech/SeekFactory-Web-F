@@ -2,10 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 import { getApi } from "@/shared/api";
-import type { FactoryQuote, NewFactoryProduct, NewFactorySeek } from "@/shared/api/contracts";
+import type {
+  FactoryProductUpdate,
+  FactoryQuote,
+  FactorySeekUpdate,
+  FactoryVerification,
+  NewFactoryProduct,
+  NewFactorySeek,
+  VerificationSubmission,
+} from "@/shared/api/contracts";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
+import type { OrderRequest, OrderStatus } from "@/entities/order";
+import { ORDER_STATUSES } from "@/features/orders/order-status";
 
 /**
  * Seller hub mutations. Run on the server so that:
@@ -48,6 +58,26 @@ export async function createProductAction(input: NewFactoryProduct): Promise<Act
   return run(() => getApi().factory.addProduct({ ...input, name: input.name.trim() }));
 }
 
+export async function updateProductAction(id: string, input: FactoryProductUpdate): Promise<ActionResult<Product>> {
+  if (input.name !== undefined && !input.name.trim()) return { ok: false, error: "Product name is required." };
+  if (input.priceInr !== undefined && !(input.priceInr > 0)) {
+    return { ok: false, error: "Price must be greater than zero." };
+  }
+  if (input.imageUrls) {
+    if (input.imageUrls.length === 0) return { ok: false, error: "Add at least one product photo." };
+    if (input.imageUrls.length > 8) return { ok: false, error: "A product can have at most 8 photos." };
+    if (!input.imageUrls.every(isUploadableUrl)) return { ok: false, error: "A product photo was not uploaded." };
+  }
+  if (input.datasheetUrl && !isUploadableUrl(input.datasheetUrl)) {
+    return { ok: false, error: "Datasheet was not uploaded." };
+  }
+  return run(() => getApi().factory.updateProduct(id, { ...input, name: input.name?.trim() }));
+}
+
+export async function setProductListedAction(id: string, listed: boolean): Promise<ActionResult<Product>> {
+  return run(() => getApi().factory.setProductListed(id, listed));
+}
+
 export async function deleteProductAction(id: string): Promise<ActionResult> {
   return run(async () => {
     await getApi().factory.deleteProduct(id);
@@ -62,6 +92,16 @@ export async function createSeekAction(input: NewFactorySeek): Promise<ActionRes
   }
   if (!isUploadableUrl(input.posterUrl)) return { ok: false, error: "Cover image was not uploaded." };
   return run(() => getApi().factory.addSeek({ ...input, title: input.title.trim() }));
+}
+
+export async function updateSeekAction(id: string, input: FactorySeekUpdate): Promise<ActionResult<Reel>> {
+  if (input.title !== undefined && !input.title.trim()) return { ok: false, error: "Video title is required." };
+  if (input.posterUrl && !isUploadableUrl(input.posterUrl)) return { ok: false, error: "Cover image was not uploaded." };
+  return run(() => getApi().factory.updateSeek(id, { ...input, title: input.title?.trim() }));
+}
+
+export async function setSeekListedAction(id: string, listed: boolean): Promise<ActionResult<Reel>> {
+  return run(() => getApi().factory.setSeekListed(id, listed));
 }
 
 export async function deleteSeekAction(id: string): Promise<ActionResult> {
@@ -80,14 +120,47 @@ export async function submitQuoteAction(rfqId: string, quote: FactoryQuote): Pro
   });
 }
 
+export async function updateOrderStatusAction(
+  orderId: string,
+  status: OrderStatus,
+  note?: string,
+): Promise<ActionResult<OrderRequest>> {
+  if (!ORDER_STATUSES.includes(status)) return { ok: false, error: "Unknown order status." };
+  if (note && note.length > 2000) return { ok: false, error: "Note must be at most 2000 characters." };
+  return run(() => getApi().factory.updateOrderStatus(orderId, status, note?.trim() || undefined));
+}
+
 export async function updateFactoryProfileAction(
   data: Partial<Manufacturer>,
 ): Promise<ActionResult<Manufacturer>> {
-  if (data.websiteUrl && !/^https?:\/\//i.test(data.websiteUrl)) {
-    return { ok: false, error: "Website must start with http:// or https://" };
+  if (data.websiteUrl !== undefined) {
+    const website = data.websiteUrl.trim();
+    // "example.com" → "https://example.com"; any other scheme (javascript:, data:, …) is refused
+    const withScheme = !website || /^https?:\/\//i.test(website) ? website : `https://${website}`;
+    if (withScheme && !/^https?:\/\/[a-z0-9.-]+\.[a-z]{2,}(:\d+)?([/?#]\S*)?$/i.test(withScheme)) {
+      return { ok: false, error: "Enter a valid website URL, e.g. https://example.com" };
+    }
+    data = { ...data, websiteUrl: withScheme };
   }
   if (data.certificates?.some((cert) => !isUploadableUrl(cert.imageUrl))) {
     return { ok: false, error: "A certificate image was not uploaded." };
   }
   return run(() => getApi().factory.updateProfile(data));
+}
+
+export async function submitVerificationAction(
+  input: VerificationSubmission,
+): Promise<ActionResult<FactoryVerification>> {
+  if (input.companyRegNumber.trim().length < 4) {
+    return { ok: false, error: "Enter a valid business registration number." };
+  }
+  if (input.factoryAddress.trim().length < 10) return { ok: false, error: "Enter the full factory address." };
+  return run(() =>
+    getApi().factory.submitVerification({
+      ...input,
+      companyRegNumber: input.companyRegNumber.trim(),
+      factoryAddress: input.factoryAddress.trim(),
+      taxId: input.taxId?.trim() || undefined,
+    }),
+  );
 }

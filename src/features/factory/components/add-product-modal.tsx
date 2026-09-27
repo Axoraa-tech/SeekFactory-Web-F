@@ -1,17 +1,35 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { X, Plus, Trash2, PackagePlus, UploadCloud, Info, Image as ImageIcon, Check, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import {
+  X,
+  Plus,
+  Trash2,
+  PackagePlus,
+  UploadCloud,
+  Info,
+  Image as ImageIcon,
+  Loader2,
+  FileText,
+  Star,
+  Pencil,
+} from "lucide-react";
 import { getApi } from "@/shared/api";
 import type { NewFactoryProduct } from "@/shared/api/contracts";
 import type { Category } from "@/entities/category";
+import type { SellerProduct } from "../types";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   categories: Category[];
-  /** Persists the product; rejects with a user-facing message on failure. */
-  onAddProduct: (product: NewFactoryProduct) => Promise<void>;
+  /** Edit mode when set: the form starts from this product. */
+  product?: SellerProduct;
+  /**
+   * Persists the product; rejects with a user-facing message on failure.
+   * In edit mode an empty datasheetUrl means "remove the datasheet".
+   */
+  onSubmit: (product: NewFactoryProduct) => Promise<void>;
 };
 
 const SAMPLE_IMAGES = [
@@ -22,63 +40,141 @@ const SAMPLE_IMAGES = [
   "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?auto=format&fit=crop&w=900&q=80",
 ];
 
+const MAX_IMAGES = 8;
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_PDF_BYTES = 20 * 1024 * 1024;
 
-export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: Props) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  // Remember the last upload so a failed save can retry without re-sending the photo.
-  const uploadedRef = useRef<{ file: File; url: string } | null>(null);
+/** A gallery slot: either already stored (url) or a device file waiting for upload (preview). */
+type GalleryItem = { key: string; url: string; file?: File };
+
+type Datasheet = { url?: string; name: string; file?: File } | null;
+
+const DEFAULT_SPECS = [
+  { key: "Spindle Speed / Power", value: "12,000 RPM / 15 kW" },
+  { key: "Table Size / Capacity", value: "1200 x 600 mm" },
+  { key: "Certification", value: "ISO 9001 / CE" },
+];
+
+let keySeq = 0;
+const nextKey = () => `img-${++keySeq}`;
+
+export function AddProductModal({ isOpen, onClose, categories, product, onSubmit }: Props) {
+  const editing = Boolean(product);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  // Uploads already done for a File, so a failed save can retry without re-sending it.
+  const uploadedRef = useRef(new Map<File, string>());
   const roots = categories.filter((c) => c.parentId === null);
-  const [name, setName] = useState("");
-  const [rootCategoryId, setRootCategoryId] = useState(roots[0]?.id ?? "");
-  const [subCategoryId, setSubCategoryId] = useState("");
-  const [priceInr, setPriceInr] = useState<number>(2500000);
-  const [unit, setUnit] = useState("Set");
-  const [moq, setMoq] = useState("1 Set");
-  const [imageUrl, setImageUrl] = useState(SAMPLE_IMAGES[0]);
-  const [deviceFile, setDeviceFile] = useState<File | null>(null);
-  const [deviceFileSelected, setDeviceFileSelected] = useState<string | null>(null);
-  const [description, setDescription] = useState("");
-  const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>([
-    { key: "Spindle Speed / Power", value: "12,000 RPM / 15 kW" },
-    { key: "Table Size / Capacity", value: "1200 x 600 mm" },
-    { key: "Certification", value: "ISO 9001 / CE" },
-  ]);
+
+  const initialCategory = categories.find((c) => c.id === product?.categoryId);
+  const [name, setName] = useState(product?.name ?? "");
+  const [rootCategoryId, setRootCategoryId] = useState(
+    initialCategory ? initialCategory.parentId ?? initialCategory.id : roots[0]?.id ?? "",
+  );
+  const [subCategoryId, setSubCategoryId] = useState(initialCategory?.parentId ? initialCategory.id : "");
+  const [priceInr, setPriceInr] = useState<number>(product?.priceInr ?? 2500000);
+  const [unit, setUnit] = useState(product?.unit ?? "Set");
+  const [moq, setMoq] = useState(product?.moq ?? "1 Set");
+  const [gallery, setGallery] = useState<GalleryItem[]>(() =>
+    product
+      ? product.imageUrls.map((url) => ({ key: nextKey(), url }))
+      : [{ key: nextKey(), url: SAMPLE_IMAGES[0] }],
+  );
+  const [datasheet, setDatasheet] = useState<Datasheet>(
+    product?.datasheetUrl ? { url: product.datasheetUrl, name: product.datasheetName || "Datasheet.pdf" } : null,
+  );
+  const [description, setDescription] = useState(product?.description ?? "");
+  const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>(() => {
+    if (!product) return DEFAULT_SPECS;
+    const entries = Object.entries(product.specs).map(([key, value]) => ({ key, value }));
+    return entries.length ? entries : [{ key: "", value: "" }];
+  });
   const [status, setStatus] = useState<"idle" | "uploading" | "saving">("idle");
   const [error, setError] = useState<string | null>(null);
   const busy = status !== "idle";
   const subCategories = categories.filter((c) => c.parentId === rootCategoryId);
 
+  // Release preview object URLs when the modal goes away
+  const galleryRef = useRef(gallery);
+  galleryRef.current = gallery;
+  useEffect(
+    () => () => galleryRef.current.forEach((item) => item.file && URL.revokeObjectURL(item.url)),
+    [],
+  );
+
   if (!isOpen) return null;
 
-  function handleDeviceFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > MAX_IMAGE_BYTES) {
-        setError("Photo is larger than 20MB. Please choose a smaller file.");
-        return;
-      }
-      if (deviceFileSelected) URL.revokeObjectURL(deviceFileSelected);
-      const objectUrl = URL.createObjectURL(file);
-      setError(null);
-      setDeviceFile(file);
-      setDeviceFileSelected(objectUrl);
-      setImageUrl(objectUrl);
+  function addDeviceImages(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length) return;
+    const room = MAX_IMAGES - gallery.length;
+    if (room <= 0) {
+      setError(`A product can have at most ${MAX_IMAGES} photos.`);
+      return;
     }
+    const tooBig = files.find((file) => file.size > MAX_IMAGE_BYTES);
+    if (tooBig) {
+      setError(`"${tooBig.name}" is larger than 20MB. Please choose a smaller file.`);
+      return;
+    }
+    setError(files.length > room ? `Only the first ${room} photo(s) were added (max ${MAX_IMAGES}).` : null);
+    setGallery((prev) => [
+      ...prev,
+      ...files.slice(0, room).map((file) => ({ key: nextKey(), url: URL.createObjectURL(file), file })),
+    ]);
   }
 
-  function handleAddSpec() {
-    setSpecs((prev) => [...prev, { key: "", value: "" }]);
+  function addPreset(url: string) {
+    if (gallery.some((item) => item.url === url)) return;
+    if (gallery.length >= MAX_IMAGES) {
+      setError(`A product can have at most ${MAX_IMAGES} photos.`);
+      return;
+    }
+    setGallery((prev) => [...prev, { key: nextKey(), url }]);
   }
 
-  function handleRemoveSpec(index: number) {
-    setSpecs((prev) => prev.filter((_, i) => i !== index));
+  function removeImage(key: string) {
+    setGallery((prev) => {
+      const item = prev.find((i) => i.key === key);
+      if (item?.file) URL.revokeObjectURL(item.url);
+      return prev.filter((i) => i.key !== key);
+    });
+  }
+
+  function makeCover(key: string) {
+    setGallery((prev) => {
+      const item = prev.find((i) => i.key === key);
+      return item ? [item, ...prev.filter((i) => i.key !== key)] : prev;
+    });
+  }
+
+  function pickDatasheet(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      setError("Datasheet must be a PDF file.");
+      return;
+    }
+    if (file.size > MAX_PDF_BYTES) {
+      setError("Datasheet is larger than 20MB.");
+      return;
+    }
+    setError(null);
+    setDatasheet({ name: file.name, file });
   }
 
   function handleSpecChange(index: number, field: "key" | "value", val: string) {
-    setSpecs((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, [field]: val } : s))
-    );
+    setSpecs((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: val } : s)));
+  }
+
+  async function upload(file: File, kind: "image" | "document") {
+    const cached = uploadedRef.current.get(file);
+    if (cached) return cached;
+    const media = await getApi().factory.uploadMedia(file, kind);
+    uploadedRef.current.set(file, media.url);
+    return media.url;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -89,32 +185,31 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
       setError("Choose a category for this product.");
       return;
     }
+    if (gallery.length === 0) {
+      setError("Add at least one product photo.");
+      return;
+    }
 
     const specsRecord: Record<string, string> = {};
     specs.forEach((s) => {
-      if (s.key.trim() && s.value.trim()) {
-        specsRecord[s.key.trim()] = s.value.trim();
-      }
+      if (s.key.trim() && s.value.trim()) specsRecord[s.key.trim()] = s.value.trim();
     });
 
     setError(null);
     try {
-      let finalImage = imageUrl;
-      if (deviceFile) {
-        let uploaded = uploadedRef.current;
-        if (uploaded?.file !== deviceFile) {
-          setStatus("uploading");
-          const media = await getApi().factory.uploadMedia(deviceFile, "image");
-          uploaded = { file: deviceFile, url: media.url };
-          uploadedRef.current = uploaded;
-        }
-        finalImage = uploaded.url;
+      const needsUpload = gallery.some((item) => item.file) || Boolean(datasheet?.file);
+      if (needsUpload) setStatus("uploading");
+      const imageUrls: string[] = [];
+      for (const item of gallery) {
+        imageUrls.push(item.file ? await upload(item.file, "image") : item.url);
       }
+      const datasheetUrl = datasheet?.file ? await upload(datasheet.file, "document") : datasheet?.url;
 
       setStatus("saving");
-      await onAddProduct({
+      await onSubmit({
         name: name.trim(),
-        imageUrl: finalImage,
+        imageUrl: imageUrls[0],
+        imageUrls,
         categoryId,
         priceInr: Number(priceInr) || 100000,
         unit,
@@ -123,11 +218,13 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
         description:
           description.trim() ||
           `${name.trim()} manufactured to international quality standards for OEM/ODM export.`,
+        // Edit: "" clears a removed datasheet; create: omit when none
+        datasheetUrl: datasheetUrl ?? (editing ? "" : undefined),
+        datasheetName: datasheet?.name,
       });
-      if (deviceFileSelected) URL.revokeObjectURL(deviceFileSelected);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not publish product. Please retry.");
+      setError(err instanceof Error ? err.message : "Could not save product. Please retry.");
       setStatus("idle");
     }
   }
@@ -139,11 +236,15 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-surface px-6 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-blue text-white shadow-xs">
-              <PackagePlus className="h-5 w-5" />
+              {editing ? <Pencil className="h-5 w-5" /> : <PackagePlus className="h-5 w-5" />}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-ink">Post New Industrial Product</h2>
-              <p className="text-xs text-ink-muted">Publish machinery to verified Indian & global buyers</p>
+              <h2 className="text-lg font-bold text-ink">{editing ? "Edit Product" : "Post New Industrial Product"}</h2>
+              <p className="text-xs text-ink-muted">
+                {editing
+                  ? "Changes go live on your public listing as soon as you save"
+                  : "Publish machinery to verified Indian & global buyers"}
+              </p>
             </div>
           </div>
           <button
@@ -235,10 +336,11 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
                   onChange={(e) => setUnit(e.target.value)}
                   className="rounded-lg border border-line px-2.5 py-2.5 text-sm text-ink focus:border-brand-blue focus:outline-hidden bg-surface"
                 >
-                  <option value="Set">Set</option>
-                  <option value="Piece">Piece</option>
-                  <option value="Ton">Ton</option>
-                  <option value="Unit">Unit</option>
+                  {Array.from(new Set(["Set", "Piece", "Ton", "Unit", unit])).map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
                 </select>
                 <input
                   type="text"
@@ -252,77 +354,147 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
             </div>
           </div>
 
-          {/* Product Photo Upload Option (From Device & Samples) */}
+          {/* Product Photos (gallery) */}
           <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-ink">
-              Product Photo <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold uppercase tracking-wider text-ink">
+                Product Photos <span className="text-red-500">*</span>
+              </label>
+              <span className="text-[11px] text-ink-muted">
+                {gallery.length}/{MAX_IMAGES} • first photo is the cover
+              </span>
+            </div>
 
-            {/* Device File Upload Area */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="cursor-pointer rounded-xl border-2 border-dashed border-line hover:border-brand-blue bg-canvas p-4 text-center transition flex flex-col items-center justify-center gap-2 group"
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleDeviceFileChange}
-                className="hidden"
-              />
-              {deviceFileSelected ? (
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-lg overflow-hidden border border-line shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img loading="lazy" decoding="async" src={deviceFileSelected} alt="Preview" className="h-full w-full object-cover" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-ink flex items-center gap-1">
-                      <Check className="h-3.5 w-3.5 text-emerald-600" /> Photo Selected from Device
-                    </p>
-                    <p className="text-[11px] text-brand-blue hover:underline">Click to change device file</p>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+              {gallery.map((item, index) => (
+                <div
+                  key={item.key}
+                  className={`group relative aspect-4/3 rounded-lg overflow-hidden border-2 ${
+                    index === 0 ? "border-brand-blue" : "border-line"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.url} alt="" className="h-full w-full object-cover" />
+                  {index === 0 && (
+                    <span className="absolute left-1 top-1 rounded bg-brand-blue px-1.5 py-0.5 text-[9px] font-bold text-white">
+                      Cover
+                    </span>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-black/50 p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => makeCover(item.key)}
+                        aria-label="Make cover photo"
+                        title="Make cover photo"
+                        className="rounded p-1 text-white hover:bg-white/20"
+                      >
+                        <Star className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(item.key)}
+                      aria-label="Remove photo"
+                      title="Remove photo"
+                      className="rounded p-1 text-white hover:bg-white/20"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
-              ) : (
-                <>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue-soft text-brand-blue group-hover:scale-105 transition-transform">
-                    <ImageIcon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-ink">
-                      Click to <span className="text-brand-blue font-bold underline">upload photo from device</span>
-                    </p>
-                    <p className="text-[11px] text-ink-muted">PNG, JPG, WEBP up to 20MB</p>
-                  </div>
-                </>
+              ))}
+
+              {gallery.length < MAX_IMAGES && (
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="aspect-4/3 rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas flex flex-col items-center justify-center gap-1 text-brand-blue transition"
+                >
+                  <ImageIcon className="h-5 w-5" />
+                  <span className="text-[10px] font-bold">Add photos</span>
+                </button>
               )}
             </div>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              multiple
+              onChange={addDeviceImages}
+              className="hidden"
+            />
+            <p className="text-[11px] text-ink-muted">PNG, JPG, WEBP up to 20MB each.</p>
 
-            {/* Or choose from preset gallery */}
-            <div className="pt-2">
-              <p className="text-[11px] font-semibold text-ink-muted mb-2">Or select catalog preset photo:</p>
+            <div className="pt-1">
+              <p className="text-[11px] font-semibold text-ink-muted mb-2">Or add a catalog preset photo:</p>
               <div className="grid grid-cols-5 gap-2.5">
-                {SAMPLE_IMAGES.map((imgSrc, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => {
-                      setImageUrl(imgSrc);
-                      setDeviceFile(null);
-                      setDeviceFileSelected(null);
-                    }}
-                    className={`relative aspect-4/3 rounded-lg overflow-hidden border-2 transition ${
-                      imageUrl === imgSrc && !deviceFileSelected
-                        ? "border-brand-blue ring-2 ring-brand-blue-soft"
-                        : "border-line hover:border-neutral-400 opacity-70 hover:opacity-100"
-                    }`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imgSrc} alt="" className="h-full w-full object-cover" />
-                  </button>
-                ))}
+                {SAMPLE_IMAGES.map((imgSrc) => {
+                  const added = gallery.some((item) => item.url === imgSrc);
+                  return (
+                    <button
+                      key={imgSrc}
+                      type="button"
+                      onClick={() => addPreset(imgSrc)}
+                      disabled={added}
+                      className={`relative aspect-4/3 rounded-lg overflow-hidden border-2 transition ${
+                        added
+                          ? "border-brand-blue opacity-50"
+                          : "border-line hover:border-neutral-400 opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={imgSrc} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  );
+                })}
               </div>
             </div>
+          </div>
+
+          {/* Datasheet PDF */}
+          <div className="space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-ink">
+              Technical Datasheet (PDF, optional)
+            </label>
+            {datasheet ? (
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-line bg-canvas px-3 py-2">
+                <span className="flex min-w-0 items-center gap-2 text-xs font-semibold text-ink">
+                  <FileText className="h-4 w-4 shrink-0 text-red-600" />
+                  <span className="truncate">{datasheet.name}</span>
+                  {datasheet.file && <span className="shrink-0 text-[10px] text-ink-muted">(uploads on save)</span>}
+                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => pdfInputRef.current?.click()}
+                    className="text-[11px] font-bold text-brand-blue hover:underline"
+                  >
+                    Replace
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDatasheet(null)}
+                    aria-label="Remove datasheet"
+                    className="p-1 text-ink-muted hover:text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => pdfInputRef.current?.click()}
+                className="flex w-full items-center gap-2 rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas px-3 py-3 text-xs font-semibold text-ink transition"
+              >
+                <FileText className="h-4 w-4 text-brand-blue" />
+                <span>
+                  Attach a <span className="font-bold text-brand-blue underline">PDF datasheet</span> buyers can download (max 20MB)
+                </span>
+              </button>
+            )}
+            <input ref={pdfInputRef} type="file" accept="application/pdf" onChange={pickDatasheet} className="hidden" />
           </div>
 
           {/* Technical Specifications */}
@@ -333,7 +505,7 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
               </label>
               <button
                 type="button"
-                onClick={handleAddSpec}
+                onClick={() => setSpecs((prev) => [...prev, { key: "", value: "" }])}
                 className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -360,7 +532,7 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
                   {specs.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => handleRemoveSpec(idx)}
+                      onClick={() => setSpecs((prev) => prev.filter((_, i) => i !== idx))}
                       aria-label="Remove specification"
                       className="p-1.5 text-ink-muted hover:text-red-500 transition"
                     >
@@ -386,13 +558,12 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
             />
           </div>
 
-          {/* Notice */}
-          <div className="flex items-start gap-2 rounded-lg bg-brand-blue-soft p-3 border border-blue-100 text-xs text-brand-blue">
-            <Info className="h-4 w-4 shrink-0 mt-0.5 text-brand-blue" />
-            <p>
-              Your listing will be indexed in your factory catalog and presented directly to industrial buyers.
-            </p>
-          </div>
+          {!editing && (
+            <div className="flex items-start gap-2 rounded-lg bg-brand-blue-soft p-3 border border-blue-100 text-xs text-brand-blue">
+              <Info className="h-4 w-4 shrink-0 mt-0.5 text-brand-blue" />
+              <p>Your listing will be indexed in your factory catalog and presented directly to industrial buyers.</p>
+            </div>
+          )}
 
           {error && (
             <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
@@ -417,7 +588,13 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
               <span>
-                {status === "uploading" ? "Uploading photo…" : status === "saving" ? "Publishing…" : "Publish Product"}
+                {status === "uploading"
+                  ? "Uploading files…"
+                  : status === "saving"
+                    ? "Saving…"
+                    : editing
+                      ? "Save Changes"
+                      : "Publish Product"}
               </span>
             </button>
           </div>
@@ -426,4 +603,3 @@ export function AddProductModal({ isOpen, onClose, categories, onAddProduct }: P
     </div>
   );
 }
-

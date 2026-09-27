@@ -18,12 +18,15 @@ export function toSellerProduct(product: Product, categories: Category[]): Selle
     name: product.name,
     slug: product.slug,
     imageUrl: product.imageUrl,
+    imageUrls: product.imageUrls?.length ? product.imageUrls : [product.imageUrl],
+    datasheetUrl: product.datasheetUrl,
+    datasheetName: product.datasheetName,
     category: categoryName(categories, product.categoryId, "Industrial Machinery"),
     categoryId: product.categoryId,
     priceInr: product.priceInr,
     unit: product.unit,
     moq: product.moq,
-    status: "Active",
+    status: product.listed === false ? "Paused" : "Active",
     viewsCount: 0,
     inquiriesCount: 0,
     specs: product.specs,
@@ -46,38 +49,49 @@ export function toSellerSeek(reel: Reel, categories: Category[], products: Produ
     taggedProductName: products.find((item) => item.id === reel.productIds[0])?.name,
     category: categoryName(categories, reel.categoryIds?.[0], "Factory Production"),
     createdAt: "Recently",
-    status: reel.videoUrl ? "Published" : "Processing",
+    status: reel.listed === false ? "Paused" : reel.videoUrl ? "Published" : "Processing",
+    description: reel.description,
+    hashtags: reel.hashtags,
+    productIds: reel.productIds,
   };
 }
 
-const RFQ_STATUS: Record<string, SellerRfq["status"]> = {
-  SUBMITTED: "New",
-  NEW: "New",
-  OPEN: "New",
-  QUOTED: "Quoted",
-  RESPONDED: "Responded",
-  UNDER_REVIEW: "Under Review",
-};
+/** RFQ lifecycle statuses after which the buyer no longer accepts quotes. */
+const CLOSED_RFQ_STATUSES = new Set(["ACCEPTED", "IN_PRODUCTION", "COMPLETED", "CANCELLED"]);
 
-export function toSellerRfq(rfq: RfqItem): SellerRfq {
-  const status = RFQ_STATUS[rfq.status.toUpperCase().replace(/\s+/g, "_")] ?? "New";
+/**
+ * Seller-facing status: RFQs are broadcast to many factories, so "Quoted" means
+ * *this* factory has quoted (the backend sends its own quote), not that anyone did.
+ */
+export function sellerRfqStatus(rfq: RfqItem): SellerRfq["status"] {
+  if (CLOSED_RFQ_STATUSES.has(rfq.status.toUpperCase())) return "Closed";
+  return rfq.quotedPriceInr !== undefined && rfq.quotedPriceInr !== null ? "Quoted" : "New";
+}
+
+export function toSellerRfq(rfq: RfqItem, categories: Category[] = []): SellerRfq {
   const budget = Number(rfq.targetPrice);
   const createdAt = new Date(rfq.createdAt);
+  // Older RFQs embed the category as a "[Name] ..." prefix in the details
+  const legacyCategory = /^\[([^\]]+)\]/.exec(rfq.details ?? "")?.[1];
   return {
     id: rfq.id,
-    buyerName: rfq.buyerName || rfq.companyName || "Verified Industrial Buyer",
-    buyerCompany: rfq.companyName || "Global Sourcing Ltd",
-    buyerCountry: rfq.buyerCountry || "India",
+    referenceNumber: rfq.referenceNumber,
+    buyerName: rfq.buyerName || rfq.companyName || "Buyer",
+    buyerCompany: rfq.companyName || rfq.buyerName || "Buyer",
+    buyerCountry: rfq.buyerCountry || "",
+    buyerAvatarUrl: rfq.buyerAvatarUrl,
     productName: rfq.productName,
-    productCategory: /^\[([^\]]+)\]/.exec(rfq.details ?? "")?.[1] || "Machinery",
-    quantityRequested: `${rfq.quantity} ${rfq.unit || "Pieces"}`,
+    productCategory: categoryName(categories, rfq.categoryId, legacyCategory || "Machinery"),
+    quantityRequested: [rfq.quantity, rfq.unit].filter(Boolean).join(" ") || "—",
     targetBudgetInr: rfq.targetPrice && Number.isFinite(budget) ? budget : undefined,
-    deliveryPort: rfq.incoterm || "FOB",
-    status,
+    deliveryPort: rfq.incoterm || "—",
+    status: sellerRfqStatus(rfq),
     createdAt: Number.isNaN(createdAt.getTime()) ? rfq.createdAt : createdAt.toLocaleDateString("en-IN"),
     requirements: rfq.details || "",
     quotedPriceInr: rfq.quotedPriceInr,
     leadTimeDays: rfq.leadTimeDays,
+    quoteIncoterm: rfq.quoteIncoterm,
+    quoteNotes: rfq.quoteNotes,
   };
 }
 
@@ -99,7 +113,9 @@ export function toSellerProfile(
     employees: manufacturer?.employees || "",
     annualTurnover: manufacturer?.annualTurnover,
     exportCountries: manufacturer?.exportCountries || [],
-    certifications: certificates.map((cert) => cert.title),
+    certifications: manufacturer?.certifications?.length
+      ? manufacturer.certifications
+      : certificates.map((cert) => cert.title),
     certificates,
     description: manufacturer?.description || "",
     productionLines: manufacturer?.productionLines ?? 0,
