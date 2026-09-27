@@ -227,6 +227,15 @@ export function AuthCard({
                 ))}
               </ul>
             )}
+
+            {mode === "login" && (
+              <Link
+                href="/forgot-password"
+                className="block text-right text-xs font-semibold text-brand-blue hover:underline"
+              >
+                Forgot password?
+              </Link>
+            )}
           </>
         ) : (
           <>

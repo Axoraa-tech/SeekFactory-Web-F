@@ -13,18 +13,20 @@ type Props = {
   onSubmitQuote: (rfqId: string, quote: FactoryQuote) => Promise<void>;
 };
 
-const INCOTERMS = ["FOB", "CIF", "CFR", "EXW", "DAP", "DDP"];
+// Must match the backend Incoterm enum
+const INCOTERMS = ["FOB", "CIF", "EXW", "DDP"];
 
-function initialIncoterm(deliveryPort: string | undefined) {
-  const code = deliveryPort?.trim().split(/\s+/)[0]?.toUpperCase();
+function initialIncoterm(existing: string | undefined, deliveryPort: string | undefined) {
+  const code = (existing || deliveryPort)?.trim().split(/\s+/)[0]?.toUpperCase();
   return code && INCOTERMS.includes(code) ? code : "FOB";
 }
 
 export function RfqQuoteModal({ rfq, isOpen, onClose, onSubmitQuote }: Props) {
   const [priceInr, setPriceInr] = useState<number>(rfq?.quotedPriceInr || rfq?.targetBudgetInr || 2800000);
   const [leadTimeDays, setLeadTimeDays] = useState<number>(rfq?.leadTimeDays || 30);
-  const [incoterm, setIncoterm] = useState(() => initialIncoterm(rfq?.deliveryPort));
+  const [incoterm, setIncoterm] = useState(() => initialIncoterm(rfq?.quoteIncoterm, rfq?.deliveryPort));
   const [replyNotes, setReplyNotes] = useState(
+    rfq?.quoteNotes ||
     "Thank you for your RFQ. We confirm we can manufacture this machinery to your required specifications with full on-site commissioning and 2-year warranty."
   );
   const [saving, setSaving] = useState(false);

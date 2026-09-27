@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { getApi } from "@/shared/api";
-import type { FactoryQuote, NewFactoryProduct, NewFactorySeek } from "@/shared/api/contracts";
+import type { FactoryQuote, FactorySeekUpdate, NewFactoryProduct, NewFactorySeek } from "@/shared/api/contracts";
 import type { BuyerProfile } from "@/entities/user";
 import type {
+  SellerChatMessage,
   SellerConversation,
   SellerFactoryProfile,
   SellerProduct,
@@ -19,7 +20,12 @@ import {
   createSeekAction,
   deleteProductAction,
   deleteSeekAction,
+  setProductListedAction,
+  setSeekListedAction,
   submitQuoteAction,
+  updateProductAction,
+  updateSeekAction,
+  updateOrderStatusAction,
   updateFactoryProfileAction,
 } from "./actions";
 import {
@@ -38,15 +44,33 @@ import { SeeksTab } from "./tabs/seeks-tab";
 import { RfqsTab } from "./tabs/rfqs-tab";
 import { MessagesTab } from "./tabs/messages-tab";
 import { ProfileTab } from "./tabs/profile-tab";
+import { OrdersTab } from "./tabs/orders-tab";
 import { AddProductModal } from "./components/add-product-modal";
 import { AddSeekModal } from "./components/add-seek-modal";
+import { EditSeekModal } from "./components/edit-seek-modal";
 import { RfqQuoteModal } from "./components/rfq-quote-modal";
 import { FactoryPricingModal, type FactoryPlanTier } from "./components/factory-pricing-modal";
+import { AccountSecurityCard } from "@/features/auth/account-security-card";
+import Link from "next/link";
+import type { FactoryVerification } from "@/shared/api/contracts";
 
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
 import type { RfqItem } from "@/entities/rfq";
+import type { OrderRequest, OrderStatus } from "@/entities/order";
+import type { MessageAttachment, MessageItem } from "@/shared/api/contracts";
+
+function toSellerMessage(m: MessageItem): SellerChatMessage {
+  return {
+    id: m.id,
+    sender: m.sender === "factory" ? "seller" : "buyer",
+    text: m.text,
+    timestamp: m.time,
+    attachment: m.attachment,
+    order: m.order,
+  };
+}
 import type { Category } from "@/entities/category";
 
 type Props = {
@@ -56,14 +80,17 @@ type Props = {
   initialProducts?: Product[];
   initialSeeks?: Reel[];
   initialRfqs?: RfqItem[];
+  initialOrders?: OrderRequest[];
   initialConversations?: SellerConversation[];
   allCategories?: Category[];
+  verification?: FactoryVerification | null;
 };
 
 // Stable defaults: fresh `[]` literals would retrigger the prop-sync effects every render.
 const NO_PRODUCTS: Product[] = [];
 const NO_SEEKS: Reel[] = [];
 const NO_RFQS: RfqItem[] = [];
+const NO_ORDERS: OrderRequest[] = [];
 const NO_CONVERSATIONS: SellerConversation[] = [];
 const NO_CATEGORIES: Category[] = [];
 
@@ -90,8 +117,10 @@ export function FactoryDashboard({
   initialProducts = NO_PRODUCTS,
   initialSeeks = NO_SEEKS,
   initialRfqs = NO_RFQS,
+  initialOrders = NO_ORDERS,
   initialConversations = NO_CONVERSATIONS,
   allCategories = NO_CATEGORIES,
+  verification,
 }: Props) {
   const [activeTab, setActiveTab] = useState<SellerTab>("overview");
   const [stats, setStats] = useState<SellerStats>(initialStats ?? EMPTY_STATS);
@@ -101,7 +130,8 @@ export function FactoryDashboard({
   const [seeks, setSeeks] = useState<SellerSeek[]>(() =>
     initialSeeks.map((s) => toSellerSeek(s, allCategories, initialProducts))
   );
-  const [rfqs, setRfqs] = useState<SellerRfq[]>(() => initialRfqs.map(toSellerRfq));
+  const [rfqs, setRfqs] = useState<SellerRfq[]>(() => initialRfqs.map((r) => toSellerRfq(r, allCategories)));
+  const [orders, setOrders] = useState<OrderRequest[]>(initialOrders);
   const [conversations, setConversations] = useState<SellerConversation[]>(initialConversations);
   const [profile, setProfile] = useState<SellerFactoryProfile>(() => toSellerProfile(initialProfile, user));
   // Surfaces failures from actions that have no modal of their own (e.g. deletes).
@@ -110,6 +140,8 @@ export function FactoryDashboard({
   // Modals state
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddSeekOpen, setIsAddSeekOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<SellerProduct | null>(null);
+  const [editingSeek, setEditingSeek] = useState<SellerSeek | null>(null);
   const [quotingRfq, setQuotingRfq] = useState<SellerRfq | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
 
@@ -123,8 +155,8 @@ export function FactoryDashboard({
   }, [initialSeeks, allCategories, initialProducts]);
 
   useEffect(() => {
-    setRfqs(initialRfqs.map(toSellerRfq));
-  }, [initialRfqs]);
+    setRfqs(initialRfqs.map((r) => toSellerRfq(r, allCategories)));
+  }, [initialRfqs, allCategories]);
 
   useEffect(() => {
     // Plan tier is local-only until billing exists, so keep it across refreshes.
@@ -134,6 +166,10 @@ export function FactoryDashboard({
   useEffect(() => {
     if (initialStats) setStats(initialStats);
   }, [initialStats]);
+
+  useEffect(() => {
+    setOrders(initialOrders);
+  }, [initialOrders]);
 
   useEffect(() => {
     setConversations(initialConversations);
@@ -150,6 +186,7 @@ export function FactoryDashboard({
   // Unread messages count
   const unreadMessagesCount = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
   const newRfqsCount = rfqs.filter((r) => r.status === "New").length;
+  const newOrdersCount = orders.filter((o) => o.status === "PENDING").length;
 
   // Handlers — add/quote/profile throw on failure so the calling modal or form can show the error.
   async function handleAddProduct(input: NewFactoryProduct) {
@@ -158,6 +195,26 @@ export function FactoryDashboard({
     const created = toSellerProduct(result.data, allCategories);
     setProducts((prev) => [created, ...prev.filter((p) => p.id !== created.id)]);
     setStats((prev) => ({ ...prev, totalProductsCount: prev.totalProductsCount + 1 }));
+  }
+
+  async function handleUpdateProduct(id: string, input: NewFactoryProduct) {
+    const { imageUrl: _cover, ...update } = input;
+    void _cover; // the cover is imageUrls[0]
+    const result = await updateProductAction(id, update);
+    if (!result.ok) throw new Error(result.error);
+    const updated = toSellerProduct(result.data, allCategories);
+    setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+  }
+
+  /** Pause/relist; failures show in the notice bar. */
+  async function handleSetProductListed(id: string, listed: boolean) {
+    const result = await setProductListedAction(id, listed);
+    if (!result.ok) {
+      setNotice(`Could not ${listed ? "relist" : "pause"} product: ${result.error}`);
+      return;
+    }
+    const updated = toSellerProduct(result.data, allCategories);
+    setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
   }
 
   async function handleDeleteProduct(id: string) {
@@ -180,6 +237,28 @@ export function FactoryDashboard({
     setStats((prev) => ({ ...prev, totalSeeksCount: prev.totalSeeksCount + 1 }));
   }
 
+  async function handleUpdateSeek(id: string, input: FactorySeekUpdate) {
+    const result = await updateSeekAction(id, input);
+    if (!result.ok) throw new Error(result.error);
+    const previous = seeks.find((s) => s.id === id);
+    const updated = toSellerSeek(result.data, allCategories, initialProducts);
+    // The seek API does not echo the upload-time category; keep the one we showed
+    setSeeks((prev) => prev.map((s) => (s.id === id ? { ...updated, category: previous?.category ?? updated.category } : s)));
+  }
+
+  async function handleSetSeekListed(id: string, listed: boolean) {
+    const result = await setSeekListedAction(id, listed);
+    if (!result.ok) {
+      setNotice(`Could not ${listed ? "relist" : "pause"} video: ${result.error}`);
+      return;
+    }
+    setSeeks((prev) =>
+      prev.map((s) =>
+        s.id === id ? { ...s, status: listed ? (s.videoUrl ? "Published" : "Processing") : "Paused" } : s,
+      ),
+    );
+  }
+
   async function handleDeleteSeek(id: string) {
     const previous = seeks;
     setSeeks((prev) => prev.filter((s) => s.id !== id));
@@ -198,99 +277,129 @@ export function FactoryDashboard({
     setProfile((prev) => toSellerProfile(result.data, user, prev.tier));
   }
 
+  async function handleUpdateOrderStatus(orderId: string, status: OrderStatus, note?: string) {
+    const result = await updateOrderStatusAction(orderId, status, note);
+    if (!result.ok) throw new Error(result.error);
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? result.data : o)));
+  }
+
   async function handleSubmitQuote(rfqId: string, quote: FactoryQuote) {
     const result = await submitQuoteAction(rfqId, quote);
     if (!result.ok) throw new Error(result.error);
 
-    const quotedPriceInr = quote.quotePrice;
-    const leadTimeDays = quote.leadTimeDays;
-    const replyNotes = quote.notes ?? "";
+    // The buyer is notified by the backend (QUOTE notification); the quote is not a chat message.
     setRfqs((prev) =>
       prev.map((r) =>
         r.id === rfqId
           ? {
               ...r,
               status: "Quoted",
-              quotedPriceInr,
-              leadTimeDays,
+              quotedPriceInr: quote.quotePrice,
+              leadTimeDays: quote.leadTimeDays,
+              quoteIncoterm: quote.incoterm,
+              quoteNotes: quote.notes,
             }
           : r
       )
     );
-
-    // Also send quotation into trade messenger if buyer conversation exists
-    const targetRfq = rfqs.find((r) => r.id === rfqId);
-    if (targetRfq) {
-      const existingConv = conversations.find(
-        (c) => c.buyerCompany.toLowerCase() === targetRfq.buyerCompany.toLowerCase()
-      );
-      if (existingConv) {
-        setConversations((prev) =>
-          prev.map((c) =>
-            c.id === existingConv.id
-              ? {
-                  ...c,
-                  lastMessage: `Formal Quote Sent: ₹${(quotedPriceInr ?? 0).toLocaleString()}`,
-                  lastMessageTime: "Just now",
-                  messages: [
-                    ...c.messages,
-                    {
-                      id: `msg-${Date.now()}`,
-                      sender: "seller",
-                      text: replyNotes,
-                      timestamp: "Just now",
-                      attachmentType: "quote",
-                      attachmentData: {
-                        title: `Official Quotation for ${targetRfq.productName}`,
-                        detail: `Lead time: ${leadTimeDays} days. Terms: ${quote.incoterm || targetRfq.deliveryPort}`,
-                        price: quotedPriceInr,
-                      },
-                    },
-                  ],
-                }
-              : c
-          )
-        );
-      }
-    }
   }
 
-  function handleSendMessage(conversationId: string, text: string) {
-    if (!text.trim()) return;
-    
+  /** Sends a chat message; rejects with a user-facing message if it could not be delivered. */
+  async function handleSendMessage(
+    conversationId: string,
+    text: string,
+    attachment?: MessageAttachment,
+    orderId?: string,
+  ) {
+    const trimmed = text.trim();
+    if (!trimmed && !attachment) return;
+    const order = orders.find((o) => o.id === orderId);
+
     // Optimistic UI update
-    const tempId = `msg-${Date.now()}`;
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: SellerChatMessage = {
+      id: tempId,
+      sender: "seller",
+      text: trimmed,
+      timestamp: new Date().toISOString(),
+      attachment,
+      order: order && {
+        id: order.id,
+        referenceNumber: order.referenceNumber,
+        productName: order.productName,
+        productSlug: order.productSlug,
+        quantity: order.quantity,
+        unit: order.unit,
+        status: order.status,
+      },
+    };
     setConversations((prev) =>
       prev.map((c) =>
         c.id === conversationId
           ? {
               ...c,
-              lastMessage: text,
-              lastMessageTime: "Just now",
+              lastMessage: trimmed || `📎 ${attachment?.name}`,
+              lastMessageTime: new Date().toISOString(),
               unreadCount: 0,
-              messages: [
-                ...c.messages,
-                {
-                  id: tempId,
-                  sender: "seller",
-                  text,
-                  timestamp: "Just now",
-                },
-              ],
+              messages: [...c.messages, optimistic],
             }
           : c
       )
     );
 
-    // Call actual backend API
-    getApi()
-      .messages.sendMessage(conversationId, text)
-      .then((savedMsg) => {
-        // We could update the message ID here if needed, but optimistic is fine for now
-      })
-      .catch((err) => {
-        console.error("Failed to send message", err);
-      });
+    try {
+      const saved = await getApi().messages.sendMessage(conversationId, trimmed, attachment, { orderId });
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId
+            ? {
+                ...c,
+                // The live stream may already have delivered the saved message; keep one copy
+                messages: c.messages.some((m) => m.id === saved.id)
+                  ? c.messages.filter((m) => m.id !== tempId)
+                  : c.messages.map((m) => (m.id === tempId ? toSellerMessage(saved) : m)),
+              }
+            : c
+        )
+      );
+    } catch (err) {
+      setConversations((prev) =>
+        prev.map((c) => (c.id === conversationId ? { ...c, messages: c.messages.filter((m) => m.id !== tempId) } : c))
+      );
+      throw new Error(err instanceof Error ? err.message : "Message not sent. Please retry.");
+    }
+  }
+
+  /** Orders tab → chat: opens (or creates) the conversation with that order's buyer. */
+  const [pendingContext, setPendingContext] = useState<
+    { conversationId: string; orderId?: string; draft?: string } | null
+  >(null);
+  async function openChatForOrder(order: OrderRequest) {
+    const conv = await getApi().factory.openOrderConversation(order.id);
+    setConversations((prev) =>
+      prev.some((c) => c.id === conv.id)
+        ? prev
+        : [
+            {
+              id: conv.id,
+              buyerId: conv.buyerId || order.buyer.id,
+              buyerName: conv.buyerName || order.buyer.name,
+              buyerCompany: conv.buyerCompany || order.buyer.companyName || order.buyer.name,
+              buyerCountry: order.buyer.country || "",
+              buyerAvatarUrl: conv.buyerAvatarUrl || order.buyer.avatarUrl || "",
+              lastMessage: conv.lastMessage || "",
+              lastMessageTime: conv.lastMessageAt || "",
+              unreadCount: 0,
+              relatedProduct: order.productName,
+              status: "active",
+              messages: [],
+            },
+            ...prev,
+          ]
+    );
+    setPendingContext({ conversationId: conv.id, orderId: order.id });
+    setActiveConversationId(conv.id);
+    setActiveTab("messages");
   }
 
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
@@ -312,14 +421,7 @@ export function FactoryDashboard({
             if (c.id === activeConversationId) {
               return {
                 ...c,
-                messages: msgs.map((m) => ({
-                  id: m.id,
-                  sender: m.sender === "factory" ? "seller" : "buyer",
-                  text: m.text,
-                  timestamp: m.time,
-                  attachmentType: m.attachment ? "image" : undefined,
-                  attachmentData: m.attachment ? { title: m.attachment.name, detail: m.attachment.size } : undefined,
-                })),
+                messages: msgs.map(toSellerMessage),
                 unreadCount: 0,
               };
             }
@@ -340,21 +442,24 @@ export function FactoryDashboard({
             if (c.messages.some(m => m.id === newMsg.id)) {
               return c;
             }
+            // Our own message can arrive over the stream before the send request returns:
+            // swap it in for the pending optimistic copy instead of showing it twice.
+            const incoming = toSellerMessage(newMsg);
+            const pendingIdx = c.messages.findIndex(
+              (m) =>
+                m.id.startsWith("temp-") &&
+                m.sender === incoming.sender &&
+                m.text === incoming.text &&
+                (m.attachment?.url ?? "") === (incoming.attachment?.url ?? "")
+            );
             return {
               ...c,
-              lastMessage: newMsg.text,
+              lastMessage: newMsg.text || (newMsg.attachment ? `📎 ${newMsg.attachment.name}` : c.lastMessage),
               lastMessageTime: newMsg.time,
-              messages: [
-                ...c.messages,
-                {
-                  id: newMsg.id,
-                  sender: newMsg.sender === "factory" ? "seller" : "buyer",
-                  text: newMsg.text,
-                  timestamp: newMsg.time,
-                  attachmentType: newMsg.attachment ? "image" : undefined,
-                  attachmentData: newMsg.attachment ? { title: newMsg.attachment.name, detail: newMsg.attachment.size } : undefined,
-                },
-              ],
+              messages:
+                pendingIdx >= 0
+                  ? c.messages.map((m, i) => (i === pendingIdx ? incoming : m))
+                  : [...c.messages, incoming],
             };
           }
           return c;
@@ -368,18 +473,40 @@ export function FactoryDashboard({
     };
   }, [activeConversationId]); // Only re-run when active thread changes
 
-  function handleOpenChatWithBuyer(buyerCompany: string) {
-    const targetConv = conversations.find(
-      (c) => c.buyerCompany.toLowerCase() === buyerCompany.toLowerCase()
+  /** RFQs tab → chat: opens (or creates) the conversation with the buyer who posted the RFQ. */
+  async function openChatForRfq(rfq: SellerRfq) {
+    const conv = await getApi().factory.openRfqConversation(rfq.id);
+    setConversations((prev) =>
+      prev.some((c) => c.id === conv.id)
+        ? prev
+        : [
+            {
+              id: conv.id,
+              buyerId: conv.buyerId || "",
+              buyerName: conv.buyerName || rfq.buyerName,
+              buyerCompany: conv.buyerCompany || rfq.buyerCompany,
+              buyerCountry: rfq.buyerCountry,
+              buyerAvatarUrl: conv.buyerAvatarUrl || rfq.buyerAvatarUrl || "",
+              lastMessage: conv.lastMessage || "",
+              lastMessageTime: conv.lastMessageAt || "",
+              unreadCount: 0,
+              relatedProduct: rfq.productName,
+              status: "active",
+              messages: [],
+            },
+            ...prev,
+          ]
     );
-    if (targetConv) {
-      setActiveConversationId(targetConv.id);
-    }
+    setPendingContext({
+      conversationId: conv.id,
+      draft: `Regarding your RFQ ${rfq.referenceNumber} (${rfq.productName}): `,
+    });
+    setActiveConversationId(conv.id);
     setActiveTab("messages");
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex">
+    <div className="sf-hub min-h-screen bg-[#F8FAFC] flex">
       {/* Salespro Left Sidebar (Responsive drawer on mobile) */}
       <SalesproSidebar
         activeTab={activeTab}
@@ -387,12 +514,15 @@ export function FactoryDashboard({
         productsCount={products.length}
         seeksCount={seeks.length}
         rfqsCount={newRfqsCount}
+        ordersCount={newOrdersCount}
         unreadMessagesCount={unreadMessagesCount}
         profile={profile}
         userName={user.name}
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         onOpenUpgradeModal={() => setIsPricingModalOpen(true)}
+        verificationStatus={verification?.status}
+        verificationSubmitted={verification?.submitted}
       />
 
       {/* Main Content Area (offset by fixed 256px / w-64 sidebar on desktop) */}
@@ -424,7 +554,34 @@ export function FactoryDashboard({
             </div>
           )}
 
-          {/* Tab Views */}
+          {verification && verification.status !== "APPROVED" && (
+            <div
+              className={`mt-4 flex flex-col gap-2 rounded-xl border px-4 py-3 text-xs sm:flex-row sm:items-center sm:justify-between ${
+                verification.status === "REJECTED"
+                  ? "border-red-200 bg-red-50 text-red-800"
+                  : "border-amber-200 bg-amber-50 text-amber-900"
+              }`}
+            >
+              <span className="font-semibold">
+                {verification.status === "REJECTED"
+                  ? `Verification declined${verification.rejectionReason ? `: ${verification.rejectionReason}` : ""}. Your factory is hidden from buyers until it is approved.`
+                  : verification.submitted
+                    ? "Verification is in review. Your products and seeks become visible to buyers once SeekFactory approves your factory."
+                    : "Your factory is not verified yet, so buyers cannot see your products or seeks. Submit your business details to get approved."}
+              </span>
+              {(verification.status === "REJECTED" || !verification.submitted) && (
+                <Link
+                  href="/factory/verify"
+                  className="shrink-0 rounded-lg bg-brand-blue px-3 py-1.5 text-center font-bold text-white hover:bg-brand-blue-dark"
+                >
+                  {verification.status === "REJECTED" ? "Resubmit details" : "Verify factory"}
+                </Link>
+              )}
+            </div>
+          )}
+
+          {/* Tab Views (keyed so each switch replays the enter transition) */}
+          <div key={activeTab} className="sf-enter">
           {activeTab === "overview" && (
             <SalesproOverviewView
               profile={profile}
@@ -433,6 +590,7 @@ export function FactoryDashboard({
               seeks={seeks}
               rfqs={rfqs}
               onOpenQuoteModal={(rfq) => setQuotingRfq(rfq)}
+              onViewAllRfqs={() => setActiveTab("rfqs")}
             />
           )}
 
@@ -441,6 +599,8 @@ export function FactoryDashboard({
               <ProductsTab
                 products={products}
                 onOpenAddProduct={() => setIsAddProductOpen(true)}
+                onEditProduct={setEditingProduct}
+                onSetListed={handleSetProductListed}
                 onDeleteProduct={handleDeleteProduct}
               />
             </div>
@@ -451,6 +611,8 @@ export function FactoryDashboard({
               <SeeksTab
                 seeks={seeks}
                 onOpenAddSeek={() => setIsAddSeekOpen(true)}
+                onEditSeek={setEditingSeek}
+                onSetListed={handleSetSeekListed}
                 onDeleteSeek={handleDeleteSeek}
               />
             </div>
@@ -461,8 +623,14 @@ export function FactoryDashboard({
               <RfqsTab
                 rfqs={rfqs}
                 onOpenQuoteModal={(rfq) => setQuotingRfq(rfq)}
-                onOpenChatWithBuyer={handleOpenChatWithBuyer}
+                onOpenChatWithBuyer={openChatForRfq}
               />
+            </div>
+          )}
+
+          {activeTab === "orders" && (
+            <div className="pt-5">
+              <OrdersTab orders={orders} onUpdateStatus={handleUpdateOrderStatus} onChatWithBuyer={openChatForOrder} />
             </div>
           )}
 
@@ -473,7 +641,16 @@ export function FactoryDashboard({
                 activeConversationId={activeConversationId}
                 onSelectConversation={setActiveConversationId}
                 onSendMessage={handleSendMessage}
+                orders={orders}
+                initialContext={pendingContext}
+                onContextConsumed={() => setPendingContext(null)}
               />
+            </div>
+          )}
+
+          {activeTab === "account" && (
+            <div className="pt-5">
+              <AccountSecurityCard email={user.email} emailVerified={user.emailVerified} />
             </div>
           )}
 
@@ -486,16 +663,32 @@ export function FactoryDashboard({
               />
             </div>
           )}
+          </div>
         </main>
       </div>
 
       {/* Modals with Device File Uploads — mounted only while open so each opens with a fresh form */}
-      {isAddProductOpen && (
+      {(isAddProductOpen || editingProduct) && (
         <AddProductModal
+          key={editingProduct?.id ?? "new"}
           isOpen
-          onClose={() => setIsAddProductOpen(false)}
+          onClose={() => {
+            setIsAddProductOpen(false);
+            setEditingProduct(null);
+          }}
           categories={allCategories}
-          onAddProduct={handleAddProduct}
+          product={editingProduct ?? undefined}
+          onSubmit={editingProduct ? (input) => handleUpdateProduct(editingProduct.id, input) : handleAddProduct}
+        />
+      )}
+
+      {editingSeek && (
+        <EditSeekModal
+          key={editingSeek.id}
+          seek={editingSeek}
+          products={products}
+          onClose={() => setEditingSeek(null)}
+          onSave={handleUpdateSeek}
         />
       )}
 

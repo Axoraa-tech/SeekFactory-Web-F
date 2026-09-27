@@ -35,6 +35,9 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     const init: RequestInit & { duplex?: "half" } = {
       method: req.method,
       headers,
+      // Abort the upstream call when the browser goes away (e.g. a closed chat's SSE stream),
+      // otherwise long-lived backend streams would leak.
+      signal: req.signal,
     };
 
     if (req.method !== "GET" && req.method !== "HEAD" && req.body) {

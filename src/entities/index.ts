@@ -7,3 +7,4 @@ export type { Conversation } from "@/entities/message";
 export type { AppNotification } from "@/entities/notification";
 export type { BuyerProfile } from "@/entities/user";
 export type { RfqDraft } from "@/entities/rfq";
+export type { OrderRequest, OrderStatus, NewOrderRequest } from "@/entities/order";

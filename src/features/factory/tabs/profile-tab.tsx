@@ -36,7 +36,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
   const [yearsEstablished, setYearsEstablished] = useState(profile.yearsEstablished);
   const [factorySize, setFactorySize] = useState(profile.factorySize);
   const [employees, setEmployees] = useState(profile.employees);
-  const [annualTurnover] = useState(profile.annualTurnover || "");
+  const [annualTurnover, setAnnualTurnover] = useState(profile.annualTurnover || "");
   const [productionLines, setProductionLines] = useState(profile.productionLines);
   const [description, setDescription] = useState(profile.description);
   const [isSaved, setIsSaved] = useState(false);
@@ -72,6 +72,15 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (isSaving) return;
+    const year = Number(yearsEstablished);
+    if (!Number.isInteger(year) || year < 1900 || year > new Date().getFullYear()) {
+      setSaveError(`Year founded must be between 1900 and ${new Date().getFullYear()}.`);
+      return;
+    }
+    if (!Number.isInteger(Number(productionLines)) || Number(productionLines) < 0) {
+      setSaveError("Production lines must be a whole number (0 or more).");
+      return;
+    }
     setIsSaving(true);
     setSaveError(null);
     try {
@@ -82,10 +91,9 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
         yearsEstablished: Number(yearsEstablished),
         factorySize,
         employees,
-        annualTurnover,
+        annualTurnover: annualTurnover.trim(),
         productionLines: Number(productionLines),
         description,
-        certificates,
       });
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
@@ -96,14 +104,15 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
     }
   }
 
-  const liveWebsite = /^https?:\/\//i.test(websiteUrl.trim()) ? websiteUrl.trim() : profile.websiteUrl;
+  // The saved URL (the server normalises "example.com" to "https://example.com")
+  const liveWebsite = profile.websiteUrl;
 
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900 flex flex-wrap items-center gap-2">
+          <h2 className="text-lg font-semibold tracking-tight text-neutral-900 flex flex-wrap items-center gap-2">
             <span>Factory Profile & Verified Showroom</span>
             <span className="rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 text-xs font-bold text-amber-800">
               ★ {profile.tier}
@@ -117,7 +126,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
                 <span>Upgrade Plan</span>
               </button>
             )}
-          </h1>
+          </h2>
           <p className="text-xs text-ink-muted mt-1">
             Maintain your manufacturing credentials, facility capacity, official website, and export certificates
           </p>
@@ -151,7 +160,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
           yearsEstablished: Number(yearsEstablished),
           factorySize: factorySize,
           exportCountries: profile.exportCountries,
-          verifiedBy: "SGS Group",
+          verified: profile.verified,
         }}
         isOwner={true}
         onOpenUpload={() => setIsUploadModalOpen(true)}
@@ -162,13 +171,13 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
       <form onSubmit={handleSave} className="space-y-6">
         {/* Core Profile Details */}
         <div className="rounded-2xl border border-line bg-white p-6 shadow-xs space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-700">
-            Company Overview & Factory Identity
+          <h2 className="text-sm font-bold text-neutral-900">
+            Company overview & factory identity
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Registered Factory Name
               </label>
               <input
@@ -180,7 +189,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Industrial Estate / Location
               </label>
               <input
@@ -193,13 +202,14 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">
+            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
               Official Factory Website (Direct Link for Buyers)
             </label>
             <div className="relative">
               <Globe2 className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
               <input
-                type="url"
+                type="text"
+                inputMode="url"
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
                 placeholder="https://www.your-factory-domain.com"
@@ -207,17 +217,19 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
               />
             </div>
             <p className="text-[11px] text-ink-muted mt-1">
-              This URL is prominently linked on your public showroom so international buyers can visit your website.
+              Shown as &quot;Official Website&quot; on your public profile and in your seller hub. Leave empty to hide it.
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Year Founded
               </label>
               <input
                 type="number"
+                min={1900}
+                max={new Date().getFullYear()}
                 value={yearsEstablished}
                 onChange={(e) => setYearsEstablished(Number(e.target.value))}
                 className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
@@ -225,7 +237,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Plant Area
               </label>
               <input
@@ -237,7 +249,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Total Workforce
               </label>
               <input
@@ -249,11 +261,12 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Production Lines
               </label>
               <input
                 type="number"
+                min={0}
                 value={productionLines}
                 onChange={(e) => setProductionLines(Number(e.target.value))}
                 className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
@@ -261,8 +274,22 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
             </div>
           </div>
 
+          <div className="sm:w-1/2">
+            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+              Annual Turnover
+            </label>
+            <input
+              type="text"
+              maxLength={64}
+              value={annualTurnover}
+              onChange={(e) => setAnnualTurnover(e.target.value)}
+              placeholder="e.g. USD 5–10 Million"
+              className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
+            />
+          </div>
+
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">
+            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
               Company Overview & OEM Capability
             </label>
             <textarea

@@ -1,30 +1,68 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Send,
-  Search,
-  Package,
-  FileText,
-  Sparkles,
-} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Send, Search, Package, FileText, Sparkles, Paperclip, Loader2, X, MessageSquare } from "lucide-react";
+import type { OrderRequest } from "@/entities/order";
+import type { MessageAttachment } from "@/shared/api/contracts";
+import { useChatAttachment } from "@/hooks/use-chat-attachment";
+import { CHAT_ATTACHMENT_ACCEPT, formatChatTime } from "@/shared/lib/chat";
+import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "@/components/messages/message-extras";
 import type { SellerConversation } from "../types";
 
 type Props = {
   conversations: SellerConversation[];
   activeConversationId?: string;
   onSelectConversation: (id: string) => void;
-  onSendMessage: (conversationId: string, text: string) => void;
+  /** Rejects with a user-facing message if the message could not be sent. */
+  onSendMessage: (conversationId: string, text: string, attachment?: MessageAttachment, orderId?: string) => Promise<void>;
+  /** All of this factory's order requests; the picker shows the ones from the active buyer. */
+  orders: OrderRequest[];
+  /** Pre-selected order context when arriving from the Orders tab. */
+  /** Pre-selects an order and/or pre-fills the composer when arriving from Orders or RFQs. */
+  initialContext?: { conversationId: string; orderId?: string; draft?: string } | null;
+  onContextConsumed?: () => void;
 };
+
+function initials(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "B"
+  );
+}
+
+function Avatar({ url, name, size }: { url?: string; name: string; size: "sm" | "md" }) {
+  const box = size === "md" ? "h-10 w-10" : "h-9 w-9";
+  return (
+    <div className={`relative ${box} rounded-full overflow-hidden bg-brand-blue-soft border border-line shrink-0 flex items-center justify-center text-xs font-bold text-brand-blue`}>
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img loading="lazy" decoding="async" src={url} alt="" className="h-full w-full object-cover" />
+      ) : (
+        initials(name)
+      )}
+    </div>
+  );
+}
 
 export function MessagesTab({
   conversations,
   activeConversationId,
   onSelectConversation,
   onSendMessage,
+  orders,
+  initialContext,
+  onContextConsumed,
 }: Props) {
   const [inputText, setInputText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [contextOrderId, setContextOrderId] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!activeConversationId && conversations.length > 0) {
@@ -33,8 +71,24 @@ export function MessagesTab({
   }, [activeConversationId, conversations, onSelectConversation]);
 
   const selectedId = activeConversationId || conversations[0]?.id || "";
-  const activeConv =
-    conversations.find((c) => c.id === selectedId) || conversations[0];
+  const activeConv = conversations.find((c) => c.id === selectedId) || conversations[0];
+  const upload = useChatAttachment(activeConv?.id);
+  const buyerOrders = activeConv ? orders.filter((o) => o.buyer.id === activeConv.buyerId) : [];
+
+  // Switching buyer resets the composer; arriving from the Orders tab pre-selects that order
+  const clearUpload = upload.clear;
+  useEffect(() => {
+    clearUpload();
+    setSendError(null);
+    if (initialContext && initialContext.conversationId === activeConv?.id) {
+      setContextOrderId(initialContext.orderId ?? "");
+      if (initialContext.draft) setInputText(initialContext.draft);
+      onContextConsumed?.();
+    } else {
+      setContextOrderId("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run on conversation change only
+  }, [activeConv?.id, clearUpload]);
 
   const filteredConversations = conversations.filter(
     (c) =>
@@ -43,17 +97,31 @@ export function MessagesTab({
       c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  function handleSend(e: React.FormEvent) {
-    e.preventDefault();
-    if (!inputText.trim() || !activeConv) return;
-    onSendMessage(activeConv.id, inputText.trim());
-    setInputText("");
+  async function send(text: string, withComposerState: boolean) {
+    if (!activeConv || sending) return;
+    const attachment = withComposerState ? upload.attachment ?? undefined : undefined;
+    if (!text.trim() && !attachment) return;
+    setSending(true);
+    setSendError(null);
+    try {
+      await onSendMessage(activeConv.id, text, attachment, contextOrderId || undefined);
+      if (withComposerState) {
+        setInputText("");
+        upload.clear();
+      }
+    } catch (err) {
+      setSendError(err instanceof Error ? `Not sent: ${err.message}` : "Message not sent. Please retry.");
+    } finally {
+      setSending(false);
+    }
   }
 
-  function handleQuickReply(text: string) {
-    if (!activeConv) return;
-    onSendMessage(activeConv.id, text);
+  function handleSend(e: React.FormEvent) {
+    e.preventDefault();
+    void send(inputText.trim(), true);
   }
+
+  const canSend = (inputText.trim().length > 0 || upload.attachment !== null) && !upload.uploading && !sending;
 
   return (
     <div className="rounded-2xl border border-line bg-white shadow-xs overflow-hidden flex flex-col md:flex-row h-[750px]">
@@ -64,7 +132,7 @@ export function MessagesTab({
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-sm font-bold text-neutral-900">Trade Messenger</h2>
             <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[10px] font-bold text-brand-blue">
-              {conversations.length} Active Buyers
+              {conversations.length} {conversations.length === 1 ? "Buyer" : "Buyers"}
             </span>
           </div>
           <div className="relative">
@@ -92,20 +160,21 @@ export function MessagesTab({
                   isSelected ? "bg-white border-l-4 border-l-brand-blue shadow-2xs" : "hover:bg-neutral-200/50"
                 }`}
               >
-                <div className="relative h-10 w-10 rounded-full overflow-hidden bg-neutral-200 shrink-0 border border-line">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img loading="lazy" decoding="async" src={conv.buyerAvatarUrl} alt="" className="h-full w-full object-cover" />
+                <div className="relative">
+                  <Avatar url={conv.buyerAvatarUrl} name={conv.buyerName} size="md" />
                   {conv.unreadCount > 0 && (
                     <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-600 ring-2 ring-white" />
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-bold text-neutral-900 truncate">{conv.buyerCompany}</p>
-                    <span className="text-[10px] text-neutral-400">{conv.lastMessageTime}</span>
+                    <span className="text-[10px] text-neutral-400 shrink-0">{formatChatTime(conv.lastMessageTime)}</span>
                   </div>
-                  <p className="text-[11px] text-ink-muted truncate">{conv.buyerName} • {conv.buyerCountry}</p>
+                  <p className="text-[11px] text-ink-muted truncate">
+                    {[conv.buyerName, conv.buyerCountry].filter(Boolean).join(" • ")}
+                  </p>
                   <p className="text-xs text-neutral-700 truncate mt-0.5 font-medium">{conv.lastMessage}</p>
                   {conv.relatedProduct && (
                     <span className="inline-block mt-1 text-[10px] font-semibold text-brand-blue bg-blue-50 px-1.5 py-0.2 rounded-md truncate max-w-full">
@@ -116,27 +185,31 @@ export function MessagesTab({
               </button>
             );
           })}
+          {filteredConversations.length === 0 && (
+            <p className="p-6 text-center text-xs text-ink-muted">
+              No conversations yet. Use <strong>Chat with buyer</strong> on an order request to start one.
+            </p>
+          )}
         </div>
       </div>
 
       {/* Right Pane: Chat Thread */}
       {activeConv ? (
-        <div className="flex-1 flex flex-col bg-white">
+        <div className="flex-1 flex flex-col bg-white min-w-0">
           {/* Top Chat Header */}
           <div className="p-3.5 border-b border-line flex items-center justify-between bg-white">
-            <div className="flex items-center gap-3">
-              <div className="relative h-9 w-9 rounded-full overflow-hidden bg-canvas border border-line">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={activeConv.buyerAvatarUrl} alt="" className="h-full w-full object-cover" />
-              </div>
-              <div>
+            <div className="flex items-center gap-3 min-w-0">
+              <Avatar url={activeConv.buyerAvatarUrl} name={activeConv.buyerName} size="sm" />
+              <div className="min-w-0">
                 <h3 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
-                  <span>{activeConv.buyerCompany}</span>
-                  <span className="rounded-md bg-canvas px-1.5 py-0.2 text-[10px] font-semibold text-neutral-600">
-                    {activeConv.buyerCountry}
-                  </span>
+                  <span className="truncate">{activeConv.buyerCompany}</span>
+                  {activeConv.buyerCountry && (
+                    <span className="rounded-md bg-canvas px-1.5 py-0.2 text-[10px] font-semibold text-neutral-600">
+                      {activeConv.buyerCountry}
+                    </span>
+                  )}
                 </h3>
-                <p className="text-[11px] text-ink-muted">Contact Person: {activeConv.buyerName} • Verified Buyer</p>
+                <p className="text-[11px] text-ink-muted">Contact person: {activeConv.buyerName}</p>
               </div>
             </div>
 
@@ -150,13 +223,21 @@ export function MessagesTab({
 
           {/* Messages Body */}
           <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#FAFAFA]">
+            {activeConv.messages.length === 0 && (
+              <div className="mx-auto mt-10 max-w-sm text-center text-neutral-500">
+                <MessageSquare className="mx-auto mb-2 h-8 w-8 text-neutral-300" />
+                <p className="text-sm font-semibold text-neutral-700">No messages yet</p>
+                <p className="mt-1 text-xs">
+                  {buyerOrders.length > 0
+                    ? "Pick the order you are contacting them about below, then send your message."
+                    : "Send a message to start the conversation."}
+                </p>
+              </div>
+            )}
             {activeConv.messages.map((msg) => {
               const isSeller = msg.sender === "seller";
               return (
-                <div
-                  key={msg.id}
-                  className={`flex flex-col ${isSeller ? "items-end" : "items-start"}`}
-                >
+                <div key={msg.id} className={`flex flex-col ${isSeller ? "items-end" : "items-start"}`}>
                   <div
                     className={`max-w-[80%] rounded-2xl p-3.5 text-xs leading-relaxed shadow-2xs ${
                       isSeller
@@ -164,9 +245,11 @@ export function MessagesTab({
                         : "bg-white text-neutral-900 border border-line rounded-bl-xs"
                     }`}
                   >
-                    <p>{msg.text}</p>
+                    {msg.order && <MessageOrderTag order={msg.order} tone={isSeller ? "own" : "other"} />}
+                    {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
+                    {msg.attachment && <MessageAttachmentView attachment={msg.attachment} tone={isSeller ? "own" : "other"} />}
 
-                    {/* Attachment Preview Card if present */}
+                    {/* Legacy quote summary card */}
                     {msg.attachmentData && (
                       <div
                         className={`mt-2.5 p-2.5 rounded-xl border text-xs ${
@@ -188,7 +271,7 @@ export function MessagesTab({
                       </div>
                     )}
                   </div>
-                  <span className="text-[10px] text-neutral-400 mt-1 px-1">{msg.timestamp}</span>
+                  <span className="text-[10px] text-neutral-400 mt-1 px-1">{formatChatTime(msg.timestamp)}</span>
                 </div>
               );
             })}
@@ -200,37 +283,97 @@ export function MessagesTab({
               <Sparkles className="h-3 w-3 text-brand-blue" /> Quick Replies:
             </span>
             {[
-              "Yes, we have ready stock in Pune.",
-              "I have attached our technical test report.",
-              "We provide 2-year on-site commissioning warranty.",
+              "Thank you for your order request. Let me confirm the details.",
+              "Yes, this model is available in ready stock.",
+              "I have attached our quotation / test report.",
               "Please share your CAD drawing or technical specifications.",
             ].map((qr, i) => (
               <button
                 key={i}
                 type="button"
-                onClick={() => handleQuickReply(qr)}
-                className="shrink-0 rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-semibold text-neutral-700 hover:bg-neutral-200 hover:border-brand-blue transition"
+                onClick={() => void send(qr, false)}
+                disabled={sending}
+                className="shrink-0 rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-semibold text-neutral-700 hover:bg-neutral-200 hover:border-brand-blue transition disabled:opacity-50"
               >
                 {qr}
               </button>
             ))}
           </div>
 
+          {/* Context: which order this message is about */}
+          {buyerOrders.length > 0 && (
+            <div className="px-4 py-1.5 bg-white border-t border-line">
+              <OrderContextPicker orders={buyerOrders} value={contextOrderId} onChange={setContextOrderId} />
+            </div>
+          )}
+
+          {(upload.attachment || upload.uploading || upload.error || sendError) && (
+            <div
+              className={`px-4 py-1.5 border-t flex items-center justify-between text-xs ${
+                upload.error || sendError ? "bg-red-50 border-red-100 text-red-700" : "bg-blue-50/60 border-blue-100 text-brand-blue"
+              }`}
+              role={upload.error || sendError ? "alert" : undefined}
+            >
+              <span className="flex items-center gap-1.5 font-semibold truncate">
+                {upload.uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Paperclip className="h-3.5 w-3.5 shrink-0" />}
+                <span className="truncate">
+                  {upload.error ??
+                    sendError ??
+                    (upload.uploading ? "Uploading…" : `Attached: ${upload.attachment?.name} (${upload.attachment?.size})`)}
+                </span>
+              </span>
+              {upload.attachment && !upload.uploading && (
+                <button
+                  type="button"
+                  onClick={upload.clear}
+                  className="font-bold text-red-500 hover:underline text-[11px] ml-2 inline-flex items-center gap-0.5"
+                >
+                  <X className="h-3 w-3" /> Remove
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Message Input Box */}
           <form onSubmit={handleSend} className="p-3 border-t border-line bg-white flex items-center gap-2">
             <input
+              ref={fileInputRef}
+              type="file"
+              accept={CHAT_ATTACHMENT_ACCEPT}
+              className="hidden"
+              onChange={(e) => {
+                void upload.pick(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={upload.uploading}
+              title="Attach an image or PDF"
+              aria-label="Attach an image or PDF"
+              className={`flex items-center justify-center h-9 w-9 rounded-xl border shrink-0 transition disabled:opacity-50 ${
+                upload.attachment ? "bg-blue-100 text-brand-blue border-brand-blue" : "bg-canvas text-neutral-500 border-line hover:bg-neutral-200"
+              }`}
+            >
+              <Paperclip className="h-4 w-4" />
+            </button>
+            <input
               type="text"
               value={inputText}
+              maxLength={5000}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Type your message, FOB terms, or technical reply to buyer..."
-              className="flex-1 rounded-xl border border-line px-3.5 py-2.5 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
+              className="flex-1 min-w-0 rounded-xl border border-line px-3.5 py-2.5 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
             />
             <button
               type="submit"
-              className="flex items-center justify-center h-9 w-9 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white shadow-xs transition active:scale-95 shrink-0"
+              disabled={!canSend}
+              className="flex items-center justify-center h-9 w-9 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white shadow-xs transition active:scale-95 shrink-0 disabled:opacity-50"
               title="Send Message"
+              aria-label="Send message"
             >
-              <Send className="h-4 w-4" />
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </button>
           </form>
         </div>
@@ -242,4 +385,3 @@ export function MessagesTab({
     </div>
   );
 }
-

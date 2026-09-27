@@ -18,7 +18,13 @@ import type {
   MessageItem,
   NewFactoryProduct,
   NewFactorySeek,
+  OrderRepository,
   UploadedMedia,
+  AccountRepository,
+  FactoryProductUpdate,
+  FactorySeekUpdate,
+  FactoryVerification,
+  VerificationSubmission,
 } from "@/shared/api/contracts";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
 import type { Category, CategoryIconKey } from "@/entities/category";
@@ -29,6 +35,7 @@ import type { Product } from "@/entities/product";
 import type { AppNotification } from "@/entities/notification";
 import type { Conversation } from "@/entities/message";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
+import type { NewOrderRequest, OrderParty, OrderRequest, OrderStatus } from "@/entities/order";
 import type { BuyerProfile } from "@/entities/user";
 import type { SellerStats } from "@/features/factory/types";
 import {
@@ -65,6 +72,7 @@ interface BackendUser {
   avatar_url?: string;
   avatarUrl?: string;
   phone?: string;
+  emailVerified?: boolean;
 }
 
 interface BackendAuthResponse {
@@ -118,6 +126,7 @@ interface BackendReel {
   savesCount?: number;
   product_ids?: string[];
   productIds?: string[];
+  listed?: boolean;
 }
 
 interface BackendProduct {
@@ -139,6 +148,10 @@ interface BackendProduct {
   category_id?: string;
   categoryId?: string;
   specs?: Record<string, string>;
+  imageUrls?: string[];
+  datasheetUrl?: string;
+  datasheetName?: string;
+  listed?: boolean;
 }
 
 interface BackendManufacturer {
@@ -171,6 +184,7 @@ interface BackendManufacturer {
   websiteUrl?: string;
   annual_turnover?: string;
   annualTurnover?: string;
+  certifications?: string[];
   production_lines?: number;
   productionLines?: number;
   certificates?: FactoryCertificate[];
@@ -246,6 +260,16 @@ interface BackendConversation {
 }
 
 interface BackendMessage {
+  attachmentContentType?: string;
+  order?: {
+    id: string;
+    referenceNumber?: string;
+    productName?: string;
+    productSlug?: string;
+    quantity?: number;
+    unit?: string;
+    status?: string;
+  };
   id: string;
   conversation_id?: string;
   conversationId?: string;
@@ -284,6 +308,7 @@ interface BackendNotification {
 }
 
 interface BackendFactoryStats {
+  weeklyTrend?: { weekStart: string; seekViews?: number; productViews?: number; rfqs?: number }[];
   periodDays?: number;
   responseWindowDays?: number;
   total_product_views?: number;
@@ -438,6 +463,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
           country: user.country || "India",
           email: user.email,
           phone: user.phone,
+          emailVerified: user.emailVerified,
         };
       } catch {
         // Return null if backend auth fails
@@ -909,24 +935,10 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getMessages(conversationId: string) {
       try {
-        const list = await fetchJson<BackendMessage[]>(`/api/v1/conversations/${conversationId}/messages`);
-        return list.map((m) => {
-          const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
-          const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
-          return {
-            id: m.id,
-            conversationId: m.conversationId || m.conversation_id || conversationId,
-            sender,
-            text: m.messageText || m.message_text || "",
-            time: m.createdAt || m.created_at || "Just now",
-            attachment: (m.attachmentName || m.attachment_name) ? {
-              name: m.attachmentName || m.attachment_name || "attachment",
-              size: m.attachmentSize || m.attachment_size || "",
-              url: m.attachmentUrl || m.attachment_url,
-            } : undefined,
-            isRead: m.isRead ?? m.is_read ?? false,
-          };
+        const list = await fetchJson<BackendMessage[]>(`/api/v1/conversations/${conversationId}/messages`, {
+          cache: "no-store",
         });
+        return list.map((m) => normalizeMessage(m, conversationId));
       } catch {
         return [];
       }
@@ -935,13 +947,15 @@ export function createHttpApi(baseUrl: string): ApiClient {
     async sendMessage(
       conversationId: string,
       text: string,
-      attachment?: MessageAttachment
+      attachment?: MessageAttachment,
+      context?: { orderId?: string }
     ) {
       const payload = {
         messageText: text,
         attachmentName: attachment?.name,
         attachmentSize: attachment?.size,
         attachmentUrl: attachment?.url,
+        orderId: context?.orderId,
       };
 
       const m = await fetchJson<BackendMessage>(`/api/v1/conversations/${conversationId}/messages`, {
@@ -949,22 +963,29 @@ export function createHttpApi(baseUrl: string): ApiClient {
         body: JSON.stringify(payload),
       });
 
-      const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
-      const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
+      return normalizeMessage(m, conversationId);
+    },
 
-      return {
-        id: m.id,
-        conversationId: m.conversationId || m.conversation_id || conversationId,
-        sender,
-        text: m.messageText || m.message_text || text,
-        time: m.createdAt || m.created_at || "Just now",
-        attachment: (m.attachmentName || m.attachment_name) ? {
-          name: m.attachmentName || m.attachment_name || "",
-          size: m.attachmentSize || m.attachment_size || "",
-          url: m.attachmentUrl || m.attachment_url,
-        } : undefined,
-        isRead: m.isRead ?? m.is_read ?? false,
-      };
+    async uploadAttachment(conversationId: string, file: File): Promise<MessageAttachment> {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetchJson<{ url: string; name?: string; size?: string; contentType?: string }>(
+        `/api/v1/conversations/${encodeURIComponent(conversationId)}/attachments`,
+        { method: "POST", body },
+      );
+      return { url: res.url, name: res.name || file.name, size: res.size || "", contentType: res.contentType || file.type };
+    },
+
+    async listConversationOrders(conversationId: string): Promise<OrderRequest[]> {
+      try {
+        const list = await fetchJson<BackendOrder[]>(
+          `/api/v1/conversations/${encodeURIComponent(conversationId)}/orders`,
+          { cache: "no-store" },
+        );
+        return list.map(normalizeOrder);
+      } catch {
+        return [];
+      }
     },
 
     async startConversation(manufacturerId: string, initialMessage?: string): Promise<Conversation & { manufacturer: Manufacturer }> {
@@ -1001,27 +1022,13 @@ export function createHttpApi(baseUrl: string): ApiClient {
     onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void {
       if (typeof window === "undefined") return () => {};
       
-      const evtSource = new EventSource(`/api/v1/conversations/${conversationId}/stream`);
+      // Same-origin via the proxy so the HttpOnly session cookie is attached
+      const evtSource = new EventSource(`/api/proxy/api/v1/conversations/${encodeURIComponent(conversationId)}/stream`);
       
       evtSource.addEventListener("message", (event) => {
         try {
           const m: BackendMessage = JSON.parse(event.data);
-          const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
-          const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
-          
-          callback({
-            id: m.id,
-            conversationId: m.conversationId || m.conversation_id || conversationId,
-            sender,
-            text: m.messageText || m.message_text || "",
-            time: m.createdAt || m.created_at || "Just now",
-            attachment: (m.attachmentName || m.attachment_name) ? {
-              name: m.attachmentName || m.attachment_name || "attachment",
-              size: m.attachmentSize || m.attachment_size || "",
-              url: m.attachmentUrl || m.attachment_url,
-            } : undefined,
-            isRead: m.isRead ?? m.is_read ?? false,
-          });
+          callback(normalizeMessage(m, conversationId));
         } catch (e) {
           console.error("Failed to parse SSE message", e);
         }
@@ -1115,7 +1122,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
         exportCountries: data.exportCountries,
         categoryIds: data.categoryIds,
         chairmanName: data.chairmanName,
-        certificates: data.certificates,
+        certifications: data.certifications,
+        certificates: data.certificates?.map((cert) => ({ ...cert, imageUrl: toStoredMediaUrl(cert.imageUrl) })),
       };
       const res = await fetchJson<BackendManufacturer>("/api/v1/factory/profile", {
         method: "PUT",
@@ -1165,7 +1173,32 @@ export function createHttpApi(baseUrl: string): ApiClient {
     async addProduct(data: NewFactoryProduct): Promise<Product> {
       const res = await fetchJson<BackendProduct>("/api/v1/factory/products", {
         method: "POST",
-        body: JSON.stringify({ ...data, imageUrl: toStoredMediaUrl(data.imageUrl) }),
+        body: JSON.stringify({
+          ...data,
+          imageUrl: toStoredMediaUrl(data.imageUrl),
+          imageUrls: data.imageUrls?.map((url) => toStoredMediaUrl(url)),
+          datasheetUrl: toStoredMediaUrl(data.datasheetUrl),
+        }),
+      });
+      return normalizeProduct(res);
+    },
+
+    async updateProduct(id: string, data: FactoryProductUpdate): Promise<Product> {
+      const res = await fetchJson<BackendProduct>(`/api/v1/factory/products/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          ...data,
+          imageUrls: data.imageUrls?.map((url) => toStoredMediaUrl(url)),
+          datasheetUrl: toStoredMediaUrl(data.datasheetUrl),
+        }),
+      });
+      return normalizeProduct(res);
+    },
+
+    async setProductListed(id: string, listed: boolean): Promise<Product> {
+      const res = await fetchJson<BackendProduct>(`/api/v1/factory/products/${encodeURIComponent(id)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ listed }),
       });
       return normalizeProduct(res);
     },
@@ -1197,6 +1230,47 @@ export function createHttpApi(baseUrl: string): ApiClient {
       return { ...normalizeReel(res), categoryIds: data.categoryIds };
     },
 
+    async updateSeek(id: string, data: FactorySeekUpdate): Promise<Reel> {
+      const res = await fetchJson<BackendReel>(`/api/v1/factory/seeks/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          ...data,
+          posterUrl: toStoredMediaUrl(data.posterUrl),
+          videoUrl: toStoredMediaUrl(data.videoUrl),
+        }),
+      });
+      return normalizeReel(res);
+    },
+
+    async setSeekListed(id: string, listed: boolean): Promise<Reel> {
+      const res = await fetchJson<BackendReel>(`/api/v1/factory/seeks/${encodeURIComponent(id)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ listed }),
+      });
+      return normalizeReel(res);
+    },
+
+    async getVerification(): Promise<FactoryVerification> {
+      const res = await fetchJson<Partial<FactoryVerification>>("/api/v1/factory/verification", { cache: "no-store" });
+      return normalizeVerification(res);
+    },
+
+    async submitVerification(data: VerificationSubmission): Promise<FactoryVerification> {
+      const res = await fetchJson<Partial<FactoryVerification>>("/api/v1/factory/verification", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return normalizeVerification(res);
+    },
+
+    async openRfqConversation(rfqId: string): Promise<Conversation> {
+      const item = await fetchJson<BackendConversation>(
+        `/api/v1/factory/rfqs/${encodeURIComponent(rfqId)}/conversation`,
+        { method: "POST" },
+      );
+      return normalizeSellerConversation(item);
+    },
+
     async deleteSeek(id: string): Promise<void> {
       await fetchJson<void>(`/api/v1/factory/seeks/${id}`, {
         method: "DELETE",
@@ -1223,33 +1297,39 @@ export function createHttpApi(baseUrl: string): ApiClient {
           created_at?: string;
           companyName?: string;
           company_name?: string;
+          categoryId?: string;
           buyerName?: string;
-          buyer_name?: string;
           buyerCountry?: string;
-          buyer_country?: string;
-          quotePrice?: number;
-          quote_price?: number;
-          leadTimeDays?: number;
-          lead_time_days?: number;
+          buyerAvatarUrl?: string;
+          myQuotePrice?: number;
+          myQuoteLeadTimeDays?: number;
+          myQuoteIncoterm?: string;
+          myQuoteNotes?: string;
+          myQuotedAt?: string;
         }
         const list = await fetchJson<BackendRfqItem[]>("/api/v1/factory/rfqs", { cache: "no-store" });
         return list.map((item) => ({
           id: item.id,
           referenceNumber: item.referenceNumber || item.reference_number || `RFQ-${item.id.slice(0, 8)}`,
-          productName: item.productName || item.product_name || "Industrial Component",
-          quantity: item.quantity || "100",
-          unit: item.unit || "Pieces",
-          targetPrice: item.targetPrice || item.target_price || "Negotiable",
+          productName: item.productName || item.product_name || "Untitled RFQ",
+          quantity: item.quantity || "",
+          unit: item.unit,
+          targetPrice: item.targetPrice || item.target_price,
           currency: item.currency || "INR",
-          incoterm: item.incoterm || "FOB",
+          incoterm: item.incoterm,
           details: item.details || "",
           status: item.status || "SUBMITTED",
-          createdAt: item.createdAt || item.created_at || "Just now",
+          createdAt: item.createdAt || item.created_at || "",
           companyName: item.companyName || item.company_name,
-          buyerName: item.buyerName || item.buyer_name,
-          buyerCountry: item.buyerCountry || item.buyer_country,
-          quotedPriceInr: item.quotePrice ?? item.quote_price,
-          leadTimeDays: item.leadTimeDays ?? item.lead_time_days,
+          categoryId: item.categoryId,
+          buyerName: item.buyerName,
+          buyerCountry: item.buyerCountry,
+          buyerAvatarUrl: resolveMediaUrl(item.buyerAvatarUrl),
+          quotedPriceInr: item.myQuotePrice ?? undefined,
+          leadTimeDays: item.myQuoteLeadTimeDays ?? undefined,
+          quoteIncoterm: item.myQuoteIncoterm,
+          quoteNotes: item.myQuoteNotes,
+          quotedAt: item.myQuotedAt,
         }));
       } catch {
         return [];
@@ -1261,6 +1341,74 @@ export function createHttpApi(baseUrl: string): ApiClient {
         method: "POST",
         body: JSON.stringify(quote),
       });
+    },
+
+    async getOrders(): Promise<OrderRequest[]> {
+      const list = await fetchJson<BackendOrder[]>("/api/v1/factory/orders", { cache: "no-store" });
+      return list.map(normalizeOrder);
+    },
+
+    async openOrderConversation(orderId: string): Promise<Conversation> {
+      const item = await fetchJson<BackendConversation>(
+        `/api/v1/factory/orders/${encodeURIComponent(orderId)}/conversation`,
+        { method: "POST" },
+      );
+      return normalizeSellerConversation(item);
+    },
+
+    async updateOrderStatus(orderId: string, status: OrderStatus, note?: string): Promise<OrderRequest> {
+      const res = await fetchJson<BackendOrder>(`/api/v1/factory/orders/${encodeURIComponent(orderId)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status, note }),
+      });
+      return normalizeOrder(res);
+    },
+  };
+
+  // ── 12. ACCOUNT (password, email verification) ─────────────
+  const account: AccountRepository = {
+    async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+      await fetchJson<void>("/api/v1/account/password", {
+        method: "POST",
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+    },
+    async sendEmailVerification(): Promise<void> {
+      await fetchJson<void>("/api/v1/account/email/verification", { method: "POST" });
+    },
+    async requestPasswordReset(email: string): Promise<void> {
+      await fetchJson<void>("/api/v1/auth/password/forgot", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    },
+    async resetPassword(token: string, newPassword: string): Promise<void> {
+      await fetchJson<void>("/api/v1/auth/password/reset", {
+        method: "POST",
+        body: JSON.stringify({ token, newPassword }),
+      });
+    },
+    async verifyEmail(token: string): Promise<void> {
+      await fetchJson<void>("/api/v1/auth/email/verify", {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      });
+    },
+  };
+
+  // ── 11. ORDER REQUESTS (buyer side) ───────────────────────────
+  const orders: OrderRepository = {
+    async place(input: NewOrderRequest): Promise<OrderRequest> {
+      const res = await fetchJson<BackendOrder>("/api/v1/orders", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+      return normalizeOrder(res);
+    },
+
+    async listMine(): Promise<OrderRequest[]> {
+      const list = await fetchJson<BackendOrder[]>("/api/v1/orders/mine", { cache: "no-store" });
+      return list.map(normalizeOrder);
     },
   };
 
@@ -1275,6 +1423,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
     rfq,
     comments,
     factory,
+    orders,
+    account,
   };
 }
 
@@ -1326,6 +1476,7 @@ function normalizeReel(r: BackendReel, fallbackManufacturerId = "", tab: FeedTab
     saves: r.saves || r.savesCount || r.saves_count || 0,
     tab,
     productIds: r.productIds || r.product_ids || [],
+    listed: r.listed ?? true,
   };
 }
 
@@ -1351,7 +1502,42 @@ function normalizeManufacturer(m: BackendManufacturer): Manufacturer {
     websiteUrl: m.websiteUrl || m.website_url,
     annualTurnover: m.annualTurnover || m.annual_turnover,
     productionLines: m.productionLines ?? m.production_lines,
-    certificates: m.certificates,
+    certificates: m.certificates?.map((cert) => ({
+      ...cert,
+      certNumber: cert.certNumber ?? "",
+      imageUrl: resolveMediaUrl(cert.imageUrl) || "",
+    })),
+    certifications: m.certifications ?? [],
+  };
+}
+
+function normalizeVerification(v: Partial<FactoryVerification> | null | undefined): FactoryVerification {
+  return {
+    status: v?.status ?? "PENDING",
+    submitted: Boolean(v?.submitted),
+    submittedAt: v?.submittedAt ?? undefined,
+    reviewedAt: v?.reviewedAt ?? undefined,
+    rejectionReason: v?.rejectionReason ?? undefined,
+    companyRegNumber: v?.companyRegNumber ?? undefined,
+    taxId: v?.taxId ?? undefined,
+    registrationDate: v?.registrationDate ?? undefined,
+    factoryAddress: v?.factoryAddress ?? undefined,
+    certifications: v?.certifications ?? [],
+  };
+}
+
+/** A conversation opened from the seller hub (seller view: buyer fields filled). */
+function normalizeSellerConversation(item: BackendConversation): Conversation {
+  return {
+    id: item.id,
+    manufacturerId: item.manufacturerId || item.manufacturer?.id || "",
+    buyerId: item.buyerId || item.buyer_id,
+    buyerName: item.buyerName || item.buyer_name,
+    buyerCompany: item.buyerCompany || item.buyer_company,
+    buyerAvatarUrl: resolveMediaUrl(item.buyerAvatarUrl || item.buyer_avatar_url),
+    lastMessage: typeof item.lastMessage === "string" ? item.lastMessage : "",
+    lastMessageAt: item.lastMessageAt || item.last_message_at || "",
+    unreadCount: item.unreadCount ?? item.unread_count ?? 0,
   };
 }
 
@@ -1377,6 +1563,12 @@ function normalizeProduct(p: BackendProduct): Product {
     moq: moqStr,
     categoryId: p.categoryId || p.category_id || "",
     specs: p.specs || {},
+    imageUrls: p.imageUrls?.length
+      ? p.imageUrls.map((url) => resolveMediaUrl(url) || url)
+      : undefined,
+    datasheetUrl: resolveMediaUrl(p.datasheetUrl),
+    datasheetName: p.datasheetName,
+    listed: p.listed ?? true,
   };
 }
 
@@ -1409,5 +1601,112 @@ function normalizeFactoryStats(res: BackendFactoryStats): SellerStats {
     followerCount: res.followerCount ?? res.follower_count ?? 0,
     totalProductsCount: res.totalProductsCount ?? res.total_products_count ?? 0,
     totalSeeksCount: res.totalSeeksCount ?? res.total_seeks_count ?? 0,
+    weeklyTrend: (res.weeklyTrend ?? []).map((point) => ({
+      weekStart: point.weekStart,
+      seekViews: point.seekViews ?? 0,
+      productViews: point.productViews ?? 0,
+      rfqs: point.rfqs ?? 0,
+    })),
+  };
+}
+
+interface BackendOrderParty {
+  id?: string;
+  name?: string;
+  slug?: string;
+  companyName?: string;
+  country?: string;
+  avatarUrl?: string;
+  email?: string;
+  phone?: string;
+}
+
+interface BackendOrder {
+  id: string;
+  referenceNumber?: string;
+  status?: string;
+  statusUpdatedAt?: string;
+  createdAt?: string;
+  productId?: string;
+  productSlug?: string;
+  productName?: string;
+  productImageUrl?: string;
+  unitPriceInr?: number;
+  unit?: string;
+  quantity?: number;
+  estimatedTotalInr?: number;
+  buyerNote?: string;
+  sellerNote?: string;
+  manufacturer?: BackendOrderParty;
+  buyer?: BackendOrderParty;
+}
+
+function normalizeOrderParty(p: BackendOrderParty | undefined): OrderParty {
+  return {
+    id: p?.id || "",
+    name: p?.name || "",
+    slug: p?.slug,
+    companyName: p?.companyName,
+    country: p?.country,
+    avatarUrl: resolveMediaUrl(p?.avatarUrl),
+    email: p?.email,
+    phone: p?.phone,
+  };
+}
+
+function normalizeOrder(o: BackendOrder): OrderRequest {
+  return {
+    id: o.id,
+    referenceNumber: o.referenceNumber || "",
+    status: (o.status || "PENDING") as OrderStatus,
+    statusUpdatedAt: o.statusUpdatedAt,
+    createdAt: o.createdAt || "",
+    productId: o.productId,
+    productSlug: o.productSlug,
+    productName: o.productName || "",
+    productImageUrl: resolveMediaUrl(o.productImageUrl),
+    unitPriceInr: o.unitPriceInr,
+    unit: o.unit,
+    quantity: o.quantity ?? 0,
+    estimatedTotalInr: o.estimatedTotalInr,
+    buyerNote: o.buyerNote,
+    sellerNote: o.sellerNote,
+    manufacturer: normalizeOrderParty(o.manufacturer),
+    buyer: normalizeOrderParty(o.buyer),
+  };
+}
+
+function normalizeMessage(m: BackendMessage, conversationId: string): MessageItem {
+  const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
+  const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
+  const attachmentUrl = m.attachmentUrl || m.attachment_url;
+  const attachmentName = m.attachmentName || m.attachment_name;
+  return {
+    id: m.id,
+    conversationId: m.conversationId || m.conversation_id || conversationId,
+    sender,
+    text: m.messageText || m.message_text || "",
+    time: m.createdAt || m.created_at || "",
+    attachment:
+      attachmentName || attachmentUrl
+        ? {
+            name: attachmentName || "attachment",
+            size: m.attachmentSize || m.attachment_size || "",
+            url: attachmentUrl,
+            contentType: m.attachmentContentType,
+          }
+        : undefined,
+    order: m.order
+      ? {
+          id: m.order.id,
+          referenceNumber: m.order.referenceNumber || "",
+          productName: m.order.productName || "",
+          productSlug: m.order.productSlug,
+          quantity: m.order.quantity,
+          unit: m.order.unit,
+          status: m.order.status,
+        }
+      : undefined,
+    isRead: m.isRead ?? m.is_read ?? false,
   };
 }

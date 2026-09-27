@@ -8,4 +8,5 @@ export type BuyerProfile = {
   country: string;
   email?: string;
   phone?: string;
+  emailVerified?: boolean;
 };

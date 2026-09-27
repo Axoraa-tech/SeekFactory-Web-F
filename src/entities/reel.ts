@@ -19,4 +19,6 @@ export type Reel = {
   productIds: string[];
   categoryIds?: string[];
   subcategoryIds?: string[];
+  /** false = paused by the seller (hidden from the feed). */
+  listed?: boolean;
 };

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import {
   X,
   UploadCloud,
-  Image as ImageIcon,
   CheckCircle2,
   Award,
   ShieldCheck,
@@ -30,13 +29,6 @@ const COMMON_PRESETS = [
   { title: "Factory Gold On-Site Audit Report", issuer: "SeekFactory Inspection", category: "Audit Report" as const },
 ];
 
-const PRESET_IMAGES = [
-  { label: "ISO 9001 Gold Certificate", url: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=1200&q=80" },
-  { label: "CE Machinery Plaque", url: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80" },
-  { label: "RoHS & Test Report", url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80" },
-  { label: "TUV Plant Audit Stamp", url: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80" },
-];
-
 export function UploadCertificateModal({
   isOpen,
   onClose,
@@ -59,9 +51,6 @@ export function UploadCertificateModal({
     setTitle(preset.title);
     setIssuer(preset.issuer);
     setCategory(preset.category);
-    if (!certNumber) {
-      setCertNumber(`CERT-${Math.floor(100000 + Math.random() * 900000)}`);
-    }
   };
 
   // Upload immediately so the certificate is saved with a shareable URL, not a data: blob.
@@ -84,15 +73,24 @@ export function UploadCertificateModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !issuer.trim() || isUploading) return;
+    // Buyers see this as the factory's certificate: it must be the real document, not a stock photo
+    if (!imageUrl.trim()) {
+      setUploadError("Upload a photo or scan of the certificate.");
+      return;
+    }
+    if (issueDate && expiryDate && expiryDate < issueDate) {
+      setUploadError("Expiry date cannot be before the issue date.");
+      return;
+    }
 
     const newCert: FactoryCertificate = {
       id: `cert-${Date.now()}`,
       title: title.trim(),
       issuer: issuer.trim(),
-      certNumber: certNumber.trim() || `SEEK-CERT-${Math.floor(100000 + Math.random() * 900000)}`,
-      issueDate: issueDate || new Date().toISOString().slice(0, 10),
-      expiryDate: expiryDate || "2027-12-31",
-      imageUrl: imageUrl || PRESET_IMAGES[0].url,
+      certNumber: certNumber.trim(),
+      issueDate: issueDate || undefined,
+      expiryDate: expiryDate || undefined,
+      imageUrl: imageUrl.trim(),
       // Seller-uploaded documents are unverified until SeekFactory reviews them.
       verified: false,
       category,
@@ -281,29 +279,6 @@ export function UploadCertificateModal({
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Preset Sample Images for One-Click Testing */}
-          <div>
-            <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1">
-              Quick Sample Templates:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_IMAGES.map((img, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => {
-                    setImageUrl(img.url);
-                    setPreviewError(false);
-                  }}
-                  className="text-[10px] font-medium text-blue-600 hover:underline flex items-center gap-1"
-                >
-                  <ImageIcon className="h-3 w-3" />
-                  {img.label}
-                </button>
-              ))}
             </div>
           </div>
 

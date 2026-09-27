@@ -11,18 +11,20 @@ import type { MediaKind } from "@/shared/api/contracts";
 export type StoredMedia = {
   bytes: Uint8Array;
   contentType: string;
-  kind: MediaKind;
+  kind: MediaKind | "document";
 };
 
 // Allowlist only: SVG/HTML would be served from our origin and could carry script.
-export const MEDIA_TYPES: Record<MediaKind, string[]> = {
+export const MEDIA_TYPES: Record<MediaKind | "document", string[]> = {
   image: ["image/png", "image/jpeg", "image/webp", "image/gif"],
   video: ["video/mp4", "video/webm", "video/quicktime"],
+  document: ["application/pdf"],
 };
 
-export const MEDIA_MAX_BYTES: Record<MediaKind, number> = {
+export const MEDIA_MAX_BYTES: Record<MediaKind | "document", number> = {
   image: 20 * 1024 * 1024,
   video: 100 * 1024 * 1024,
+  document: 20 * 1024 * 1024,
 };
 
 const MAX_ITEMS = 50;

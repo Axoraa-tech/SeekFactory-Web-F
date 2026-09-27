@@ -9,19 +9,43 @@ import {
   Trash2,
   ExternalLink,
   Eye,
+  Pencil,
+  PauseCircle,
+  PlayCircle,
+  Loader2,
+  FileText,
+  Images,
 } from "lucide-react";
 import type { SellerProduct } from "../types";
+import { SafeImage } from "@/components/ui/safe-image";
 
 type Props = {
   products: SellerProduct[];
   onOpenAddProduct: () => void;
+  onEditProduct: (product: SellerProduct) => void;
+  /** Pause (false) or relist (true); resolves when saved. */
+  onSetListed: (id: string, listed: boolean) => Promise<void>;
   onDeleteProduct: (id: string) => void;
 };
 
-export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Props) {
+const STATUS_FILTERS = ["All", "Active", "Paused"] as const;
+
+export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetListed, onDeleteProduct }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState<(typeof STATUS_FILTERS)[number]>("All");
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const activeCount = products.filter((p) => p.status === "Active").length;
+
+  async function toggleListed(product: SellerProduct) {
+    if (togglingId) return;
+    setTogglingId(product.id);
+    try {
+      await onSetListed(product.id, product.status === "Paused");
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
 
@@ -37,14 +61,19 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
   return (
     <div className="space-y-5">
       {/* Header & Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+          <h2 className="text-lg font-semibold tracking-tight text-neutral-900 flex items-center gap-2">
             <span>Product Catalog & Machinery Inventory</span>
             <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.2 text-xs font-bold text-brand-blue">
-              {products.length} Listed
+              {activeCount} Live
             </span>
-          </h1>
+            {products.length > activeCount && (
+              <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.2 text-xs font-bold text-amber-800">
+                {products.length - activeCount} Paused
+              </span>
+            )}
+          </h2>
           <p className="text-xs text-ink-muted mt-1">
             Manage your machinery listings, technical parameters, and export pricing
           </p>
@@ -89,23 +118,24 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
 
           <select
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
+            onChange={(e) => setSelectedStatus(e.target.value as (typeof STATUS_FILTERS)[number])}
             className="rounded-xl border border-line bg-white px-3 py-2 text-xs font-medium text-neutral-800 focus:border-brand-blue focus:outline-hidden shadow-xs"
           >
-            <option value="All">Status: All</option>
-            <option value="Active">Active</option>
-            <option value="Under Review">Under Review</option>
-            <option value="Draft">Draft</option>
+            {STATUS_FILTERS.map((status) => (
+              <option key={status} value={status}>
+                {status === "All" ? `Status: All (${products.length})` : `${status} (${products.filter((p) => p.status === status).length})`}
+              </option>
+            ))}
           </select>
         </div>
       </div>
 
       {/* Product List Cards */}
-      <div className="space-y-3">
+      <div className="space-y-3 sf-stagger">
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="group flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-2xl border border-line bg-white p-4 shadow-xs hover:border-brand-blue transition"
+            className="sf-lift group flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-2xl border border-line bg-white p-4 shadow-xs hover:border-brand-blue/60"
           >
             {/* Left: Thumbnail & Details */}
             <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -114,8 +144,8 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
                 className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 bg-canvas border border-line block group/img"
                 title={`View ${product.name}`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img loading="lazy" decoding="async" src={product.imageUrl}
+                <SafeImage
+                  src={product.imageUrl}
                   alt={product.name}
                   className="h-full w-full object-cover group-hover/img:scale-110 transition-transform duration-300"
                 />
@@ -136,9 +166,23 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
                         : "bg-amber-100 text-amber-800"
                     }`}
                   >
-                    {product.status}
+                    {product.status === "Paused" ? "Paused • hidden from buyers" : "Active"}
                   </span>
-                  <span className="text-[11px] text-neutral-400">Added {product.createdAt}</span>
+                  {product.imageUrls.length > 1 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-neutral-500">
+                      <Images className="h-3 w-3" /> {product.imageUrls.length} photos
+                    </span>
+                  )}
+                  {product.datasheetUrl && (
+                    <a
+                      href={product.datasheetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-700 hover:underline"
+                    >
+                      <FileText className="h-3 w-3" /> Datasheet
+                    </a>
+                  )}
                 </div>
 
                 <Link
@@ -172,24 +216,57 @@ export function ProductsTab({ products, onOpenAddProduct, onDeleteProduct }: Pro
             <div className="flex items-center justify-between md:justify-end gap-5 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-line">
               <div className="flex items-center gap-4 text-center">
                 <div>
-                  <p className="text-xs font-extrabold text-neutral-900">{product.viewsCount}</p>
+                  <p className="text-xs font-extrabold text-neutral-900 tabular-nums">{product.viewsCount}</p>
                   <p className="text-[10px] text-neutral-400">Views</p>
                 </div>
                 <div>
-                  <p className="text-xs font-extrabold text-red-600">{product.inquiriesCount}</p>
+                  <p className="text-xs font-extrabold text-neutral-900 tabular-nums">{product.inquiriesCount}</p>
                   <p className="text-[10px] text-neutral-400">Inquiries</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Link
-                  href={`/products/${product.slug}`}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
-                  title="View Public Marketplace Listing"
+                {product.status === "Active" && (
+                  <Link
+                    href={`/products/${product.slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
+                    title="View Public Marketplace Listing"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>View</span>
+                  </Link>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => onEditProduct(product)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs cursor-pointer"
+                  title="Edit product"
                 >
-                  <Eye className="h-3.5 w-3.5" />
-                  <span>View</span>
-                </Link> 
+                  <Pencil className="h-3.5 w-3.5" />
+                  <span>Edit</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void toggleListed(product)}
+                  disabled={togglingId === product.id}
+                  className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition shadow-2xs cursor-pointer disabled:opacity-60 ${
+                    product.status === "Paused"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                      : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                  }`}
+                  title={product.status === "Paused" ? "Show this product to buyers again" : "Hide from buyers without deleting"}
+                >
+                  {togglingId === product.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : product.status === "Paused" ? (
+                    <PlayCircle className="h-3.5 w-3.5" />
+                  ) : (
+                    <PauseCircle className="h-3.5 w-3.5" />
+                  )}
+                  <span>{product.status === "Paused" ? "Relist" : "Pause"}</span>
+                </button>
 
                 <button
                   type="button"

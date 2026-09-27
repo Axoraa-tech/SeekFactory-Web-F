@@ -13,7 +13,7 @@ export default async function FactoryHomePage() {
   const user = await requireUser("/factory");
   const api = getApi();
 
-  const [profile, stats, products, seeks, rfqs, categories, convosRaw] = await Promise.all([
+  const [profile, stats, products, seeks, rfqs, categories, convosRaw, orders, verification] = await Promise.all([
     api.factory.getProfile().catch(() => null),
     api.factory.getStats().catch(() => null),
     api.factory.getProducts().catch(() => []),
@@ -21,6 +21,8 @@ export default async function FactoryHomePage() {
     api.factory.getRfqs().catch(() => []),
     api.categories.list().catch(() => []),
     api.messages.listRecent().catch(() => []),
+    api.factory.getOrders().catch(() => []),
+    api.factory.getVerification().catch(() => null),
   ]);
 
   // Map Backend Conversations to SellerConversations for the Dashboard
@@ -46,8 +48,10 @@ export default async function FactoryHomePage() {
       initialProducts={products}
       initialSeeks={seeks}
       initialRfqs={rfqs}
+      initialOrders={orders}
       initialConversations={initialConversations}
       allCategories={categories}
+      verification={verification}
     />
   );
 }
