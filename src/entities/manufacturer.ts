@@ -20,4 +20,6 @@ export type Manufacturer = {
   annualTurnover?: string;
   productionLines?: number;
   certificates?: import("./factory-certificate").FactoryCertificate[];
+  /** Certification names (e.g. "ISO 9001") declared for verification. */
+  certifications?: string[];
 };

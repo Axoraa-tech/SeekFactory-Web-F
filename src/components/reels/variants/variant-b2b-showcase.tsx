@@ -30,8 +30,9 @@ import { formatCount, formatDuration } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
-import { getApi } from "@/shared/api";
 import { useReelImpression } from "@/hooks/use-reel-impression";
+import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
+import type { Product } from "@/entities/product";
 
 type Props = {
   reel: Reel;
@@ -39,13 +40,19 @@ type Props = {
   productSlug?: string;
   /** Called when the user clicks the expand/popup icon */
   onExpand?: () => void;
+  /** Whether the viewer follows this factory; undefined for guests. */
+  followingManufacturer?: boolean;
+  /** The seek's primary product: drives the spec chips and the price / order bar. */
+  product?: Product;
 };
 
 /**
  * VARIANT 3: B2B Industrial Showcase & Technical Spec Sheet (Industrial Segmented 5-Button Bar)
  */
-export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }: Props) {
-  const [following, setFollowing] = useState(false);
+const SPEC_ICONS = [PackageCheck, Layers, Clock, FileSpreadsheet];
+
+export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product }: Props) {
+  const { following, toggleFollow } = useFollow(manufacturer.id, followingManufacturer, manufacturer.followerCount);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(reel.startSec || 0);
@@ -54,12 +61,12 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(reel.comments);
 
-  const [liked, setLiked] = useState(false);
-  const [reposted, setReposted] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { liked, likes, saved, shares, shared, toggleLike, toggleSave, share } = useReelEngagement(reel);
 
-  const displayLikes = liked ? reel.likes + 1 : reel.likes;
-  const displayReposts = reposted ? reel.shares + 1 : reel.shares;
+  const specChips = [
+    ...(product?.moq ? [{ label: "Min. order", value: product.moq }] : []),
+    ...Object.entries(product?.specs ?? {}).map(([label, value]) => ({ label, value })),
+  ].slice(0, 4);
 
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
@@ -153,8 +160,12 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
               <Award className="h-3.5 w-3.5" />
               Verified OEM Manufacturer
             </span>
-            <span className="text-slate-400">•</span>
-            <span className="text-slate-300 font-medium hidden sm:inline">ISO 9001 Audited</span>
+            {manufacturer.yearsEstablished > 0 && (
+              <>
+                <span className="text-slate-400">•</span>
+                <span className="text-slate-300 font-medium hidden sm:inline">Est. {manufacturer.yearsEstablished}</span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
@@ -194,7 +205,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"
-                  onClick={() => setFollowing((v) => !v)}
+                  onClick={toggleFollow}
                   className={cn(
                     "rounded-lg px-3 py-1 text-xs font-semibold transition border",
                     following
@@ -323,47 +334,34 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
 
 
 
-          {/* Technical Spec Sheet Chips with SupplierLockOverlay */}
-          <SupplierLockOverlay badgeLabel="View Factory Specs" compact>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-              <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-                <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                  <Layers className="h-3 w-3 text-brand-blue" />
-                  <span>CAPACITY</span>
-                </div>
-                <p className="font-bold text-neutral-800 mt-0.5 text-xs">500 Units / Mo</p>
+          {/* Technical Spec Sheet Chips with SupplierLockOverlay: the product's MOQ plus the factory's own specs */}
+          {specChips.length > 0 && (
+            <SupplierLockOverlay badgeLabel="View Factory Specs" compact>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                {specChips.map((chip, index) => {
+                  const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
+                  return (
+                    <div key={chip.label} className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
+                      <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
+                        <Icon className="h-3 w-3 text-brand-blue" />
+                        <span className="uppercase truncate">{chip.label}</span>
+                      </div>
+                      <p className="font-bold text-neutral-800 mt-0.5 text-xs truncate">{chip.value}</p>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-                <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                  <PackageCheck className="h-3 w-3 text-brand-blue" />
-                  <span>MIN. ORDER</span>
-                </div>
-                <p className="font-bold text-neutral-800 mt-0.5 text-xs">1 Set / MOQ</p>
-              </div>
-              <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-                <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                  <Clock className="h-3 w-3 text-brand-blue" />
-                  <span>LEAD TIME</span>
-                </div>
-                <p className="font-bold text-neutral-800 mt-0.5 text-xs">15-20 Days</p>
-              </div>
-              <div className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-                <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                  <FileSpreadsheet className="h-3 w-3 text-brand-blue" />
-                  <span>CUSTOMIZATION</span>
-                </div>
-                <p className="font-bold text-neutral-800 mt-0.5 text-xs">OEM & ODM</p>
-              </div>
-            </div>
-          </SupplierLockOverlay>
+            </SupplierLockOverlay>
+          )}
 
           {/* B2B Instant Commercial Bar: Price, Buy Now, Add to Cart, Chat */}
           <div className="rounded-xl border border-slate-200/90 bg-gradient-to-r from-slate-50 via-white to-blue-50/20 p-2.5 shadow-2xs">
             <ProductActionBar
-              priceInr={125000}
-              unit="Set"
-              moq={1}
-              productSlug={productSlug}
+              productId={product?.id}
+              priceInr={product?.priceInr}
+              unit={product?.unit}
+              moq={product?.moq}
+              productSlug={product?.slug ?? productSlug}
               manufacturerSlug={manufacturer.slug}
               size="sm"
             />
@@ -387,14 +385,15 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
             {/* 2. Share */}
             <button
               type="button"
-              onClick={() => setReposted((v) => !v)}
+              onClick={share}
+              aria-label="Share seek"
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-emerald-600 hover:shadow-xs transition",
-                reposted && "text-emerald-600 bg-white shadow-xs"
+                shared && "text-emerald-600 bg-white shadow-xs"
               )}
             >
               <Repeat2 className="h-3.5 w-3.5" />
-              <span className="font-medium text-[11px]">{formatCount(displayReposts)}</span>
+              <span className="font-medium text-[11px]">{formatCount(shares)}</span>
             </button>
 
             <span className="h-4 w-px bg-neutral-200" />
@@ -402,17 +401,15 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
             {/* 3. Like */}
             <button
               type="button"
-              onClick={() => {
-                setLiked((v) => !v);
-                getApi().feed.likeReel(reel.id).catch(() => {});
-              }}
+              onClick={toggleLike}
+              aria-label={liked ? "Unlike seek" : "Like seek"}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-rose-600 hover:shadow-xs transition",
                 liked && "text-rose-600 bg-white shadow-xs"
               )}
             >
               <Heart className={cn("h-3.5 w-3.5", liked && "fill-rose-500")} />
-              <span className="font-medium text-[11px]">{formatCount(displayLikes)}</span>
+              <span className="font-medium text-[11px]">{formatCount(likes)}</span>
             </button>
 
             <span className="h-4 w-px bg-neutral-200" />
@@ -428,10 +425,8 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand }
             {/* 5. Save */}
             <button
               type="button"
-              onClick={() => {
-                setSaved((v) => !v);
-                getApi().feed.saveReel(reel.id).catch(() => {});
-              }}
+              onClick={toggleSave}
+              aria-label={saved ? "Remove from saved" : "Save seek"}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition",
                 saved && "text-brand-blue bg-white shadow-xs"

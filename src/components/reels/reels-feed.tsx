@@ -77,6 +77,7 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
                 >
                   <ReelCard
                     reel={item.reel}
+                    followingManufacturer={item.followingManufacturer}
                     manufacturer={item.manufacturer}
                     productSlug={item.primaryProductSlug}
                     products={item.products}
@@ -103,6 +104,7 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
                 >
                   <ReelCard
                     reel={item.reel}
+                    followingManufacturer={item.followingManufacturer}
                     manufacturer={item.manufacturer}
                     productSlug={item.primaryProductSlug}
                     products={item.products}

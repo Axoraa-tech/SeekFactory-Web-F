@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { X, MessageSquare } from "lucide-react";
 import type { ReelComment } from "@/entities/comment";
 import { getApi } from "@/shared/api";
+import { ApiError } from "@/shared/api/http-api";
+import { useRequireSignIn } from "@/features/engagement/use-engagement";
 import { pauseAllSeeks } from "@/hooks/use-seek-autoplay";
 import { CommentComposer } from "./comment-composer";
 import { CommentThreadItem } from "./comment-thread-item";
@@ -39,6 +41,9 @@ export function CommentsModal({
 
   const [likedMap, setLikedMap] = useState<Record<string, { liked: boolean; count: number }>>({});
 
+  const [actionError, setActionError] = useState<string | null>(null);
+  const requireSignIn = useRequireSignIn();
+
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,15 +65,17 @@ export function CommentsModal({
 
         const map: Record<string, { liked: boolean; count: number }> = {};
         data.forEach((c) => {
-          map[c.id] = { liked: false, count: c.likes };
+          map[c.id] = { liked: Boolean(c.likedByMe), count: c.likes };
           c.replies.forEach((r) => {
-            map[r.id] = { liked: false, count: r.likes };
+            map[r.id] = { liked: Boolean(r.likedByMe), count: r.likes };
           });
         });
         setLikedMap(map);
       })
-      .catch(() => {
-        if (mounted) setLoading(false);
+      .catch((err: unknown) => {
+        if (!mounted) return;
+        setLoading(false);
+        setActionError(err instanceof Error ? err.message : "Could not load comments");
       });
 
     return () => {
@@ -89,18 +96,29 @@ export function CommentsModal({
     0
   );
 
-  const handleToggleLike = (id: string, initialCount: number) => {
-    setLikedMap((prev) => {
-      const current = prev[id] || { liked: false, count: initialCount };
-      const nextLiked = !current.liked;
-      return {
-        ...prev,
-        [id]: {
-          liked: nextLiked,
-          count: nextLiked ? current.count + 1 : Math.max(0, current.count - 1),
-        },
-      };
-    });
+  /** Guests are sent to sign in; any other failure is shown above the composer. */
+  const handleActionError = (err: unknown, fallback: string) => {
+    if (err instanceof ApiError && err.status === 401) {
+      requireSignIn();
+      return;
+    }
+    setActionError(err instanceof Error ? err.message : fallback);
+  };
+
+  const handleToggleLike = async (id: string, initialCount: number) => {
+    const current = likedMap[id] || { liked: false, count: initialCount };
+    const nextLiked = !current.liked;
+    setLikedMap((prev) => ({
+      ...prev,
+      [id]: { liked: nextLiked, count: Math.max(0, current.count + (nextLiked ? 1 : -1)) },
+    }));
+    try {
+      const res = await getApi().comments.toggleLike(id);
+      setLikedMap((prev) => ({ ...prev, [id]: { liked: res.liked, count: res.likes } }));
+    } catch (err) {
+      setLikedMap((prev) => ({ ...prev, [id]: current }));
+      handleActionError(err, "Could not update like");
+    }
   };
 
   const handlePostComment = async (e: React.FormEvent) => {
@@ -108,14 +126,15 @@ export function CommentsModal({
     if (!newCommentText.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
+    setActionError(null);
     try {
       const added = await getApi().comments.addComment(reelId, newCommentText.trim());
       setComments((prev) => [added, ...prev]);
       setLikedMap((prev) => ({ ...prev, [added.id]: { liked: false, count: 0 } }));
       setNewCommentText("");
       onCommentAdded?.();
-    } catch {
-      // handled
+    } catch (err) {
+      handleActionError(err, "Could not post comment");
     } finally {
       setIsSubmitting(false);
     }
@@ -125,6 +144,7 @@ export function CommentsModal({
     if (!replyText.trim() || isSubmittingReply) return;
 
     setIsSubmittingReply(true);
+    setActionError(null);
     try {
       const reply = await getApi().comments.addReply(commentId, replyText.trim());
       setComments((prev) =>
@@ -142,8 +162,8 @@ export function CommentsModal({
       setReplyText("");
       setReplyingToId(null);
       onCommentAdded?.();
-    } catch {
-      // handled
+    } catch (err) {
+      handleActionError(err, "Could not post reply");
     } finally {
       setIsSubmittingReply(false);
     }
@@ -189,6 +209,12 @@ export function CommentsModal({
           onSubmit={handlePostComment}
           isSubmitting={isSubmitting}
         />
+
+        {actionError && (
+          <p role="alert" className="px-5 py-2 text-xs font-semibold text-rose-600 border-b border-line bg-rose-50">
+            {actionError}
+          </p>
+        )}
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 divide-y divide-line/60">
           {loading ? (

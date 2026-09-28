@@ -14,6 +14,8 @@ import {
   X,
   ExternalLink,
   Globe2,
+  ShieldCheck,
+  KeyRound,
 } from "lucide-react";
 import Link from "next/link";
 import { BrandLogo } from "@/components/ui/brand-logo";
@@ -27,12 +29,17 @@ type Props = {
   productsCount: number;
   seeksCount: number;
   rfqsCount: number;
+  /** New (pending) order requests. */
+  ordersCount?: number;
   unreadMessagesCount: number;
   profile: SellerFactoryProfile;
   userName: string;
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
   onOpenUpgradeModal?: () => void;
+  /** Admin review state of this factory; undefined when unknown. */
+  verificationStatus?: "PENDING" | "APPROVED" | "REJECTED";
+  verificationSubmitted?: boolean;
 };
 
 export function SalesproSidebar({
@@ -41,12 +48,15 @@ export function SalesproSidebar({
   productsCount,
   seeksCount,
   rfqsCount,
+  ordersCount = 0,
   unreadMessagesCount,
   profile,
   userName,
   isMobileOpen = false,
   onCloseMobile,
   onOpenUpgradeModal,
+  verificationStatus,
+  verificationSubmitted,
 }: Props) {
   const [productsOpen, setProductsOpen] = useState(true);
   const [customerOpen, setCustomerOpen] = useState(true);
@@ -199,6 +209,24 @@ export function SalesproSidebar({
 
               <button
                 type="button"
+                onClick={() => handleSelectTab("orders")}
+                className={cn(
+                  "w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer",
+                  activeTab === "orders"
+                    ? "bg-[#FFF1E8] text-[#F26B21] font-bold"
+                    : "text-[#5F6368] hover:text-[#F26B21] hover:bg-[#F3F4F6]"
+                )}
+              >
+                <span>Order Requests</span>
+                {ordersCount > 0 && (
+                  <span className="rounded-full bg-[#DC2626] text-white px-1.5 py-0.2 text-[10px] font-bold">
+                    {ordersCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
                 onClick={() => handleSelectTab("messages")}
                 className={cn(
                   "w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition cursor-pointer",
@@ -238,18 +266,58 @@ export function SalesproSidebar({
             <span>Factory Profile & Certs</span>
           </button>
 
-          <a
-            href={profile.websiteUrl || "https://www.apex-forgings.com"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#E8F1FD] hover:text-[#1A73E8] transition font-semibold"
+          <Link
+            href="/factory/verify"
+            className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8] transition font-semibold"
           >
             <div className="flex items-center gap-2.5">
-              <Globe2 className="h-4 w-4 text-[#1A73E8]" />
-              <span>Official Website</span>
+              <ShieldCheck className="h-4 w-4 text-[#1A73E8]" />
+              <span>Factory Verification</span>
             </div>
-            <ExternalLink className="h-3 w-3 text-[#80868B]" />
-          </a>
+            {verificationStatus && (
+              <span
+                className={cn(
+                  "rounded-full px-1.5 py-0.5 text-[9px] font-bold",
+                  verificationStatus === "APPROVED" && "bg-emerald-100 text-emerald-800",
+                  verificationStatus === "REJECTED" && "bg-red-100 text-red-700",
+                  verificationStatus === "PENDING" && "bg-amber-100 text-amber-800",
+                )}
+              >
+                {verificationStatus === "APPROVED"
+                  ? "Verified"
+                  : verificationStatus === "REJECTED"
+                    ? "Declined"
+                    : verificationSubmitted
+                      ? "In review"
+                      : "Not started"}
+              </span>
+            )}
+          </Link>
+
+          {profile.websiteUrl ? (
+            <a
+              href={profile.websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#E8F1FD] hover:text-[#1A73E8] transition font-semibold"
+            >
+              <div className="flex items-center gap-2.5">
+                <Globe2 className="h-4 w-4 text-[#1A73E8]" />
+                <span>Official Website</span>
+              </div>
+              <ExternalLink className="h-3 w-3 text-[#80868B]" />
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleSelectTab("profile")}
+              className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#E8F1FD] hover:text-[#1A73E8] transition font-semibold cursor-pointer"
+              title="Add your website URL in Factory Profile"
+            >
+              <Globe2 className="h-4 w-4 text-[#80868B]" />
+              <span>Add Official Website</span>
+            </button>
+          )}
 
           <Link
             href="/explore"
@@ -272,6 +340,19 @@ export function SalesproSidebar({
           >
             <Settings className="h-4 w-4" />
             <span>Factory Settings</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSelectTab("account")}
+            className={cn(
+              "w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer",
+              activeTab === "account"
+                ? "bg-[#E8F1FD] text-[#1A73E8] font-bold"
+                : "text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8]"
+            )}
+          >
+            <KeyRound className="h-4 w-4" />
+            <span>Account & Security</span>
           </button>
         </div>
 
@@ -317,7 +398,9 @@ export function SalesproSidebar({
             <p className="text-[10px] text-[#5F6368] truncate">{userName} • {profile.tier || "Manager"}</p>
           </div>
         </div>
-        <LogoutButton />
+        <div className="shrink-0 whitespace-nowrap pl-2 [&>button]:mt-0 [&>button]:text-xs">
+          <LogoutButton />
+        </div>
       </div>
       </aside>
     </>

@@ -29,6 +29,10 @@ export default async function ManufacturerPage({ params }: Props) {
       products={detail.products}
       reels={detail.reels}
       allManufacturers={allManufacturers}
+      certifications={detail.certifications}
+      responseRatePercent={detail.responseRatePercent}
+      avgResponseTimeHours={detail.avgResponseTimeHours}
+      followedByMe={detail.followedByMe}
     />
   );
 }

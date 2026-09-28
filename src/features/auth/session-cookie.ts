@@ -20,6 +20,8 @@ export type JoinInput = {
   companyName?: string;
   industry?: string;
   country?: string;
+  /** Verification code typed by the user for phone sign-in. */
+  otp?: string;
   method: "email" | "phone";
 };
 
@@ -41,8 +43,7 @@ export function payloadToProfile(payload: SessionPayload): BuyerProfile {
     id: payload.id,
     name: payload.name,
     role: payload.role,
-    avatarUrl:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+    avatarUrl: "",
     companyName: payload.companyName,
     industry: payload.role === "Buyer" ? "Industrial sourcing" : "Manufacturing",
     country: payload.role === "Buyer" ? "India" : "China",

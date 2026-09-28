@@ -21,7 +21,7 @@ const tabs: {
 }[] = [
   { id: "details", label: "Company & Contact", icon: Building2 },
   { id: "rfqs", label: "My RFQs & Orders", icon: FileText, count: "rfq" },
-  { id: "saved", label: "Saved Products", icon: Bookmark, count: "saved" },
+  { id: "saved", label: "Saved Items", icon: Bookmark, count: "saved" },
   { id: "following", label: "Following Factories", icon: User, count: "following" },
   { id: "premium", label: "Membership & Plans", icon: Crown, crown: true },
 ];

@@ -1,9 +1,11 @@
+import type { FactoryVerification } from "@/shared/api/contracts";
 import type { Conversation } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { AppNotification } from "@/entities/notification";
 import type { Product } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
 import type { RfqItem } from "@/entities/rfq";
+import type { OrderRequest } from "@/entities/order";
 import type { ReelComment } from "@/entities/comment";
 import type { BuyerProfile } from "@/entities/user";
 import { categories } from "@/shared/mocks/machinery-taxonomy";
@@ -1002,6 +1004,7 @@ export const notifications: AppNotification[] = [
   {
     id: "nt-1",
     title: "Quote received",
+    type: "quote",
     body: "Apex Forgings sent a quotation for forged drive shafts.",
     createdAt: "12m",
     read: false,
@@ -1009,6 +1012,7 @@ export const notifications: AppNotification[] = [
   {
     id: "nt-2",
     title: "New factory video",
+    type: "follow",
     body: "SteelForge Industries published a chairman walkthrough.",
     createdAt: "1h",
     read: false,
@@ -1016,6 +1020,7 @@ export const notifications: AppNotification[] = [
   {
     id: "nt-3",
     title: "RFQ viewed",
+    type: "rfq",
     body: "3 verified manufacturers viewed your laser-cut enclosure RFQ.",
     createdAt: "3h",
     read: false,
@@ -1023,6 +1028,7 @@ export const notifications: AppNotification[] = [
   {
     id: "nt-4",
     title: "Follow accepted",
+    type: "follow",
     body: "Bharat Precision Tools accepted your follow request.",
     createdAt: "Yesterday",
     read: true,
@@ -1030,6 +1036,7 @@ export const notifications: AppNotification[] = [
   {
     id: "nt-5",
     title: "Trade fair",
+    type: "system",
     body: "SeekFactory Expo — Ningbo Auto Parts pavilion opens Aug 23.",
     createdAt: "2d",
     read: true,
@@ -1037,6 +1044,7 @@ export const notifications: AppNotification[] = [
   {
     id: "nt-6",
     title: "Price update",
+    type: "system",
     body: "Hydraulic gear pump listing updated by Ningbo Kaiyuan.",
     createdAt: "3d",
     read: false,
@@ -1044,6 +1052,7 @@ export const notifications: AppNotification[] = [
   {
     id: "nt-7",
     title: "Message reminder",
+    type: "message",
     body: "You have unread chats from 2 manufacturers.",
     createdAt: "3d",
     read: false,
@@ -1103,3 +1112,13 @@ export const factoryRfqs = shared<RfqItem[]>("factoryRfqs", [
     leadTimeDays: 35,
   },
 ]);
+
+/** Order requests placed by buyers in mock mode (starts empty; see mockApi.orders). */
+export const orderRequests = shared<OrderRequest[]>("orderRequests", []);
+
+/** Mock-mode verification application of the seller's factory. */
+export const factoryVerification = shared<FactoryVerification>("factoryVerification", {
+  status: "APPROVED",
+  submitted: false,
+  certifications: [],
+});

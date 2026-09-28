@@ -1,6 +1,6 @@
 "use client";
 
-import { Send } from "lucide-react";
+import { Send, UserRound } from "lucide-react";
 
 type Props = {
   inputRef: React.RefObject<HTMLInputElement | null>;
@@ -16,11 +16,12 @@ export function CommentComposer({ inputRef, value, onChange, onSubmit, isSubmitt
       onSubmit={onSubmit}
       className="flex items-center gap-3 px-5 py-3.5 border-b border-line bg-canvas/60"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
-        alt="Current user"
-        className="h-9 w-9 rounded-full object-cover border border-line flex-shrink-0"
-      />
+      <span
+        aria-hidden
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-ink-muted flex-shrink-0"
+      >
+        <UserRound className="h-4 w-4" />
+      </span>
       <div className="relative flex-1">
         <input
           ref={inputRef}

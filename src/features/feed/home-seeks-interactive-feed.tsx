@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -23,8 +23,12 @@ import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import type { Category } from "@/entities/category";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedTab } from "@/entities/reel";
+import { getApi } from "@/shared/api";
+import { LandscapeReelSkeleton } from "@/components/skeletons";
+import { feedSourceKey } from "@/features/feed/load-feed";
 
 type Props = {
+  /** Server-loaded seeks for the initial tab / subcategory / search (see feedSourceKey). */
   initialItems: FeedItem[];
   roots: Category[];
   allCategories: Category[];
@@ -119,52 +123,13 @@ export function HomeSeeksInteractiveFeed({
     return roots.find((r) => r.slug === expandedCategorySlug) ?? null;
   }, [expandedCategorySlug, roots]);
 
-  // Find subcategories belonging to the expanded root (matching Explore page logic)
+  // Subcategories of the expanded root, from the category tree built on the server
   const subcategories = useMemo(() => {
     if (!expandedRoot) return [];
-    if (childrenByRoot) {
-      if (childrenByRoot[expandedRoot.id]?.length) {
-        return childrenByRoot[expandedRoot.id];
-      }
-      if (childrenByRoot[expandedRoot.slug]?.length) {
-        return childrenByRoot[expandedRoot.slug];
-      }
-    }
-    // Taxonomy alias fallback to guarantee all subcategories appear even without server map
-    const PARENT_ALIASES: Record<string, string[]> = {
-      "cat-agricultural-machinery": ["cat-agriculture"],
-      "cat-agriculture": ["cat-agricultural-machinery"],
-      "cat-food-processing-machinery": ["cat-food-and-beverage-processing"],
-      "cat-food-and-beverage-processing": ["cat-food-processing-machinery"],
-      "cat-fashion-machinery": ["cat-textile-and-leather-manufacturing"],
-      "cat-textile-and-leather-manufacturing": ["cat-fashion-machinery"],
-      "cat-engineering-capital-machinery": ["cat-construction", "cat-machine-tools"],
-      "cat-construction": ["cat-engineering-capital-machinery"],
-      "cat-machine-tools": ["cat-engineering-capital-machinery"],
-      "cat-renewable-energy-machinery": ["cat-energy"],
-      "cat-energy": ["cat-renewable-energy-machinery"],
-      "cat-transaportation-machinery": ["cat-transportation-and-trailers"],
-      "cat-transportation-and-trailers": ["cat-transaportation-machinery"],
-      "cat-healthcare-machinery": ["cat-test-lab-medical-equipment"],
-      "cat-test-lab-medical-equipment": ["cat-healthcare-machinery", "cat-pharmaceutical-machinery"],
-      "cat-packaging-machinery": ["cat-processing"],
-      "cat-processing": ["cat-packaging-machinery"],
-      "cat-electronics-manufacturing-machinery": ["cat-semiconductors", "cat-industrial-automation"],
-      "cat-robots": ["cat-industrial-automation"],
-    };
-    const matchingParents = new Set([
-      expandedRoot.id,
-      ...(PARENT_ALIASES[expandedRoot.id] || []),
-    ]);
-    const seen = new Set<string>();
-    const results: Category[] = [];
-    for (const item of allCategories) {
-      if (item.parentId && matchingParents.has(item.parentId) && !seen.has(item.id)) {
-        seen.add(item.id);
-        results.push(item);
-      }
-    }
-    return results;
+    return (
+      childrenByRoot?.[expandedRoot.id] ??
+      allCategories.filter((item) => item.parentId === expandedRoot.id)
+    );
   }, [expandedRoot, childrenByRoot, allCategories]);
 
   // Find the currently selected subcategory object (if any)
@@ -221,86 +186,45 @@ export function HomeSeeksInteractiveFeed({
     updateUrl(expandedCategorySlug, "", tab, viewMode, "");
   };
 
-  // Filter the Seeks according to:
-  // 1. tab (for-you vs following)
-  // 2. selectedSubcategory (ONLY if selected! If only category expanded, all Seeks stay visible!)
-  // 3. searchQuery (keyword filter for Seeks)
-  const filteredItems = useMemo(() => {
-    let result = initialItems;
+  // Seeks come from the backend for the current source:
+  // - a subcategory or search query → search API (category includes its subcategories)
+  // - otherwise the tab feed (Following = factories the signed-in buyer follows)
+  // Expanding a root category alone keeps the current seeks visible until a subcategory is chosen.
+  const sourceKey = feedSourceKey(tab, selectedSub?.id ?? "", searchQuery);
+  const [items, setItems] = useState<FeedItem[]>(initialItems);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const loadedKey = useRef(feedSourceKey(initialTab, initialSubcategoryId(initialSubcategorySlug, allCategories), initialQuery));
 
-    // 1. Tab filter
-    if (tab === "following") {
-      result = result.filter((item) =>
-        ["mfr-apex", "mfr-bharat", "mfr-metalcraft"].includes(item.manufacturer.id)
-      );
-    }
-
-    // 2. Subcategory filter: ONLY filters when a subcategory is explicitly chosen!
-    // As per requirement: "The Seeks should stay there until the user selects/clicks a subcategory."
-    if (selectedSub) {
-      const subId = selectedSub.id;
-      const subSlug = selectedSub.slug;
-      const subNameLower = selectedSub.name.toLowerCase();
-
-      const matched = result.filter((item) => {
-        // A. Direct subcategory tag on the reel
-        if (item.reel.subcategoryIds?.includes(subId)) return true;
-
-        // B. Any product attached to the reel matches subcategory
-        if (item.products?.some((p) => p.categoryId === subId)) return true;
-
-        // C. Manufacturer belongs to subcategory
-        if (item.manufacturer.categoryIds?.includes(subId)) return true;
-
-        // D. Textual match in title, description, or hashtags
-        const titleLower = item.reel.title.toLowerCase();
-        const descLower = item.reel.description.toLowerCase();
-        const tags = item.reel.hashtags.map((t) => t.toLowerCase());
-
-        if (titleLower.includes(subSlug) || descLower.includes(subSlug)) return true;
-        if (tags.some((t) => t.includes(subSlug) || subSlug.includes(t))) return true;
-
-        // Also check if any key word in subcategory name appears
-        const words = subNameLower.split(/[\s,&-]+/).filter((w) => w.length > 3);
-        if (words.some((w) => titleLower.includes(w) || descLower.includes(w))) {
-          return true;
-        }
-
-        return false;
+  useEffect(() => {
+    if (sourceKey === loadedKey.current) return;
+    let cancelled = false;
+    const q = searchQuery.trim();
+    const subId = selectedSub?.id ?? "";
+    setLoading(true);
+    setLoadError(null);
+    const request =
+      q || subId
+        ? getApi().search.query({ q, category: subId, limit: 50 }).then((res) => res.reels)
+        : getApi().feed.list(tab);
+    request
+      .then((next) => {
+        if (cancelled) return;
+        loadedKey.current = sourceKey;
+        setItems(next);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : "Could not load seeks");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
+  }, [sourceKey, searchQuery, selectedSub, tab]);
 
-      // If specific matches exist, show those.
-      // If none match the exact mock ID, fall back to matching parent category reels so the user always sees content
-      if (matched.length > 0) {
-        result = matched;
-      } else if (expandedRoot) {
-        // Fallback to reels under the expanded root category
-        const parentMatches = result.filter((item) => {
-          if (item.reel.categoryIds?.includes(expandedRoot.id)) return true;
-          if (item.manufacturer.categoryIds?.includes(expandedRoot.id)) return true;
-          return false;
-        });
-        if (parentMatches.length > 0) {
-          result = parentMatches;
-        }
-      }
-    }
-
-    // 3. Search query filter specifically for Seeks
-    const q = searchQuery.trim().toLowerCase();
-    if (q) {
-      result = result.filter((item) => {
-        const inTitle = item.reel.title.toLowerCase().includes(q);
-        const inDesc = item.reel.description.toLowerCase().includes(q);
-        const inTags = item.reel.hashtags.some((t) => t.toLowerCase().includes(q));
-        const inMfr = item.manufacturer.name.toLowerCase().includes(q);
-        const inProd = item.products?.some((p) => p.name.toLowerCase().includes(q));
-        return inTitle || inDesc || inTags || inMfr || inProd;
-      });
-    }
-
-    return result;
-  }, [initialItems, tab, selectedSub, expandedRoot, searchQuery]);
+  const filteredItems = items;
 
   return (
     <section className="space-y-3.5">
@@ -480,8 +404,19 @@ export function HomeSeeksInteractiveFeed({
         </div>
       )}
 
+      {loadError && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-semibold text-rose-700">
+          {loadError}
+        </div>
+      )}
+
       {/* Layout is admin-controlled; DUAL is the fallback for anything unrecognised */}
-      {showcase.mode === "SINGLE" ? (
+      {loading ? (
+        <div className="space-y-4">
+          <LandscapeReelSkeleton />
+          <LandscapeReelSkeleton />
+        </div>
+      ) : showcase.mode === "SINGLE" ? (
         <SingleSeekShowcase items={filteredItems} settings={showcase} />
       ) : showcase.mode === "SIDEBAR" ? (
         <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" />
@@ -498,4 +433,8 @@ export function HomeSeeksInteractiveFeed({
       )}
     </section>
   );
+}
+
+function initialSubcategoryId(slug: string, all: Category[]) {
+  return slug ? all.find((c) => c.slug === slug)?.id ?? "" : "";
 }

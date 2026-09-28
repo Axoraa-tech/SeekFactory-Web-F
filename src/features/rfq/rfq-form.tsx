@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import {
   FileText,
   Paperclip,
@@ -18,31 +17,42 @@ import { cn } from "@/shared/lib/cn";
 
 type Props = {
   categories: Category[];
+  /** Buyer company from the profile. */
+  initialCompanyName?: string;
+  /** Prefill when arriving from a product page (?product=). */
+  initialProductName?: string;
+  /** Root category id to preselect. */
+  initialCategoryId?: string;
 };
 
-export function RfqForm({ categories }: Props) {
-  const searchParams = useSearchParams();
-  const initialProduct = searchParams.get("product") || "";
-  const initialCategory = searchParams.get("category") || "";
+type Attachment = { name: string; size: string; url: string };
 
+function formatBytes(bytes: number) {
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+export function RfqForm({ categories, initialCompanyName = "", initialProductName = "", initialCategoryId = "" }: Props) {
   const [status, setStatus] = useState<"idle" | "saving" | "sent">("idle");
+  const [error, setError] = useState<string | null>(null);
   const [referenceId, setReferenceId] = useState<string | null>(null);
-  const [productName, setProductName] = useState(initialProduct);
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [quantity, setQuantity] = useState("500");
+  const [productName, setProductName] = useState(initialProductName);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategoryId);
+  const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("Pieces");
   const [targetPrice, setTargetPrice] = useState("");
   const [currency, setCurrency] = useState("INR");
   const [incoterm, setIncoterm] = useState("FOB");
-  const [companyName, setCompanyName] = useState("Global Sourcing Buyer");
-  const [details, setDetails] = useState(
-    "Need CNC machined parts with ±0.01mm tolerance. Surface treatment: Hard anodized black. Raw material certs required."
-  );
-  const [attachedFile, setAttachedFile] = useState<{ name: string; size: string } | null>(null);
+  const [companyName, setCompanyName] = useState(initialCompanyName);
+  const [details, setDetails] = useState("");
+  const [attachedFile, setAttachedFile] = useState<Attachment | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("saving");
+    setError(null);
 
     try {
       const result = await getApi().rfq.submit({
@@ -57,24 +67,38 @@ export function RfqForm({ categories }: Props) {
         companyName,
         attachmentName: attachedFile?.name,
         attachmentSize: attachedFile?.size,
+        attachmentUrl: attachedFile?.url,
       });
 
-      setReferenceId(result.referenceNumber || result.id || `SF-RFQ-${Math.floor(100000 + Math.random() * 900000)}`);
+      setReferenceId(result.referenceNumber || result.id);
       setStatus("sent");
     } catch (err) {
-      console.error("Failed to submit RFQ:", err);
+      setError(err instanceof Error ? err.message : "Could not post your RFQ. Please try again.");
       setStatus("idle");
     }
   }
 
-  const handleAttachMock = () => {
+  const handleFileChosen = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const uploaded = await getApi().media.upload(file, "document");
+      setAttachedFile({ name: file.name, size: formatBytes(file.size), url: uploaded.url });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not upload the file");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAttach = () => {
     if (attachedFile) {
       setAttachedFile(null);
     } else {
-      setAttachedFile({
-        name: "Component_2D_3D_Drawing.step",
-        size: "8.4 MB",
-      });
+      fileInput.current?.click();
     }
   };
 
@@ -93,14 +117,14 @@ export function RfqForm({ categories }: Props) {
             Request for Quotation Live!
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-            Your RFQ reference is <strong className="font-mono text-brand-blue">{referenceId}</strong>. Verified OEM manufacturers matching your category will start providing quotes within 4 hours.
+            Your RFQ reference is <strong className="font-mono text-brand-blue">{referenceId}</strong>. Verified manufacturers in your category can now quote on it; you will be notified as quotes arrive.
           </p>
         </div>
 
         <div className="rounded-xl bg-white border border-slate-200 p-4 max-w-md mx-auto text-left text-xs space-y-1.5 shadow-2xs">
           <div className="flex justify-between">
             <span className="text-slate-500 font-medium">Product:</span>
-            <span className="font-bold text-slate-800">{productName || "Custom Component"}</span>
+            <span className="font-bold text-slate-800">{productName}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-500 font-medium">Quantity:</span>
@@ -110,15 +134,17 @@ export function RfqForm({ categories }: Props) {
             <span className="text-slate-500 font-medium">Delivery Term:</span>
             <span className="font-bold text-slate-800">{incoterm}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-slate-500 font-medium">Escrow Protection:</span>
-            <span className="font-bold text-emerald-600">100% Trade Assurance Active</span>
-          </div>
+          {attachedFile && (
+            <div className="flex justify-between">
+              <span className="text-slate-500 font-medium">Attachment:</span>
+              <span className="font-bold text-slate-800 truncate max-w-[60%]">{attachedFile.name}</span>
+            </div>
+          )}
         </div>
 
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            href="/profile"
+            href="/profile?tab=rfqs"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
           >
             <span>Track in My RFQs & Profile</span>
@@ -183,7 +209,7 @@ export function RfqForm({ categories }: Props) {
             >
               <option value="">All Machinery Categories</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.name}>
+                <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
@@ -203,6 +229,7 @@ export function RfqForm({ categories }: Props) {
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
+              placeholder="e.g. 500"
               className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors"
             />
           </div>
@@ -276,6 +303,7 @@ export function RfqForm({ categories }: Props) {
             required
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
+            placeholder="Your company name"
             className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
           />
         </div>
@@ -293,6 +321,7 @@ export function RfqForm({ categories }: Props) {
             required
             value={details}
             onChange={(e) => setDetails(e.target.value)}
+            placeholder="e.g. CNC machined parts, ±0.01mm tolerance, hard anodized black, material certificates required"
             className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue leading-relaxed"
           />
         </div>
@@ -308,14 +337,22 @@ export function RfqForm({ categories }: Props) {
                 {attachedFile ? attachedFile.name : "Attach CAD Drawing / 2D PDF / Blueprint"}
               </p>
               <p className="text-[11px] text-slate-500">
-                {attachedFile ? `${attachedFile.size} · Ready to upload` : "Supports .STEP, .DWG, .DXF, .PDF up to 50MB"}
+                {uploading ? "Uploading…" : attachedFile ? `${attachedFile.size} · Uploaded` : "Supports .STEP, .DWG, .DXF, .PDF up to 50MB"}
               </p>
             </div>
           </div>
 
+          <input
+            ref={fileInput}
+            type="file"
+            accept=".pdf,.step,.stp,.dwg,.dxf,.igs,.iges,.stl,.zip,.xlsx,.docx"
+            className="hidden"
+            onChange={handleFileChosen}
+          />
           <button
             type="button"
-            onClick={handleAttachMock}
+            disabled={uploading}
+            onClick={handleAttach}
             className={cn(
               "px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs shrink-0",
               attachedFile
@@ -323,15 +360,21 @@ export function RfqForm({ categories }: Props) {
                 : "bg-white text-brand-blue border border-slate-200 hover:bg-blue-50"
             )}
           >
-            {attachedFile ? "Remove Drawing" : "+ Attach Sample CAD"}
+            {attachedFile ? "Remove Drawing" : uploading ? "Uploading…" : "+ Attach CAD / PDF"}
           </button>
         </div>
+
+        {error && (
+          <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700">
+            {error}
+          </p>
+        )}
 
         {/* Submit Button */}
         <div className="pt-2 flex items-center justify-end gap-3">
           <Button
             type="submit"
-            disabled={status === "saving"}
+            disabled={status === "saving" || uploading}
             className="h-11 px-6 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm hover:bg-brand-blue-dark shadow-md active:scale-95 transition-all"
           >
             {status === "saving" ? "Publishing to Verified Plants..." : "Post Buying Request to Verified Factories"}

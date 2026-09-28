@@ -18,8 +18,25 @@ import type {
   MessageItem,
   NewFactoryProduct,
   NewFactorySeek,
+  OrderRepository,
   UploadedMedia,
+  AccountRepository,
+  FactoryProductUpdate,
+  FactorySeekUpdate,
+  FactoryVerification,
+  VerificationSubmission,
+  SearchRepository,
+  SearchResult,
+  MediaRepository,
+  PlatformRepository,
+  FeedItem,
+  UploadKind,
 } from "@/shared/api/contracts";
+import type { CartItem } from "@/entities/order";
+import type { BuyerPlan, ExchangeRates } from "@/entities/plan";
+import type { NotificationType } from "@/entities/notification";
+import type { PriceTier } from "@/entities/product";
+import type { RfqQuote } from "@/entities/rfq";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
 import type { Category, CategoryIconKey } from "@/entities/category";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
@@ -29,19 +46,28 @@ import type { Product } from "@/entities/product";
 import type { AppNotification } from "@/entities/notification";
 import type { Conversation } from "@/entities/message";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
-import type { BuyerProfile } from "@/entities/user";
+import type { Cart, NewOrderRequest, OrderContact, OrderParty, OrderRequest, OrderStatus } from "@/entities/order";
+import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
 import type { SellerStats } from "@/features/factory/types";
 import {
   clearBrowserCookie,
-  parseSessionCookie,
-  payloadToProfile,
   readBrowserCookie,
-  SESSION_COOKIE,
   writeBrowserCookie,
   type JoinInput,
   type LoginInput,
   type SessionPayload,
 } from "@/features/auth/session-cookie";
+
+/** Error from the backend, carrying the HTTP status so callers can tell "not found" from "down". */
+export class ApiError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+/** Shown for missing product, factory and seek imagery instead of invented stock photos. */
+export const PLACEHOLDER_IMAGE = "/placeholders/image.svg";
 
 /**
  * Standard Backend Envelope Response
@@ -65,6 +91,11 @@ interface BackendUser {
   avatar_url?: string;
   avatarUrl?: string;
   phone?: string;
+  emailVerified?: boolean;
+  taxId?: string;
+  address?: string;
+  plan?: string;
+  memberSince?: string;
 }
 
 interface BackendAuthResponse {
@@ -118,6 +149,9 @@ interface BackendReel {
   savesCount?: number;
   product_ids?: string[];
   productIds?: string[];
+  listed?: boolean;
+  likedByMe?: boolean;
+  savedByMe?: boolean;
 }
 
 interface BackendProduct {
@@ -139,6 +173,12 @@ interface BackendProduct {
   category_id?: string;
   categoryId?: string;
   specs?: Record<string, string>;
+  imageUrls?: string[];
+  datasheetUrl?: string;
+  datasheetName?: string;
+  listed?: boolean;
+  priceTiers?: PriceTier[];
+  savedByMe?: boolean;
 }
 
 interface BackendManufacturer {
@@ -171,6 +211,7 @@ interface BackendManufacturer {
   websiteUrl?: string;
   annual_turnover?: string;
   annualTurnover?: string;
+  certifications?: string[];
   production_lines?: number;
   productionLines?: number;
   certificates?: FactoryCertificate[];
@@ -184,6 +225,7 @@ interface BackendFeedItem {
   primary_product_slug?: string;
   primaryProductSlug?: string;
   products?: BackendProduct[];
+  followingManufacturer?: boolean;
 }
 
 interface BackendCategory {
@@ -199,24 +241,20 @@ interface BackendCategory {
 
 interface BackendCommentReply {
   id: string;
-  user_name?: string;
-  author_name?: string;
-  author_avatar_url?: string;
+  authorName?: string;
+  authorAvatarUrl?: string;
+  authorCompany?: string;
+  authorCountry?: string;
+  verified?: boolean;
+  isVerified?: boolean;
   content: string;
-  created_at?: string;
-  likes_count?: number;
+  createdAt?: string;
+  likes?: number;
+  likedByMe?: boolean;
 }
 
-interface BackendComment {
-  id: string;
-  reel_id?: string;
-  user_name?: string;
-  author_name?: string;
-  author_avatar_url?: string;
-  author_company?: string;
-  content: string;
-  created_at?: string;
-  likes_count?: number;
+interface BackendComment extends BackendCommentReply {
+  reelId?: string;
   replies?: BackendCommentReply[];
 }
 
@@ -246,6 +284,16 @@ interface BackendConversation {
 }
 
 interface BackendMessage {
+  attachmentContentType?: string;
+  order?: {
+    id: string;
+    referenceNumber?: string;
+    productName?: string;
+    productSlug?: string;
+    quantity?: number;
+    unit?: string;
+    status?: string;
+  };
   id: string;
   conversation_id?: string;
   conversationId?: string;
@@ -273,17 +321,64 @@ interface BackendMessage {
 
 interface BackendNotification {
   id: string;
-  user_id?: string;
   type?: string;
   title?: string;
   body?: string;
-  link?: string;
-  is_read?: boolean;
   read?: boolean;
-  created_at?: string;
+  createdAt?: string;
+  referenceId?: string;
+}
+
+interface BackendRfq {
+  id: string;
+  referenceNumber?: string;
+  productName?: string;
+  categoryId?: string;
+  quantity?: string;
+  unit?: string;
+  targetPrice?: string;
+  currency?: string;
+  incoterm?: string;
+  companyName?: string;
+  details?: string;
+  attachmentName?: string;
+  attachmentUrl?: string;
+  status?: string;
+  createdAt?: string;
+  quoteCount?: number;
+  quotes?: {
+    id: string;
+    manufacturer?: BackendManufacturer;
+    quotePrice?: number;
+    currency?: string;
+    leadTimeDays?: number;
+    notes?: string;
+    attachmentUrl?: string;
+    status?: string;
+    createdAt?: string;
+    orderId?: string;
+  }[];
+}
+
+interface BackendCartItem {
+  id: string;
+  product: BackendProduct;
+  manufacturer: BackendManufacturer;
+  quantity: number;
+  minQuantity?: number;
+  unitPrice?: number | null;
+  lineTotal?: number | null;
+}
+
+interface BackendCart {
+  items?: BackendCartItem[];
+  itemCount?: number;
+  totalAmount?: number;
+  currency?: string;
 }
 
 interface BackendFactoryStats {
+  weeklyTrend?: { weekStart: string; seekViews?: number; productViews?: number; rfqs?: number }[];
   periodDays?: number;
   responseWindowDays?: number;
   total_product_views?: number;
@@ -402,10 +497,12 @@ export function createHttpApi(baseUrl: string): ApiClient {
         } catch {
           // Response was not JSON
         }
-        throw new Error(errorMsg);
+        throw new ApiError(errorMsg, res.status);
       }
 
-      const json = (await res.json()) as BackendResponse<T>;
+      const text = await res.text();
+      if (!text) return undefined as T;
+      const json = JSON.parse(text) as BackendResponse<T>;
       return json.data;
     })();
 
@@ -422,147 +519,92 @@ export function createHttpApi(baseUrl: string): ApiClient {
   }
 
   // ── 1. SESSION REPOSITORY ──────────────────────────────────────
+  /** Display-only session cookie; the credential itself lives in the HttpOnly sf-access-token cookie. */
+  function rememberSession(res: BackendAuthResponse) {
+    const sessionData: SessionPayload = {
+      id: res.user?.id || res.userId || res.user_id || "",
+      name: res.user?.name || res.name || "",
+      role: mapBackendRole(res.user?.role || res.role),
+      email: res.user?.email || res.email || "",
+      companyName: res.user?.companyName || res.user?.company_name || res.companyName || res.company_name || "",
+    };
+    writeBrowserCookie(sessionData);
+  }
+
   const session: SessionRepository = {
     async getCurrentUser(): Promise<BuyerProfile | null> {
       try {
-        const user = await fetchJson<BackendUser>("/api/v1/auth/me");
-        if (!user) return null;
-
-        return {
-          id: user.id,
-          name: user.name,
-          role: mapBackendRole(user.role),
-          avatarUrl: user.avatar_url || user.avatarUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-          companyName: user.company_name || user.companyName || "Enterprise Member",
-          industry: user.industry || "Manufacturing",
-          country: user.country || "India",
-          email: user.email,
-          phone: user.phone,
-        };
+        const user = await fetchJson<BackendUser>("/api/v1/auth/me", { cache: "no-store" });
+        return user ? toProfile(user) : null;
       } catch {
-        // Return null if backend auth fails
+        // Signed out, or the access token expired and could not be refreshed
         return null;
       }
     },
 
     async join(input: JoinInput): Promise<BuyerProfile> {
-      const payload = {
-        name: input.name || input.email?.split("@")[0] || "New Member",
-        email: input.email,
-        password: input.password || "Password@123",
-        role: input.role === "Supplier" ? "SUPPLIER" : "BUYER",
-        companyName: input.companyName || "New Company",
-        industry: input.industry || "Manufacturing",
-        country: input.country || "India",
-        phone: input.phone,
-      };
-
+      if (!input.password) throw new Error("Password is required");
       const res = await fetchJson<BackendAuthResponse>("/api/v1/auth/register", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          name: input.name || input.email?.split("@")[0],
+          email: input.email,
+          password: input.password,
+          role: input.role === "Supplier" ? "SUPPLIER" : "BUYER",
+          companyName: input.companyName,
+          industry: input.industry,
+          country: input.country,
+          phone: input.phone,
+        }),
       });
-
-      const userId = res.user?.id || res.user_id || res.userId || `user-${Date.now()}`;
-      const userName = res.user?.name || res.name || payload.name;
-      const userEmail = res.user?.email || res.email || payload.email || "";
-      const roleRaw = res.user?.role || res.role || input.role;
-      const userRole: "Buyer" | "Supplier" =
-        mapBackendRole(roleRaw);
-      const userCompany =
-        res.user?.company_name || res.company_name || res.companyName || payload.companyName;
-
-      const sessionData: SessionPayload = {
-        id: userId,
-        name: userName,
-        role: userRole,
-        email: userEmail,
-        companyName: userCompany,
-      };
-
-      writeBrowserCookie(sessionData);
-      return payloadToProfile(sessionData);
+      rememberSession(res);
+      return (await session.getCurrentUser()) ?? authResponseToProfile(res);
     },
 
     async login(input: LoginInput): Promise<BuyerProfile> {
-      let res: BackendAuthResponse;
-
-      if (input.method === "phone" && input.phone) {
-        res = await fetchJson<BackendAuthResponse>("/api/v1/auth/login/phone", {
-          method: "POST",
-          body: JSON.stringify({ phone: input.phone, otp: "123456", role: input.role }),
-        });
-      } else {
-        res = await fetchJson<BackendAuthResponse>("/api/v1/auth/login", {
-          method: "POST",
-          body: JSON.stringify({ email: input.email, password: input.password }),
-        });
-      }
-
-      const userId = res.user?.id || res.userId || res.user_id || `user-${Date.now()}`;
-      const userName = res.user?.name || res.name || "Member";
-      const userEmail = res.user?.email || res.email || input.email || "";
-      const roleRaw = res.user?.role || res.role || input.role;
-      const userRole: "Buyer" | "Supplier" =
-        mapBackendRole(roleRaw);
-      const userCompany =
-        res.user?.companyName || res.user?.company_name || res.companyName || res.company_name || "Enterprise Member";
-
-      const sessionData: SessionPayload = {
-        id: userId,
-        name: userName,
-        role: userRole,
-        email: userEmail,
-        companyName: userCompany,
-      };
-
-      writeBrowserCookie(sessionData);
-      return payloadToProfile(sessionData);
+      const res =
+        input.method === "phone" && input.phone
+          ? await fetchJson<BackendAuthResponse>("/api/v1/auth/login/phone", {
+              method: "POST",
+              body: JSON.stringify({ phone: input.phone, otp: input.otp, role: input.role, companyName: input.companyName }),
+            })
+          : await fetchJson<BackendAuthResponse>("/api/v1/auth/login", {
+              method: "POST",
+              body: JSON.stringify({ email: input.email, password: input.password }),
+            });
+      rememberSession(res);
+      return (await session.getCurrentUser()) ?? authResponseToProfile(res);
     },
 
     async logout(): Promise<void> {
       try {
         await fetchJson<void>("/api/v1/auth/logout", { method: "POST" });
       } catch {
-        // Ignore errors on logout
+        // The proxy clears the auth cookies either way
       } finally {
         clearBrowserCookie();
       }
     },
 
-    async updateProfile(input: {
-      name?: string;
-      companyName?: string;
-      industry?: string;
-      country?: string;
-      phone?: string;
-    }): Promise<BuyerProfile> {
+    async updateProfile(input): Promise<BuyerProfile> {
       const updated = await fetchJson<BackendUser>("/api/v1/users/me", {
         method: "PUT",
-        body: JSON.stringify(input),
+        body: JSON.stringify({ ...input, avatarUrl: toStoredMediaUrl(input.avatarUrl) }),
       });
-
+      const profile = toProfile(updated);
       if (typeof window !== "undefined") {
-        const session = readBrowserCookie();
-        if (session) {
-          writeBrowserCookie({
-            ...session,
-            name: updated.name || session.name,
-            companyName: updated.companyName || updated.company_name || input.companyName || session.companyName,
-          });
-        }
+        const current = readBrowserCookie();
+        if (current) writeBrowserCookie({ ...current, name: profile.name, companyName: profile.companyName });
       }
+      return profile;
+    },
 
-      return {
-        id: updated.id || "user-me",
-        name: updated.name || input.name || "Member",
-        role: "Buyer",
-        avatarUrl: updated.avatarUrl || updated.avatar_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-        companyName: updated.companyName || updated.company_name || input.companyName || "Enterprise Member",
-        industry: updated.industry || input.industry || "Manufacturing",
-        country: updated.country || input.country || "India",
-        email: updated.email,
-        phone: updated.phone || input.phone,
-      };
+    async updatePlan(plan: BuyerPlanTier): Promise<BuyerProfile> {
+      const updated = await fetchJson<BackendUser>("/api/v1/users/me/plan", {
+        method: "PUT",
+        body: JSON.stringify({ plan }),
+      });
+      return toProfile(updated);
     },
   };
 
@@ -570,40 +612,35 @@ export function createHttpApi(baseUrl: string): ApiClient {
   const feed: FeedRepository = {
     async list(tab: FeedTab) {
       const data = await fetchJson<BackendFeedItem[]>(`/api/v1/feed?tab=${tab}`, { cache: "no-store" });
-      return data.map((item) => {
-        const reel = normalizeReel(item.reel, item.manufacturer?.id, tab);
-        return {
-          reel: {
-            ...reel,
-            posterUrl: reel.posterUrl || "https://images.seekfactory.com/posters/default.jpg",
-          },
-          manufacturer: normalizeManufacturer(item.manufacturer || {}),
-          primaryProductSlug: item.primaryProductSlug || item.primary_product_slug,
-          products: (item.products || []).map(normalizeProduct),
-        };
+      return data.map((item) => normalizeFeedItem(item, tab));
+    },
+
+    async addReel(): Promise<void> {
+      // Seeks are published from the seller hub (factory.addSeek); the public feed is read-only.
+      throw new Error("Use factory.addSeek to publish a seek");
+    },
+
+    async likeReel(reelId: string) {
+      return fetchJson<{ liked: boolean; likesCount: number }>(`/api/v1/feed/${encodeURIComponent(reelId)}/like`, {
+        method: "POST",
       });
     },
 
-    async addReel(reel: Reel): Promise<void> {
-      try {
-        await fetchJson<void>("/api/v1/feed", {
-          method: "POST",
-          body: JSON.stringify(reel),
-        });
-      } catch {
-        // Safe fallback
-      }
+    async saveReel(reelId: string) {
+      return fetchJson<{ saved: boolean; savesCount: number }>(`/api/v1/feed/${encodeURIComponent(reelId)}/save`, {
+        method: "POST",
+      });
     },
 
-    async likeReel(reelId: string): Promise<{ liked: boolean; likesCount: number }> {
-      try {
-        const res = await fetchJson<{ liked: boolean; likesCount: number }>(`/api/v1/feed/${reelId}/like`, {
-          method: "POST",
-        });
-        return res;
-      } catch {
-        return { liked: true, likesCount: 1 };
-      }
+    async shareReel(reelId: string) {
+      return fetchJson<{ sharesCount: number }>(`/api/v1/feed/${encodeURIComponent(reelId)}/share`, {
+        method: "POST",
+      });
+    },
+
+    async listSaved(): Promise<FeedItem[]> {
+      const data = await fetchJson<BackendFeedItem[]>("/api/v1/users/me/saved/seeks", { cache: "no-store" });
+      return data.map((item) => normalizeFeedItem(item));
     },
 
     async recordView(reelId: string, viewerId?: string): Promise<void> {
@@ -614,17 +651,6 @@ export function createHttpApi(baseUrl: string): ApiClient {
         });
       } catch {
         // Analytics must never break playback
-      }
-    },
-
-    async saveReel(reelId: string): Promise<{ saved: boolean; savesCount: number }> {
-      try {
-        const res = await fetchJson<{ saved: boolean; savesCount: number }>(`/api/v1/feed/${reelId}/save`, {
-          method: "POST",
-        });
-        return res;
-      } catch {
-        return { saved: true, savesCount: 1 };
       }
     },
   };
@@ -643,19 +669,40 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getBySlug(slug: string): Promise<ManufacturerDetail | null> {
       try {
-        // Backend returns { manufacturer, products, reels }; older builds returned a flat manufacturer.
-        const detail = await fetchJson<
-          BackendManufacturer & { manufacturer?: BackendManufacturer }
-        >(`/api/v1/manufacturers/${slug}`);
-        const manufacturer = detail.manufacturer ?? detail;
+        const detail = await fetchJson<{
+          manufacturer: BackendManufacturer;
+          products?: BackendProduct[];
+          reels?: BackendReel[];
+          certifications?: string[];
+          responseRatePercent?: number;
+          avgResponseTimeHours?: number;
+          followedByMe?: boolean;
+        }>(`/api/v1/manufacturers/${encodeURIComponent(slug)}`, { cache: "no-store" });
         return {
-          manufacturer: normalizeManufacturer(manufacturer),
+          manufacturer: normalizeManufacturer(detail.manufacturer),
           products: (detail.products || []).map(normalizeProduct),
-          reels: (detail.reels || []).map((r) => normalizeReel(r, manufacturer.id)),
+          reels: (detail.reels || []).map((r) => normalizeReel(r, detail.manufacturer.id)),
+          certifications: detail.certifications || [],
+          responseRatePercent: detail.responseRatePercent ?? null,
+          avgResponseTimeHours: detail.avgResponseTimeHours ?? null,
+          followedByMe: detail.followedByMe,
         };
-      } catch {
-        return null;
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) return null;
+        throw err;
       }
+    },
+
+    async toggleFollow(manufacturerId: string) {
+      return fetchJson<{ following: boolean; followerCount: number }>(
+        `/api/v1/manufacturers/${encodeURIComponent(manufacturerId)}/follow`,
+        { method: "POST" },
+      );
+    },
+
+    async listFollowing(): Promise<Manufacturer[]> {
+      const list = await fetchJson<BackendManufacturer[]>("/api/v1/users/me/following", { cache: "no-store" });
+      return list.map(normalizeManufacturer);
     },
   };
 
@@ -668,22 +715,33 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getBySlug(slug: string): Promise<ProductDetail | null> {
       try {
-        // Backend returns { product, manufacturer, related }; older builds returned a flat product.
-        const detail = await fetchJson<
-          BackendProduct & { product?: BackendProduct; related?: BackendProduct[] }
-        >(`/api/v1/products/${slug}`);
-        const product = detail.product ?? detail;
+        const detail = await fetchJson<{
+          product: BackendProduct;
+          manufacturer: BackendManufacturer;
+          related?: BackendProduct[];
+        }>(`/api/v1/products/${encodeURIComponent(slug)}`, { cache: "no-store" });
         return {
-          product: normalizeProduct(product),
-          manufacturer: normalizeManufacturer(detail.manufacturer || product.manufacturer || {}),
+          product: normalizeProduct(detail.product),
+          manufacturer: normalizeManufacturer(detail.manufacturer),
+          related: (detail.related || []).map(normalizeProduct),
         };
-      } catch {
-        return null;
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) return null;
+        throw err;
       }
     },
 
     async listByCategory(categoryId: string): Promise<Product[]> {
-      const list = await fetchJson<BackendProduct[]>(`/api/v1/products/category/${categoryId}`);
+      const list = await fetchJson<BackendProduct[]>(`/api/v1/products/category/${encodeURIComponent(categoryId)}`);
+      return list.map(normalizeProduct);
+    },
+
+    async toggleSave(productId: string) {
+      return fetchJson<{ saved: boolean }>(`/api/v1/products/${encodeURIComponent(productId)}/save`, { method: "POST" });
+    },
+
+    async listSaved(): Promise<Product[]> {
+      const list = await fetchJson<BackendProduct[]>("/api/v1/users/me/saved/products", { cache: "no-store" });
       return list.map(normalizeProduct);
     },
 
@@ -698,15 +756,9 @@ export function createHttpApi(baseUrl: string): ApiClient {
       }
     },
 
-    async addProduct(product: Product): Promise<void> {
-      try {
-        await fetchJson<void>("/api/v1/products", {
-          method: "POST",
-          body: JSON.stringify(product),
-        });
-      } catch {
-        // Safe fallback
-      }
+    async addProduct(): Promise<void> {
+      // Products are created from the seller hub (factory.addProduct).
+      throw new Error("Use factory.addProduct to list a product");
     },
   };
 
@@ -744,128 +796,87 @@ export function createHttpApi(baseUrl: string): ApiClient {
   // ── 6. RFQ REPOSITORY ──────────────────────────────────────────
   const rfq: RfqRepository = {
     async submit(draft: RfqDraft): Promise<{ ok: true; id: string; referenceNumber?: string }> {
-      const payload = {
-        productName: draft.productName,
-        categoryId: draft.categoryId,
-        quantity: draft.quantity,
-        unit: draft.unit || "Pieces",
-        targetPrice: draft.targetPrice || "Negotiable",
-        currency: draft.currency || "INR",
-        incoterm: draft.incoterm || "FOB",
-        companyName: draft.companyName || "Global Buyer",
-        details: draft.details,
-        attachmentName: draft.attachmentName,
-        attachmentSize: draft.attachmentSize,
-        attachmentUrl: draft.attachmentUrl,
-      };
-
-      const result = await fetchJson<{ ok: boolean; id: string; referenceNumber?: string }>(
-        "/api/v1/rfqs",
-        {
-          method: "POST",
-          body: JSON.stringify(payload),
-        }
-      );
-
+      const result = await fetchJson<{ ok: boolean; id: string; referenceNumber?: string }>("/api/v1/rfqs", {
+        method: "POST",
+        body: JSON.stringify({
+          productName: draft.productName,
+          categoryId: draft.categoryId,
+          quantity: draft.quantity,
+          unit: draft.unit,
+          targetPrice: draft.targetPrice,
+          currency: draft.currency,
+          incoterm: draft.incoterm,
+          companyName: draft.companyName,
+          details: draft.details,
+          attachmentName: draft.attachmentName,
+          attachmentSize: draft.attachmentSize,
+          attachmentUrl: toStoredMediaUrl(draft.attachmentUrl),
+        }),
+      });
       return { ok: true, id: result.id, referenceNumber: result.referenceNumber };
     },
 
     async listMyRfqs(): Promise<RfqItem[]> {
-      try {
-        interface BackendRfqItem {
-          id: string;
-          referenceNumber?: string;
-          reference_number?: string;
-          productName?: string;
-          product_name?: string;
-          quantity?: string;
-          unit?: string;
-          targetPrice?: string;
-          target_price?: string;
-          currency?: string;
-          incoterm?: string;
-          details?: string;
-          status?: string;
-          createdAt?: string;
-          created_at?: string;
-        }
+      const list = await fetchJson<BackendRfq[]>("/api/v1/rfqs", { cache: "no-store" });
+      return list.map(normalizeRfq);
+    },
 
-        const list = await fetchJson<BackendRfqItem[]>("/api/v1/rfqs");
-        return list.map((item) => ({
-          id: item.id,
-          referenceNumber: item.referenceNumber || item.reference_number || `RFQ-${item.id.slice(0, 8)}`,
-          productName: item.productName || item.product_name || "Industrial Component",
-          quantity: item.quantity || "100",
-          unit: item.unit || "Pieces",
-          targetPrice: item.targetPrice || item.target_price || "Negotiable",
-          currency: item.currency || "INR",
-          incoterm: item.incoterm || "FOB",
-          details: item.details || "",
-          status: item.status || "SUBMITTED",
-          createdAt: item.createdAt || item.created_at || "Just now",
-        }));
-      } catch {
-        return [];
-      }
+    async getMine(rfqId: string): Promise<RfqItem> {
+      return normalizeRfq(await fetchJson<BackendRfq>(`/api/v1/rfqs/${encodeURIComponent(rfqId)}`, { cache: "no-store" }));
+    },
+
+    async cancel(rfqId: string): Promise<RfqItem> {
+      return normalizeRfq(await fetchJson<BackendRfq>(`/api/v1/rfqs/${encodeURIComponent(rfqId)}/cancel`, { method: "PUT" }));
+    },
+
+    async acceptQuote(rfqId, quoteId, contact): Promise<RfqItem> {
+      return normalizeRfq(
+        await fetchJson<BackendRfq>(
+          `/api/v1/rfqs/${encodeURIComponent(rfqId)}/quotes/${encodeURIComponent(quoteId)}/accept`,
+          { method: "POST", body: JSON.stringify(contact) },
+        ),
+      );
+    },
+
+    async rejectQuote(rfqId, quoteId): Promise<RfqItem> {
+      return normalizeRfq(
+        await fetchJson<BackendRfq>(
+          `/api/v1/rfqs/${encodeURIComponent(rfqId)}/quotes/${encodeURIComponent(quoteId)}/reject`,
+          { method: "POST" },
+        ),
+      );
     },
   };
 
   // ── 7. COMMENT REPOSITORY ──────────────────────────────────────
   const comments: CommentRepository = {
     async listByReelId(reelId: string): Promise<ReelComment[]> {
-      const list = await fetchJson<BackendComment[]>(`/api/v1/reels/${reelId}/comments`);
-      return list.map((c) => ({
-        id: c.id,
-        reelId: c.reel_id || reelId,
-        authorName: c.user_name || c.author_name || "Member",
-        authorAvatarUrl: c.author_avatar_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
-        authorCompany: c.author_company,
-        content: c.content,
-        createdAt: c.created_at || "Just now",
-        likes: c.likes_count || 0,
-        replies: (c.replies || []).map((r: BackendCommentReply) => ({
-          id: r.id,
-          authorName: r.user_name || r.author_name || "Member",
-          authorAvatarUrl: r.author_avatar_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
-          content: r.content,
-          createdAt: r.created_at || "Just now",
-          likes: r.likes_count || 0,
-        })),
-      }));
+      const list = await fetchJson<BackendComment[]>(`/api/v1/reels/${encodeURIComponent(reelId)}/comments`, {
+        cache: "no-store",
+      });
+      return list.map((c) => normalizeComment(c, reelId));
     },
 
     async addComment(reelId: string, content: string): Promise<ReelComment> {
-      const res = await fetchJson<BackendComment>(`/api/v1/reels/${reelId}/comments`, {
+      const res = await fetchJson<BackendComment>(`/api/v1/reels/${encodeURIComponent(reelId)}/comments`, {
         method: "POST",
         body: JSON.stringify({ content }),
       });
-
-      return {
-        id: res.id,
-        reelId: reelId,
-        authorName: res.user_name || "You",
-        authorAvatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
-        content: res.content,
-        createdAt: res.created_at || "Just now",
-        likes: 0,
-        replies: [],
-      };
+      return normalizeComment(res, reelId);
     },
 
     async addReply(commentId: string, content: string): Promise<ReelCommentReply> {
-      const res = await fetchJson<BackendCommentReply>(`/api/v1/comments/${commentId}/replies`, {
+      const res = await fetchJson<BackendCommentReply>(`/api/v1/comments/${encodeURIComponent(commentId)}/replies`, {
         method: "POST",
         body: JSON.stringify({ content }),
       });
+      return normalizeReply(res);
+    },
 
-      return {
-        id: res.id,
-        authorName: res.user_name || "You",
-        authorAvatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
-        content: res.content,
-        createdAt: res.created_at || "Just now",
-        likes: 0,
-      };
+    async toggleLike(commentId: string) {
+      return fetchJson<{ liked: boolean; likes: number }>(`/api/v1/comments/${encodeURIComponent(commentId)}/like`, {
+        method: "POST",
+      });
     },
   };
 
@@ -886,47 +897,34 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
           const lastAt = item.lastMessageAt || item.last_message_at ||
             (typeof item.last_message === "object" ? item.last_message?.sent_at : null) ||
-            new Date().toISOString();
+            "";
 
           return {
             id: item.id,
-            manufacturerId: item.manufacturerId || item.manufacturer?.id || "mfg-01",
-            buyerId: item.buyerId || "b-0",
-            buyerName: item.buyerName || "Buyer",
-            buyerCompany: item.buyerCompany || item.manufacturer?.name || "Global Buyer",
-            buyerAvatarUrl: item.buyerAvatarUrl || item.manufacturer?.logoUrl || "https://images.seekfactory.com/logos/default.png",
+            manufacturerId: item.manufacturerId || item.manufacturer?.id || "",
+            buyerId: item.buyerId,
+            buyerName: item.buyerName,
+            buyerCompany: item.buyerCompany,
+            buyerAvatarUrl: resolveMediaUrl(item.buyerAvatarUrl),
             lastMessage: lastMsg,
             lastMessageAt: lastAt,
             unreadCount: item.unreadCount ?? item.unread_count ?? 0,
             manufacturer: normalizeManufacturer(item.manufacturer || {}),
           };
         });
-      } catch {
-        // Return empty list if unauthenticated (e.g. static prerendering or guest)
-        return [];
+      } catch (err) {
+        // Guests have no conversations; anything else is a real failure
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) return [];
+        throw err;
       }
     },
 
     async getMessages(conversationId: string) {
       try {
-        const list = await fetchJson<BackendMessage[]>(`/api/v1/conversations/${conversationId}/messages`);
-        return list.map((m) => {
-          const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
-          const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
-          return {
-            id: m.id,
-            conversationId: m.conversationId || m.conversation_id || conversationId,
-            sender,
-            text: m.messageText || m.message_text || "",
-            time: m.createdAt || m.created_at || "Just now",
-            attachment: (m.attachmentName || m.attachment_name) ? {
-              name: m.attachmentName || m.attachment_name || "attachment",
-              size: m.attachmentSize || m.attachment_size || "",
-              url: m.attachmentUrl || m.attachment_url,
-            } : undefined,
-            isRead: m.isRead ?? m.is_read ?? false,
-          };
+        const list = await fetchJson<BackendMessage[]>(`/api/v1/conversations/${conversationId}/messages`, {
+          cache: "no-store",
         });
+        return list.map((m) => normalizeMessage(m, conversationId));
       } catch {
         return [];
       }
@@ -935,13 +933,15 @@ export function createHttpApi(baseUrl: string): ApiClient {
     async sendMessage(
       conversationId: string,
       text: string,
-      attachment?: MessageAttachment
+      attachment?: MessageAttachment,
+      context?: { orderId?: string }
     ) {
       const payload = {
         messageText: text,
         attachmentName: attachment?.name,
         attachmentSize: attachment?.size,
         attachmentUrl: attachment?.url,
+        orderId: context?.orderId,
       };
 
       const m = await fetchJson<BackendMessage>(`/api/v1/conversations/${conversationId}/messages`, {
@@ -949,22 +949,29 @@ export function createHttpApi(baseUrl: string): ApiClient {
         body: JSON.stringify(payload),
       });
 
-      const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
-      const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
+      return normalizeMessage(m, conversationId);
+    },
 
-      return {
-        id: m.id,
-        conversationId: m.conversationId || m.conversation_id || conversationId,
-        sender,
-        text: m.messageText || m.message_text || text,
-        time: m.createdAt || m.created_at || "Just now",
-        attachment: (m.attachmentName || m.attachment_name) ? {
-          name: m.attachmentName || m.attachment_name || "",
-          size: m.attachmentSize || m.attachment_size || "",
-          url: m.attachmentUrl || m.attachment_url,
-        } : undefined,
-        isRead: m.isRead ?? m.is_read ?? false,
-      };
+    async uploadAttachment(conversationId: string, file: File): Promise<MessageAttachment> {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetchJson<{ url: string; name?: string; size?: string; contentType?: string }>(
+        `/api/v1/conversations/${encodeURIComponent(conversationId)}/attachments`,
+        { method: "POST", body },
+      );
+      return { url: res.url, name: res.name || file.name, size: res.size || "", contentType: res.contentType || file.type };
+    },
+
+    async listConversationOrders(conversationId: string): Promise<OrderRequest[]> {
+      try {
+        const list = await fetchJson<BackendOrder[]>(
+          `/api/v1/conversations/${encodeURIComponent(conversationId)}/orders`,
+          { cache: "no-store" },
+        );
+        return list.map(normalizeOrder);
+      } catch {
+        return [];
+      }
     },
 
     async startConversation(manufacturerId: string, initialMessage?: string): Promise<Conversation & { manufacturer: Manufacturer }> {
@@ -982,7 +989,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
         id: item.id,
         manufacturerId: item.manufacturerId || item.manufacturer?.id || manufacturerId,
         lastMessage: item.lastMessage || (typeof item.last_message === "string" ? item.last_message : item.last_message?.content || ""),
-        lastMessageAt: item.lastMessageAt || item.last_message_at || new Date().toISOString(),
+        lastMessageAt: item.lastMessageAt || item.last_message_at || "",
         unreadCount: item.unreadCount ?? item.unread_count ?? 0,
         manufacturer: normalizeManufacturer(item.manufacturer || {}),
       };
@@ -1001,27 +1008,13 @@ export function createHttpApi(baseUrl: string): ApiClient {
     onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void {
       if (typeof window === "undefined") return () => {};
       
-      const evtSource = new EventSource(`/api/v1/conversations/${conversationId}/stream`);
+      // Same-origin via the proxy so the HttpOnly session cookie is attached
+      const evtSource = new EventSource(`/api/proxy/api/v1/conversations/${encodeURIComponent(conversationId)}/stream`);
       
       evtSource.addEventListener("message", (event) => {
         try {
           const m: BackendMessage = JSON.parse(event.data);
-          const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
-          const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
-          
-          callback({
-            id: m.id,
-            conversationId: m.conversationId || m.conversation_id || conversationId,
-            sender,
-            text: m.messageText || m.message_text || "",
-            time: m.createdAt || m.created_at || "Just now",
-            attachment: (m.attachmentName || m.attachment_name) ? {
-              name: m.attachmentName || m.attachment_name || "attachment",
-              size: m.attachmentSize || m.attachment_size || "",
-              url: m.attachmentUrl || m.attachment_url,
-            } : undefined,
-            isRead: m.isRead ?? m.is_read ?? false,
-          });
+          callback(normalizeMessage(m, conversationId));
         } catch (e) {
           console.error("Failed to parse SSE message", e);
         }
@@ -1037,57 +1030,83 @@ export function createHttpApi(baseUrl: string): ApiClient {
   const notifications: NotificationRepository = {
     async list(): Promise<AppNotification[]> {
       try {
-        const list = await fetchJson<BackendNotification[]>("/api/v1/notifications");
-        return list.map((n) => ({
-          id: n.id,
-          title: n.title || "",
-          body: n.body || "",
-          createdAt: n.created_at || new Date().toISOString(),
-          read: n.is_read ?? n.read ?? false,
-        }));
-      } catch {
-        // Return empty list if unauthenticated (e.g. static prerendering or guest)
-        return [];
+        const list = await fetchJson<BackendNotification[]>("/api/v1/notifications", { cache: "no-store" });
+        return list.map(normalizeNotification);
+      } catch (err) {
+        // Guests have no notifications; anything else is a real failure
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) return [];
+        throw err;
       }
     },
 
     async unreadCount(): Promise<number> {
       try {
-        const res = await fetchJson<{ count: number }>("/api/v1/notifications/unread-count");
+        const res = await fetchJson<{ count: number }>("/api/v1/notifications/unread-count", { cache: "no-store" });
         return res.count || 0;
       } catch {
+        // Badge only: never break the page shell over it
         return 0;
       }
     },
 
     async markAllAsRead(): Promise<void> {
-      try {
-        await fetchJson<void>("/api/v1/notifications/mark-read", {
-          method: "PUT",
-        });
-      } catch {
-        // Safe fallback
-      }
+      await fetchJson<void>("/api/v1/notifications/mark-read", { method: "PUT" });
     },
 
     async markAsRead(id: string): Promise<void> {
-      try {
-        await fetchJson<void>(`/api/v1/notifications/${id}/read`, {
-          method: "PUT",
-        });
-      } catch {
-        // Safe fallback
-      }
+      await fetchJson<void>(`/api/v1/notifications/${encodeURIComponent(id)}/read`, { method: "PUT" });
     },
 
     async deleteNotification(id: string): Promise<void> {
-      try {
-        await fetchJson<void>(`/api/v1/notifications/${id}`, {
-          method: "DELETE",
-        });
-      } catch {
-        // Safe fallback
-      }
+      await fetchJson<void>(`/api/v1/notifications/${encodeURIComponent(id)}`, { method: "DELETE" });
+    },
+  };
+
+  // ── 11. SEARCH REPOSITORY ──────────────────────────────────────
+  const search: SearchRepository = {
+    async query({ q = "", category = "", limit = 30 }): Promise<SearchResult> {
+      const params = new URLSearchParams({ q, category, limit: String(limit) });
+      const res = await fetchJson<{
+        products?: BackendProduct[];
+        manufacturers?: BackendManufacturer[];
+        reels?: BackendFeedItem[];
+      }>(`/api/v1/search?${params}`, { cache: "no-store" });
+      return {
+        products: (res.products || []).map(normalizeProduct),
+        manufacturers: (res.manufacturers || []).map(normalizeManufacturer),
+        reels: (res.reels || []).map((item) => normalizeFeedItem(item)),
+      };
+    },
+  };
+
+  // ── 13. MEDIA REPOSITORY ───────────────────────────────────────
+  const media: MediaRepository = {
+    async upload(file: File, kind: UploadKind): Promise<UploadedMedia> {
+      const body = new FormData();
+      body.append("file", file);
+      body.append("kind", kind);
+      const res = await fetchJson<{ url?: string; contentType?: string; size?: number }>("/api/v1/media", {
+        method: "POST",
+        body,
+      });
+      if (!res?.url) throw new Error("Upload succeeded but no file URL was returned");
+      return {
+        url: resolveMediaUrl(res.url) || res.url,
+        contentType: res.contentType || file.type,
+        size: res.size ?? file.size,
+      };
+    },
+  };
+
+  // ── 14. PLATFORM REPOSITORY ────────────────────────────────────
+  const platform: PlatformRepository = {
+    async listBuyerPlans(): Promise<BuyerPlan[]> {
+      const list = await fetchJson<BuyerPlan[]>("/api/v1/pricing/buyer-plans");
+      return list.map((p) => ({ ...p, priceInr: Number(p.priceInr), priceCny: Number(p.priceCny) }));
+    },
+
+    async getExchangeRates(): Promise<ExchangeRates> {
+      return fetchJson<ExchangeRates>("/api/v1/settings/exchange-rates");
     },
   };
 
@@ -1115,7 +1134,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
         exportCountries: data.exportCountries,
         categoryIds: data.categoryIds,
         chairmanName: data.chairmanName,
-        certificates: data.certificates,
+        certifications: data.certifications,
+        certificates: data.certificates?.map((cert) => ({ ...cert, imageUrl: toStoredMediaUrl(cert.imageUrl) })),
       };
       const res = await fetchJson<BackendManufacturer>("/api/v1/factory/profile", {
         method: "PUT",
@@ -1165,7 +1185,32 @@ export function createHttpApi(baseUrl: string): ApiClient {
     async addProduct(data: NewFactoryProduct): Promise<Product> {
       const res = await fetchJson<BackendProduct>("/api/v1/factory/products", {
         method: "POST",
-        body: JSON.stringify({ ...data, imageUrl: toStoredMediaUrl(data.imageUrl) }),
+        body: JSON.stringify({
+          ...data,
+          imageUrl: toStoredMediaUrl(data.imageUrl),
+          imageUrls: data.imageUrls?.map((url) => toStoredMediaUrl(url)),
+          datasheetUrl: toStoredMediaUrl(data.datasheetUrl),
+        }),
+      });
+      return normalizeProduct(res);
+    },
+
+    async updateProduct(id: string, data: FactoryProductUpdate): Promise<Product> {
+      const res = await fetchJson<BackendProduct>(`/api/v1/factory/products/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          ...data,
+          imageUrls: data.imageUrls?.map((url) => toStoredMediaUrl(url)),
+          datasheetUrl: toStoredMediaUrl(data.datasheetUrl),
+        }),
+      });
+      return normalizeProduct(res);
+    },
+
+    async setProductListed(id: string, listed: boolean): Promise<Product> {
+      const res = await fetchJson<BackendProduct>(`/api/v1/factory/products/${encodeURIComponent(id)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ listed }),
       });
       return normalizeProduct(res);
     },
@@ -1197,6 +1242,47 @@ export function createHttpApi(baseUrl: string): ApiClient {
       return { ...normalizeReel(res), categoryIds: data.categoryIds };
     },
 
+    async updateSeek(id: string, data: FactorySeekUpdate): Promise<Reel> {
+      const res = await fetchJson<BackendReel>(`/api/v1/factory/seeks/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          ...data,
+          posterUrl: toStoredMediaUrl(data.posterUrl),
+          videoUrl: toStoredMediaUrl(data.videoUrl),
+        }),
+      });
+      return normalizeReel(res);
+    },
+
+    async setSeekListed(id: string, listed: boolean): Promise<Reel> {
+      const res = await fetchJson<BackendReel>(`/api/v1/factory/seeks/${encodeURIComponent(id)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ listed }),
+      });
+      return normalizeReel(res);
+    },
+
+    async getVerification(): Promise<FactoryVerification> {
+      const res = await fetchJson<Partial<FactoryVerification>>("/api/v1/factory/verification", { cache: "no-store" });
+      return normalizeVerification(res);
+    },
+
+    async submitVerification(data: VerificationSubmission): Promise<FactoryVerification> {
+      const res = await fetchJson<Partial<FactoryVerification>>("/api/v1/factory/verification", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return normalizeVerification(res);
+    },
+
+    async openRfqConversation(rfqId: string): Promise<Conversation> {
+      const item = await fetchJson<BackendConversation>(
+        `/api/v1/factory/rfqs/${encodeURIComponent(rfqId)}/conversation`,
+        { method: "POST" },
+      );
+      return normalizeSellerConversation(item);
+    },
+
     async deleteSeek(id: string): Promise<void> {
       await fetchJson<void>(`/api/v1/factory/seeks/${id}`, {
         method: "DELETE",
@@ -1223,33 +1309,39 @@ export function createHttpApi(baseUrl: string): ApiClient {
           created_at?: string;
           companyName?: string;
           company_name?: string;
+          categoryId?: string;
           buyerName?: string;
-          buyer_name?: string;
           buyerCountry?: string;
-          buyer_country?: string;
-          quotePrice?: number;
-          quote_price?: number;
-          leadTimeDays?: number;
-          lead_time_days?: number;
+          buyerAvatarUrl?: string;
+          myQuotePrice?: number;
+          myQuoteLeadTimeDays?: number;
+          myQuoteIncoterm?: string;
+          myQuoteNotes?: string;
+          myQuotedAt?: string;
         }
         const list = await fetchJson<BackendRfqItem[]>("/api/v1/factory/rfqs", { cache: "no-store" });
         return list.map((item) => ({
           id: item.id,
           referenceNumber: item.referenceNumber || item.reference_number || `RFQ-${item.id.slice(0, 8)}`,
-          productName: item.productName || item.product_name || "Industrial Component",
-          quantity: item.quantity || "100",
-          unit: item.unit || "Pieces",
-          targetPrice: item.targetPrice || item.target_price || "Negotiable",
+          productName: item.productName || item.product_name || "Untitled RFQ",
+          quantity: item.quantity || "",
+          unit: item.unit,
+          targetPrice: item.targetPrice || item.target_price,
           currency: item.currency || "INR",
-          incoterm: item.incoterm || "FOB",
+          incoterm: item.incoterm,
           details: item.details || "",
           status: item.status || "SUBMITTED",
-          createdAt: item.createdAt || item.created_at || "Just now",
+          createdAt: item.createdAt || item.created_at || "",
           companyName: item.companyName || item.company_name,
-          buyerName: item.buyerName || item.buyer_name,
-          buyerCountry: item.buyerCountry || item.buyer_country,
-          quotedPriceInr: item.quotePrice ?? item.quote_price,
-          leadTimeDays: item.leadTimeDays ?? item.lead_time_days,
+          categoryId: item.categoryId,
+          buyerName: item.buyerName,
+          buyerCountry: item.buyerCountry,
+          buyerAvatarUrl: resolveMediaUrl(item.buyerAvatarUrl),
+          quotedPriceInr: item.myQuotePrice ?? undefined,
+          leadTimeDays: item.myQuoteLeadTimeDays ?? undefined,
+          quoteIncoterm: item.myQuoteIncoterm,
+          quoteNotes: item.myQuoteNotes,
+          quotedAt: item.myQuotedAt,
         }));
       } catch {
         return [];
@@ -1261,6 +1353,119 @@ export function createHttpApi(baseUrl: string): ApiClient {
         method: "POST",
         body: JSON.stringify(quote),
       });
+    },
+
+    async getOrders(): Promise<OrderRequest[]> {
+      const list = await fetchJson<BackendOrder[]>("/api/v1/factory/orders", { cache: "no-store" });
+      return list.map(normalizeOrder);
+    },
+
+    async openOrderConversation(orderId: string): Promise<Conversation> {
+      const item = await fetchJson<BackendConversation>(
+        `/api/v1/factory/orders/${encodeURIComponent(orderId)}/conversation`,
+        { method: "POST" },
+      );
+      return normalizeSellerConversation(item);
+    },
+
+    async updateOrderStatus(orderId: string, status: OrderStatus, note?: string): Promise<OrderRequest> {
+      const res = await fetchJson<BackendOrder>(`/api/v1/factory/orders/${encodeURIComponent(orderId)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status, note }),
+      });
+      return normalizeOrder(res);
+    },
+  };
+
+  // ── 12. ACCOUNT (password, email verification) ─────────────
+  const account: AccountRepository = {
+    async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+      await fetchJson<void>("/api/v1/account/password", {
+        method: "POST",
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+    },
+    async sendEmailVerification(): Promise<void> {
+      await fetchJson<void>("/api/v1/account/email/verification", { method: "POST" });
+    },
+    async requestPasswordReset(email: string): Promise<void> {
+      await fetchJson<void>("/api/v1/auth/password/forgot", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    },
+    async resetPassword(token: string, newPassword: string): Promise<void> {
+      await fetchJson<void>("/api/v1/auth/password/reset", {
+        method: "POST",
+        body: JSON.stringify({ token, newPassword }),
+      });
+    },
+    async verifyEmail(token: string): Promise<void> {
+      await fetchJson<void>("/api/v1/auth/email/verify", {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      });
+    },
+  };
+
+  // ── 11. ORDER REQUESTS (buyer side) ───────────────────────────
+  const orders: OrderRepository = {
+    async place(input: NewOrderRequest): Promise<OrderRequest> {
+      const res = await fetchJson<BackendOrder>("/api/v1/orders", {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+      return normalizeOrder(res);
+    },
+
+    async listMine(): Promise<OrderRequest[]> {
+      const list = await fetchJson<BackendOrder[]>("/api/v1/orders/mine", { cache: "no-store" });
+      return list.map(normalizeOrder);
+    },
+
+    async cancel(orderId: string, reason?: string): Promise<OrderRequest> {
+      return normalizeOrder(
+        await fetchJson<BackendOrder>(`/api/v1/orders/${encodeURIComponent(orderId)}/cancel`, {
+          method: "POST",
+          body: JSON.stringify({ reason }),
+        }),
+      );
+    },
+
+    async getCart(): Promise<Cart> {
+      return normalizeCart(await fetchJson<BackendCart>("/api/v1/cart", { cache: "no-store" }));
+    },
+
+    async addToCart(productId: string, quantity: number): Promise<Cart> {
+      return normalizeCart(
+        await fetchJson<BackendCart>("/api/v1/cart/items", {
+          method: "POST",
+          body: JSON.stringify({ productId, quantity }),
+        }),
+      );
+    },
+
+    async updateCartQuantity(cartItemId: string, quantity: number): Promise<Cart> {
+      return normalizeCart(
+        await fetchJson<BackendCart>(`/api/v1/cart/items/${encodeURIComponent(cartItemId)}`, {
+          method: "PUT",
+          body: JSON.stringify({ quantity }),
+        }),
+      );
+    },
+
+    async removeFromCart(cartItemId: string): Promise<Cart> {
+      return normalizeCart(
+        await fetchJson<BackendCart>(`/api/v1/cart/items/${encodeURIComponent(cartItemId)}`, { method: "DELETE" }),
+      );
+    },
+
+    async checkout(contact: OrderContact): Promise<OrderRequest[]> {
+      const list = await fetchJson<BackendOrder[]>("/api/v1/cart/checkout", {
+        method: "POST",
+        body: JSON.stringify(contact),
+      });
+      return list.map(normalizeOrder);
     },
   };
 
@@ -1275,6 +1480,11 @@ export function createHttpApi(baseUrl: string): ApiClient {
     rfq,
     comments,
     factory,
+    search,
+    orders,
+    media,
+    platform,
+    account,
   };
 }
 
@@ -1312,12 +1522,12 @@ function normalizeReel(r: BackendReel, fallbackManufacturerId = "", tab: FeedTab
   return {
     id: r.id,
     manufacturerId: r.manufacturerId || r.manufacturer_id || fallbackManufacturerId,
-    title: r.title || r.caption || "Factory Seek",
+    title: r.title || r.caption || "",
     description: r.description || "",
     hashtags: r.hashtags || [],
-    posterUrl: resolveMediaUrl(r.posterUrl || r.poster_url) || "",
+    posterUrl: resolveMediaUrl(r.posterUrl || r.poster_url) || PLACEHOLDER_IMAGE,
     videoUrl: resolveMediaUrl(r.videoUrl || r.video_url),
-    durationSec: r.durationSec || r.duration_sec || 30,
+    durationSec: r.durationSec ?? r.duration_sec ?? 0,
     startSec: r.startSec || r.start_sec || 0,
     views: r.views || 0,
     likes: r.likes || r.likesCount || r.likes_count || 0,
@@ -1326,39 +1536,88 @@ function normalizeReel(r: BackendReel, fallbackManufacturerId = "", tab: FeedTab
     saves: r.saves || r.savesCount || r.saves_count || 0,
     tab,
     productIds: r.productIds || r.product_ids || [],
+    listed: r.listed ?? true,
+    likedByMe: r.likedByMe,
+    savedByMe: r.savedByMe,
   };
 }
 
+function normalizeFeedItem(item: BackendFeedItem, tab: FeedTab = "for-you"): FeedItem {
+  return {
+    reel: normalizeReel(item.reel, item.manufacturer?.id, tab),
+    manufacturer: normalizeManufacturer(item.manufacturer || {}),
+    primaryProductSlug: item.primaryProductSlug || item.primary_product_slug,
+    products: (item.products || []).map(normalizeProduct),
+    followingManufacturer: item.followingManufacturer,
+  };
+}
+
+/** Values the backend does not send stay empty; the UI shows its empty state rather than invented data. */
 function normalizeManufacturer(m: BackendManufacturer): Manufacturer {
   return {
     id: m.id || "",
     slug: m.slug || "",
-    name: m.name || "Verified Factory",
-    logoUrl: resolveMediaUrl(m.logoUrl || m.logo_url) || "https://images.seekfactory.com/logos/default.png",
-    coverUrl: resolveMediaUrl(m.coverUrl || m.cover_url) || "https://images.seekfactory.com/covers/default.jpg",
-    country: m.country || "China",
-    location: m.location || "Zhejiang, China",
-    verified: m.verified ?? true,
+    name: m.name || "",
+    logoUrl: resolveMediaUrl(m.logoUrl || m.logo_url) || PLACEHOLDER_IMAGE,
+    coverUrl: resolveMediaUrl(m.coverUrl || m.cover_url) || PLACEHOLDER_IMAGE,
+    country: m.country || "",
+    location: m.location || "",
+    verified: m.verified ?? false,
     premium: m.premium ?? false,
-    yearsEstablished: m.yearsEstablished ?? m.years_established ?? 12,
-    factorySize: m.factorySize || m.factory_size || "20,000 sq.m",
-    employees: m.employees || "200-500",
-    exportCountries: m.exportCountries || m.export_countries || ["India", "USA", "Germany"],
+    yearsEstablished: m.yearsEstablished ?? m.years_established ?? 0,
+    factorySize: m.factorySize || m.factory_size || "",
+    employees: m.employees || "",
+    exportCountries: m.exportCountries || m.export_countries || [],
     description: m.description || "",
-    followerCount: m.followerCount ?? m.follower_count ?? 1200,
+    followerCount: m.followerCount ?? m.follower_count ?? 0,
     categoryIds: m.categoryIds || m.category_ids || [],
     chairmanName: m.chairmanName || m.chairman_name,
     websiteUrl: m.websiteUrl || m.website_url,
     annualTurnover: m.annualTurnover || m.annual_turnover,
     productionLines: m.productionLines ?? m.production_lines,
-    certificates: m.certificates,
+    certificates: m.certificates?.map((cert) => ({
+      ...cert,
+      certNumber: cert.certNumber ?? "",
+      imageUrl: resolveMediaUrl(cert.imageUrl) || "",
+    })),
+    certifications: m.certifications ?? [],
+  };
+}
+
+function normalizeVerification(v: Partial<FactoryVerification> | null | undefined): FactoryVerification {
+  return {
+    status: v?.status ?? "PENDING",
+    submitted: Boolean(v?.submitted),
+    submittedAt: v?.submittedAt ?? undefined,
+    reviewedAt: v?.reviewedAt ?? undefined,
+    rejectionReason: v?.rejectionReason ?? undefined,
+    companyRegNumber: v?.companyRegNumber ?? undefined,
+    taxId: v?.taxId ?? undefined,
+    registrationDate: v?.registrationDate ?? undefined,
+    factoryAddress: v?.factoryAddress ?? undefined,
+    certifications: v?.certifications ?? [],
+  };
+}
+
+/** A conversation opened from the seller hub (seller view: buyer fields filled). */
+function normalizeSellerConversation(item: BackendConversation): Conversation {
+  return {
+    id: item.id,
+    manufacturerId: item.manufacturerId || item.manufacturer?.id || "",
+    buyerId: item.buyerId || item.buyer_id,
+    buyerName: item.buyerName || item.buyer_name,
+    buyerCompany: item.buyerCompany || item.buyer_company,
+    buyerAvatarUrl: resolveMediaUrl(item.buyerAvatarUrl || item.buyer_avatar_url),
+    lastMessage: typeof item.lastMessage === "string" ? item.lastMessage : "",
+    lastMessageAt: item.lastMessageAt || item.last_message_at || "",
+    unreadCount: item.unreadCount ?? item.unread_count ?? 0,
   };
 }
 
 function normalizeProduct(p: BackendProduct): Product {
-  let moqStr = "1 unit";
+  let moqStr = "";
   if (typeof p.moq === "number") {
-    moqStr = `${p.moq} units`;
+    moqStr = `${p.moq} ${p.unit || ""}`.trim();
   } else if (typeof p.moq === "string") {
     moqStr = p.moq;
   }
@@ -1369,14 +1628,21 @@ function normalizeProduct(p: BackendProduct): Product {
     manufacturerId: p.manufacturerId || p.manufacturer_id || p.manufacturer?.id || "",
     name: p.name || "",
     imageUrl:
-      resolveMediaUrl(p.imageUrl || p.primaryImageUrl || p.primary_image_url || p.image_url) ||
-      "https://images.seekfactory.com/products/default.jpg",
+      resolveMediaUrl(p.imageUrl || p.primaryImageUrl || p.primary_image_url || p.image_url) || PLACEHOLDER_IMAGE,
     description: p.description || "",
-    priceInr: p.priceInr ?? p.price_inr ?? 150000,
-    unit: p.unit || "SET",
+    priceInr: Number(p.priceInr ?? p.price_inr ?? 0),
+    unit: p.unit || "",
     moq: moqStr,
     categoryId: p.categoryId || p.category_id || "",
     specs: p.specs || {},
+    imageUrls: p.imageUrls?.length
+      ? p.imageUrls.map((url) => resolveMediaUrl(url) || url)
+      : undefined,
+    datasheetUrl: resolveMediaUrl(p.datasheetUrl),
+    datasheetName: p.datasheetName,
+    listed: p.listed ?? true,
+    priceTiers: (p.priceTiers || []).map((t) => ({ minQty: Number(t.minQty), priceInr: Number(t.priceInr) })),
+    savedByMe: p.savedByMe,
   };
 }
 
@@ -1388,6 +1654,135 @@ function normalizeCategory(c: BackendCategory): Category {
     listingCount: c.listing_count || c.listingCount || 0,
     icon: (c.icon || "other") as CategoryIconKey,
     parentId: c.parent_id || c.parentId || null,
+  };
+}
+
+function toProfile(user: BackendUser): BuyerProfile {
+  return {
+    id: user.id,
+    name: user.name || "",
+    role: mapBackendRole(user.role),
+    avatarUrl: resolveMediaUrl(user.avatarUrl || user.avatar_url) || "",
+    companyName: user.companyName || user.company_name || "",
+    industry: user.industry || "",
+    country: user.country || "",
+    email: user.email,
+    phone: user.phone,
+    taxId: user.taxId,
+    address: user.address,
+    plan: normalizePlan(user.plan),
+    memberSince: user.memberSince,
+  };
+}
+
+/** Fallback when /auth/me cannot be read right after sign-in: only what the auth response carried. */
+function authResponseToProfile(res: BackendAuthResponse): BuyerProfile {
+  return {
+    id: res.user?.id || res.userId || res.user_id || "",
+    name: res.user?.name || res.name || "",
+    role: mapBackendRole(res.user?.role || res.role),
+    avatarUrl: resolveMediaUrl(res.avatarUrl || res.avatar_url) || "",
+    companyName: res.companyName || res.company_name || "",
+    industry: "",
+    country: "",
+    email: res.email,
+  };
+}
+
+function normalizePlan(plan: string | undefined): BuyerPlanTier {
+  const value = plan?.toLowerCase();
+  return value === "pro" || value === "enterprise" ? value : "free";
+}
+
+function normalizeReply(r: BackendCommentReply): ReelCommentReply {
+  return {
+    id: r.id,
+    authorName: r.authorName || "",
+    authorAvatarUrl: resolveMediaUrl(r.authorAvatarUrl) || "",
+    authorCompany: r.authorCompany,
+    authorCountry: r.authorCountry,
+    isVerified: r.verified ?? r.isVerified,
+    content: r.content,
+    createdAt: r.createdAt || "",
+    likes: r.likes ?? 0,
+    likedByMe: r.likedByMe,
+  };
+}
+
+function normalizeComment(c: BackendComment, reelId: string): ReelComment {
+  return {
+    ...normalizeReply(c),
+    reelId: c.reelId || reelId,
+    replies: (c.replies || []).map(normalizeReply),
+  };
+}
+
+const NOTIFICATION_TYPES: NotificationType[] = ["system", "quote", "rfq", "message", "follow", "order"];
+
+function normalizeNotification(n: BackendNotification): AppNotification {
+  const type = (n.type || "system").toLowerCase() as NotificationType;
+  return {
+    id: n.id,
+    title: n.title || "",
+    body: n.body || "",
+    createdAt: n.createdAt || "",
+    read: n.read ?? false,
+    type: NOTIFICATION_TYPES.includes(type) ? type : "system",
+    referenceId: n.referenceId,
+  };
+}
+
+function normalizeRfq(item: BackendRfq): RfqItem {
+  return {
+    id: item.id,
+    referenceNumber: item.referenceNumber || "",
+    productName: item.productName || "",
+    categoryId: item.categoryId,
+    quantity: item.quantity || "",
+    unit: item.unit,
+    targetPrice: item.targetPrice,
+    currency: item.currency,
+    incoterm: item.incoterm,
+    details: item.details,
+    companyName: item.companyName,
+    attachmentName: item.attachmentName,
+    attachmentUrl: resolveMediaUrl(item.attachmentUrl),
+    status: item.status || "",
+    createdAt: item.createdAt || "",
+    quoteCount: item.quoteCount,
+    quotes: item.quotes?.map(
+      (q): RfqQuote => ({
+        id: q.id,
+        manufacturer: normalizeManufacturer(q.manufacturer || {}),
+        quotePrice: Number(q.quotePrice ?? 0),
+        currency: q.currency || "INR",
+        leadTimeDays: q.leadTimeDays ?? 0,
+        notes: q.notes,
+        attachmentUrl: resolveMediaUrl(q.attachmentUrl),
+        status: q.status || "PENDING",
+        createdAt: q.createdAt || "",
+        orderId: q.orderId,
+      }),
+    ),
+  };
+}
+
+function normalizeCart(c: BackendCart): Cart {
+  return {
+    items: (c.items || []).map(
+      (i): CartItem => ({
+        id: i.id,
+        product: normalizeProduct(i.product),
+        manufacturer: normalizeManufacturer(i.manufacturer),
+        quantity: i.quantity,
+        minQuantity: i.minQuantity ?? 1,
+        unitPrice: i.unitPrice == null ? undefined : Number(i.unitPrice),
+        lineTotal: i.lineTotal == null ? undefined : Number(i.lineTotal),
+      }),
+    ),
+    itemCount: c.itemCount ?? c.items?.length ?? 0,
+    totalAmount: Number(c.totalAmount ?? 0),
+    currency: c.currency || "INR",
   };
 }
 
@@ -1409,5 +1804,130 @@ function normalizeFactoryStats(res: BackendFactoryStats): SellerStats {
     followerCount: res.followerCount ?? res.follower_count ?? 0,
     totalProductsCount: res.totalProductsCount ?? res.total_products_count ?? 0,
     totalSeeksCount: res.totalSeeksCount ?? res.total_seeks_count ?? 0,
+    weeklyTrend: (res.weeklyTrend ?? []).map((point) => ({
+      weekStart: point.weekStart,
+      seekViews: point.seekViews ?? 0,
+      productViews: point.productViews ?? 0,
+      rfqs: point.rfqs ?? 0,
+    })),
+  };
+}
+
+interface BackendOrderParty {
+  id?: string;
+  name?: string;
+  slug?: string;
+  companyName?: string;
+  country?: string;
+  avatarUrl?: string;
+  email?: string;
+  phone?: string;
+}
+
+interface BackendOrder {
+  id: string;
+  referenceNumber?: string;
+  status?: string;
+  statusUpdatedAt?: string;
+  createdAt?: string;
+  productId?: string;
+  productSlug?: string;
+  productName?: string;
+  productImageUrl?: string;
+  unitPriceInr?: number;
+  unit?: string;
+  quantity?: number;
+  estimatedTotalInr?: number;
+  buyerNote?: string;
+  sellerNote?: string;
+  manufacturer?: BackendOrderParty;
+  buyer?: BackendOrderParty;
+  source?: string;
+  rfqId?: string;
+  currency?: string;
+  quotedTotal?: number;
+  contactName?: string;
+  contactPhone?: string;
+  deliveryAddress?: string;
+  cancelReason?: string;
+  cancellable?: boolean;
+}
+
+function normalizeOrderParty(p: BackendOrderParty | undefined): OrderParty {
+  return {
+    id: p?.id || "",
+    name: p?.name || "",
+    slug: p?.slug,
+    companyName: p?.companyName,
+    country: p?.country,
+    avatarUrl: resolveMediaUrl(p?.avatarUrl),
+    email: p?.email,
+    phone: p?.phone,
+  };
+}
+
+function normalizeOrder(o: BackendOrder): OrderRequest {
+  return {
+    id: o.id,
+    referenceNumber: o.referenceNumber || "",
+    status: (o.status || "PENDING") as OrderStatus,
+    statusUpdatedAt: o.statusUpdatedAt,
+    createdAt: o.createdAt || "",
+    productId: o.productId,
+    productSlug: o.productSlug,
+    productName: o.productName || "",
+    productImageUrl: resolveMediaUrl(o.productImageUrl),
+    unitPriceInr: o.unitPriceInr,
+    unit: o.unit,
+    quantity: o.quantity ?? 0,
+    estimatedTotalInr: o.estimatedTotalInr,
+    buyerNote: o.buyerNote,
+    sellerNote: o.sellerNote,
+    manufacturer: normalizeOrderParty(o.manufacturer),
+    buyer: normalizeOrderParty(o.buyer),
+    source: (o.source || "DIRECT") as OrderRequest["source"],
+    rfqId: o.rfqId,
+    currency: o.currency || "INR",
+    quotedTotal: o.quotedTotal == null ? undefined : Number(o.quotedTotal),
+    contactName: o.contactName,
+    contactPhone: o.contactPhone,
+    deliveryAddress: o.deliveryAddress,
+    cancelReason: o.cancelReason,
+    cancellable: o.cancellable ?? false,
+  };
+}
+
+function normalizeMessage(m: BackendMessage, conversationId: string): MessageItem {
+  const rawType = (m.senderType || m.sender_type || "USER").toUpperCase();
+  const sender: "user" | "factory" = rawType.includes("FACTORY") || rawType.includes("SUPPLIER") ? "factory" : "user";
+  const attachmentUrl = m.attachmentUrl || m.attachment_url;
+  const attachmentName = m.attachmentName || m.attachment_name;
+  return {
+    id: m.id,
+    conversationId: m.conversationId || m.conversation_id || conversationId,
+    sender,
+    text: m.messageText || m.message_text || "",
+    time: m.createdAt || m.created_at || "",
+    attachment:
+      attachmentName || attachmentUrl
+        ? {
+            name: attachmentName || "attachment",
+            size: m.attachmentSize || m.attachment_size || "",
+            url: attachmentUrl,
+            contentType: m.attachmentContentType,
+          }
+        : undefined,
+    order: m.order
+      ? {
+          id: m.order.id,
+          referenceNumber: m.order.referenceNumber || "",
+          productName: m.order.productName || "",
+          productSlug: m.order.productSlug,
+          quantity: m.order.quantity,
+          unit: m.order.unit,
+          status: m.order.status,
+        }
+      : undefined,
+    isRead: m.isRead ?? m.is_read ?? false,
   };
 }

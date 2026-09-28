@@ -1,12 +1,14 @@
 import type { Category } from "@/entities/category";
-import type { Conversation } from "@/entities/message";
+import type { Conversation, MessageOrderContext } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { AppNotification } from "@/entities/notification";
 import type { Product } from "@/entities/product";
 import type { FeedTab, Reel } from "@/entities/reel";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
-import type { BuyerProfile } from "@/entities/user";
+import type { Cart, NewOrderRequest, OrderContact, OrderRequest, OrderStatus } from "@/entities/order";
+import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
+import type { BuyerPlan, ExchangeRates } from "@/entities/plan";
 import type { JoinInput, LoginInput } from "@/features/auth/session-cookie";
 import type { SellerStats } from "@/features/factory/types";
 
@@ -15,17 +17,33 @@ export type FeedItem = {
   manufacturer: Manufacturer;
   primaryProductSlug?: string;
   products?: Product[];
+  /** Whether the signed-in viewer follows this seek's factory; undefined for guests. */
+  followingManufacturer?: boolean;
 };
 
 export type ManufacturerDetail = {
   manufacturer: Manufacturer;
   products: Product[];
   reels: Reel[];
+  /** Certification names the factory declared (e.g. "ISO 9001"); empty when none. */
+  certifications: string[];
+  /** Share of recent RFQs quoted on; null until the factory has received RFQs. */
+  responseRatePercent: number | null;
+  avgResponseTimeHours: number | null;
+  /** Undefined for guests. */
+  followedByMe?: boolean;
 };
 
 export type ProductDetail = {
   product: Product;
   manufacturer: Manufacturer;
+  related: Product[];
+};
+
+export type SearchResult = {
+  products: Product[];
+  manufacturers: Manufacturer[];
+  reels: FeedItem[];
 };
 
 export interface SessionRepository {
@@ -39,7 +57,12 @@ export interface SessionRepository {
     industry?: string;
     country?: string;
     phone?: string;
+    taxId?: string;
+    address?: string;
+    avatarUrl?: string;
   }): Promise<BuyerProfile>;
+  /** Switches the buyer's membership tier. No payment is collected yet. */
+  updatePlan(plan: BuyerPlanTier): Promise<BuyerProfile>;
 }
 
 export interface FeedRepository {
@@ -47,6 +70,10 @@ export interface FeedRepository {
   addReel(reel: Reel): Promise<void>;
   likeReel(reelId: string): Promise<{ liked: boolean; likesCount: number }>;
   saveReel(reelId: string): Promise<{ saved: boolean; savesCount: number }>;
+  /** Counts a share (link copy / native share); works for guests. */
+  shareReel(reelId: string): Promise<{ sharesCount: number }>;
+  /** Seeks the signed-in user saved. */
+  listSaved(): Promise<FeedItem[]>;
   /** Seek impression for seller analytics; viewerId dedupes guests. Never throws for tracking failures. */
   recordView(reelId: string, viewerId?: string): Promise<void>;
 }
@@ -55,12 +82,19 @@ export interface ManufacturerRepository {
   listVerified(limit?: number): Promise<Manufacturer[]>;
   getBySlug(slug: string): Promise<ManufacturerDetail | null>;
   listAll(): Promise<Manufacturer[]>;
+  toggleFollow(manufacturerId: string): Promise<{ following: boolean; followerCount: number }>;
+  /** Factories the signed-in user follows. */
+  listFollowing(): Promise<Manufacturer[]>;
 }
 
 export interface ProductRepository {
   listTrending(limit?: number): Promise<Product[]>;
   getBySlug(slug: string): Promise<ProductDetail | null>;
+  /** Products in the category or any of its subcategories (id or slug). */
   listByCategory(categoryId: string): Promise<Product[]>;
+  toggleSave(productId: string): Promise<{ saved: boolean }>;
+  /** Products the signed-in user saved. */
+  listSaved(): Promise<Product[]>;
   addProduct(product: Product): Promise<void>;
   /** Product detail view for seller analytics; viewerId dedupes guests. Never throws for tracking failures. */
   recordView(productId: string, viewerId?: string): Promise<void>;
@@ -69,7 +103,10 @@ export interface ProductRepository {
 export type MessageAttachment = {
   name: string;
   size: string;
+  /** Backend path (e.g. /api/v1/conversations/{id}/attachments/{key}); use attachmentHref() to display. */
   url?: string;
+  /** image/png, image/jpeg, application/pdf, ... */
+  contentType?: string;
 };
 
 export type MessageItem = {
@@ -79,6 +116,8 @@ export type MessageItem = {
   text: string;
   time: string;
   attachment?: MessageAttachment;
+  /** The order this message is about, if the sender picked one. */
+  order?: MessageOrderContext;
   isRead?: boolean;
 };
 
@@ -88,8 +127,13 @@ export interface MessageRepository {
   sendMessage(
     conversationId: string,
     text: string,
-    attachment?: MessageAttachment
+    attachment?: MessageAttachment,
+    context?: { orderId?: string }
   ): Promise<MessageItem>;
+  /** Upload an image/PDF to this conversation; pass the result to sendMessage. */
+  uploadAttachment(conversationId: string, file: File): Promise<MessageAttachment>;
+  /** Orders between this conversation's buyer and factory (for the context picker). */
+  listConversationOrders(conversationId: string): Promise<OrderRequest[]>;
   startConversation(manufacturerId: string, initialMessage?: string): Promise<Conversation & { manufacturer: Manufacturer }>;
   markAsRead(conversationId: string): Promise<void>;
   onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void;
@@ -113,15 +157,41 @@ export interface NotificationRepository {
 export interface RfqRepository {
   submit(draft: RfqDraft): Promise<{ ok: true; id: string; referenceNumber?: string }>;
   listMyRfqs(): Promise<RfqItem[]>;
+  /** One of the buyer's RFQs with every factory quote on it. */
+  getMine(rfqId: string): Promise<RfqItem>;
+  cancel(rfqId: string): Promise<RfqItem>;
+  /** Accepting a quote places an order with that factory. */
+  acceptQuote(rfqId: string, quoteId: string, contact: OrderContact): Promise<RfqItem>;
+  rejectQuote(rfqId: string, quoteId: string): Promise<RfqItem>;
 }
 
 export interface CommentRepository {
   listByReelId(reelId: string): Promise<ReelComment[]>;
   addComment(reelId: string, content: string, user?: { name: string; avatarUrl: string; companyName?: string }): Promise<ReelComment>;
   addReply(commentId: string, content: string, user?: { name: string; avatarUrl: string; companyName?: string }): Promise<ReelCommentReply>;
+  /** Likes or unlikes a comment or reply. */
+  toggleLike(commentId: string): Promise<{ liked: boolean; likes: number }>;
 }
 
-export type MediaKind = "image" | "video";
+export interface SearchRepository {
+  /** Searches products, factories and seeks. category = id or slug and includes subcategories. */
+  query(params: { q?: string; category?: string; limit?: number }): Promise<SearchResult>;
+}
+
+export type UploadKind = "image" | "document";
+
+export interface MediaRepository {
+  /** Browser-only: uploads a profile photo or an RFQ / chat attachment. */
+  upload(file: File, kind: UploadKind): Promise<UploadedMedia>;
+}
+
+export interface PlatformRepository {
+  listBuyerPlans(): Promise<BuyerPlan[]>;
+  getExchangeRates(): Promise<ExchangeRates>;
+}
+
+/** document = PDF (product datasheets). */
+export type MediaKind = "image" | "video" | "document";
 
 export type UploadedMedia = {
   url: string;
@@ -138,6 +208,41 @@ export type NewFactoryProduct = {
   moq?: string;
   categoryId: string;
   specs?: Record<string, string>;
+  /** Full gallery (max 8); the first entry becomes the cover. */
+  imageUrls?: string[];
+  datasheetUrl?: string;
+  datasheetName?: string;
+};
+
+/** Partial product edit; omitted fields stay unchanged. datasheetUrl "" removes the datasheet. */
+export type FactoryProductUpdate = Partial<Omit<NewFactoryProduct, "imageUrl">>;
+
+/** Partial seek edit; omitted fields stay unchanged. */
+export type FactorySeekUpdate = Partial<Omit<NewFactorySeek, "categoryIds">>;
+
+export type VerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+/** The seller's own verification application (private: holds tax/registration ids). */
+export type FactoryVerification = {
+  status: VerificationStatus;
+  submitted: boolean;
+  submittedAt?: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
+  companyRegNumber?: string;
+  taxId?: string;
+  registrationDate?: string;
+  factoryAddress?: string;
+  certifications: string[];
+};
+
+export type VerificationSubmission = {
+  companyRegNumber: string;
+  taxId?: string;
+  registrationDate?: string;
+  country?: string;
+  factoryAddress: string;
+  certifications: string[];
 };
 
 export type NewFactorySeek = {
@@ -167,12 +272,55 @@ export interface FactoryRepository {
   uploadMedia(file: File, kind: MediaKind): Promise<UploadedMedia>;
   getProducts(): Promise<Product[]>;
   addProduct(data: NewFactoryProduct): Promise<Product>;
+  updateProduct(id: string, data: FactoryProductUpdate): Promise<Product>;
+  /** Pause (false) hides the product from buyers without deleting it. */
+  setProductListed(id: string, listed: boolean): Promise<Product>;
   deleteProduct(id: string): Promise<void>;
   getSeeks(): Promise<Reel[]>;
   addSeek(data: NewFactorySeek): Promise<Reel>;
+  updateSeek(id: string, data: FactorySeekUpdate): Promise<Reel>;
+  setSeekListed(id: string, listed: boolean): Promise<Reel>;
   deleteSeek(id: string): Promise<void>;
+  getVerification(): Promise<FactoryVerification>;
+  submitVerification(data: VerificationSubmission): Promise<FactoryVerification>;
+  /** Open (or reuse) the chat with the buyer who posted an RFQ. */
+  openRfqConversation(rfqId: string): Promise<Conversation>;
   getRfqs(): Promise<RfqItem[]>;
   submitQuote(rfqId: string, quote: FactoryQuote): Promise<void>;
+  /** Order requests received by this factory (includes buyer contact details). */
+  getOrders(): Promise<OrderRequest[]>;
+  updateOrderStatus(orderId: string, status: OrderStatus, note?: string): Promise<OrderRequest>;
+  /** Open (or reuse) the chat with an order's buyer; returns the conversation (seller view). */
+  openOrderConversation(orderId: string): Promise<Conversation>;
+}
+
+/** Buyer side of order requests. No payment: the factory is notified and follows up. */
+/**
+ * Buyer order requests (no payment). One request per product: from a product page (place),
+ * the cart (checkout) or an accepted RFQ quote (rfq.acceptQuote).
+ */
+export interface OrderRepository {
+  place(input: NewOrderRequest): Promise<OrderRequest>;
+  listMine(): Promise<OrderRequest[]>;
+  /** Buyer withdraws a request the factory has not confirmed yet. */
+  cancel(orderId: string, reason?: string): Promise<OrderRequest>;
+  getCart(): Promise<Cart>;
+  /** Adds a product, or raises its quantity when already in the cart. */
+  addToCart(productId: string, quantity: number): Promise<Cart>;
+  updateCartQuantity(cartItemId: string, quantity: number): Promise<Cart>;
+  removeFromCart(cartItemId: string): Promise<Cart>;
+  /** Sends every cart line to its factory as an order request and empties the cart. */
+  checkout(contact: OrderContact): Promise<OrderRequest[]>;
+}
+
+/** Password and email-verification flows (buyers and suppliers). */
+export interface AccountRepository {
+  changePassword(currentPassword: string, newPassword: string): Promise<void>;
+  sendEmailVerification(): Promise<void>;
+  /** Always resolves the same way whether or not the email has an account. */
+  requestPasswordReset(email: string): Promise<void>;
+  resetPassword(token: string, newPassword: string): Promise<void>;
+  verifyEmail(token: string): Promise<void>;
 }
 
 export interface ApiClient {
@@ -186,4 +334,9 @@ export interface ApiClient {
   rfq: RfqRepository;
   comments: CommentRepository;
   factory: FactoryRepository;
+  search: SearchRepository;
+  orders: OrderRepository;
+  media: MediaRepository;
+  platform: PlatformRepository;
+  account: AccountRepository;
 }

@@ -4,6 +4,8 @@ import { Heart, ChevronDown, ChevronUp, CornerDownRight, CheckCircle2 } from "lu
 import type { ReelComment } from "@/entities/comment";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+import { Avatar } from "@/components/ui/avatar";
+import { formatRelativeTime } from "@/shared/lib/format";
 
 type LikedState = { liked: boolean; count: number };
 
@@ -46,10 +48,11 @@ export function CommentThreadItem({
   return (
     <div className="pt-4 first:pt-0">
       <div className="flex items-start gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img loading="lazy" decoding="async" src={comment.authorAvatarUrl}
-          alt=""
-          className="h-8 w-8 rounded-full object-cover border border-line flex-shrink-0 mt-0.5"
+        <Avatar
+          src={comment.authorAvatarUrl}
+          alt={comment.authorName}
+          size={32}
+          className="border border-line flex-shrink-0 mt-0.5"
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -64,7 +67,7 @@ export function CommentThreadItem({
                 • {comment.authorCompany}
               </span>
             )}
-            <span className="text-[10px] text-ink-faint ml-auto">{comment.createdAt}</span>
+            <span className="text-[10px] text-ink-faint ml-auto">{formatRelativeTime(comment.createdAt)}</span>
           </div>
 
           <p className="text-xs text-ink mt-1 leading-relaxed break-words">{comment.content}</p>
@@ -164,10 +167,11 @@ export function CommentThreadItem({
                     };
                     return (
                       <div key={reply.id} className="flex items-start gap-2.5">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={reply.authorAvatarUrl}
-                          alt=""
-                          className="h-6 w-6 rounded-full object-cover border border-line flex-shrink-0 mt-0.5"
+                        <Avatar
+                          src={reply.authorAvatarUrl}
+                          alt={reply.authorName}
+                          size={24}
+                          className="border border-line flex-shrink-0 mt-0.5"
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
@@ -181,7 +185,7 @@ export function CommentThreadItem({
                               </span>
                             )}
                             <span className="text-[10px] text-ink-faint ml-auto">
-                              {reply.createdAt}
+                              {formatRelativeTime(reply.createdAt)}
                             </span>
                           </div>
                           <p className="text-xs text-ink mt-0.5 leading-relaxed">{reply.content}</p>
