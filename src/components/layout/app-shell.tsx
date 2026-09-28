@@ -37,7 +37,7 @@ export function AppShell({
   showRight = false,
 }: Props) {
   return (
-    <div className="min-h-screen bg-canvas pb-16 lg:pb-0">
+    <div className="site-canvas min-h-screen pb-16 lg:pb-0">
       <TopNav
         user={user}
         categories={categories}

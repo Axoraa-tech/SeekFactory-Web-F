@@ -209,14 +209,14 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="rounded-lg border border-line px-4 py-2 text-xs font-bold text-ink hover:bg-canvas transition disabled:opacity-50"
+              className="btn btn-secondary px-4 py-2 text-xs disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={busy}
-              className="rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-70"
+              className="btn btn-primary px-5 py-2 text-xs flex items-center gap-1.5 disabled:opacity-70"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               <span>{status === "uploading" ? "Uploading cover…" : status === "saving" ? "Saving…" : "Save Changes"}</span>

@@ -134,7 +134,7 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
           <div className="mt-3.5 flex items-center gap-2">
             <Link
               href={`/messages?with=${currentManufacturer.slug}`}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue py-2 px-3 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-sm"
+              className="btn btn-primary flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 text-xs"
             >
               Start Chat
             </Link>

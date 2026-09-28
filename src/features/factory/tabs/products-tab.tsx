@@ -81,7 +81,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
 
         <button
           onClick={onOpenAddProduct}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 text-xs font-bold shadow-xs transition active:scale-95"
+          className="btn btn-primary flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs"
         >
           <Plus className="h-4 w-4" />
           <span>Post New Product</span>
@@ -229,7 +229,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                 {product.status === "Active" && (
                   <Link
                     href={`/products/${product.slug}`}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
+                    className="btn btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
                     title="View Public Marketplace Listing"
                   >
                     <Eye className="h-3.5 w-3.5" />

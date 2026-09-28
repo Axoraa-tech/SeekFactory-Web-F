@@ -7,8 +7,6 @@ import {
   Volume2,
   VolumeX,
   Maximize2,
-  ShieldCheck,
-  Award,
   Layers,
   Clock,
   PackageCheck,
@@ -25,6 +23,7 @@ import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
+import { SeekTrustStrip } from "@/components/reels/seek-trust-strip";
 import { formatCount, formatDuration } from "@/shared/lib/format";
 
 import { cn } from "@/shared/lib/cn";
@@ -151,29 +150,9 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
     <>
       <article
         ref={containerRef}
-        className="group/card relative overflow-hidden rounded-2xl bg-surface border border-neutral-200/90 shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
+        className="seek-stage group/card relative overflow-hidden rounded-card border border-[rgba(28,22,22,0.07)] shadow-[0_1px_1px_rgba(28,22,22,0.03),0_18px_40px_-26px_rgba(60,30,26,0.4)] transition-shadow duration-300 hover:shadow-[0_1px_1px_rgba(28,22,22,0.03),0_24px_48px_-26px_rgba(60,30,26,0.5)]"
       >
-        {/* Enterprise Top Banner */}
-        <div className="bg-slate-900 px-4 py-2 text-white flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 font-bold text-amber-400">
-              <Award className="h-3.5 w-3.5" />
-              Verified OEM Manufacturer
-            </span>
-            {manufacturer.yearsEstablished > 0 && (
-              <>
-                <span className="text-slate-400">•</span>
-                <span className="text-slate-300 font-medium hidden sm:inline">Est. {manufacturer.yearsEstablished}</span>
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Verified Factory
-            </span>
-          </div>
-        </div>
+        <SeekTrustStrip manufacturer={manufacturer} />
 
         <div className="p-3.5 sm:p-4 pb-2 sm:pb-2.5 space-y-2.5">
           {/* Header with SupplierLockOverlay */}
@@ -206,18 +185,13 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 <button
                   type="button"
                   onClick={toggleFollow}
-                  className={cn(
-                    "rounded-lg px-3 py-1 text-xs font-semibold transition border",
-                    following
-                      ? "border-neutral-200 bg-neutral-100 text-neutral-700"
-                      : "border-brand-blue/30 bg-brand-blue-soft text-brand-blue hover:bg-brand-blue hover:text-white"
-                  )}
+                  className={cn("btn h-7 px-3 text-xs", following ? "btn-soft" : "btn-secondary")}
                 >
                   {following ? "Following" : "Follow"}
                 </button>
                 <Link
                   href="/rfq/new"
-                  className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
+                  className="btn btn-primary inline-flex h-7 items-center gap-1 px-3 text-xs"
                 >
                   <Send className="h-3 w-3" />
                   <span>Send RFQ</span>
@@ -321,7 +295,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 className="relative flex h-3 w-full cursor-pointer items-center"
               >
                 <div className="relative h-1 w-full rounded-full bg-white/30">
-                  <div className="h-full rounded-full bg-brand-blue" style={{ width: `${progressPercent}%` }} />
+                  <div className="h-full rounded-full bg-brand-red" style={{ width: `${progressPercent}%` }} />
                 </div>
               </div>
               <div className="flex items-center justify-between text-[11px] text-white/90 pt-0.5 font-mono">
@@ -337,16 +311,20 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
           {/* Technical Spec Sheet Chips with SupplierLockOverlay: the product's MOQ plus the factory's own specs */}
           {specChips.length > 0 && (
             <SupplierLockOverlay badgeLabel="View Factory Specs" compact>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {specChips.map((chip, index) => {
                   const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
                   return (
-                    <div key={chip.label} className="rounded-lg bg-neutral-50 p-2 border border-neutral-200/70">
-                      <div className="flex items-center gap-1 text-neutral-500 text-[10px] font-semibold">
-                        <Icon className="h-3 w-3 text-brand-blue" />
-                        <span className="uppercase truncate">{chip.label}</span>
+                    <div key={chip.label} className="glass-tile min-w-0 rounded-2xl px-3 py-2.5">
+                      <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-ink-muted">
+                        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-white shadow-[0_1px_2px_rgba(28,22,22,0.08)] ring-1 ring-[rgba(28,22,22,0.05)]">
+                          <Icon className={cn("h-3 w-3", index === 0 ? "text-brand-red" : "text-ink")} strokeWidth={2} />
+                        </span>
+                        <span className="truncate">{chip.label.charAt(0).toUpperCase() + chip.label.slice(1).toLowerCase()}</span>
                       </div>
-                      <p className="font-bold text-neutral-800 mt-0.5 text-xs truncate">{chip.value}</p>
+                      <p className="mt-1.5 truncate text-[13px] font-semibold tracking-[-0.01em] text-ink" title={chip.value}>
+                        {chip.value}
+                      </p>
                     </div>
                   );
                 })}
@@ -355,7 +333,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
           )}
 
           {/* B2B Instant Commercial Bar: Price, Buy Now, Add to Cart, Chat */}
-          <div className="rounded-xl border border-slate-200/90 bg-gradient-to-r from-slate-50 via-white to-blue-50/20 p-2.5 shadow-2xs">
+          <div className="glass-tile rounded-2xl px-3 py-2.5">
             <ProductActionBar
               productId={product?.id}
               priceInr={product?.priceInr}
@@ -368,19 +346,19 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
           </div>
 
           {/* DISTINCT DESIGN 3: Industrial Segmented 5-Button Bar (Thin & Compact) */}
-          <div className="rounded-xl bg-neutral-50/90 border border-neutral-200/70 p-1 flex items-center justify-between text-xs select-none">
+          <div className="glass-tile flex select-none items-center justify-between rounded-2xl p-1 text-xs">
 
             {/* 1. Comments */}
             <button
               type="button"
               onClick={() => setIsCommentsOpen(true)}
-              className="flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition"
+              className="flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition"
             >
               <MessageCircle className="h-3.5 w-3.5" />
               <span className="font-medium text-[11px]">{formatCount(commentCount)}</span>
             </button>
 
-            <span className="h-4 w-px bg-neutral-200" />
+            <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
 
             {/* 2. Share */}
             <button
@@ -388,15 +366,15 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               onClick={share}
               aria-label="Share seek"
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-emerald-600 hover:shadow-xs transition",
-                shared && "text-emerald-600 bg-white shadow-xs"
+                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition",
+                shared && "text-brand-blue bg-white shadow-xs"
               )}
             >
               <Repeat2 className="h-3.5 w-3.5" />
               <span className="font-medium text-[11px]">{formatCount(shares)}</span>
             </button>
 
-            <span className="h-4 w-px bg-neutral-200" />
+            <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
 
             {/* 3. Like */}
             <button
@@ -404,15 +382,15 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               onClick={toggleLike}
               aria-label={liked ? "Unlike seek" : "Like seek"}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-rose-600 hover:shadow-xs transition",
-                liked && "text-rose-600 bg-white shadow-xs"
+                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-red hover:shadow-xs transition",
+                liked && "text-brand-red bg-white shadow-xs"
               )}
             >
-              <Heart className={cn("h-3.5 w-3.5", liked && "fill-rose-500")} />
+              <Heart className={cn("h-3.5 w-3.5", liked && "fill-brand-red")} />
               <span className="font-medium text-[11px]">{formatCount(likes)}</span>
             </button>
 
-            <span className="h-4 w-px bg-neutral-200" />
+            <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
 
             {/* 4. Impressions */}
             <div className="flex-1 flex items-center justify-center gap-1 py-1 px-2 text-neutral-500 cursor-default">
@@ -420,7 +398,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               <span className="font-medium text-[11px]">{formatCount(reel.views)}</span>
             </div>
 
-            <span className="h-4 w-px bg-neutral-200" />
+            <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
 
             {/* 5. Save */}
             <button
@@ -428,7 +406,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               onClick={toggleSave}
               aria-label={saved ? "Remove from saved" : "Save seek"}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition",
+                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition",
                 saved && "text-brand-blue bg-white shadow-xs"
               )}
             >

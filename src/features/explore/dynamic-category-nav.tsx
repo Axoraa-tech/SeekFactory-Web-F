@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, Sparkles, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { cn } from "@/shared/lib/cn";
 import type { Category } from "@/entities/category";
@@ -301,7 +301,7 @@ export function DynamicCategoryNav({
           {/* Scrollable Category Row */}
           <div
             ref={scrollContainerRef}
-            className="no-scrollbar flex w-full items-center gap-0 overflow-x-auto scroll-smooth py-1 touch-pan-x overscroll-x-contain"
+            className="no-scrollbar flex w-full items-center gap-0 overflow-x-auto scroll-smooth py-0.5 touch-pan-x overscroll-x-contain"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {/* 1. "For You" / "All" Tab with Hover Dropdown */}
@@ -322,34 +322,35 @@ export function DynamicCategoryNav({
                 }}
                 title={`${t("feed.forYou", "For You")} - ${t("sidebar.allCategories", "All Categories")}`}
                 aria-current={!currentCategory ? "page" : undefined}
-                className={cn(
-                  "group relative flex w-auto shrink-0 items-center justify-center gap-1 rounded-xl px-3 py-2 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
-                  !currentCategory
-                    ? "text-brand-blue font-bold bg-blue-50"
-                    : "text-neutral-700 hover:text-ink hover:bg-neutral-100 font-medium",
-                  activePopover?.type === "for-you" && "bg-blue-50/80 text-brand-blue"
-                )}
+                className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"}
               >
                 <span
                   className={cn(
-                    "text-center text-[11px] sm:text-xs leading-tight truncate transition-colors",
+                    "flex h-8 w-8 items-center justify-center rounded-[10px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
                     !currentCategory
-                      ? "text-brand-blue font-bold"
-                      : "text-neutral-700 group-hover:text-ink"
+                      ? "bg-brand-blue-soft"
+                      : activePopover?.type === "for-you"
+                        ? "bg-neutral-100"
+                        : "group-hover:bg-neutral-100"
                   )}
                 >
-                  {t("feed.forYou", "For You")}
+                  <CategoryIcon icon="for-you" size={24} />
                 </span>
-                <ChevronDown
-                  className={cn(
-                    "h-3 w-3 text-neutral-400 transition-transform duration-200",
-                    activePopover?.type === "for-you" && "rotate-180 text-brand-blue"
-                  )}
-                />
+                <span className="block max-w-full">
+                  <span
+                    className={cn(
+                      "block truncate text-center text-[11px] sm:text-xs leading-4 transition-colors",
+                      !currentCategory
+                        ? "font-bold text-ink"
+                        : "font-medium text-neutral-600 group-hover:text-ink"
+                    )}
+                  >
+                    {t("feed.forYou", "For You")}
+                  </span>
+                </span>
 
-                {/* Active Blue Indicator Underline */}
                 {!currentCategory && (
-                  <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-gradient-to-r from-brand-blue to-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
+                  <span className="absolute bottom-0 inset-x-6 h-[2.5px] rounded-full bg-brand-blue" />
                 )}
               </Link>
             </div>
@@ -393,36 +394,35 @@ export function DynamicCategoryNav({
                     }}
                     title={translatedName}
                     aria-current={isActive ? "page" : undefined}
-                    className={cn(
-                      "group relative flex w-auto shrink-0 items-center justify-center gap-1 rounded-xl px-3 py-2 transition-all duration-200 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden",
-                      isActive
-                        ? "text-brand-blue font-bold bg-blue-50"
-                        : "text-neutral-700 hover:text-ink hover:bg-neutral-100 font-medium",
-                      isHovered && "bg-neutral-100 text-ink"
-                    )}
+                    className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"}
                   >
                     <span
                       className={cn(
-                        "w-full text-center text-[11px] sm:text-xs leading-tight truncate transition-colors",
+                        "flex h-8 w-8 items-center justify-center rounded-[10px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
                         isActive
-                          ? "text-brand-blue font-bold"
-                          : "text-neutral-700 group-hover:text-ink"
+                          ? "bg-brand-blue-soft"
+                          : isHovered
+                            ? "bg-neutral-100"
+                            : "group-hover:bg-neutral-100"
                       )}
                     >
-                      {translatedName}
+                      <CategoryIcon icon={item.icon} size={24} />
                     </span>
-                    {hasChildren && (
-                      <ChevronDown
+                    <span className="block max-w-full">
+                      <span
                         className={cn(
-                          "h-2.5 w-2.5 text-neutral-400 opacity-60 transition-transform duration-200 group-hover:opacity-100",
-                          isHovered && "rotate-180 text-brand-blue opacity-100"
+                          "block truncate text-center text-[11px] sm:text-xs leading-4 transition-colors",
+                          isActive
+                            ? "font-bold text-ink"
+                            : "font-medium text-neutral-600 group-hover:text-ink"
                         )}
-                      />
-                    )}
+                      >
+                        {translatedName}
+                      </span>
+                    </span>
 
-                    {/* Active Underline */}
                     {isActive && (
-                      <span className="absolute bottom-0 inset-x-2.5 h-[2.5px] rounded-t-full bg-gradient-to-r from-brand-blue to-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
+                      <span className="absolute bottom-0 inset-x-6 h-[2.5px] rounded-full bg-brand-blue" />
                     )}
                   </Link>
                 </div>

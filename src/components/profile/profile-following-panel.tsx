@@ -33,7 +33,7 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
           </p>
           <Link
             href="/explore"
-            className="inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white"
+            className="btn btn-primary inline-block mt-2 px-4 py-1.5 text-xs"
           >
             Explore factories
           </Link>

@@ -518,7 +518,7 @@ export function FactoryDashboard({
   }
 
   return (
-    <div className="sf-hub min-h-screen bg-[#F8FAFC] flex">
+    <div className="sf-hub site-canvas min-h-screen flex">
       {/* Salespro Left Sidebar (Responsive drawer on mobile) */}
       <SalesproSidebar
         activeTab={activeTab}
@@ -584,7 +584,7 @@ export function FactoryDashboard({
               {(verification.status === "REJECTED" || !verification.submitted) && (
                 <Link
                   href="/factory/verify"
-                  className="shrink-0 rounded-lg bg-brand-blue px-3 py-1.5 text-center font-bold text-white hover:bg-brand-blue-dark"
+                  className="btn btn-primary shrink-0 px-3 py-1.5 text-center"
                 >
                   {verification.status === "REJECTED" ? "Resubmit details" : "Verify factory"}
                 </Link>

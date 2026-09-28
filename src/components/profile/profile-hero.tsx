@@ -51,7 +51,7 @@ export function ProfileHero({
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/80 to-transparent" />
 
-        <Link href={"/"} className="absolute right-48 top-4 hidden sm:flex items-center gap-1.5 rounded-full  px-3 py-1 text-[12px] font-semibold text-white bg-brand-blue">
+        <Link href={"/"} className="btn btn-secondary absolute right-48 top-4 hidden sm:flex items-center gap-1.5 px-3 py-1 text-[12px]">
 
           <ChevronLeft className="h-3.5 w-3.5" />
           Home
@@ -124,7 +124,7 @@ export function ProfileHero({
           <div className="flex flex-wrap items-center gap-2 shrink-0 pb-1">
             <Link
               href="/rfq/new"
-              className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-brand-blue-dark transition active:scale-[0.98]"
+              className="btn btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs"
             >
               <FileText className="h-3.5 w-3.5" />
               Post RFQ

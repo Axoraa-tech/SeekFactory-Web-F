@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { cn } from "@/shared/lib/cn";
+import { useEffect, useRef, useState } from "react";
 
-type LoadingScreenProps = {
-  minDurationMs?: number;
-};
+/**
+ * First-visit intro: the brand video, at most 2.5 s (2.2 s visible + 0.3 s fade).
+ *
+ * It is rendered in the server HTML so it covers the very first paint (no flash of the page
+ * before the intro). For visitors who should not see it, the inline script below flags <html>
+ * before paint and CSS hides it; the same CSS ends the intro at 2.5 s even if JavaScript is slow.
+ * See the "sf-intro" rules in globals.css.
+ */
+
+const VISIBLE_MS = 2200;
+const FADE_MS = 300;
+const TOTAL_MS = VISIBLE_MS + FADE_MS;
 
 const SEEN_KEY = "sf-intro-seen";
 
@@ -16,12 +22,11 @@ const SKIP_PREFIXES = ["/admin", "/login", "/join", "/legal"];
 
 /**
  * Fallback for private browsing, where sessionStorage throws. It survives client-side
- * navigation but not a reload, so the worst case is once per full page load rather
- * than once per route change.
+ * navigation but not a reload, so the worst case is once per full page load.
  */
 let shownThisPageLoad = false;
 
-/** True when the intro has already played for this visitor, or this route opts out. */
+/** True when the intro has already played this session, this route opts out, or we are framed. */
 function shouldSkipIntro(pathname: string): boolean {
   if (shownThisPageLoad) return true;
   if (SKIP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return true;
@@ -47,132 +52,70 @@ function markIntroSeen() {
   }
 }
 
-// 4-step sequence completing the full loop: Image 1 -> Image 2 -> Image 3 -> Image 1
-const STEPS = [
-  { id: "step-1", src: "/loading/illustration-1.png", label: "Buyer Sourcing & CNC Factory" },
-  { id: "step-2", src: "/loading/illustration-2.png", label: "Warehouse Hub & Freight Logistics" },
-  { id: "step-3", src: "/loading/illustration-3.png", label: "Container Port & Global Transit" },
-  { id: "step-4", src: "/loading/illustration-1.png", label: "Loop Complete - Verified Manufacturing" },
-];
+/** Same decision as shouldSkipIntro, run inline before first paint (no React yet). */
+const PRE_PAINT_SCRIPT = `(function(){try{var p=location.pathname,s=${JSON.stringify(SKIP_PREFIXES)},skip=false;
+for(var i=0;i<s.length;i++){if(p===s[i]||p.indexOf(s[i]+"/")===0){skip=true;}}
+try{if(window.self!==window.top){skip=true;}}catch(e){skip=true;}
+try{if(sessionStorage.getItem(${JSON.stringify(SEEN_KEY)})==="1"){skip=true;}}catch(e){}
+if(skip){document.documentElement.setAttribute("data-sf-intro","skip");}}catch(e){}})();`;
 
-export function LoadingScreen({ minDurationMs = 5800 }: LoadingScreenProps) {
-  // "pending" until the browser tells us whether this visitor has seen the intro.
-  // Deciding on the client avoids a flash of the overlay on every navigation.
-  const [phase, setPhase] = useState<"pending" | "loading" | "fadeout" | "completed">("pending");
-  const [currentStep, setCurrentStep] = useState(0);
-  const pathname = usePathname();
+export function LoadingScreen() {
+  const [done, setDone] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Runs once per mount: play the intro only on a visitor's first eligible page
   useEffect(() => {
-    if (shouldSkipIntro(pathname)) {
-      setPhase("completed");
+    if (shouldSkipIntro(window.location.pathname)) {
+      setDone(true);
       return;
     }
     markIntroSeen();
-    setPhase("loading");
-    // pathname is read once on mount by design: the intro must not restart on navigation
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const video = videoRef.current;
+    if (video) {
+      // React does not always emit the `muted` attribute in server HTML, and browsers only
+      // autoplay muted video: set it explicitly and start playback if it has not begun.
+      video.muted = true;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        video.pause(); // the poster frame stays; no motion
+      } else if (video.paused) {
+        void video.play().catch(() => {
+          // Autoplay refused (e.g. low-power mode): the poster frame is shown instead
+        });
+      }
+    }
+
+    // Count from page start, not from hydration, so a slow load never stretches the intro
+    const remaining = Math.max(0, TOTAL_MS - performance.now());
+    const timer = window.setTimeout(() => setDone(true), remaining);
+    return () => window.clearTimeout(timer);
   }, []);
 
-  // Transition smoothly through steps [0 -> 1 -> 2 -> 3]
-  useEffect(() => {
-    if (phase !== "loading") return;
-
-    const stepInterval = minDurationMs / STEPS.length; // ~1450ms per step
-
-    const timer = setInterval(() => {
-      setCurrentStep((prev) => {
-        const next = prev + 1;
-        if (next >= STEPS.length - 1) {
-          clearInterval(timer);
-          return STEPS.length - 1; // Stay on the looped final step (Image 1)
-        }
-        return next;
-      });
-    }, stepInterval);
-
-    return () => clearInterval(timer);
-  }, [phase, minDurationMs]);
-
-  // Screen completion timer: after minDurationMs, fade out smoothly into the page
-  useEffect(() => {
-    if (phase !== "loading") return;
-
-    const fadeTimer = setTimeout(() => {
-      setPhase("fadeout");
-    }, minDurationMs);
-
-    const completeTimer = setTimeout(() => {
-      setPhase("completed");
-    }, minDurationMs + 800);
-
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(completeTimer);
-    };
-  }, [phase, minDurationMs]);
-
-  if (phase === "pending" || phase === "completed") {
-    return null;
-  }
-
-  const isFadeOut = phase === "fadeout";
+  if (done) return null;
 
   return (
-    <div
-      className={cn(
-        "fixed inset-0 z-[9999] overflow-hidden bg-white select-none transition-opacity duration-800 ease-out",
-        isFadeOut ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
-      )}
-      aria-label="SeekFactory Initializing"
-    >
-      {/* Seamless Layered Illustration Cross-Dissolve (No White Flash or Flicker) */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center">
-        {STEPS.map((step, idx) => {
-          const isActive = idx <= currentStep;
-          const isCurrent = idx === currentStep;
-
-          return (
-            <div
-              key={step.id}
-              style={{ zIndex: (idx + 1) * 10 }}
-              className={cn(
-                "absolute inset-0 flex items-center justify-center transition-opacity duration-1100 ease-in-out will-change-[opacity,transform]",
-                isActive ? "opacity-100" : "opacity-0"
-              )}
-            >
-              <div
-                className={cn(
-                  "w-full h-full flex items-center justify-center transition-transform duration-[2200ms] ease-out will-change-transform",
-                  isCurrent ? "scale-100" : "scale-[1.02]"
-                )}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img loading="lazy" decoding="async" src={step.src}
-                  alt={step.label}
-                  style={{ imageRendering: "-webkit-optimize-contrast" }}
-                  className="w-full h-full object-contain md:object-cover object-center filter contrast-[1.05]"
-                />
-              </div>
-            </div>
-          );
-        })}
+    <>
+      <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_SCRIPT }} />
+      <div
+        id="sf-intro"
+        aria-hidden="true"
+        className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden select-none bg-[linear-gradient(to_bottom,#fefefe,#e9e8eb)]"
+      >
+        {/* Landscape screens are filled (cropping at most the empty sides of the 16:9 frame);
+            on portrait phones the element is exactly the 16:9 frame, enlarged 1.5x (the logo spans
+            the middle ~60%, so only empty sides are cropped) with its edges faded into the gradient */}
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          poster="/loading_screen/intro-poster.jpg"
+          className="h-full w-full object-cover portrait:aspect-video portrait:h-auto portrait:scale-150 portrait:[-webkit-mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)] portrait:[mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]"
+        >
+          <source src="/loading_screen/intro.webm" type="video/webm" />
+          <source src="/loading_screen/intro.mp4" type="video/mp4" />
+        </video>
       </div>
-
-      {/* Center Branding — Pure Logo Presence with Soft Floating Ambience */}
-      <div className="relative z-50 flex h-full w-full flex-col items-center justify-center px-4 pointer-events-none">
-        <div className="relative flex items-center justify-center transition-transform duration-700 hover:scale-105">
-          <Image
-            src="/brand/seekfactory-logo.png"
-            alt="SeekFactory"
-            width={851}
-            height={293}
-            priority
-            className="h-14 sm:h-20 md:h-24 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.08)]"
-          />
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
-

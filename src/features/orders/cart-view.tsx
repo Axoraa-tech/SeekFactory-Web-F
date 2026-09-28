@@ -65,7 +65,7 @@ export function CartView({ user, initialCart }: Props) {
         <p className="text-xs text-ink-muted">Add products from a factory page or a seek to order them here.</p>
         <Link
           href="/explore"
-          className="inline-flex h-9 items-center rounded-full bg-brand-blue px-5 text-xs font-bold text-white hover:bg-brand-blue-dark"
+          className="btn btn-primary inline-flex h-9 items-center px-5 text-xs"
         >
           Explore products
         </Link>

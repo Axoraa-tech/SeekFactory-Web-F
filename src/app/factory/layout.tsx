@@ -14,5 +14,5 @@ export default async function FactoryLayout({ children }: { children: ReactNode 
   const user = await getApi().session.getCurrentUser();
   if (user && user.role !== "Supplier") redirect("/");
 
-  return <div className="min-h-screen bg-[#F8FAFC]">{children}</div>;
+  return <div className="site-canvas min-h-screen">{children}</div>;
 }

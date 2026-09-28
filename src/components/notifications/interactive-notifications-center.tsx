@@ -140,7 +140,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
             <button
               type="button"
               onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-brand-blue/30 hover:text-brand-blue transition-all active:scale-95 shadow-2xs"
+              className="btn btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
             >
               <CheckCheck className="h-3.5 w-3.5 text-brand-blue" />
               <span>{t("notifications.markAllAsRead", "Mark all read")}</span>
@@ -151,7 +151,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
             <button
               type="button"
               onClick={handleClearAll}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95 shadow-2xs"
+              className="btn btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span>Clear all</span>

@@ -305,7 +305,7 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
           <button
             type="submit"
             disabled={submitting}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:opacity-70"
+            className="btn btn-primary flex h-11 w-full items-center justify-center gap-2 text-sm disabled:opacity-70"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {submitting ? "Submitting…" : verification.submitted ? "Resubmit for Verification" : "Submit for Verification"}
@@ -368,7 +368,7 @@ function StatusCard({
         {detail && <p className={`mt-3 rounded-lg px-3 py-2 text-xs font-semibold ${detailTone}`}>{detail}</p>}
         <Link
           href={continueHref}
-          className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark"
+          className="btn btn-primary mt-5 inline-flex h-11 w-full items-center justify-center text-sm"
         >
           {continueLabel}
         </Link>

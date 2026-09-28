@@ -374,7 +374,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
               type="button"
               disabled={isBuying}
               onClick={handleBuyNow}
-              className="flex-1 bg-gradient-to-r from-[#FF5722] to-[#FF3D00] hover:from-[#FF3D00] hover:to-[#E63700] text-white text-xs font-bold flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-80"
+              className="btn-buy flex-1 text-white text-xs font-bold flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-80"
             >
               <span>{isBuying ? "Processing..." : "Buy Now"}</span>
             </button>
