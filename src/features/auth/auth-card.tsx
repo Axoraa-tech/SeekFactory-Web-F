@@ -107,7 +107,7 @@ export function AuthCard({
         return;
       }
 
-      router.push(postAuthPath(user.role, next));
+      router.push(postAuthPath(user.role, next, user.firstLogin));
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed. Please check your credentials.");

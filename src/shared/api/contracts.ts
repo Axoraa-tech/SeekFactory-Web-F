@@ -46,10 +46,13 @@ export type SearchResult = {
   reels: FeedItem[];
 };
 
+/** The signed-in profile, plus whether this was the account's very first sign-in. */
+export type SignInResult = BuyerProfile & { firstLogin?: boolean };
+
 export interface SessionRepository {
   getCurrentUser(): Promise<BuyerProfile | null>;
-  join(input: JoinInput): Promise<BuyerProfile>;
-  login(input: LoginInput): Promise<BuyerProfile>;
+  join(input: JoinInput): Promise<SignInResult>;
+  login(input: LoginInput): Promise<SignInResult>;
   logout(): Promise<void>;
   updateProfile(input: {
     name?: string;

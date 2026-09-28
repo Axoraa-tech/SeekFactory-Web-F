@@ -14,3 +14,14 @@ export async function requireUser(nextPath: string): Promise<BuyerProfile> {
   }
   return user;
 }
+
+/**
+ * Seller hub pages: guests go to sign in (manufacturer tab preselected); a signed-in buyer
+ * is sent back to the buyer home. The backend enforces ROLE_SUPPLIER on /factory APIs as
+ * well; this keeps buyers from landing on an empty seller dashboard.
+ */
+export async function requireSupplier(nextPath: string): Promise<BuyerProfile> {
+  const user = await requireUser(nextPath);
+  if (user.role !== "Supplier") redirect("/");
+  return user;
+}

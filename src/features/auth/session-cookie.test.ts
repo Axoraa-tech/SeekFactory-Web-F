@@ -17,6 +17,14 @@ describe("postAuthPath", () => {
     expect(postAuthPath("Buyer")).toBe("/");
     expect(postAuthPath("Supplier")).toBe("/factory");
   });
+
+  it("opens the product catalog on a supplier's first sign-in", () => {
+    expect(postAuthPath("Supplier", undefined, true)).toBe("/factory?tab=products");
+    expect(postAuthPath("Supplier", undefined, false)).toBe("/factory");
+    expect(postAuthPath("Buyer", undefined, true)).toBe("/");
+    // An explicit destination still wins
+    expect(postAuthPath("Supplier", "/factory?tab=orders", true)).toBe("/factory?tab=orders");
+  });
 });
 
 describe("parseSessionCookie", () => {

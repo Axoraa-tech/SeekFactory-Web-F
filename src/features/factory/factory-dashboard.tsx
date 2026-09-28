@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { getApi } from "@/shared/api";
 import type { FactoryQuote, FactorySeekUpdate, NewFactoryProduct, NewFactorySeek } from "@/shared/api/contracts";
@@ -15,6 +16,7 @@ import type {
   SellerStats,
   SellerTab,
 } from "./types";
+import { parseSellerTab } from "./types";
 import {
   createProductAction,
   createSeekAction,
@@ -122,7 +124,17 @@ export function FactoryDashboard({
   allCategories = NO_CATEGORIES,
   verification,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<SellerTab>("overview");
+  // The open tab lives in the URL (/factory?tab=orders) so a reload or a shared link reopens it,
+  // and browser back/forward moves between tabs. pushState keeps it client-side (no refetch).
+  const searchParams = useSearchParams();
+  const activeTab = parseSellerTab(searchParams.get("tab"));
+  const setActiveTab = useCallback((tab: SellerTab) => {
+    const params = new URLSearchParams(window.location.search);
+    if (tab === "overview") params.delete("tab");
+    else params.set("tab", tab);
+    const query = params.toString();
+    window.history.pushState(null, "", query ? `/factory?${query}` : "/factory");
+  }, []);
   const [stats, setStats] = useState<SellerStats>(initialStats ?? EMPTY_STATS);
   const [products, setProducts] = useState<SellerProduct[]>(() =>
     initialProducts.map((p) => toSellerProduct(p, allCategories))

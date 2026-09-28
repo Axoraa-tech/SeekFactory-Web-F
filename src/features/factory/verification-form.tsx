@@ -134,6 +134,8 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
         }
         onEdit={() => setEditing(true)}
         editLabel={rejected ? "Correct & resubmit" : "Update details"}
+        continueHref="/factory?tab=products"
+        continueLabel="Continue to Product Catalog"
       />
     );
   }
@@ -309,8 +311,11 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
             {submitting ? "Submitting…" : verification.submitted ? "Resubmit for Verification" : "Submit for Verification"}
           </button>
 
-          <Link href="/factory" className="block text-center text-xs font-semibold text-ink-muted hover:text-brand-blue">
-            Skip for now — go to seller hub
+          <Link
+            href="/factory?tab=products"
+            className="block text-center text-xs font-semibold text-ink-muted hover:text-brand-blue"
+          >
+            Skip for now, go to your product catalog
           </Link>
         </form>
       </div>
@@ -335,6 +340,8 @@ function StatusCard({
   detail,
   onEdit,
   editLabel,
+  continueHref = "/factory",
+  continueLabel = "Continue to Dashboard",
 }: {
   tone: "success" | "pending" | "error";
   icon: React.ReactNode;
@@ -343,6 +350,8 @@ function StatusCard({
   detail?: string;
   onEdit?: () => void;
   editLabel?: string;
+  continueHref?: string;
+  continueLabel?: string;
 }) {
   const ring = { success: "bg-emerald-50", pending: "bg-amber-50", error: "bg-red-50" }[tone];
   const detailTone = {
@@ -358,10 +367,10 @@ function StatusCard({
         <p className="mt-2 text-sm leading-relaxed text-ink-muted">{body}</p>
         {detail && <p className={`mt-3 rounded-lg px-3 py-2 text-xs font-semibold ${detailTone}`}>{detail}</p>}
         <Link
-          href="/factory"
+          href={continueHref}
           className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark"
         >
-          Continue to Dashboard
+          {continueLabel}
         </Link>
         {onEdit && (
           <button
