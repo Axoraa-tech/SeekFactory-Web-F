@@ -1,11 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { useState } from "react";
 import { Copy, Loader2, ShieldAlert, ShieldCheck, UserPlus } from "lucide-react";
-import { adminData, type AdminUser } from "@/shared/api/admin-api";
+import { AdminApiError, adminData, type AdminUser } from "@/shared/api/admin-api";
 import { DataTable, PageHeader, Pill, formatDate, initials, useAdminList, useToast, type Column } from "@/features/admin/ui";
 
 export default function AdminSettingsPage() {
+  const router = useRouter();
   const toast = useToast();
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
@@ -24,7 +27,9 @@ export default function AdminSettingsPage() {
       toast("success", `Invitation created for ${email.trim()}`);
       setEmail("");
     } catch (err) {
-      toast("error", (err as Error).message);
+      // The list redirects on 401 via useAdminList; the form has to do it itself
+      if (err instanceof AdminApiError && err.status === 401) router.replace("/admin/login");
+      else toast("error", (err as Error).message);
     } finally {
       setSending(false);
     }

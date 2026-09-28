@@ -12,11 +12,14 @@ import {
 import { SESSION_COOKIE } from "@/features/auth/session-cookie";
 
 /**
- * Security headers, admin gate, and backend session refresh.
+ * Edge middleware.
  *
- * Server components call the backend with the HttpOnly access-token cookie. When it has expired
- * but the refresh token is still valid, a new pair is fetched here, before rendering, so the page
- * sees the signed-in user. Per-page auth stays in `requireUser()`.
+ * Admin routes are gated here on the HttpOnly `admin_token` cookie. Buyer and
+ * factory pages still authenticate per-page via `requireUser()`, because their
+ * demo session cookie is client-writable and must not be treated as trusted.
+ *
+ * When real backend auth lands: verify HttpOnly session here and redirect guests
+ * away from /messages, /notifications, /profile, /rfq/* before rendering.
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

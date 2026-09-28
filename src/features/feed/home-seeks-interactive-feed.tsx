@@ -418,6 +418,8 @@ export function HomeSeeksInteractiveFeed({
         </div>
       ) : showcase.mode === "SINGLE" ? (
         <SingleSeekShowcase items={filteredItems} settings={showcase} />
+      ) : showcase.mode === "SIDEBAR" ? (
+        <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" />
       ) : showcase.mode === "FEED" ? (
         <FeedListShowcase items={filteredItems} settings={showcase} />
       ) : showcase.mode === "COMPACT" ? (

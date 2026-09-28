@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { adminData } from "@/shared/api/admin-api";
 
 /**
@@ -23,17 +24,25 @@ export function usePendingApprovals() {
   return useContext(PendingContext);
 }
 
+/** Login and setup sit under /admin, so they inherit this provider while signed out. */
+const UNAUTHENTICATED = ["/admin/login", "/admin/setup"];
+
 export function PendingApprovalsProvider({ children }: { children: React.ReactNode }) {
   const [pending, setPending] = useState(0);
+  const pathname = usePathname();
+  const signedOutScreen = UNAUTHENTICATED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   const refresh = useCallback(() => {
+    // Polling an admin endpoint from the sign-in page only produces 401s
+    if (signedOutScreen) return;
     // size 1 — only the counts matter, not the rows
     adminData.manufacturers({ page: 0, size: 1, filter: "unverified" })
       .then((p) => setPending(p.counts?.unverified ?? 0))
       .catch(() => {/* signed out or offline: leave the last known count */});
-  }, []);
+  }, [signedOutScreen]);
 
   useEffect(() => {
+    if (signedOutScreen) return;
     refresh();
     const timer = setInterval(() => {
       if (document.visibilityState === "visible") refresh();
@@ -44,7 +53,7 @@ export function PendingApprovalsProvider({ children }: { children: React.ReactNo
       clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [refresh]);
+  }, [refresh, signedOutScreen]);
 
   return <PendingContext.Provider value={{ pending, refresh }}>{children}</PendingContext.Provider>;
 }

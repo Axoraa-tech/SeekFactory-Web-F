@@ -15,31 +15,22 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleInitialSubmit = async (e: React.FormEvent) => {
+  /**
+   * Step 1 validates locally only.
+   *
+   * It used to probe the backend with a dummy TOTP code to check the password
+   * early. That burned a failed-auth attempt against any lockout on every sign-in,
+   * classified failures by substring-matching the error text, and told an attacker
+   * whether a password was right before they needed a second factor. The real
+   * login now happens once, in step 2, with the real code.
+   */
+  const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError("Email and password are required.");
       return;
     }
-    
-    setIsLoading(true);
     setError("");
-    
-    try {
-      // Pre-flight check: test credentials with a dummy TOTP code
-      await adminApi.login(email, password, "000000");
-    } catch (err: unknown) {
-      const msg = (err as Error).message || "";
-      if (msg.includes("Invalid email or password") || msg.includes("Admin role required") || msg.includes("deactivated") || msg.includes("not configured")) {
-        setError(msg);
-        setIsLoading(false);
-        return;
-      }
-      // If the error is "Invalid TOTP code", it means credentials are correct!
-    }
-
-    setIsLoading(false);
-    // Move to TOTP step
     setStep(2);
   };
 
@@ -49,31 +40,15 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      if (step === 1) {
-        if (!email || !password) {
-          setError("Please enter both email and password.");
-          setIsLoading(false);
-          return;
-        }
-        
-        // We can't log in without TOTP.
-        // We just move to step 2 locally.
+      if (totpCode.length !== 6) {
+        setError("Please enter the 6-digit code.");
         setIsLoading(false);
-        setStep(2);
-
-      } else {
-        const code = totpCode;
-        if (code.length !== 6) {
-          setError("Please enter the 6-digit TOTP code.");
-          setIsLoading(false);
-          return;
-        }
-
-        const data = await adminApi.login(email, password, code);
-
-        // Success: cookie is set by the server route
-        router.push("/admin/dashboard");
+        return;
       }
+
+      await adminApi.login(email, password, totpCode);
+      // Success: the session cookie is set by the server route
+      router.push("/admin/dashboard");
     } catch (err: unknown) {
       setError((err as Error).message || "Invalid credentials or TOTP code.");
       setIsLoading(false);
