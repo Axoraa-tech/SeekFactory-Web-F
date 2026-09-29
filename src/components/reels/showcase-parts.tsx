@@ -134,14 +134,14 @@ export function SeekActions({ item }: { item: FeedItem }) {
       {productHref && (
         <Link
           href={productHref}
-          className="rounded-full bg-brand-blue px-3.5 py-1.5 text-xs font-medium text-white hover:bg-brand-blue-dark"
+          className="btn btn-primary px-3.5 py-1.5 text-xs font-medium"
         >
           View products
         </Link>
       )}
       <Link
         href={`/manufacturers/${item.manufacturer.slug}`}
-        className="rounded-full border border-line px-3.5 py-1.5 text-xs font-medium text-ink hover:bg-canvas"
+        className="btn btn-secondary px-3.5 py-1.5 text-xs"
       >
         View manufacturer
       </Link>

@@ -107,7 +107,7 @@ export function AuthCard({
         return;
       }
 
-      router.push(postAuthPath(user.role, next));
+      router.push(postAuthPath(user.role, next, user.firstLogin));
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed. Please check your credentials.");
@@ -272,7 +272,7 @@ export function AuthCard({
         <button
           type="submit"
           disabled={saving}
-          className="h-11 sm:h-12 w-full rounded-full bg-brand-blue text-sm sm:text-base font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60 transition-colors"
+          className="btn btn-primary h-11 sm:h-12 w-full text-sm sm:text-base disabled:opacity-60"
         >
           {saving
             ? "Please wait…"

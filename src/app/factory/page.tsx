@@ -1,4 +1,4 @@
-import { requireUser } from "@/features/auth/require-user";
+import { requireSupplier } from "@/features/auth/require-user";
 import { FactoryDashboard } from "@/features/factory/factory-dashboard";
 import { getApi } from "@/shared/api";
 
@@ -9,8 +9,11 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function FactoryHomePage() {
-  const user = await requireUser("/factory");
+type Props = { searchParams: Promise<{ tab?: string }> };
+
+export default async function FactoryHomePage({ searchParams }: Props) {
+  const { tab } = await searchParams;
+  const user = await requireSupplier(tab ? `/factory?tab=${encodeURIComponent(tab)}` : "/factory");
   const api = getApi();
 
   const [profile, stats, products, seeks, rfqs, categories, convosRaw, orders, verification] = await Promise.all([

@@ -69,9 +69,14 @@ export function displayRole(role: BuyerProfile["role"]) {
   return role === "Supplier" ? "Manufacturer" : "Buyer";
 }
 
-export function postAuthPath(role: BuyerProfile["role"], next?: string) {
+/**
+ * Where to go after signing in. An explicit same-origin `next` wins; otherwise a supplier's
+ * first sign-in opens the product catalog (client request), later ones the seller dashboard.
+ */
+export function postAuthPath(role: BuyerProfile["role"], next?: string, firstLogin = false) {
   if (next && next.startsWith("/") && !next.startsWith("//")) return next;
-  return role === "Supplier" ? "/factory" : "/";
+  if (role !== "Supplier") return "/";
+  return firstLogin ? "/factory?tab=products" : "/factory";
 }
 
 export function buildPayload(input: JoinInput): SessionPayload {

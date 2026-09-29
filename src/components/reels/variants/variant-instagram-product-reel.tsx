@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Award,
   ShieldCheck,
   Send,
   MessageCircle,
@@ -27,6 +26,7 @@ import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { cn } from "@/shared/lib/cn";
+import { SeekTrustStrip } from "@/components/reels/seek-trust-strip";
 import { formatCount } from "@/shared/lib/format";
 import { getApi } from "@/shared/api";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -344,7 +344,7 @@ export function VariantInstagramProductReel({
                 </div>
                 <Link
                   href={`/messages?with=${manufacturer.slug}`}
-                  className="shrink-0 px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-xs font-bold text-brand-blue hover:bg-blue-50 transition-colors shadow-2xs"
+                  className="btn btn-secondary shrink-0 px-2.5 py-1 text-xs"
                 >
                   Chat
                 </Link>
@@ -382,7 +382,7 @@ export function VariantInstagramProductReel({
                   type="button"
                   disabled={buyingId === activeProduct.id}
                   onClick={(e) => handleBuyNow(e, activeProduct)}
-                  className="flex-1 h-10 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all disabled:opacity-75"
+                  className="flex-1 h-10 btn btn-buy text-xs disabled:opacity-75"
                 >
                   <Zap className="h-3.5 w-3.5 fill-white/80" />
                   <span>{buyingId === activeProduct.id ? "Processing..." : "Buy Now"}</span>
@@ -427,23 +427,7 @@ export function VariantInstagramProductReel({
   return (
     <>
       <article className="rounded-2xl border border-neutral-200/90 bg-white shadow-xs transition-all hover:shadow-md overflow-hidden">
-        {/* 1. Distinct Header Bar: Verified Badges Ribbon */}
-        <div className="flex items-center justify-between bg-neutral-900 px-3.5 sm:px-4 py-1.5 text-xs text-neutral-300">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="flex items-center gap-1 font-bold text-amber-400">
-              <Award className="h-3.5 w-3.5" />
-              Verified OEM Manufacturer
-            </span>
-            <span className="text-neutral-500">•</span>
-            <span className="text-neutral-400">ISO 9001 Audited</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Verified Factory
-            </span>
-          </div>
-        </div>
+        <SeekTrustStrip manufacturer={manufacturer} />
 
         <div className="p-3.5 sm:p-4 pb-2 sm:pb-2.5 space-y-2.5">
           {/* 2. Manufacturer Header */}
@@ -486,7 +470,7 @@ export function VariantInstagramProductReel({
 
               <Link
                 href="/rfq/new"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-1 text-xs font-bold text-white hover:bg-brand-blue-dark transition shadow-2xs"
+                className="btn btn-primary hidden sm:inline-flex items-center gap-1.5 px-3 py-1 text-xs"
               >
                 <Send className="h-3 w-3" /> {t("feed.sendRfq", "Send RFQ")}
               </Link>
@@ -564,10 +548,8 @@ export function VariantInstagramProductReel({
                             onClick={(e) => handleBuyNow(e, prod)}
                             disabled={isBuying}
                             className={cn(
-                              "inline-flex h-5 sm:h-6 items-center justify-center gap-1 rounded px-2 text-[10px] font-bold text-white transition active:scale-95 shadow-2xs shrink-0",
-                              isBuying
-                                ? "bg-red-400 cursor-wait"
-                                : "bg-[#E53935] hover:bg-[#D32F2F]"
+                              "btn btn-buy h-5 sm:h-6 shrink-0 gap-1 px-2 text-[10px]",
+                              isBuying && "cursor-wait opacity-70"
                             )}
                           >
                             {isBuying ? "..." : t("common.buyNow", "Buy Now")}

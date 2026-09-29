@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Eye, TrendingUp, Package, Clock } from "lucide-react";
 import { getApi } from "@/shared/api";
+import { requireSupplier } from "@/features/auth/require-user";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -9,6 +10,7 @@ type Props = {
 
 export default async function SeekDetailPage({ params }: Props) {
   const { id } = await params;
+  await requireSupplier(`/factory/seeks/${encodeURIComponent(id)}`);
   const api = getApi();
   const seeks = await api.factory.getSeeks().catch(() => []);
   const seek = seeks.find((item) => item.id === id);
@@ -19,7 +21,7 @@ export default async function SeekDetailPage({ params }: Props) {
     <div className="min-h-screen bg-[#F8FAFC]">
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
         <Link
-          href="/factory"
+          href="/factory?tab=seeks"
           className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-600 hover:text-brand-blue transition mb-4"
         >
           <ArrowLeft className="h-4 w-4" />

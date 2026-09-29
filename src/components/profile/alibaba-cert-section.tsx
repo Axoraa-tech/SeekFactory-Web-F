@@ -102,7 +102,7 @@ export function AlibabaCertSection({
             <button
               type="button"
               onClick={onOpenUpload}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-3 py-1.5 text-xs font-bold transition active:scale-95"
+              className="btn btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Add Real Certificate</span>

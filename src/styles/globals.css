@@ -32,12 +32,19 @@
   --brand-blue-soft: #e8f1fd;
   --brand-orange: #f26b21;
   --brand-orange-soft: #fff1e8;
+  /* Chinese vermilion: the theme colour. Used as an accent (prices, trust seals, progress,
+     active navigation, the canvas glow), not as a button fill, so it reads as atmosphere
+     rather than alarm. Blue stays for links, category tiles and informational states. */
+  --brand-red: #ca4136;
+  --brand-red-dark: #a9352b;
+  --brand-red-soft: #fbeceb;
   --ink: #1c1c1c;
   --ink-muted: #5f6368;
   --ink-faint: #80868b;
-  --line: #e6e8eb;
+  --line: #e9e9ed;
   --canvas: #f3f4f6;
-  --surface: #ffffff;
+  /* Surfaces carry a trace of the vermilion so they sit in the warm canvas instead of on it */
+  --surface: #fefcfc;
   --font-sans: "Plus Jakarta Sans", "Segoe UI", sans-serif;
 
   /* Admin chart tokens. These alias the brand tokens above so the dashboard marks
@@ -224,6 +231,7 @@ body {
 body {
   margin: 0;
   background: var(--canvas);
+  font-feature-settings: "ss01", "cv11";
   color: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -555,5 +563,261 @@ textarea {
   }
   .sf-hub .sf-lift:hover {
     translate: none;
+  }
+}
+
+/* First-visit intro (components/ui/loading-screen.tsx).
+   Returning visitors and opted-out routes are flagged on <html> before paint, so the intro never
+   flashes; everyone else sees it fade out at 2.2 s and gone by 2.5 s, even if JavaScript is slow. */
+html[data-sf-intro="skip"] #sf-intro {
+  display: none;
+}
+
+#sf-intro {
+  animation: sf-intro-out 300ms ease-out 2200ms forwards;
+}
+
+@keyframes sf-intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+
+/* ─── Site canvas ────────────────────────────────────────────────────────────
+   Panels float over a still, lit surface: a warm off-white with a vermilion glow top-right,
+   a faint amber glow bottom-left and a cool breath of blue top-left. A fine dot grid sits on
+   a fixed, pointer-less layer (never on a scrolling box) and fades out down the page. */
+.site-canvas {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(1100px 640px at 104% -14%, rgba(202, 65, 54, 0.1), transparent 62%),
+    radial-gradient(900px 620px at -10% 112%, rgba(240, 150, 60, 0.09), transparent 62%),
+    radial-gradient(820px 520px at -6% -12%, rgba(26, 115, 232, 0.05), transparent 60%),
+    linear-gradient(180deg, #f8f7f6 0%, #f2f0ef 100%);
+  background-attachment: fixed;
+}
+.site-canvas::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(60, 30, 26, 0.09) 1px, transparent 1.3px);
+  background-size: 20px 20px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 90%);
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 90%);
+}
+
+/* ─── Frosted tile ───────────────────────────────────────────────────────────
+   Web frosted-glass approximation (backdrop-filter + layered edge + top highlight) for small
+   panels sitting on a tinted stage, e.g. the spec, price and engagement strips on a seek.
+   Falls back to solid white when the viewer asks for less transparency. */
+@layer components {
+  .glass-tile {
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: linear-gradient(150deg, rgba(254, 252, 252, 0.94) 0%, rgba(254, 252, 252, 0.58) 100%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 0 0 1px rgba(28, 22, 22, 0.045),
+      0 12px 26px -20px rgba(60, 30, 26, 0.45);
+  }
+  /* The stage a seek's glass tiles sit on: white up top, warming toward the bottom corners */
+  .seek-stage {
+    background:
+      radial-gradient(120% 55% at 100% 100%, rgba(202, 65, 54, 0.12), transparent 64%),
+      radial-gradient(95% 50% at 0% 100%, rgba(240, 150, 60, 0.12), transparent 64%),
+      var(--surface);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-tile {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Headings: tighter tracking as size grows, as in the admin type scale */
+@layer base {
+  h1 {
+    letter-spacing: -0.028em;
+  }
+  h2 {
+    letter-spacing: -0.02em;
+  }
+  h3 {
+    letter-spacing: -0.012em;
+  }
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────────
+   One system for the whole site (see components/ui/button.tsx):
+   .btn + one variant (primary | secondary | soft | ghost | dark) + optional size.
+   Pill-shaped like the admin controls; transform/opacity-only motion; visible focus. */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition:
+      background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      translate 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      scale 120ms ease;
+    cursor: pointer;
+  }
+  .btn:focus-visible {
+    outline: 2px solid var(--brand-red);
+    outline-offset: 2px;
+  }
+  .btn:not(:disabled):active {
+    scale: 0.98;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Flat vermilion: the one main action in a group. Matte on purpose (no gloss, a soft
+     tinted shadow) so it reads as the brand colour rather than an alarm. White text on
+     #CA4136 is 4.9:1 (WCAG AA). */
+  .btn-primary {
+    background: var(--brand-red);
+    color: #fff;
+    box-shadow:
+      0 1px 2px rgba(120, 30, 24, 0.18),
+      0 8px 16px -12px rgba(202, 65, 54, 0.7);
+  }
+  .btn-primary:not(:disabled):hover {
+    background: var(--brand-red-dark);
+  }
+
+  /* Buy Now only: warm ink with a lit top edge, so the purchase action stands apart from
+     the red actions around it. */
+  .btn-buy {
+    background: linear-gradient(180deg, #34302f 0%, #1c1a1a 100%);
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 1px 2px rgba(28, 22, 22, 0.2),
+      0 10px 20px -12px rgba(28, 22, 22, 0.6);
+  }
+  .btn-buy:not(:disabled):hover {
+    background: linear-gradient(180deg, #2a2626 0%, #0f0e0e 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 1px 2px rgba(28, 22, 22, 0.22),
+      0 14px 24px -14px rgba(28, 22, 22, 0.7);
+  }
+
+  /* White with a hairline edge: secondary actions next to a primary */
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink);
+    border-color: rgba(28, 22, 22, 0.12);
+    box-shadow: 0 1px 2px rgba(28, 22, 22, 0.05);
+  }
+  .btn-secondary:not(:disabled):hover {
+    border-color: rgba(28, 22, 22, 0.24);
+    background: #fbf6f6;
+  }
+
+  /* Tinted: a strong second action (e.g. Order next to Buy Now) without a second fill */
+  .btn-soft {
+    background: rgba(28, 22, 22, 0.055);
+    color: var(--ink);
+  }
+  .btn-soft:not(:disabled):hover {
+    background: rgba(28, 22, 22, 0.09);
+  }
+
+  /* Dark: primary actions on photos or dark surfaces */
+  .btn-dark {
+    background: var(--ink);
+    color: #fff;
+  }
+  .btn-dark:not(:disabled):hover {
+    background: #000;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-muted);
+  }
+  .btn-ghost:not(:disabled):hover {
+    background: rgba(28, 22, 22, 0.05);
+    color: var(--ink);
+  }
+
+  .btn-sm {
+    height: 2rem;
+    padding: 0 0.85rem;
+    font-size: 0.75rem;
+  }
+  .btn-md {
+    height: 2.5rem;
+    padding: 0 1.1rem;
+    font-size: 0.8125rem;
+  }
+  .btn-lg {
+    height: 2.875rem;
+    padding: 0 1.4rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:not(:disabled):active {
+    scale: none;
+  }
+}
+
+
+/* ─── Panels ─────────────────────────────────────────────────────────────────
+   Cards written as "rounded-* border border-line bg-white" (the site's common pattern) get
+   the admin panel treatment: an almost invisible edge and a soft shadow tinted to the ink
+   hue, so they float over the canvas instead of reading as boxes. Each selector weighs the
+   same as one hover utility (0,2,0) and sits in an earlier layer, so hover borders/shadows
+   written on a card still win. Only containers: inputs keep their visible border. */
+@layer components {
+  .rounded-2xl.border-line:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-2xl.border-slate-200:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-2xl.border-slate-200\/90:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-2xl.border-slate-200\/80:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-2xl.border-neutral-200:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-3xl.border-line:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-3xl.border-slate-200:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-3xl.border-slate-200\/90:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-3xl.border-slate-200\/80:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-3xl.border-neutral-200:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-card.border-line:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-card.border-slate-200:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-card.border-slate-200\/90:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-card.border-slate-200\/80:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-card.border-neutral-200:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-xl.border-line:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-xl.border-slate-200:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-xl.border-slate-200\/90:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-xl.border-slate-200\/80:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details),
+  .rounded-xl.border-neutral-200:where(.bg-white, .bg-surface):where(div, section, article, aside, li, form, header, details) {
+    border-color: rgba(28, 22, 22, 0.07);
+    box-shadow:
+      0 1px 1px rgba(28, 22, 22, 0.03),
+      0 14px 34px -22px rgba(28, 22, 22, 0.32);
   }
 }

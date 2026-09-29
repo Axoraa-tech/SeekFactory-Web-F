@@ -354,7 +354,7 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
             </div>
             <Link
               href={`/messages?with=${manufacturer.slug}`}
-              className="shrink-0 px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-xs font-bold text-brand-blue hover:bg-blue-50 transition-colors shadow-2xs"
+              className="btn btn-secondary shrink-0 px-2.5 py-1 text-xs"
             >
               Chat
             </Link>
@@ -388,7 +388,7 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
               type="button"
               disabled={isBuying}
               onClick={handleBuyNow}
-              className="flex-1 h-10 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all disabled:opacity-75"
+              className="flex-1 h-10 btn btn-buy text-xs disabled:opacity-75"
             >
               <Zap className="h-3.5 w-3.5 fill-white/80" />
               <span>{isBuying ? "Processing..." : "Buy Now"}</span>

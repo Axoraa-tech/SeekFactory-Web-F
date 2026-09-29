@@ -89,7 +89,7 @@ export function ShippingForm({ user, submitLabel, submitting, error, onSubmit }:
       <button
         type="submit"
         disabled={submitting}
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 px-5 text-sm font-bold text-white shadow-sm hover:from-rose-700 hover:to-red-700 transition active:scale-[0.99] disabled:opacity-70"
+        className="btn btn-primary h-11 w-full px-5 text-sm disabled:opacity-70"
       >
         {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
         <span>{submitting ? "Sending…" : submitLabel}</span>

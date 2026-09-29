@@ -80,7 +80,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
         <span className="text-slate-900 font-semibold truncate">{product.name}</span>
       </nav>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         {/* Left Column: Image & Factory Trust */}
         <div className="space-y-4">
           <Card className="overflow-hidden border-slate-200/90 shadow-2xs">
@@ -118,7 +118,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
               <Link
                 href={`/manufacturers/${manufacturer.slug}`}
-                className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
+                className="btn btn-secondary shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-xs"
               >
                 <Building2 className="h-3.5 w-3.5" />
                 <span>Visit Factory</span>

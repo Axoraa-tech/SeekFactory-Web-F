@@ -346,7 +346,7 @@ export function SupplierProfileView({
 
               <Link
                 href={`/messages?with=${manufacturer.slug}`}
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-800 hover:bg-slate-50 hover:border-brand-blue/40 hover:text-brand-blue transition-all active:scale-95 shadow-2xs"
+                className="btn btn-secondary inline-flex h-10 items-center justify-center gap-1.5 px-4 text-xs"
               >
                 <MessageSquare className="h-4 w-4 text-brand-blue" />
                 <span>Chat Now</span>
@@ -354,7 +354,7 @@ export function SupplierProfileView({
 
               <Link
                 href="/rfq/new"
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-4 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
+                className="btn btn-primary inline-flex h-10 items-center justify-center gap-1.5 px-4 text-xs"
               >
                 <Send className="h-3.5 w-3.5" />
                 <span>Send RFQ</span>

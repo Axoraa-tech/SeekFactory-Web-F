@@ -1,415 +1,274 @@
 import type { ReactElement } from "react";
 import type { Category, CategoryIconKey } from "@/entities/category";
 
-type IconProps = {
-  className?: string;
-  size?: number;
-};
-
 /**
- * Custom High-End Dual-Tone (Blue #1A73E8 & Black #0F172A) Vector Icons
- * Styled like modern e-commerce / marketplace category illustrations.
+ * SeekFactory category icons, one family on a 32px grid.
+ * Ink outline at a single stroke weight; a flat brand-blue fill sits under the part that
+ * defines each object; red is rationed to one small detail (indicator, tip, beacon).
+ * Source of truth for the shapes: generated from a script, so keep edits consistent.
  */
-function IconForYou({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Bag Outline */}
-      <rect x="4" y="8" width="16" height="13" rx="3" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M8 8V6a4 4 0 0 1 8 0v2" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Sparkle Accent */}
-      <path
-        d="M12 11.5v4M10 13.5h4"
-        stroke="#1A73E8"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="13.5" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
+const INK = "#1C1C1C";
+const BLUE = "#1A73E8";
+const RED = "#D6362B";
+const PAPER = "#FFFFFF";
 
-function IconAgriculture({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Tractor / Machine Frame */}
-      <circle cx="7" cy="17" r="3" stroke="#0F172A" strokeWidth="1.8" />
-      <circle cx="17" cy="16" r="4" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M7 17h6v-6h4v5M4 14h6" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Sprout / Crop Accent */}
-      <path
-        d="M14 6c0-2 2-3 4-3 0 2-1 4-4 4z"
-        fill="#1A73E8"
-      />
-      <path d="M14 6v5" stroke="#1A73E8" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconConstruction({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Track / Body */}
-      <rect x="3" y="16" width="14" height="4" rx="2" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M5 16l2-6h5l2 6" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      {/* Blue Excavator Arm / Crane */}
-      <path
-        d="M12 10l5-4 4 3v3"
-        stroke="#1A73E8"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="17" cy="6" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconMachineTools({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Gear */}
-      <path
-        d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"
-        stroke="#0F172A"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="12" r="5" stroke="#0F172A" strokeWidth="1.8" />
-      {/* Blue CNC Cutting Tool */}
-      <path
-        d="M10 10l4 4M14 10l-4 4"
-        stroke="#1A73E8"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="12" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconAutomation({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Robot Base & Arm */}
-      <path d="M4 20h16M6 20v-3l4-4 4 2 3-6" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="6" cy="17" r="1.5" fill="#0F172A" />
-      <circle cx="10" cy="13" r="1.5" fill="#0F172A" />
-      {/* Blue Gripper / Sensor */}
-      <path d="M17 9l3-2M17 9l2 3" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="17" cy="9" r="2" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconEnergy({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Generator / Turbine Frame */}
-      <rect x="4" y="7" width="16" height="13" rx="2" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M8 4v3M16 4v3" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Lightning Bolt */}
-      <path
-        d="M13 9.5l-3 4h4l-2 4"
-        stroke="#1A73E8"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function IconFood({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Tank / Processing Vessel */}
-      <path d="M5 9h14v7a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M8 5h8v4H8z" stroke="#0F172A" strokeWidth="1.8" />
-      {/* Blue Stirrer / Fluid Accent */}
-      <path d="M12 9v7M10 16h4" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconMaterialHandling({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Forklift Chassis */}
-      <circle cx="6" cy="18" r="2.5" stroke="#0F172A" strokeWidth="1.8" />
-      <circle cx="14" cy="18" r="2.5" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M3 13h7l3-6h3v11M16 7v11" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Cargo / Fork */}
-      <path d="M19 12h3v6" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-      <rect x="18" y="7" width="4" height="4" rx="1" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconTextile({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Machine Bed */}
-      <path d="M4 18h16M6 18V8h10a3 3 0 0 1 3 3v7" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="14" cy="12" r="2" stroke="#0F172A" strokeWidth="1.5" />
-      {/* Blue Needle & Thread Spool */}
-      <path d="M10 8v5" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-      <rect x="8" y="4" width="4" height="4" rx="1" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconTransport({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Heavy Cargo Trailer */}
-      <rect x="2" y="7" width="13" height="9" rx="1.5" stroke="#0F172A" strokeWidth="1.8" />
-      <circle cx="6" cy="18" r="2.5" stroke="#0F172A" strokeWidth="1.8" />
-      <circle cx="18" cy="18" r="2.5" stroke="#0F172A" strokeWidth="1.8" />
-      {/* Blue Cab / Logistics Head */}
-      <path d="M15 10h4l3 3v3h-7v-6z" stroke="#1A73E8" strokeWidth="1.8" fill="#1A73E8" fillOpacity="0.15" />
-      <path d="M18 13h3" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconPrinting({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black 3D / Industrial Printer */}
-      <rect x="4" y="9" width="16" height="8" rx="2" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M7 9V4h10v5M7 17v4h10v-4" stroke="#0F172A" strokeWidth="1.8" />
-      {/* Blue Laser Extruder Head */}
-      <circle cx="12" cy="13" r="2" fill="#1A73E8" />
-      <path d="M12 15v2" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconMedical({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Lab Flask / Device Frame */}
-      <path d="M9 3h6M10 3v5l-5 8a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 16l-5-8V3" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Blue Fluid / Reaction Core */}
-      <path d="M7.5 14h9l1.5 2.5a2 2 0 0 1-1.8 2.5H7.8a2 2 0 0 1-1.8-2.5l1.5-2.5z" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconSemiconductors({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Integrated Circuit Frame */}
-      <rect x="5" y="5" width="14" height="14" rx="2.5" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Micro-Die Sensor */}
-      <rect x="9" y="9" width="6" height="6" rx="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconMining({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Mountain & Rig */}
-      <path d="M3 20l7-12 4 6 2-3 5 9H3z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      {/* Blue Drill / Extraction Laser */}
-      <path d="M12 4v7M10 8l4-4" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="12" cy="11" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconProcessing({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Industrial Factory Chimneys */}
-      <path d="M3 21V9l5 4V9l5 4V5h8v16H3z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      {/* Blue Emission / Power Valve */}
-      <rect x="16" y="9" width="3" height="3" rx="0.5" fill="#1A73E8" />
-      <rect x="16" y="14" width="3" height="3" rx="0.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconWoodworking({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Saw Guide Bench */}
-      <rect x="3" y="14" width="18" height="6" rx="1.5" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M6 14v-4h12v4" stroke="#0F172A" strokeWidth="1.8" />
-      {/* Blue Rotary Blade */}
-      <circle cx="12" cy="10" r="3.5" stroke="#1A73E8" strokeWidth="2" />
-      <path d="M12 8v4M10 10h4" stroke="#1A73E8" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconAircraft({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Aerospace Wings & Fuselage */}
-      <path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      {/* Blue Jet Turbine */}
-      <circle cx="12" cy="11" r="2" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconMarine({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Vessel Hull */}
-      <path d="M3 16l3 4h12l3-4H3z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M12 4v8M8 8h8" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Marine Wave */}
-      <path d="M2 19c2 1 4 1 6 0s4-1 6 0 4 1 6 0" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconForestry({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Timber Frame */}
-      <path d="M12 3l5 7h-3l4 6H6l4-6H7l5-7z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M12 16v5" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" />
-      {/* Blue Sapling Core */}
-      <circle cx="12" cy="10" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconWaste({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Shredder Bin */}
-      <path d="M4 7h16M10 3h4M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Recycle Symbol */}
-      <path d="M10 11l2 2 2-2M12 13v4" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconDefault({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Industrial Crate */}
-      <rect x="4" y="5" width="16" height="14" rx="2" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M4 10h16M10 5v14" stroke="#0F172A" strokeWidth="1.8" />
-      {/* Blue Certified Badge */}
-      <circle cx="15" cy="14.5" r="2.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconTool({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black CNC Chuck */}
-      <rect x="4" y="8" width="16" height="8" rx="1.5" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M7 8V4h10v4M7 16v4h10v-4" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Drill Bit */}
-      <path d="M12 11v6" stroke="#1A73E8" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="2 2" />
-      <circle cx="12" cy="12" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconFlame({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Crucible / Mold */}
-      <path d="M5 8h14l-2 10H7L5 8z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M8 8V5a2 2 0 0 1 4 0v3M16 8V6" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Flame Core */}
-      <path d="M12 11c-1.5 1.5-1.5 3.5 0 5 1.5-1.5 1.5-3.5 0-5z" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconBox({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Injection Mold Block */}
-      <rect x="4" y="6" width="16" height="12" rx="2" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M4 12h16" stroke="#0F172A" strokeWidth="1.8" strokeDasharray="4 2" />
-      <circle cx="8" cy="12" r="1.5" fill="#0F172A" />
-      <circle cx="16" cy="12" r="1.5" fill="#0F172A" />
-      {/* Blue Molded Part */}
-      <rect x="10.5" y="9" width="3" height="6" rx="1" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconLayers({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Sheet Metal Stack */}
-      <path d="M3 10l9-5 9 5-9 5-9-5z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M3 14l9 5 9-5" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      {/* Blue Laser Cut Accent */}
-      <path d="M12 9l3-1.5" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="12" cy="10" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-function IconCpu({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Processor Frame */}
-      <rect x="6" y="6" width="12" height="12" rx="2" stroke="#0F172A" strokeWidth="1.8" />
-      <path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3" stroke="#0F172A" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Blue Automation Brain */}
-      <path d="M10 10h4v4h-4z" fill="#1A73E8" />
-      <path d="M14 14l3 3" stroke="#1A73E8" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconZap({ className, size = 24 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Black Optical Head */}
-      <path d="M8 4h8v5a4 4 0 0 1-4 4 4 4 0 0 1-4-4V4z" stroke="#0F172A" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M10 13v3h4v-3" stroke="#0F172A" strokeWidth="1.8" />
-      {/* Blue Laser Beam */}
-      <path d="M12 16v6" stroke="#1A73E8" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="12" cy="7" r="1.5" fill="#1A73E8" />
-    </svg>
-  );
-}
-
-const iconComponentMap: Record<CategoryIconKey | "for-you", (props: IconProps) => ReactElement> = {
-  "for-you": IconForYou,
-  agriculture: IconAgriculture,
-  aircraft: IconAircraft,
-  marine: IconMarine,
-  construction: IconConstruction,
-  energy: IconEnergy,
-  food: IconFood,
-  forestry: IconForestry,
-  automation: IconAutomation,
-  "machine-tools": IconMachineTools,
-  "material-handling": IconMaterialHandling,
-  mining: IconMining,
-  printing: IconPrinting,
-  processing: IconProcessing,
-  semiconductors: IconSemiconductors,
-  medical: IconMedical,
-  textile: IconTextile,
-  transport: IconTransport,
-  waste: IconWaste,
-  woodworking: IconWoodworking,
-  tool: IconTool,
-  flame: IconFlame,
-  box: IconBox,
-  layers: IconLayers,
-  cpu: IconCpu,
-  zap: IconZap,
-  other: IconDefault,
+const glyphs: Record<Exclude<CategoryIconKey, "cpu"> | "for-you", ReactElement> = {
+  "for-you": (
+    <>
+      <path d="M7 19.5h18v4.5a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3z" fill={BLUE} stroke="none" />
+      <path d="M7 11.5h18v12.5a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3z" />
+      <path d="M12 11.5V9.5a4 4 0 0 1 8 0v2" />
+      <path d="M25.5 3.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill={RED} stroke="none" />
+    </>
+  ),
+  agriculture: (
+    <>
+      <rect x="8.5" y="8" width="5" height="5.5" rx="1" fill={BLUE} stroke="none" />
+      <path d="M6.5 17V6.5h9.5l1.5 7.5" />
+      <path d="M15.5 13.5h9a2 2 0 0 1 2 2v5.5" />
+      <path d="M15.5 21h5.5" />
+      <circle cx="10" cy="22" r="5.5" />
+      <circle cx="10" cy="22" r="1.8" />
+      <circle cx="23.5" cy="24" r="3" />
+      <path d="M21 13.5V9" />
+      <rect x="20" y="7" width="2" height="2" rx="0.5" fill={RED} stroke="none" />
+    </>
+  ),
+  aircraft: (
+    <>
+      <path d="M13.5 17.5l-3 7h3.5l6-7z" fill={BLUE} stroke="none" />
+      <path d="M4 12l2.5 5h18.5a3 3 0 0 0 0-6H9.5L6.5 6H4z" />
+      <path d="M13.5 17.5l-3 7h3.5l6-7" />
+      <path d="M14 11l-2.5-4.5H15l4.5 4.5" />
+      <circle cx="26" cy="14" r="1.1" fill={RED} stroke="none" />
+    </>
+  ),
+  marine: (
+    <>
+      <path d="M4 18.5h24l-3 6H7z" fill={BLUE} stroke="none" />
+      <path d="M4 18.5h24l-3 6H7z" />
+      <path d="M9 18.5v-6h12v6" />
+      <path d="M14 12.5V7h4v5.5" />
+      <rect x="14" y="7" width="4" height="2" fill={RED} stroke="none" />
+      <path d="M3 28c2 0 2-1.2 4.3-1.2S9.6 28 11.9 28s2.3-1.2 4.6-1.2S18.8 28 21.1 28s2.3-1.2 4.6-1.2S28 28 29 28" />
+    </>
+  ),
+  construction: (
+    <>
+      <path d="M6 21V13.5a1.5 1.5 0 0 1 1.5-1.5H12l2.5 4v5z" fill={BLUE} stroke="none" />
+      <path d="M6 21V13.5a1.5 1.5 0 0 1 1.5-1.5H12l2.5 4v5z" />
+      <rect x="3.5" y="21" width="14.5" height="5.5" rx="2.75" />
+      <circle cx="7" cy="23.75" r="0.9" />
+      <circle cx="14.5" cy="23.75" r="0.9" />
+      <path d="M14.5 16l6-8.5 6 5" />
+      <path d="M26.5 12.5v4.5l-3 2.5h-2.5l3.5-4" />
+      <rect x="8" y="9.5" width="2" height="2" rx="0.6" fill={RED} stroke="none" />
+    </>
+  ),
+  energy: (
+    <>
+      <path d="M16 12C14.2 9 14.4 5.5 16 2.8C17.6 5.5 17.8 9 16 12z" transform="rotate(0 16 12)" fill={BLUE} stroke="none" />
+      <path d="M16 12C14.2 9 14.4 5.5 16 2.8C17.6 5.5 17.8 9 16 12z" transform="rotate(120 16 12)" fill={BLUE} stroke="none" />
+      <path d="M16 12C14.2 9 14.4 5.5 16 2.8C17.6 5.5 17.8 9 16 12z" transform="rotate(240 16 12)" fill={BLUE} stroke="none" />
+      <path d="M16 12C14.2 9 14.4 5.5 16 2.8C17.6 5.5 17.8 9 16 12z" transform="rotate(0 16 12)" />
+      <path d="M16 12C14.2 9 14.4 5.5 16 2.8C17.6 5.5 17.8 9 16 12z" transform="rotate(120 16 12)" />
+      <path d="M16 12C14.2 9 14.4 5.5 16 2.8C17.6 5.5 17.8 9 16 12z" transform="rotate(240 16 12)" />
+      <path d="M15 14.5l-1.5 13.5h5L17 14.5" />
+      <path d="M10 28h12" />
+      <circle cx="16" cy="12" r="2.3" fill={PAPER} />
+      <circle cx="16" cy="12" r="1" fill={RED} stroke="none" />
+    </>
+  ),
+  food: (
+    <>
+      <path d="M7.5 16h17v3a8.5 8.5 0 0 1-17 0z" fill={BLUE} stroke="none" />
+      <path d="M7.5 11h17v8a8.5 8.5 0 0 1-17 0z" />
+      <path d="M6 11h20" />
+      <path d="M16 11V5" />
+      <path d="M13 5h6" />
+      <path d="M9 25l-1.5 3.5M23 25l1.5 3.5" />
+      <circle cx="22" cy="7.5" r="1.6" fill={RED} stroke="none" />
+      <circle cx="22" cy="7.5" r="1.6" />
+    </>
+  ),
+  forestry: (
+    <>
+      <path d="M11 3.5l-7 10h3.5l-5 7h17l-5-7H18z" fill={BLUE} stroke="none" />
+      <path d="M11 3.5l-7 10h3.5l-5 7h17l-5-7H18z" />
+      <path d="M11 20.5v7" />
+      <path d="M24 10.5l-4 6h2l-3 4.5h10l-3-4.5h2z" />
+      <path d="M24 21v6.5" />
+      <path d="M3.5 27.5h25" />
+    </>
+  ),
+  automation: (
+    <>
+      <rect x="4.5" y="24.5" width="12" height="3.5" rx="1.2" />
+      <path d="M10.5 24.5v-2" />
+      <rect x="10.5" y="18.2" width="14.8" height="3.6" rx="1.8" transform="rotate(-45 10.5 20)" fill={PAPER} />
+      <circle cx="10.5" cy="20" r="2.6" fill={BLUE} stroke="none" />
+      <circle cx="10.5" cy="20" r="2.6" />
+      <circle cx="21" cy="9.5" r="2.6" fill={BLUE} stroke="none" />
+      <circle cx="21" cy="9.5" r="2.6" />
+      <path d="M23.6 9.5h2M25.6 6v7M25.6 6h2.4M25.6 13h2.4" />
+      <circle cx="7.5" cy="26.25" r="0.9" fill={RED} stroke="none" />
+    </>
+  ),
+  "machine-tools": (
+    <>
+      <circle cx="16" cy="16" r="5" fill={BLUE} stroke="none" />
+      <path d="M14.28 6.56 L14.24 3.93 L17.76 3.93 L17.72 6.56 L20.16 7.35 L21.67 5.2 L24.52 7.27 L22.95 9.37 L24.45 11.44 L26.94 10.6 L28.02 13.94 L25.51 14.72 L25.51 17.28 L28.02 18.06 L26.94 21.4 L24.45 20.56 L22.95 22.63 L24.52 24.73 L21.67 26.8 L20.16 24.65 L17.72 25.44 L17.76 28.07 L14.24 28.07 L14.28 25.44 L11.84 24.65 L10.33 26.8 L7.48 24.73 L9.05 22.63 L7.55 20.56 L5.06 21.4 L3.98 18.06 L6.49 17.28 L6.49 14.72 L3.98 13.94 L5.06 10.6 L7.55 11.44 L9.05 9.37 L7.48 7.27 L10.33 5.2 L11.84 7.35 Z" />
+      <circle cx="16" cy="16" r="5" />
+      <circle cx="16" cy="16" r="1.9" fill={PAPER} />
+    </>
+  ),
+  "material-handling": (
+    <>
+      <rect x="17.5" y="8" width="9" height="7.5" rx="1" fill={BLUE} stroke="none" />
+      <rect x="17.5" y="8" width="9" height="7.5" rx="1" />
+      <path d="M22 8v3" />
+      <path d="M4 22.5v-8h4.5l3-6h2.5v14.5" />
+      <path d="M14 6v18.5h14" />
+      <path d="M4 22.5h10" />
+      <circle cx="7.5" cy="24.5" r="2.5" />
+      <circle cx="12.5" cy="24.5" r="1.8" />
+      <circle cx="11.5" cy="6" r="1.1" fill={RED} stroke="none" />
+    </>
+  ),
+  mining: (
+    <>
+      <path d="M25 17.5c0 0-3 3.4-3 5.3a3 3 0 0 0 6 0c0-1.9-3-5.3-3-5.3z" fill={BLUE} stroke="none" />
+      <path d="M25 17.5c0 0-3 3.4-3 5.3a3 3 0 0 0 6 0c0-1.9-3-5.3-3-5.3z" />
+      <path d="M3.5 11l14-4" />
+      <path d="M3.5 11l1.8 5" />
+      <path d="M10 9.2l-3 18.3M10 9.2l4 18.3" />
+      <path d="M17.5 7l1.5 4" />
+      <path d="M3 27.5h16" />
+      <circle cx="10" cy="9.2" r="1.2" />
+    </>
+  ),
+  printing: (
+    <>
+      <rect x="9.5" y="18.5" width="13" height="9.5" rx="1" fill={BLUE} stroke="none" />
+      <path d="M9.5 11V4h13v7" />
+      <path d="M9.5 22H6.5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" />
+      <rect x="9.5" y="18.5" width="13" height="9.5" rx="1" />
+      <circle cx="23.5" cy="14.5" r="1.1" fill={RED} stroke="none" />
+    </>
+  ),
+  processing: (
+    <>
+      <rect x="8" y="19" width="4.5" height="4" rx="0.8" fill={BLUE} stroke="none" />
+      <rect x="15" y="19" width="4.5" height="4" rx="0.8" fill={BLUE} stroke="none" />
+      <path d="M3.5 27.5V15l6.5-4.5v4.5l6.5-4.5v4.5l6.5-4.5V27.5z" />
+      <path d="M23 10.5V4.5h4v23" />
+      <rect x="23" y="4.5" width="4" height="2" fill={RED} stroke="none" />
+      <path d="M2.5 27.5h27" />
+      <rect x="8" y="19" width="4.5" height="4" rx="0.8" />
+      <rect x="15" y="19" width="4.5" height="4" rx="0.8" />
+    </>
+  ),
+  semiconductors: (
+    <>
+      <rect x="11" y="11" width="10" height="10" rx="1.5" fill={BLUE} stroke="none" />
+      <rect x="7.5" y="7.5" width="17" height="17" rx="2.5" />
+      <path d="M12 4v3.5M12 24.5V28M4 12h3.5M24.5 12H28M16 4v3.5M16 24.5V28M4 16h3.5M24.5 16H28M20 4v3.5M20 24.5V28M4 20h3.5M24.5 20H28" />
+      <circle cx="10.5" cy="10.5" r="1" fill={RED} stroke="none" />
+    </>
+  ),
+  medical: (
+    <>
+      <path d="M8.8 19.5h14.4l3 5.5a2 2 0 0 1-1.8 3H7.6a2 2 0 0 1-1.8-3z" fill={BLUE} stroke="none" />
+      <path d="M12.5 4.5v8l-6.7 12.5a2 2 0 0 0 1.8 3h16.8a2 2 0 0 0 1.8-3L19.5 12.5v-8" />
+      <path d="M11 4.5h10" />
+      <path d="M19.5 9h-2.5" />
+      <circle cx="15.5" cy="16" r="1.1" fill={RED} stroke="none" />
+    </>
+  ),
+  textile: (
+    <>
+      <rect x="9.5" y="9" width="11" height="14" rx="1" fill={BLUE} stroke="none" />
+      <path d="M7.5 5.5h15M7.5 26.5h15" />
+      <path d="M9.5 5.5v21M20.5 5.5v21" />
+      <path d="M9.5 11.5l11 3M9.5 16l11 3" />
+      <path d="M20.5 22c3.5 0 5-2 5-5V5" />
+      <path d="M25.5 5l-1.5-2.5" stroke={RED} />
+    </>
+  ),
+  transport: (
+    <>
+      <path d="M19 11.5h5l3.5 5v6.5H19z" fill={BLUE} stroke="none" />
+      <rect x="3.5" y="7.5" width="15.5" height="15.5" rx="1.5" />
+      <path d="M19 11.5h5l3.5 5v6.5H19" />
+      <circle cx="9" cy="24.5" r="2.5" />
+      <circle cx="23" cy="24.5" r="2.5" />
+      <rect x="3.5" y="18.5" width="1.8" height="3" fill={RED} stroke="none" />
+    </>
+  ),
+  waste: (
+    <>
+      <path d="M8 10.5h16l-1.5 16a2 2 0 0 1-2 1.8h-9a2 2 0 0 1-2-1.8z" fill={BLUE} stroke="none" />
+      <path d="M8 10.5h16l-1.5 16a2 2 0 0 1-2 1.8h-9a2 2 0 0 1-2-1.8z" />
+      <path d="M5.5 10.5h21" />
+      <path d="M12.5 10.5V7a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v3.5" />
+      <path d="M13 16.5l3-2.5 3 2.5M14 22.5h4" stroke={PAPER} />
+    </>
+  ),
+  woodworking: (
+    <>
+      <circle cx="16" cy="13" r="5.5" fill={BLUE} stroke="none" />
+      <path d="M26.5 13 L23.31 16.25 L25.09 18.25 L20.7 19.47 L21.25 22.09 L16.84 20.96 L16 23.5 L12.75 20.31 L10.75 22.09 L9.53 17.7 L6.91 18.25 L8.04 13.84 L5.5 13 L8.69 9.75 L6.91 7.75 L11.3 6.53 L10.75 3.91 L15.16 5.04 L16 2.5 L19.25 5.69 L21.25 3.91 L22.47 8.3 L25.09 7.75 L23.96 12.16 Z" />
+      <circle cx="16" cy="13" r="5.5" />
+      <circle cx="16" cy="13" r="1.4" fill={RED} stroke="none" />
+      <path d="M3.5 25h25" />
+      <path d="M3.5 28.5h25" />
+    </>
+  ),
+  other: (
+    <>
+      <rect x="5" y="5" width="9.5" height="9.5" rx="2.5" fill={BLUE} stroke="none" />
+      <rect x="5" y="5" width="9.5" height="9.5" rx="2.5" />
+      <rect x="17.5" y="5" width="9.5" height="9.5" rx="2.5" />
+      <rect x="5" y="17.5" width="9.5" height="9.5" rx="2.5" />
+      <circle cx="22.25" cy="22.25" r="4.75" />
+      <circle cx="22.25" cy="22.25" r="1.3" fill={RED} stroke="none" />
+    </>
+  ),
+  tool: (
+    <>
+      <path d="M20.5 4.5a6 6 0 0 0-5.6 8.2L5 22.6a2.4 2.4 0 0 0 3.4 3.4l9.9-9.9a6 6 0 0 0 8.2-5.6l-3.6 3.6-3.4-.6-.6-3.4z" fill={BLUE} stroke="none" />
+      <path d="M20.5 4.5a6 6 0 0 0-5.6 8.2L5 22.6a2.4 2.4 0 0 0 3.4 3.4l9.9-9.9a6 6 0 0 0 8.2-5.6l-3.6 3.6-3.4-.6-.6-3.4z" />
+    </>
+  ),
+  flame: (
+    <>
+      <path d="M16 3.5c1 5 7.5 7.5 7.5 14.5a7.5 7.5 0 0 1-15 0c0-4 2.5-6 3.5-8.5 1.5 2 2 3.5 2 3.5s2-3.5 2-9.5z" fill={BLUE} stroke="none" />
+      <path d="M16 3.5c1 5 7.5 7.5 7.5 14.5a7.5 7.5 0 0 1-15 0c0-4 2.5-6 3.5-8.5 1.5 2 2 3.5 2 3.5s2-3.5 2-9.5z" />
+      <path d="M16 18c1.8 1.9 3 3.3 3 5a3 3 0 0 1-6 0c0-1.7 1.2-3.1 3-5z" fill={RED} stroke="none" />
+    </>
+  ),
+  box: (
+    <>
+      <path d="M4.5 10l11.5-5 11.5 5-11.5 5z" fill={BLUE} stroke="none" />
+      <path d="M4.5 10l11.5-5 11.5 5v12L16 27 4.5 22z" />
+      <path d="M4.5 10L16 15l11.5-5M16 15v12" />
+      <path d="M10 7.5l11.5 5v4" stroke={RED} />
+    </>
+  ),
+  layers: (
+    <>
+      <path d="M16 4.5L28 11l-12 6.5L4 11z" fill={BLUE} stroke="none" />
+      <path d="M16 4.5L28 11l-12 6.5L4 11z" />
+      <path d="M4 16.5l12 6.5 12-6.5" />
+      <path d="M4 22l12 6.5L28 22" />
+    </>
+  ),
+  zap: (
+    <>
+      <path d="M18 3.5L6.5 18H15l-1.5 10.5L25.5 14H17z" fill={BLUE} stroke="none" />
+      <path d="M18 3.5L6.5 18H15l-1.5 10.5L25.5 14H17z" />
+    </>
+  ),
 };
 
 export function CategoryIcon({
@@ -421,6 +280,20 @@ export function CategoryIcon({
   className?: string;
   size?: number;
 }) {
-  const Component = (icon && iconComponentMap[icon as CategoryIconKey]) || IconDefault;
-  return <Component className={className} size={size} />;
+  const key = icon === "cpu" ? "semiconductors" : icon;
+  const glyph = glyphs[key as keyof typeof glyphs] ?? glyphs.other;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+    >
+      <g stroke={INK} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        {glyph}
+      </g>
+    </svg>
+  );
 }

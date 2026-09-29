@@ -69,7 +69,7 @@ export function SeeksTab({ seeks, onOpenAddSeek, onEditSeek, onSetListed, onDele
 
         <button
           onClick={onOpenAddSeek}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 text-xs font-bold shadow-xs"
+          className="btn btn-primary flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs"
         >
           <Plus className="h-4 w-4" />
           <span>Upload Video Seek</span>

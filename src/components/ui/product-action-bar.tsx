@@ -68,7 +68,7 @@ export function ProductActionBar({
     <div
       className={cn(
         "flex",
-        layout === "vertical" ? "flex-col gap-3" : "items-center justify-between gap-2.5",
+        layout === "vertical" ? "flex-col gap-3" : "flex-wrap items-center justify-between gap-x-2.5 gap-y-2",
         className
       )}
     >
@@ -80,20 +80,20 @@ export function ProductActionBar({
               <>
                 <span
                   className={cn(
-                    "font-extrabold tracking-tight text-slate-900",
+                    "font-extrabold tracking-tight text-brand-red-dark",
                     isSmall ? "text-sm" : isLarge ? "text-2xl" : "text-lg"
                   )}
                 >
                   {formatPrice(priceInr)}
                 </span>
-                {unit ? <span className="text-xs text-slate-500 font-medium">/{unit}</span> : null}
+                {unit ? <span className="text-xs text-ink-muted font-medium">/{unit}</span> : null}
               </>
             ) : (
               <span className={cn("font-bold text-slate-700", isSmall ? "text-xs" : "text-sm")}>Price on request</span>
             )}
           </div>
           {moq !== undefined && moq !== "" && (
-            <p className="text-[11px] text-slate-500 font-medium">
+            <p className="whitespace-nowrap text-[11px] text-slate-500 font-medium">
               Min. order: <span className="font-semibold text-slate-700">{typeof moq === "number" ? `${moq} ${unit}` : moq}</span>
             </p>
           )}
@@ -104,7 +104,7 @@ export function ProductActionBar({
       <div
         className={cn(
           "flex items-center gap-2.5",
-          layout === "vertical" ? "w-full flex-col sm:flex-row" : "shrink-0"
+          layout === "vertical" ? "w-full flex-col sm:flex-row" : "ml-auto shrink-0"
         )}
       >
         {/* 1. Chat with Manufacturer Button */}
@@ -112,12 +112,12 @@ export function ProductActionBar({
           href={manufacturerSlug ? `/messages?with=${manufacturerSlug}` : "/messages"}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-brand-blue/40 hover:bg-blue-50/60 hover:text-brand-blue transition-all active:scale-95 shadow-2xs whitespace-nowrap",
+            "btn btn-secondary",
             isSmall ? "h-8 px-2.5 text-xs" : isLarge ? "h-12 px-5 text-sm w-full sm:w-auto" : "h-9 px-3 text-xs"
           )}
           title="Chat with factory"
         >
-          <MessageSquare className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-brand-blue")} />
+          <MessageSquare className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
           <span>{t("common.chat", "Chat")}</span>
         </Link>
 
@@ -127,13 +127,12 @@ export function ProductActionBar({
             type="button"
             onClick={handleOrder}
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
-              "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
-              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs"
+              "btn btn-soft",
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
             title="Send an order request to the factory"
           >
-            <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
+            <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-brand-red")} />
             <span>{t("common.order", "Order")}</span>
           </button>
         )}
@@ -144,12 +143,11 @@ export function ProductActionBar({
             type="button"
             onClick={handleBuyNow}
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
-              "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 disabled:opacity-75",
-              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs"
+              "btn btn-buy",
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
           >
-            <Zap className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "fill-white/80")} />
+            <Zap className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-[#ff8a7f] fill-[#ff8a7f]")} />
             <span>{t("common.buyNow", "Buy Now")}</span>
           </button>
         ) : (
@@ -158,8 +156,8 @@ export function ProductActionBar({
             href={productSlug ? `/rfq/new?product=${productSlug}` : "/rfq/new"}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-blue hover:bg-brand-blue-dark",
-              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm flex-1 w-full" : "h-9 px-3.5 text-xs"
+              "btn btn-primary",
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
           >
             <FileText className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />

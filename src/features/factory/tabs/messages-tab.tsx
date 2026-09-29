@@ -369,7 +369,7 @@ export function MessagesTab({
             <button
               type="submit"
               disabled={!canSend}
-              className="flex items-center justify-center h-9 w-9 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white shadow-xs transition active:scale-95 shrink-0 disabled:opacity-50"
+              className="btn btn-primary flex items-center justify-center h-9 w-9 shrink-0 disabled:opacity-50"
               title="Send Message"
               aria-label="Send message"
             >

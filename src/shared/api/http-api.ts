@@ -19,6 +19,7 @@ import type {
   NewFactoryProduct,
   NewFactorySeek,
   OrderRepository,
+  SignInResult,
   UploadedMedia,
   AccountRepository,
   FactoryProductUpdate,
@@ -99,6 +100,8 @@ interface BackendUser {
 }
 
 interface BackendAuthResponse {
+  /** True on the account's first sign-in (sign-up included). */
+  firstLogin?: boolean;
   accessToken?: string;
   access_token?: string;
   refreshToken?: string;
@@ -542,7 +545,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       }
     },
 
-    async join(input: JoinInput): Promise<BuyerProfile> {
+    async join(input: JoinInput): Promise<SignInResult> {
       if (!input.password) throw new Error("Password is required");
       const res = await fetchJson<BackendAuthResponse>("/api/v1/auth/register", {
         method: "POST",
@@ -558,10 +561,11 @@ export function createHttpApi(baseUrl: string): ApiClient {
         }),
       });
       rememberSession(res);
-      return (await session.getCurrentUser()) ?? authResponseToProfile(res);
+      const profile = (await session.getCurrentUser()) ?? authResponseToProfile(res);
+      return { ...profile, firstLogin: res.firstLogin === true };
     },
 
-    async login(input: LoginInput): Promise<BuyerProfile> {
+    async login(input: LoginInput): Promise<SignInResult> {
       const res =
         input.method === "phone" && input.phone
           ? await fetchJson<BackendAuthResponse>("/api/v1/auth/login/phone", {
@@ -573,7 +577,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
               body: JSON.stringify({ email: input.email, password: input.password }),
             });
       rememberSession(res);
-      return (await session.getCurrentUser()) ?? authResponseToProfile(res);
+      const profile = (await session.getCurrentUser()) ?? authResponseToProfile(res);
+      return { ...profile, firstLogin: res.firstLogin === true };
     },
 
     async logout(): Promise<void> {

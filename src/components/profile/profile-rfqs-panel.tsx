@@ -115,7 +115,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
 
         <Link
           href="/rfq/new"
-          className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-sm shrink-0"
+          className="btn btn-primary inline-flex items-center gap-1.5 px-3.5 py-2 text-xs shrink-0"
         >
           <Plus className="h-3.5 w-3.5" />
           <span>Post New RFQ</span>
@@ -133,7 +133,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
           <FileText className="h-8 w-8 mx-auto text-ink-faint" />
           <p className="font-bold text-sm text-ink">No RFQs yet</p>
           <p className="text-xs text-ink-muted">Post a buying request and verified factories in that category will quote on it.</p>
-          <Link href="/rfq/new" className="inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white">
+          <Link href="/rfq/new" className="btn btn-primary inline-block mt-2 px-4 py-1.5 text-xs">
             Post an RFQ
           </Link>
         </div>
@@ -241,12 +241,12 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                           <div className="flex flex-wrap items-center gap-2">
                             <Link
                               href={`/messages?with=${quote.manufacturer.slug}`}
-                              className="rounded-full border border-line px-3 py-1 text-[11px] font-semibold text-ink hover:text-brand-blue"
+                              className="btn btn-secondary px-3 py-1 text-[11px]"
                             >
                               Chat
                             </Link>
                             {quote.status === "ACCEPTED" && quote.orderId && (
-                              <Link href={`/orders#${quote.orderId}`} className="rounded-full bg-brand-blue px-3 py-1 text-[11px] font-bold text-white">
+                              <Link href={`/orders#${quote.orderId}`} className="btn btn-primary px-3 py-1 text-[11px]">
                                 View order
                               </Link>
                             )}

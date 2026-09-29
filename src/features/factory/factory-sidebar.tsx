@@ -118,7 +118,7 @@ export function FactorySidebar({
             <button
               type="button"
               onClick={onOpenAddProduct}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white py-2 text-xs font-semibold shadow-xs transition active:scale-95"
+              className="btn btn-primary flex w-full items-center justify-center gap-1.5 py-2 text-xs"
             >
               <Plus className="h-4 w-4" />
               <span>Post New Product</span>
