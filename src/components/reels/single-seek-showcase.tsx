@@ -289,7 +289,7 @@ function ProfileBar({ item }: { item: FeedItem }) {
           <span className="flex items-center gap-0.5"><Users className="h-3 w-3" />{formatCount(m.followerCount || 0)}</span>
         </p>
       </div>
-      <Link href={`/manufacturers/${m.slug}`} className="btn btn-secondary shrink-0 px-3 py-1.5 text-xs">{t("nav.profile")}</Link>
+      <Link href={`/manufacturers/${m.slug}`} className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink">{t("nav.profile")}</Link>
       <Link href="/rfq/new" className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
     </div>
   );

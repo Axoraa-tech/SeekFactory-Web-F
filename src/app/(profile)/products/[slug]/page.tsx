@@ -123,7 +123,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
               <Link
                 href={`/manufacturers/${manufacturer.slug}`}
-                className="btn btn-secondary shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-xs"
+                className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
               >
                 <Building2 className="h-3.5 w-3.5" />
                 <span>{t("product.page.visitFactory")}</span>

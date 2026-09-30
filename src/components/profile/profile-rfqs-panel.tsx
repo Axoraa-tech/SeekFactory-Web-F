@@ -118,7 +118,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
 
         <Link
           href="/rfq/new"
-          className="btn btn-primary inline-flex items-center gap-1.5 px-3.5 py-2 text-xs shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-sm shrink-0"
         >
           <Plus className="h-3.5 w-3.5" />
           <span>{t("rfq.buyer.postNewRfq")}</span>
@@ -136,7 +136,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
           <FileText className="h-8 w-8 mx-auto text-ink-faint" />
           <p className="font-bold text-sm text-ink">{t("rfq.buyer.noRfqsYet")}</p>
           <p className="text-xs text-ink-muted">{t("rfq.buyer.postABuyingRequestAnd")}</p>
-          <Link href="/rfq/new" className="btn btn-primary inline-block mt-2 px-4 py-1.5 text-xs">
+          <Link href="/rfq/new" className="inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white">
             {t("rfq.buyer.postAnRfq")}
           </Link>
         </div>
@@ -244,12 +244,12 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                           <div className="flex flex-wrap items-center gap-2">
                             <Link
                               href={`/messages?with=${quote.manufacturer.slug}`}
-                              className="btn btn-secondary px-3 py-1 text-[11px]"
+                              className="rounded-full border border-line px-3 py-1 text-[11px] font-semibold text-ink hover:text-brand-blue"
                             >
                               {t("common.chat")}
                             </Link>
                             {quote.status === "ACCEPTED" && quote.orderId && (
-                              <Link href={`/orders#${quote.orderId}`} className="btn btn-primary px-3 py-1 text-[11px]">
+                              <Link href={`/orders#${quote.orderId}`} className="rounded-full bg-brand-blue px-3 py-1 text-[11px] font-bold text-white">
                                 {t("rfq.buyer.viewOrder")}
                               </Link>
                             )}

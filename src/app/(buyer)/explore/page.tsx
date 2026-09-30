@@ -140,7 +140,7 @@ export default async function ExplorePage({ searchParams }: Props) {
           <p className="text-xs text-neutral-500">{t("explore.tryBrowsingAllCategoriesOr")}</p>
           <Link
             href="/explore"
-            className="btn btn-primary inline-flex h-8 items-center px-4 text-xs mt-2"
+            className="inline-flex h-8 items-center rounded-full bg-brand-blue px-4 text-xs font-bold text-white hover:bg-brand-blue-dark mt-2"
           >
             {t("explore.exploreAllCategories")}
           </Link>

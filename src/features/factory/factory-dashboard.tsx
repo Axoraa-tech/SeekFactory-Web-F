@@ -586,7 +586,7 @@ export function FactoryDashboard({
               {(verification.status === "REJECTED" || !verification.submitted) && (
                 <Link
                   href="/factory/verify"
-                  className="btn btn-primary shrink-0 px-3 py-1.5 text-center"
+                  className="shrink-0 rounded-lg bg-brand-blue px-3 py-1.5 text-center font-bold text-white hover:bg-brand-blue-dark"
                 >
                   {verification.status === "REJECTED" ? t("seller.dashboard.resubmitDetails") : t("seller.dashboard.verifyFactory")}
                 </Link>

@@ -80,7 +80,7 @@ export function ProductActionBar({
               <>
                 <span
                   className={cn(
-                    "font-extrabold tracking-tight text-brand-red-dark",
+                    "font-extrabold tracking-tight text-slate-900",
                     isSmall ? "text-sm" : isLarge ? "text-2xl" : "text-lg"
                   )}
                 >
@@ -112,12 +112,12 @@ export function ProductActionBar({
           href={manufacturerSlug ? `/messages?with=${manufacturerSlug}` : "/messages"}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "btn btn-secondary",
+            "inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-brand-blue/40 hover:bg-blue-50/60 hover:text-brand-blue transition-all active:scale-95 shadow-2xs whitespace-nowrap",
             isSmall ? "h-8 px-2.5 text-xs" : isLarge ? "h-12 px-5 text-sm w-full sm:w-auto" : "h-9 px-3 text-xs"
           )}
           title={t("product.actions.chatWithFactory")}
         >
-          <MessageSquare className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
+          <MessageSquare className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-brand-blue")} />
           <span>{t("common.chat", "Chat")}</span>
         </Link>
 
@@ -127,12 +127,13 @@ export function ProductActionBar({
             type="button"
             onClick={handleOrder}
             className={cn(
-              "btn btn-soft",
+              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
+              "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
             title={t("product.actions.sendAnOrderRequestTo")}
           >
-            <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-brand-red")} />
+            <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
             <span>{t("common.order", "Order")}</span>
           </button>
         )}
@@ -143,11 +144,12 @@ export function ProductActionBar({
             type="button"
             onClick={handleBuyNow}
             className={cn(
-              "btn btn-buy",
+              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
+              "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 disabled:opacity-75",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
           >
-            <Zap className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-[#ff8a7f] fill-[#ff8a7f]")} />
+            <Zap className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "fill-white/80")} />
             <span>{t("common.buyNow", "Buy Now")}</span>
           </button>
         ) : (
@@ -156,7 +158,7 @@ export function ProductActionBar({
             href={productSlug ? `/rfq/new?product=${productSlug}` : "/rfq/new"}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "btn btn-primary",
+              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-blue hover:bg-brand-blue-dark",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
           >

@@ -235,7 +235,7 @@ function OrderCard({
               type="button"
               onClick={handleChat}
               disabled={openingChat}
-              className="btn btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-blue px-3 py-1.5 text-[11px] font-bold text-white hover:bg-brand-blue-dark disabled:opacity-60"
             >
               {openingChat ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageSquare className="h-3.5 w-3.5" />}
               {t("seller.chatWithBuyer")}
@@ -294,7 +294,7 @@ function OrderCard({
           type="button"
           onClick={handleSave}
           disabled={!dirty || saving}
-          className="btn btn-primary px-4 py-2 text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
+          className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:active:scale-100"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
           <span>{saving ? t("common.saving") : t("seller.orders.updateStatus")}</span>

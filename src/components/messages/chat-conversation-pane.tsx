@@ -101,14 +101,14 @@ export function ChatConversationPane({
         <div className="flex items-center gap-1.5 shrink-0">
           <Link
             href={`/manufacturers/${activeThread.manufacturer.slug}`}
-            className="btn btn-secondary hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-xs"
+            className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors shadow-2xs"
           >
             <Building2 className="h-3.5 w-3.5" />
             <span>{t("chat.visitPlant")}</span>
           </Link>
           <Link
             href="/rfq/new"
-            className="btn btn-primary inline-flex items-center gap-1 px-3 py-1.5 text-xs"
+            className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
           >
             <FileText className="h-3.5 w-3.5" />
             <span>{t("nav.postRfq")}</span>
@@ -267,7 +267,7 @@ export function ChatConversationPane({
         <button
           type="submit"
           disabled={!canSend}
-          className="btn btn-primary h-10 px-4 text-xs sm:text-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+          className="h-10 px-4 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs disabled:opacity-50"
         >
           <Send className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{t("common.send")}</span>

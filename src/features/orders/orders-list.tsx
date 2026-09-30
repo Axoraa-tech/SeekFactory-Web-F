@@ -69,7 +69,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
           <p className="text-xs text-ink-muted">{t("orders.list.orderRequestsYouSendOr")}</p>
           <Link
             href="/explore"
-            className="btn btn-primary inline-flex h-9 items-center px-5 text-xs"
+            className="inline-flex h-9 items-center rounded-full bg-brand-blue px-5 text-xs font-bold text-white hover:bg-brand-blue-dark"
           >
             {t("orders.exploreProducts")}
           </Link>
@@ -155,7 +155,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                   <span className="text-sm font-extrabold text-ink tabular-nums">{orderTotal(order)}</span>
                   <Link
                     href={`/messages?with=${order.manufacturer.slug}`}
-                    className="btn btn-secondary px-3 py-1.5"
+                    className="rounded-lg border border-line px-3 py-1.5 font-semibold text-ink hover:border-brand-blue/40 hover:text-brand-blue"
                   >
                     {t("common.chat")}
                   </Link>
@@ -164,7 +164,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                       type="button"
                       disabled={cancelling === order.id}
                       onClick={() => cancel(order)}
-                      className="btn btn-secondary text-brand-red-dark hover:border-brand-red/40 px-3 py-1.5 disabled:opacity-50"
+                      className="rounded-lg border border-rose-200 px-3 py-1.5 font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
                     >
                       {cancelling === order.id ? t("orders.list.cancelling") : t("common.cancel")}
                     </button>

@@ -49,7 +49,7 @@ export function LanguageCurrencyDropdown() {
         aria-haspopup="listbox"
         aria-label={t("label")}
         title={t("label")}
-        className={`group flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/30 ${
+        className={`group flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30 ${
           isOpen ? "border-[rgba(28,22,22,0.2)] bg-white" : "border-[rgba(28,22,22,0.1)] bg-white hover:border-[rgba(28,22,22,0.2)]"
         }`}
       >
@@ -81,7 +81,7 @@ export function LanguageCurrencyDropdown() {
                   aria-selected={curr.code === selectedCurrency.code}
                   onClick={() => handleSelect(curr)}
                   className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors ${
-                    curr.code === selectedCurrency.code ? "bg-brand-red-soft font-semibold text-brand-red-dark" : "text-ink hover:bg-canvas"
+                    curr.code === selectedCurrency.code ? "bg-brand-blue-soft font-semibold text-brand-blue" : "text-ink hover:bg-canvas"
                   }`}
                 >
                   <span className="flex items-center gap-2 truncate">

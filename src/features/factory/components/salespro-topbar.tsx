@@ -97,7 +97,7 @@ export function SalesproTopbar({
         <Link
           href={`/manufacturers/${profile.slug}`}
           target="_blank"
-          className="btn btn-secondary flex items-center gap-1.5 px-3.5 py-2 text-xs"
+          className="flex items-center gap-1.5 rounded-lg border border-[#E6E8EB] bg-white px-3.5 py-2 text-xs font-semibold text-[#1C1C1C] hover:bg-[#F3F4F6] hover:text-[#1A73E8] transition shadow-2xs"
         >
           <Eye className="h-3.5 w-3.5 text-[#5F6368]" />
           <span>{t("seller.top.publicProfile")}</span>
@@ -128,7 +128,7 @@ export function SalesproTopbar({
         <button
           type="button"
           onClick={onOpenAddProduct}
-          className="btn btn-primary flex items-center gap-1.5 px-4 py-2 text-xs"
+          className="flex items-center gap-1.5 rounded-lg bg-[#1A73E8] hover:bg-[#1557B0] text-white px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95 cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>{t("seller.postProduct")}</span>
@@ -138,7 +138,7 @@ export function SalesproTopbar({
         <button
           type="button"
           onClick={onOpenAddSeek}
-          className="btn btn-soft px-4 py-2 text-xs"
+          className="flex items-center gap-1.5 rounded-lg bg-[#F26B21] hover:bg-[#E05307] text-white px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95 cursor-pointer"
         >
           <Video className="h-4 w-4" />
           <span>{t("seller.uploadSeek")}</span>

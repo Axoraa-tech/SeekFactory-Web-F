@@ -405,7 +405,7 @@ export function ReelPopupModal({ items }: Props) {
                 <Link
                   href="/rfq/new"
                   onClick={close}
-                  className="btn btn-primary inline-flex h-7 items-center gap-1 px-3 text-xs"
+                  className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white hover:bg-brand-blue-dark transition active:scale-95"
                 >
                   <Send className="h-3 w-3" />
                   <span>{t("feed.sendRfq")}</span>

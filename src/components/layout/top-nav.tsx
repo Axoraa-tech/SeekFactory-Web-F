@@ -165,7 +165,7 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
         className="absolute inset-0 h-full w-full"
         style={{
           clipPath: "url(#unified-header-clip)",
-          backgroundColor: "rgba(254, 252, 252, 0.95)",
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(24px) saturate(160%)",
           WebkitBackdropFilter: "blur(24px) saturate(160%)",
         }}
@@ -180,7 +180,7 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
       >
         <path
           d={fullPathD}
-          fill="rgba(254, 252, 252, 0.95)"
+          fill="rgba(255, 255, 255, 0.95)"
           stroke="none"
         />
         <path
@@ -256,7 +256,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
                 </div>
                 <Link
                   href="/rfq/new"
-                  className="btn btn-primary inline-flex h-9 sm:h-10 items-center gap-1.5 px-3 sm:px-3.5 text-xs sm:text-sm"
+                  className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl bg-brand-blue px-3 sm:px-3.5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] transition hover:bg-brand-blue-dark active:scale-95"
                 >
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">{t("nav.postRfq", "Post RFQ")}</span>
@@ -286,7 +286,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
 
                 <Link
                   href="/rfq/new"
-                  className="btn btn-secondary hidden sm:inline-flex h-9 sm:h-10 gap-1.5 px-3 sm:px-3.5 text-xs"
+                  className="hidden sm:inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl border border-brand-blue/30 bg-blue-500/10 backdrop-blur-md px-3 sm:px-3.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue hover:text-white transition-all shadow-2xs active:scale-95"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>{t("nav.postRfq", "Post RFQ")}</span>
@@ -301,7 +301,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
 
                 <Link
                   href="/join"
-                  className="btn btn-primary h-9 sm:h-10 px-3.5 sm:px-5 text-xs sm:text-sm"
+                  className="inline-flex h-9 sm:h-10 items-center justify-center rounded-full bg-gradient-to-r from-brand-blue via-blue-600 to-indigo-600 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] transition-all hover:shadow-[0_6px_20px_rgba(37,99,235,0.45)] hover:brightness-105 active:scale-95"
                 >
                   {t("nav.joinNow", "Join now")}
                 </Link>
