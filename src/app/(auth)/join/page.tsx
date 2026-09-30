@@ -1,7 +1,11 @@
 import { Suspense } from "react";
 import { AuthCard } from "@/features/auth/auth-card";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = { title: "Join SeekFactory" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.join.title") };
+}
 
 export default function JoinPage() {
   return (

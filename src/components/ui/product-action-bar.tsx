@@ -40,7 +40,7 @@ export function ProductActionBar({
   showPrice = true,
   className,
 }: ProductActionBarProps) {
-  const { t, formatPrice } = useRegionalSettings();
+  const { t, formatPrice, translateUnit } = useRegionalSettings();
   const router = useRouter();
   const [isOrderOpen, setIsOrderOpen] = useState(autoOpenOrder && Boolean(productSlug));
 
@@ -86,15 +86,15 @@ export function ProductActionBar({
                 >
                   {formatPrice(priceInr)}
                 </span>
-                {unit ? <span className="text-xs text-ink-muted font-medium">/{unit}</span> : null}
+                {unit ? <span className="text-xs text-ink-muted font-medium">/{translateUnit(unit)}</span> : null}
               </>
             ) : (
-              <span className={cn("font-bold text-slate-700", isSmall ? "text-xs" : "text-sm")}>Price on request</span>
+              <span className={cn("font-bold text-slate-700", isSmall ? "text-xs" : "text-sm")}>{t("product.actions.priceOnRequest")}</span>
             )}
           </div>
           {moq !== undefined && moq !== "" && (
             <p className="whitespace-nowrap text-[11px] text-slate-500 font-medium">
-              Min. order: <span className="font-semibold text-slate-700">{typeof moq === "number" ? `${moq} ${unit}` : moq}</span>
+              {t("product.actions.minOrder")} <span className="font-semibold text-slate-700">{typeof moq === "number" ? `${moq} ${unit}` : moq}</span>
             </p>
           )}
         </div>
@@ -115,7 +115,7 @@ export function ProductActionBar({
             "btn btn-secondary",
             isSmall ? "h-8 px-2.5 text-xs" : isLarge ? "h-12 px-5 text-sm w-full sm:w-auto" : "h-9 px-3 text-xs"
           )}
-          title="Chat with factory"
+          title={t("product.actions.chatWithFactory")}
         >
           <MessageSquare className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
           <span>{t("common.chat", "Chat")}</span>
@@ -130,7 +130,7 @@ export function ProductActionBar({
               "btn btn-soft",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
-            title="Send an order request to the factory"
+            title={t("product.actions.sendAnOrderRequestTo")}
           >
             <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-brand-red")} />
             <span>{t("common.order", "Order")}</span>
@@ -161,7 +161,7 @@ export function ProductActionBar({
             )}
           >
             <FileText className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-            <span>Request Quote</span>
+            <span>{t("product.actions.requestQuote")}</span>
           </Link>
         )}
       </div>

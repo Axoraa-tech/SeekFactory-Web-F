@@ -12,6 +12,7 @@ import type { BuyerProfile } from "@/entities/user";
 import type { Category } from "@/entities/category";
 import { ShippingForm } from "@/features/orders/shipping-form";
 import { formatMoney } from "@/features/orders/order-status";
+import { useTranslations, useLocale } from "next-intl";
 
 type Props = {
   user: BuyerProfile;
@@ -24,14 +25,14 @@ type Props = {
 };
 
 const RFQ_STATUS: Record<string, { label: string; className: string }> = {
-  SUBMITTED: { label: "Open for quotes", className: "text-amber-700 bg-amber-50 border-amber-200" },
-  REVIEWING: { label: "In review", className: "text-amber-700 bg-amber-50 border-amber-200" },
-  QUOTING: { label: "Collecting quotes", className: "text-amber-700 bg-amber-50 border-amber-200" },
-  QUOTED: { label: "Quotes received", className: "text-emerald-700 bg-emerald-50 border-emerald-200" },
-  ACCEPTED: { label: "Quote accepted", className: "text-brand-blue bg-blue-50 border-blue-200" },
-  IN_PRODUCTION: { label: "In production", className: "text-indigo-700 bg-indigo-50 border-indigo-200" },
-  COMPLETED: { label: "Completed", className: "text-emerald-700 bg-emerald-50 border-emerald-200" },
-  CANCELLED: { label: "Cancelled", className: "text-slate-600 bg-slate-100 border-slate-200" },
+  SUBMITTED: { label: "rfq.status.open", className: "text-amber-700 bg-amber-50 border-amber-200" },
+  REVIEWING: { label: "rfq.status.review", className: "text-amber-700 bg-amber-50 border-amber-200" },
+  QUOTING: { label: "rfq.status.collecting", className: "text-amber-700 bg-amber-50 border-amber-200" },
+  QUOTED: { label: "rfq.status.quoted", className: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+  ACCEPTED: { label: "rfq.status.accepted", className: "text-brand-blue bg-blue-50 border-blue-200" },
+  IN_PRODUCTION: { label: "rfq.status.production", className: "text-indigo-700 bg-indigo-50 border-indigo-200" },
+  COMPLETED: { label: "rfq.status.completed", className: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+  CANCELLED: { label: "rfq.status.cancelled", className: "text-slate-600 bg-slate-100 border-slate-200" },
 };
 
 const OPEN = new Set(["SUBMITTED", "REVIEWING", "QUOTING", "QUOTED"]);
@@ -44,6 +45,8 @@ const QUOTE_STATUS: Record<string, string> = {
 };
 
 export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange, onToast }: Props) {
+  const locale = useLocale();
+  const t = useTranslations();
   const [openId, setOpenId] = useState<string | null>(focusRfqId ?? null);
   const [details, setDetails] = useState<Record<string, RfqItem>>({});
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -60,7 +63,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
       const detail = await getApi().rfq.getMine(rfqId);
       setDetails((prev) => ({ ...prev, [rfqId]: detail }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load quotes");
+      setError(err instanceof Error ? err.message : t("rfq.buyer.couldNotLoadQuotes"));
     } finally {
       setLoadingId(null);
     }
@@ -94,22 +97,22 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
       setAcceptingQuote(null);
       onToast(success);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("common.somethingWrong"));
     } finally {
       setBusy(false);
     }
   };
 
   const accept = (rfq: RfqItem, quote: RfqQuote, contact: OrderContact) =>
-    act(() => getApi().rfq.acceptQuote(rfq.id, quote.id, contact), `Quote accepted. Order request sent to ${quote.manufacturer.name}.`);
+    act(() => getApi().rfq.acceptQuote(rfq.id, quote.id, contact), t("rfq.buyer.quoteAcceptedOrderRequestSent", { name: quote.manufacturer.name }));
 
   return (
     <div className="space-y-4 glass-fade-in">
       <div className="glass-panel-liquid p-4 sm:p-5 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-ink">Active Buying Requests & RFQs</h2>
+          <h2 className="text-base font-bold text-ink">{t("rfq.buyer.activeBuyingRequestsRfqs")}</h2>
           <p className="text-xs text-ink-muted">
-            Review factory quotes, accept one to place the order, or decline the rest
+            {t("rfq.buyer.reviewFactoryQuotesAcceptOne")}
           </p>
         </div>
 
@@ -118,7 +121,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
           className="btn btn-primary inline-flex items-center gap-1.5 px-3.5 py-2 text-xs shrink-0"
         >
           <Plus className="h-3.5 w-3.5" />
-          <span>Post New RFQ</span>
+          <span>{t("rfq.buyer.postNewRfq")}</span>
         </Link>
       </div>
 
@@ -131,10 +134,10 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
       {rfqs.length === 0 ? (
         <div className="glass-panel-liquid p-12 text-center space-y-2">
           <FileText className="h-8 w-8 mx-auto text-ink-faint" />
-          <p className="font-bold text-sm text-ink">No RFQs yet</p>
-          <p className="text-xs text-ink-muted">Post a buying request and verified factories in that category will quote on it.</p>
+          <p className="font-bold text-sm text-ink">{t("rfq.buyer.noRfqsYet")}</p>
+          <p className="text-xs text-ink-muted">{t("rfq.buyer.postABuyingRequestAnd")}</p>
           <Link href="/rfq/new" className="btn btn-primary inline-block mt-2 px-4 py-1.5 text-xs">
-            Post an RFQ
+            {t("rfq.buyer.postAnRfq")}
           </Link>
         </div>
       ) : (
@@ -152,28 +155,28 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs font-bold text-ink-muted">{rfq.referenceNumber}</span>
                       <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold border", status.className)}>
-                        {status.label}
+                        {t.has(status.label) ? t(status.label) : status.label}
                       </span>
-                      <span className="text-[11px] text-ink-faint">• Posted {formatRelativeTime(rfq.createdAt)}</span>
+                      <span className="text-[11px] text-ink-faint">{t("rfq.buyer.posted")} {formatRelativeTime(rfq.createdAt, locale)}</span>
                     </div>
                     <h3 className="font-bold text-sm sm:text-base text-ink truncate">{rfq.productName}</h3>
                     <div className="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
                       {category && (
                         <>
                           <span>
-                            Category: <strong className="text-ink">{category}</strong>
+                            {t("rfq.buyer.category")} <strong className="text-ink">{category}</strong>
                           </span>
                           <span>•</span>
                         </>
                       )}
                       <span>
-                        Target: <strong className="text-ink">{rfq.quantity} {rfq.unit}</strong>
+                        {t("rfq.buyer.target")} <strong className="text-ink">{rfq.quantity} {rfq.unit}</strong>
                       </span>
                       {rfq.targetPrice && (
                         <>
                           <span>•</span>
                           <span>
-                            Est. Price: <strong className="text-brand-orange">{rfq.currency} {rfq.targetPrice}</strong>
+                            {t("rfq.buyer.estPrice")} <strong className="text-brand-orange">{rfq.currency} {rfq.targetPrice}</strong>
                           </span>
                         </>
                       )}
@@ -186,13 +189,13 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                         type="button"
                         disabled={busy}
                         onClick={() => {
-                          if (window.confirm(`Cancel ${rfq.referenceNumber}? Factories will stop quoting on it.`)) {
+                          if (window.confirm(t("rfq.buyer.cancelFactoriesWillStopQuoting", { referenceNumber: rfq.referenceNumber }))) {
                             void act(() => getApi().rfq.cancel(rfq.id), `${rfq.referenceNumber} cancelled`);
                           }
                         }}
                         className="text-[11px] font-semibold text-ink-faint hover:text-rose-600 disabled:opacity-50"
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </button>
                     )}
                     <button
@@ -202,7 +205,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                       className="glass-liquid-item inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold text-ink hover:text-brand-blue"
                     >
                       <MessageSquare className="h-3.5 w-3.5 text-brand-blue" />
-                      <span>View Bids ({quoteCount})</span>
+                      <span>{t("rfq.buyer.viewBids")}{quoteCount})</span>
                       {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                     </button>
                   </div>
@@ -212,10 +215,10 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                   <div className="border-t border-white/60 pt-3 space-y-2">
                     {loadingId === rfq.id ? (
                       <p className="flex items-center gap-2 text-xs text-ink-muted">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading quotes…
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("rfq.buyer.loadingQuotes")}
                       </p>
                     ) : (rfq.quotes?.length ?? 0) === 0 ? (
-                      <p className="text-xs text-ink-muted">No quotes yet. Matching factories are notified of your RFQ.</p>
+                      <p className="text-xs text-ink-muted">{t("rfq.buyer.noQuotesYetMatchingFactories")}</p>
                     ) : (
                       rfq.quotes!.map((quote) => (
                         <div key={quote.id} className="rounded-xl border border-line bg-white/70 p-3 space-y-2">
@@ -228,8 +231,8 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                                 {quote.manufacturer.name}
                               </Link>
                               <p className="text-[11px] text-ink-muted">
-                                {formatMoney(quote.quotePrice, quote.currency)} total • {quote.leadTimeDays} days lead time •{" "}
-                                {formatRelativeTime(quote.createdAt)}
+                                {formatMoney(quote.quotePrice, quote.currency)} {t("rfq.buyer.total")} {quote.leadTimeDays} {t("rfq.buyer.daysLeadTime")}{" "}
+                                {formatRelativeTime(quote.createdAt, locale)}
                               </p>
                               {quote.notes && <p className="mt-1 text-xs text-ink">{quote.notes}</p>}
                             </div>
@@ -243,11 +246,11 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                               href={`/messages?with=${quote.manufacturer.slug}`}
                               className="btn btn-secondary px-3 py-1 text-[11px]"
                             >
-                              Chat
+                              {t("common.chat")}
                             </Link>
                             {quote.status === "ACCEPTED" && quote.orderId && (
                               <Link href={`/orders#${quote.orderId}`} className="btn btn-primary px-3 py-1 text-[11px]">
-                                View order
+                                {t("rfq.buyer.viewOrder")}
                               </Link>
                             )}
                             {quote.status === "PENDING" && OPEN.has(rfq.status) && (
@@ -258,7 +261,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                                   onClick={() => setAcceptingQuote(quote)}
                                   className="rounded-full bg-brand-blue px-3 py-1 text-[11px] font-bold text-white hover:bg-brand-blue-dark disabled:opacity-50"
                                 >
-                                  Accept & order
+                                  {t("rfq.buyer.acceptOrder")}
                                 </button>
                                 <button
                                   type="button"
@@ -268,7 +271,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                                   }
                                   className="rounded-full border border-line px-3 py-1 text-[11px] font-semibold text-ink-muted hover:text-rose-600 disabled:opacity-50"
                                 >
-                                  Decline
+                                  {t("common.decline")}
                                 </button>
                               </>
                             )}
@@ -277,11 +280,11 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                           {acceptingQuote?.id === quote.id && (
                             <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-3 space-y-2">
                               <p className="text-xs font-semibold text-ink">
-                                Delivery details for the order with {quote.manufacturer.name}
+                                {t("rfq.buyer.deliveryDetailsForTheOrder")} {quote.manufacturer.name}
                               </p>
                               <ShippingForm
                                 user={user}
-                                submitLabel={`Accept quote (${formatMoney(quote.quotePrice, quote.currency)})`}
+                                submitLabel={t("rfq.buyer.acceptQuote", { formatMoney: formatMoney(quote.quotePrice, quote.currency) })}
                                 submitting={busy}
                                 error={null}
                                 onSubmit={(contact) => void accept(rfq, quote, contact)}

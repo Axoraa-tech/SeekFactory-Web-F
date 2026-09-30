@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { LanguageToggle } from "@/components/layout/language-toggle";
 import { Share2, Plus, Video, Eye, Globe2, ExternalLink, Menu, Check } from "lucide-react";
 import Link from "next/link";
 import type { SellerTab, SellerFactoryProfile } from "../types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   activeTab: SellerTab;
@@ -18,6 +20,7 @@ export function SalesproTopbar({
   profile,
   onOpenMobileMenu,
 }: Props) {
+  const t = useTranslations();
   const [shareState, setShareState] = useState<"idle" | "copied" | "failed">("idle");
 
   /** Shares the public factory page (never the private /factory dashboard URL). */
@@ -40,14 +43,14 @@ export function SalesproTopbar({
   }
 
   const titles: Record<SellerTab, string> = {
-    overview: "Manufacturer Hub Dashboard",
-    products: "Machinery Product Catalog",
-    seeks: "Video Seeks (Short Reels)",
-    rfqs: "India Buyer RFQs & Inquiries",
-    orders: "Buyer Order Requests",
-    messages: "Trade Messenger",
-    profile: "Factory Verification & Profile",
-    account: "Account & Security",
+    overview: t("seller.top.manufacturerHubDashboard"),
+    products: t("seller.top.machineryProductCatalog"),
+    seeks: t("seller.top.videoSeeksShortReels"),
+    rfqs: t("seller.top.indiaBuyerRfqsInquiries"),
+    orders: t("seller.top.buyerOrderRequests"),
+    messages: t("seller.nav.tradeMessenger"),
+    profile: t("seller.top.factoryVerificationProfile"),
+    account: t("profile.page.accountSecurity"),
   };
 
   return (
@@ -58,7 +61,7 @@ export function SalesproTopbar({
             type="button"
             onClick={onOpenMobileMenu}
             className="lg:hidden p-2 rounded-xl border border-[#E6E8EB] bg-white text-[#5F6368] hover:text-[#1A73E8] hover:bg-[#F3F4F6] transition shadow-2xs"
-            aria-label="Open sidebar navigation"
+            aria-label={t("seller.top.openSidebarNavigation")}
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -68,7 +71,7 @@ export function SalesproTopbar({
             {titles[activeTab]}
           </h1>
           <p className="text-xs text-[#5F6368] mt-0.5">
-            India–China Industrial Machinery Discovery & Inquiries
+            {t("seller.top.indiaChinaIndustrialMachineryDiscovery")}
           </p>
         </div>
       </div>
@@ -81,13 +84,15 @@ export function SalesproTopbar({
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 rounded-lg border border-[#1A73E8]/30 bg-[#E8F1FD] px-3.5 py-2 text-xs font-semibold text-[#1A73E8] hover:bg-[#1A73E8] hover:text-white transition shadow-2xs group"
-            title="Open official company website in new tab"
+            title={t("seller.top.openOfficialCompanyWebsiteIn")}
           >
             <Globe2 className="h-3.5 w-3.5" />
-            <span>Seller Website</span>
+            <span>{t("seller.top.sellerWebsite")}</span>
             <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100" />
           </a>
         )}
+
+        <LanguageToggle />
 
         <Link
           href={`/manufacturers/${profile.slug}`}
@@ -95,7 +100,7 @@ export function SalesproTopbar({
           className="btn btn-secondary flex items-center gap-1.5 px-3.5 py-2 text-xs"
         >
           <Eye className="h-3.5 w-3.5 text-[#5F6368]" />
-          <span>Public Profile</span>
+          <span>{t("seller.top.publicProfile")}</span>
         </Link>
 
         <button
@@ -104,8 +109,8 @@ export function SalesproTopbar({
           disabled={!profile.slug}
           title={
             profile.verified
-              ? "Share your public factory profile"
-              : "Shares your public profile link. It opens for buyers once your factory is verified."
+              ? t("seller.top.shareYourPublicFactoryProfile")
+              : t("seller.top.sharesYourPublicProfileLink")
           }
           className="flex items-center gap-1.5 rounded-lg border border-[#E6E8EB] bg-white px-3 py-2 text-xs font-semibold text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1C1C1C] transition shadow-2xs disabled:opacity-50"
         >
@@ -115,7 +120,7 @@ export function SalesproTopbar({
             <Share2 className="h-3.5 w-3.5" />
           )}
           <span aria-live="polite">
-            {shareState === "copied" ? "Link copied" : shareState === "failed" ? "Copy failed" : "Share"}
+            {shareState === "copied" ? t("seller.top.linkCopied") : shareState === "failed" ? t("seller.top.copyFailed") : t("common.share")}
           </span>
         </button>
 
@@ -126,7 +131,7 @@ export function SalesproTopbar({
           className="btn btn-primary flex items-center gap-1.5 px-4 py-2 text-xs"
         >
           <Plus className="h-4 w-4" />
-          <span>Post Product</span>
+          <span>{t("seller.postProduct")}</span>
         </button>
 
         {/* Secondary Action Button (Buyer "Order Now" Orangish-Yellow #F26B21) */}
@@ -136,7 +141,7 @@ export function SalesproTopbar({
           className="btn btn-soft px-4 py-2 text-xs"
         >
           <Video className="h-4 w-4" />
-          <span>Upload Seek</span>
+          <span>{t("seller.uploadSeek")}</span>
         </button>
       </div>
     </div>

@@ -24,6 +24,8 @@ import type {
   SellerStats,
   SellerTab,
 } from "../types";
+import { useTranslations } from "next-intl";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   stats: SellerStats;
@@ -48,6 +50,8 @@ export function OverviewTab({
   onOpenAddSeek,
   onOpenQuoteModal,
 }: Props) {
+  const t = useTranslations();
+  const { translateCategory } = useRegionalSettings();
   const newRfqs = rfqs.filter((r) => r.status === "New");
 
   return (
@@ -62,7 +66,7 @@ export function OverviewTab({
             </span>
           </div>
           <p className="text-xs text-ink-muted mt-1">
-            Manufacturing Cockpit • Inquiries, Video Seeks & Product Catalog Management
+            {t("seller.home.manufacturingCockpitInquiriesVideoSeeks")}
           </p>
         </div>
 
@@ -72,14 +76,14 @@ export function OverviewTab({
             className="btn btn-primary flex items-center gap-1.5 px-3.5 py-2 text-xs"
           >
             <Plus className="h-4 w-4" />
-            <span>Post Product</span>
+            <span>{t("seller.postProduct")}</span>
           </button>
           <button
             onClick={onOpenAddSeek}
             className="btn btn-secondary flex items-center gap-1.5 px-3.5 py-2 text-xs"
           >
             <Video className="h-4 w-4 text-brand-blue" />
-            <span>Upload Seek</span>
+            <span>{t("seller.uploadSeek")}</span>
           </button>
         </div>
       </Card>
@@ -90,7 +94,7 @@ export function OverviewTab({
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-              Product Views
+              {t("seller.home.productViews")}
             </span>
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-blue-soft text-brand-blue">
               <Eye className="h-4 w-4" />
@@ -101,7 +105,7 @@ export function OverviewTab({
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-brand-blue">
             <TrendingUp className="h-3 w-3" />
-            <span>+{stats?.productViewsChange ?? 0}% this mo</span>
+            <span>+{stats?.productViewsChange ?? 0}{t("seller.home.thisMo")}</span>
           </p>
         </Card>
 
@@ -109,7 +113,7 @@ export function OverviewTab({
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-              Video Plays
+              {t("seller.home.videoPlays")}
             </span>
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-blue-soft text-brand-blue">
               <Film className="h-4 w-4" />
@@ -120,7 +124,7 @@ export function OverviewTab({
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-brand-blue">
             <TrendingUp className="h-3 w-3" />
-            <span>+{stats?.videoPlaysChange ?? 0}% plays</span>
+            <span>+{stats?.videoPlaysChange ?? 0}{t("seller.home.plays")}</span>
           </p>
         </Card>
 
@@ -128,7 +132,7 @@ export function OverviewTab({
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-              Showroom Visits
+              {t("seller.home.showroomVisits")}
             </span>
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-canvas text-ink-muted">
               <Building2 className="h-4 w-4" />
@@ -139,7 +143,7 @@ export function OverviewTab({
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-amber-700">
             <TrendingUp className="h-3 w-3" />
-            <span>+{stats?.profileVisitsChange ?? 0}% visits</span>
+            <span>+{stats?.profileVisitsChange ?? 0}{t("seller.home.visits")}</span>
           </p>
         </Card>
 
@@ -147,7 +151,7 @@ export function OverviewTab({
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-              Active RFQs
+              {t("profile.hero.activeRfqs")}
             </span>
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
               <FileText className="h-4 w-4" />
@@ -157,7 +161,7 @@ export function OverviewTab({
             {stats?.activeRfqsCount ?? 0}
           </p>
           <p className="mt-1 text-[11px] text-emerald-700 font-semibold">
-            {stats?.pendingRfqsCount ?? 0} awaiting quotes
+            {stats?.pendingRfqsCount ?? 0} {t("seller.home.awaitingQuotes")}
           </p>
         </Card>
 
@@ -165,7 +169,7 @@ export function OverviewTab({
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-              Response Rate
+              {t("supplier.responseRate")}
             </span>
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-canvas text-ink-muted">
               <Clock className="h-4 w-4" />
@@ -175,7 +179,7 @@ export function OverviewTab({
             {stats?.responseRatePercent ?? 100}%
           </p>
           <p className="mt-1 text-[11px] text-ink-muted font-medium">
-            Avg {stats?.avgResponseTimeHours ?? 1.5}h
+            {t("seller.home.avg")} {stats?.avgResponseTimeHours ?? 1.5}h
           </p>
         </Card>
 
@@ -183,7 +187,7 @@ export function OverviewTab({
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-              Followers
+              {t("showcase.single.followers")}
             </span>
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-canvas text-ink-muted">
               <Users className="h-4 w-4" />
@@ -192,7 +196,7 @@ export function OverviewTab({
           <p className="text-xl font-extrabold text-ink">
             {(stats?.followerCount ?? 0).toLocaleString()}
           </p>
-          <p className="mt-1 text-[11px] text-ink-muted font-medium">Verified buyers</p>
+          <p className="mt-1 text-[11px] text-ink-muted font-medium">{t("seller.home.verifiedBuyers")}</p>
         </Card>
       </div>
 
@@ -201,20 +205,20 @@ export function OverviewTab({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-base font-bold text-ink flex items-center gap-2">
-              <span>Incoming Buyer RFQs & Inquiries</span>
+              <span>{t("seller.home.incomingBuyerRfqsInquiries")}</span>
               {newRfqs.length > 0 && (
                 <span className="rounded-full bg-red-600 text-white px-2 py-0.2 text-xs font-bold shadow-xs">
-                  {newRfqs.length} New Leads
+                  {newRfqs.length} {t("seller.home.newLeads")}
                 </span>
               )}
             </h2>
-            <p className="text-xs text-ink-muted">High-intent purchase inquiries from verified industrial buyers</p>
+            <p className="text-xs text-ink-muted">{t("seller.home.highIntentPurchaseInquiriesFrom")}</p>
           </div>
           <button
             onClick={() => onSelectTab("rfqs")}
             className="text-xs font-bold text-brand-blue hover:underline flex items-center gap-1"
           >
-            <span>View All RFQs ({rfqs.length})</span>
+            <span>{t("seller.home.viewAllRfqs")}{rfqs.length})</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -235,12 +239,12 @@ export function OverviewTab({
                         : "bg-canvas text-ink-muted"
                     }`}
                   >
-                    {rfq.status}
+                    {t(`seller.status.${rfq.status}`)}
                   </span>
                 </div>
                 <p className="text-xs font-medium text-ink">{rfq.productName}</p>
                 <p className="text-[11px] text-ink-muted line-clamp-1">
-                  Qty: <strong>{rfq.quantityRequested}</strong> • Port: {rfq.deliveryPort} • &ldquo;{rfq.requirements}&rdquo;
+                  {t("seller.home.qty")} <strong>{rfq.quantityRequested}</strong> {t("seller.home.port")} {rfq.deliveryPort} • &ldquo;{rfq.requirements}&rdquo;
                 </p>
               </div>
 
@@ -250,7 +254,7 @@ export function OverviewTab({
                   className="rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-3.5 py-1.5 text-xs font-semibold shadow-xs transition active:scale-95 flex items-center gap-1"
                 >
                   <Send className="h-3.5 w-3.5" />
-                  <span>{rfq.status === "Quoted" ? "Update Quote" : "Send Quote"}</span>
+                  <span>{rfq.status === "Quoted" ? t("seller.home.updateQuote") : t("seller.home.sendQuote")}</span>
                 </button>
                 <button
                   onClick={() => onSelectTab("messages")}
@@ -269,12 +273,12 @@ export function OverviewTab({
         {/* Top Machinery Products */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-ink">Top Viewed Catalog Products</h3>
+            <h3 className="text-sm font-bold text-ink">{t("seller.home.topViewedCatalogProducts")}</h3>
             <button
               onClick={() => onSelectTab("products")}
               className="text-xs font-bold text-brand-blue hover:underline"
             >
-              Manage ({products.length})
+              {t("seller.home.manage")}{products.length})
             </button>
           </div>
 
@@ -288,12 +292,12 @@ export function OverviewTab({
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-ink truncate">{prod.name}</p>
                   <p className="text-[11px] text-ink-muted">
-                    ₹{(prod.priceInr ?? 0).toLocaleString()} / {prod.unit} • MOQ {prod.moq}
+                    ₹{(prod.priceInr ?? 0).toLocaleString()} / {prod.unit} {t("orders.request.moq")} {prod.moq}
                   </p>
                   <div className="flex items-center gap-3 text-[10px] text-ink-muted mt-1">
-                    <span className="font-semibold text-brand-blue">{prod.viewsCount} Views</span>
+                    <span className="font-semibold text-brand-blue">{prod.viewsCount} {t("seller.seekDetail.views")}</span>
                     <span>•</span>
-                    <span className="font-bold text-red-600">{prod.inquiriesCount} Inquiries</span>
+                    <span className="font-bold text-red-600">{prod.inquiriesCount} {t("seller.home.inquiries")}</span>
                   </div>
                 </div>
               </div>
@@ -304,12 +308,12 @@ export function OverviewTab({
         {/* High-Converting Video Seeks */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-ink">Factory Video Seeks (Reels)</h3>
+            <h3 className="text-sm font-bold text-ink">{t("seller.home.factoryVideoSeeksReels")}</h3>
             <button
               onClick={() => onSelectTab("seeks")}
               className="text-xs font-bold text-brand-blue hover:underline"
             >
-              Manage ({seeks.length})
+              {t("seller.home.manage")}{seeks.length})
             </button>
           </div>
 
@@ -325,12 +329,12 @@ export function OverviewTab({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-ink truncate">{seek.title}</p>
-                  <p className="text-[11px] text-ink-muted">{seek.category} • {seek.durationSeconds}s</p>
+                  <p className="text-[11px] text-ink-muted">{translateCategory(seek.category)} • {seek.durationSeconds}s</p>
                   <div className="flex items-center gap-3 text-[10px] text-ink-muted mt-1">
-                    <span className="font-semibold text-brand-blue">{(seek.viewsCount ?? 0).toLocaleString()} Plays</span>
+                    <span className="font-semibold text-brand-blue">{(seek.viewsCount ?? 0).toLocaleString()} {t("seller.home.plays2")}</span>
                     <span>•</span>
                     <span className="font-bold text-red-600">
-                      {seek.inquiriesGenerated} Leads Generated
+                      {seek.inquiriesGenerated} {t("seller.home.leadsGenerated")}
                     </span>
                   </div>
                 </div>
@@ -347,23 +351,23 @@ export function OverviewTab({
             <Globe2 className="h-5 w-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-ink">Buyer Traffic Geography</h4>
-            <p className="text-xs text-ink-muted">Your factory showroom is currently attracting buyers primarily from:</p>
+            <h4 className="text-sm font-bold text-ink">{t("seller.home.buyerTrafficGeography")}</h4>
+            <p className="text-xs text-ink-muted">{t("seller.home.yourFactoryShowroomIsCurrently")}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap text-xs">
           <span className="rounded-lg bg-surface border border-line px-2.5 py-1 font-bold text-ink">
-            🇮🇳 India <span className="text-brand-blue font-extrabold">64%</span>
+            {t("seller.home.india")} <span className="text-brand-blue font-extrabold">64%</span>
           </span>
           <span className="rounded-lg bg-surface border border-line px-2.5 py-1 font-bold text-ink">
-            🇦🇪 UAE / Middle East <span className="text-amber-700 font-semibold">18%</span>
+            {t("seller.home.uaeMiddleEast")} <span className="text-amber-700 font-semibold">18%</span>
           </span>
           <span className="rounded-lg bg-surface border border-line px-2.5 py-1 font-bold text-ink">
-            🇩🇪 Europe <span className="text-ink-muted">12%</span>
+            {t("seller.home.europe")} <span className="text-ink-muted">12%</span>
           </span>
           <span className="rounded-lg bg-surface border border-line px-2.5 py-1 font-bold text-ink">
-            🇺🇸 USA / Global <span className="text-ink-muted">6%</span>
+            {t("seller.home.usaGlobal")} <span className="text-ink-muted">6%</span>
           </span>
         </div>
       </Card>

@@ -12,33 +12,33 @@ export const ORDER_STATUSES: OrderStatus[] = [
 
 export const ORDER_STATUS_META: Record<OrderStatus, { label: string; hint: string; className: string }> = {
   PENDING: {
-    label: "New",
-    hint: "Waiting for the factory to respond",
+    label: "orders.status.pending.label",
+    hint: "orders.status.pending.hint",
     className: "bg-red-50 text-red-700 border-red-200",
   },
   CONTACTED: {
-    label: "Contacted",
-    hint: "The factory has reached out to the buyer",
+    label: "orders.status.contacted.label",
+    hint: "orders.status.contacted.hint",
     className: "bg-blue-50 text-brand-blue border-blue-200",
   },
   NEGOTIATING: {
-    label: "In negotiation",
-    hint: "Price, specs or delivery being discussed",
+    label: "orders.status.negotiating.label",
+    hint: "orders.status.negotiating.hint",
     className: "bg-amber-50 text-amber-800 border-amber-200",
   },
   CONFIRMED: {
-    label: "Confirmed",
-    hint: "Deal agreed; production or dispatch arranged",
+    label: "orders.status.confirmed.label",
+    hint: "orders.status.confirmed.hint",
     className: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },
   COMPLETED: {
-    label: "Completed",
-    hint: "Delivered / fulfilled",
+    label: "orders.status.completed.label",
+    hint: "orders.status.completed.hint",
     className: "bg-neutral-100 text-neutral-700 border-neutral-200",
   },
   CANCELLED: {
-    label: "Cancelled",
-    hint: "Dropped by either side",
+    label: "orders.status.cancelled.label",
+    hint: "orders.status.cancelled.hint",
     className: "bg-neutral-100 text-neutral-500 border-neutral-200 line-through",
   },
 };
@@ -56,7 +56,7 @@ export const ORDER_STEPS: OrderStatus[] = ["PENDING", "CONTACTED", "NEGOTIATING"
 
 /** SeekFactory takes no payment; price and payment terms are agreed with the factory. */
 export const PAYMENT_NOTE =
-  "No payment is taken online. The factory contacts you to confirm the price, payment terms and delivery.";
+  "orders.paymentNote";
 
 export function formatMoney(amount: number, currency: string) {
   try {

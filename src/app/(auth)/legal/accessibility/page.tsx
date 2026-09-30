@@ -1,18 +1,23 @@
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = { title: "Accessibility" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.accessibility.title") };
+}
 
 export default function AccessibilityPage() {
+  const t = useTranslations();
   return (
     <Card className="max-w-xl p-6">
       <PageHeader
-        title="Accessibility"
-        description="SeekFactory aims to be usable on desktop and mobile for buyers and manufacturers."
+        title={t("legal.accessibility.title")}
+        description={t("legal.accessibility.description")}
       />
       <p className="text-sm leading-relaxed text-ink-muted">
-        This is a placeholder statement. Production will follow WCAG-oriented labels, keyboard access, and
-        contrast on primary actions. Report issues to support@seekfactory.com.
+        {t("legal.accessibility.body")}
       </p>
     </Card>
   );

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
 import { cn } from "@/shared/lib/cn";
+import { useTranslations } from "next-intl";
 
 interface HoloHallOfFameProps {
   certificates: FactoryCertificate[];
@@ -37,6 +38,7 @@ export function HoloHallOfFame({
   onDeleteCertificate,
   onInspect,
 }: HoloHallOfFameProps) {
+  const t = useTranslations();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -70,9 +72,9 @@ export function HoloHallOfFame({
     return (
       <div className="rounded-3xl border border-neutral-800 bg-neutral-950 p-12 text-center text-white">
         <Award className="mx-auto h-12 w-12 text-amber-500 mb-3 animate-pulse" />
-        <h3 className="text-lg font-bold">No Accreditations Published Yet</h3>
+        <h3 className="text-lg font-bold">{t("hallOfFame.noAccreditationsPublishedYet")}</h3>
         <p className="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
-          Upload certificates to activate the holographic AI hall of fame showcase.
+          {t("hallOfFame.uploadCertificatesToActivateThe")}
         </p>
         {isOwner && onOpenUpload && (
           <button
@@ -80,7 +82,7 @@ export function HoloHallOfFame({
             className="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold px-4 py-2 text-xs transition"
           >
             <Plus className="h-4 w-4" />
-            <span>Upload First Certificate</span>
+            <span>{t("hallOfFame.uploadFirstCertificate")}</span>
           </button>
         )}
       </div>
@@ -107,14 +109,14 @@ export function HoloHallOfFame({
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono tracking-widest uppercase text-amber-400 font-extrabold flex items-center gap-1">
                 <Sparkles className="h-3 w-3" />
-                AI-Verified Enterprise Hall of Fame
+                {t("hallOfFame.aiVerifiedEnterpriseHallOf")}
               </span>
               <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-                Live Credential
+                {t("hallOfFame.liveCredential")}
               </span>
             </div>
             <h2 className="text-base sm:text-lg font-black tracking-tight text-white mt-0.5">
-              {manufacturerName} Accreditations & Honor Chamber
+              {manufacturerName} {t("hallOfFame.accreditationsHonorChamber")}
             </h2>
           </div>
         </div>
@@ -126,7 +128,7 @@ export function HoloHallOfFame({
             className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-neutral-950 font-extrabold px-4 py-2 text-xs transition shadow-lg shadow-amber-500/25 active:scale-95 cursor-pointer shrink-0"
           >
             <Plus className="h-4 w-4" />
-            <span>Mint / Upload Certificate</span>
+            <span>{t("hallOfFame.mintUploadCertificate")}</span>
           </button>
         )}
       </div>
@@ -139,7 +141,7 @@ export function HoloHallOfFame({
         <button
           type="button"
           onClick={goPrev}
-          aria-label="Previous Certificate"
+          aria-label={t("hallOfFame.previousCertificate")}
           className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 text-white/80 hover:text-amber-400 border border-white/10 shadow-xl backdrop-blur-md transition-all active:scale-90"
         >
           <ChevronLeft className="h-6 w-6" />
@@ -148,7 +150,7 @@ export function HoloHallOfFame({
         <button
           type="button"
           onClick={goNext}
-          aria-label="Next Certificate"
+          aria-label={t("hallOfFame.nextCertificate")}
           className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-neutral-900/80 hover:bg-neutral-800 text-white/80 hover:text-amber-400 border border-white/10 shadow-xl backdrop-blur-md transition-all active:scale-90"
         >
           <ChevronRight className="h-6 w-6" />
@@ -199,20 +201,20 @@ export function HoloHallOfFame({
                 {/* Top Corner: AI Cryptographic Badge */}
                 <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-xl bg-black/80 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-amber-300 border border-amber-400/40 shadow-lg">
                   <Cpu className="h-3.5 w-3.5 text-amber-400 animate-spin" style={{ animationDuration: "12s" }} />
-                  <span className="font-mono">AI-Trust: 99.8%</span>
+                  <span className="font-mono">{t("hallOfFame.aiTrust998")}</span>
                 </div>
 
                 {/* Top Right Corner: Seal */}
                 <div className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-xl bg-emerald-500/20 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-emerald-400 border border-emerald-500/40 shadow-lg">
                   <ShieldCheck className="h-3.5 w-3.5" />
-                  <span>Verified Plaque</span>
+                  <span>{t("hallOfFame.verifiedPlaque")}</span>
                 </div>
 
                 {/* Center Hover Action */}
                 <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <span className="inline-flex items-center gap-2 rounded-2xl bg-white/95 backdrop-blur-md px-5 py-2.5 text-xs font-black text-neutral-950 shadow-2xl border border-white/40">
                     <Maximize2 className="h-4 w-4 text-amber-600" />
-                    <span>Click to Inspect High-Resolution Artifact</span>
+                    <span>{t("hallOfFame.clickToInspectHighResolution")}</span>
                   </span>
                 </div>
 
@@ -220,18 +222,18 @@ export function HoloHallOfFame({
                 <div className="absolute bottom-3 left-3 right-3 z-10 flex items-end justify-between gap-2">
                   <div>
                     <span className="text-[10px] font-mono tracking-widest uppercase text-amber-400/90 font-bold block">
-                      {activeCert.category || "Quality System"}
+                      {activeCert.category || t("hallOfFame.qualitySystem")}
                     </span>
                     <h3 className="text-sm sm:text-base font-black text-white drop-shadow-md">
                       {activeCert.title}
                     </h3>
                     <p className="text-[11px] text-neutral-300 font-medium">
-                      Audited by <strong className="text-amber-300">{activeCert.issuer}</strong>
+                      {t("hallOfFame.auditedBy")} <strong className="text-amber-300">{activeCert.issuer}</strong>
                     </p>
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className="text-[10px] font-mono text-neutral-400 block">Certificate No:</span>
+                    <span className="text-[10px] font-mono text-neutral-400 block">{t("hallOfFame.certificateNo")}</span>
                     <span className="text-xs font-mono font-bold text-amber-300 bg-black/60 px-2 py-0.5 rounded-lg border border-amber-400/30">
                       {activeCert.certNumber}
                     </span>
@@ -263,7 +265,7 @@ export function HoloHallOfFame({
                 className="inline-flex items-center gap-1 text-neutral-400 hover:text-red-400 transition"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                <span>Remove Plaque</span>
+                <span>{t("hallOfFame.removePlaque")}</span>
               </button>
             </div>
           )}
@@ -277,11 +279,11 @@ export function HoloHallOfFame({
         <div className="flex items-center justify-between mb-3 text-xs">
           <div className="flex items-center gap-2 text-neutral-400 font-mono text-[11px]">
             <Layers className="h-3.5 w-3.5 text-amber-400" />
-            <span>Artifact Dock [{selectedIndex + 1} / {certificates.length}]</span>
+            <span>{t("hallOfFame.artifactDock")}{selectedIndex + 1} / {certificates.length}]</span>
           </div>
 
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-neutral-500 font-mono uppercase">Select Credential:</span>
+            <span className="text-[10px] text-neutral-500 font-mono uppercase">{t("hallOfFame.selectCredential")}</span>
           </div>
         </div>
 

@@ -9,6 +9,7 @@ import type { Cart, CartItem, OrderContact } from "@/entities/order";
 import type { BuyerProfile } from "@/entities/user";
 import { ShippingForm } from "@/features/orders/shipping-form";
 import { PAYMENT_NOTE, formatMoney } from "@/features/orders/order-status";
+import { useTranslations } from "next-intl";
 
 type Props = {
   user: BuyerProfile;
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function CartView({ user, initialCart }: Props) {
+  const t = useTranslations();
   const router = useRouter();
   const [cart, setCart] = useState(initialCart);
   const [busyLine, setBusyLine] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export function CartView({ user, initialCart }: Props) {
     try {
       setCart(await action());
     } catch (err) {
-      setLineError(err instanceof Error ? err.message : "Could not update your cart");
+      setLineError(err instanceof Error ? err.message : t("orders.cart.couldNotUpdateYourCart"));
     } finally {
       setBusyLine(null);
     }
@@ -52,7 +54,7 @@ export function CartView({ user, initialCart }: Props) {
       router.push(`/orders?placed=${encodeURIComponent(orders.map((o) => o.referenceNumber).join(","))}`);
       router.refresh();
     } catch (err) {
-      setCheckoutError(err instanceof Error ? err.message : "Could not send your order requests");
+      setCheckoutError(err instanceof Error ? err.message : t("orders.cart.couldNotSendYourOrder"));
       setPlacing(false);
     }
   };
@@ -61,13 +63,13 @@ export function CartView({ user, initialCart }: Props) {
     return (
       <div className="rounded-2xl border border-line bg-white p-10 text-center space-y-3 shadow-2xs">
         <ShoppingCart className="mx-auto h-8 w-8 text-ink-faint" />
-        <p className="text-sm font-bold text-ink">Your cart is empty</p>
-        <p className="text-xs text-ink-muted">Add products from a factory page or a seek to order them here.</p>
+        <p className="text-sm font-bold text-ink">{t("orders.cart.yourCartIsEmpty")}</p>
+        <p className="text-xs text-ink-muted">{t("orders.cart.addProductsFromAFactory")}</p>
         <Link
           href="/explore"
           className="btn btn-primary inline-flex h-9 items-center px-5 text-xs"
         >
-          Explore products
+          {t("orders.exploreProducts")}
         </Link>
       </div>
     );
@@ -91,7 +93,7 @@ export function CartView({ user, initialCart }: Props) {
               >
                 {items[0].manufacturer.name}
               </Link>
-              <span className="text-[11px] text-ink-muted shrink-0">Sent to this factory</span>
+              <span className="text-[11px] text-ink-muted shrink-0">{t("orders.cart.sentToThisFactory")}</span>
             </header>
 
             <ul className="divide-y divide-line">
@@ -113,14 +115,14 @@ export function CartView({ user, initialCart }: Props) {
                         {item.product.name}
                       </Link>
                       <p className="text-[11px] text-ink-muted">
-                        {item.unitPrice != null ? `${formatMoney(item.unitPrice, "INR")} / ${item.product.unit || "unit"}` : "Price on request"}
+                        {item.unitPrice != null ? `${formatMoney(item.unitPrice, "INR")} / ${item.product.unit || "unit"}` : t("product.actions.priceOnRequest")}
                         {item.minQuantity > 1 ? ` • MOQ ${item.minQuantity}` : ""}
                       </p>
                       <div className="flex items-center justify-between gap-3">
                         <div className="inline-flex items-center rounded-lg border border-line">
                           <button
                             type="button"
-                            aria-label="Decrease quantity"
+                            aria-label={t("orders.decreaseQuantity")}
                             disabled={busy || item.quantity <= item.minQuantity}
                             onClick={() => run(item.id, () => getApi().orders.updateCartQuantity(item.id, item.quantity - 1))}
                             className="flex h-8 w-8 items-center justify-center text-ink-muted hover:text-brand-blue disabled:opacity-40"
@@ -130,7 +132,7 @@ export function CartView({ user, initialCart }: Props) {
                           <span className="min-w-10 text-center text-xs font-bold tabular-nums">{item.quantity}</span>
                           <button
                             type="button"
-                            aria-label="Increase quantity"
+                            aria-label={t("orders.increaseQuantity")}
                             disabled={busy}
                             onClick={() => run(item.id, () => getApi().orders.updateCartQuantity(item.id, item.quantity + 1))}
                             className="flex h-8 w-8 items-center justify-center text-ink-muted hover:text-brand-blue disabled:opacity-40"
@@ -164,19 +166,19 @@ export function CartView({ user, initialCart }: Props) {
 
       <aside className="rounded-2xl border border-line bg-white p-5 shadow-2xs space-y-4 lg:sticky lg:top-24">
         <div className="flex items-baseline justify-between">
-          <span className="text-sm font-bold text-ink">Estimated total</span>
+          <span className="text-sm font-bold text-ink">{t("orders.estimatedTotal")}</span>
           <span className="text-xl font-extrabold text-ink tabular-nums">{formatMoney(cart.totalAmount, cart.currency)}</span>
         </div>
         <p className="flex gap-2 rounded-lg bg-blue-50/70 px-3 py-2 text-[11px] text-slate-700">
           <Info className="h-3.5 w-3.5 shrink-0 text-brand-blue mt-0.5" />
           <span>
-            {cart.items.length > 1 ? `Sends ${cart.items.length} order requests, one per product. ` : ""}
-            {PAYMENT_NOTE}
+            {cart.items.length > 1 ? t("orders.cart.sendsOrderRequestsOnePer", { length: cart.items.length }) : ""}
+            {t(PAYMENT_NOTE)}
           </span>
         </p>
         <ShippingForm
           user={user}
-          submitLabel={cart.items.length > 1 ? "Send order requests" : "Send order request"}
+          submitLabel={cart.items.length > 1 ? t("orders.cart.sendOrderRequests") : t("orders.sendOrderRequest")}
           submitting={placing}
           error={checkoutError}
           onSubmit={placeOrder}

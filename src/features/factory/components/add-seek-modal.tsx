@@ -6,6 +6,7 @@ import { getApi } from "@/shared/api";
 import type { NewFactorySeek } from "@/shared/api/contracts";
 import type { Category } from "@/entities/category";
 import type { SellerProduct } from "../types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   isOpen: boolean;
@@ -29,13 +30,14 @@ const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 type Status = "idle" | "uploading-video" | "uploading-cover" | "saving";
 
 const STATUS_LABEL: Record<Status, string> = {
-  idle: "Publish Seek Reel",
-  "uploading-video": "Uploading video…",
-  "uploading-cover": "Uploading cover…",
-  saving: "Publishing…",
+  idle: "seller.seek.status.idle",
+  "uploading-video": "seller.seek.status.uploadingVideo",
+  "uploading-cover": "seller.seek.status.uploadingCover",
+  saving: "seller.seek.status.saving",
 };
 
 export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek }: Props) {
+  const t = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   // Remember finished uploads so a failed save can retry without re-sending large files.
@@ -61,7 +63,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > MAX_VIDEO_BYTES) {
-        setError("Video is larger than 100MB. Please trim or compress it first.");
+        setError(t("seller.seek.videoIsLargerThan100mb"));
         return;
       }
       if (deviceVideoSelected) URL.revokeObjectURL(deviceVideoSelected);
@@ -75,7 +77,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > MAX_IMAGE_BYTES) {
-        setError("Cover image is larger than 20MB.");
+        setError(t("seller.seek.coverImageIsLargerThan"));
         return;
       }
       setError(null);
@@ -123,7 +125,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
       if (deviceVideoSelected) URL.revokeObjectURL(deviceVideoSelected);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not publish seek. Please retry.");
+      setError(err instanceof Error ? err.message : t("seller.seek.couldNotPublishSeekPlease"));
       setStatus("idle");
     }
   }
@@ -138,15 +140,15 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
               <Film className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-ink">Upload Video Seek (Short Reel)</h2>
-              <p className="text-xs text-ink-muted">Showcase factory operations, machinery demonstrations & quality checks</p>
+              <h2 className="text-lg font-bold text-ink">{t("seller.seek.uploadVideoSeekShortReel")}</h2>
+              <p className="text-xs text-ink-muted">{t("seller.seek.showcaseFactoryOperationsMachineryDemonstrations")}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="rounded-lg p-1.5 text-ink-muted hover:bg-canvas hover:text-ink transition"
           >
             <X className="h-5 w-5" />
@@ -158,14 +160,14 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
           {/* Seek Title */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-              Video Title / Hook <span className="text-red-500">*</span>
+              {t("seller.seek.videoTitleHook")} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. 5-Axis CNC Precision Machining Live Cutting Demonstration"
+              placeholder={t("seller.seek.eG5AxisCnc")}
               className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-brand-blue focus:ring-2 focus:ring-brand-blue-soft focus:outline-hidden"
             />
           </div>
@@ -173,7 +175,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
           {/* Device Video File Upload Area */}
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-ink">
-              Select Factory Footage / Video File <span className="text-red-500">*</span>
+              {t("seller.seek.selectFactoryFootageVideoFile")} <span className="text-red-500">*</span>
             </label>
 
             <div
@@ -191,7 +193,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
                 <div className="flex items-center gap-2 text-ink">
                   <Check className="h-4 w-4 text-emerald-600" />
                   <span className="text-xs font-bold truncate max-w-[16rem]">{deviceVideo.name}</span>
-                  <span className="text-[11px] text-brand-blue underline ml-1">Click to select another</span>
+                  <span className="text-[11px] text-brand-blue underline ml-1">{t("seller.seek.clickToSelectAnother")}</span>
                 </div>
               ) : (
                 <>
@@ -200,9 +202,9 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-ink">
-                      Click to <span className="text-brand-blue font-bold underline">select video from your device</span>
+                      {t("seller.seek.clickTo")} <span className="text-brand-blue font-bold underline">{t("seller.seek.selectVideoFromYourDevice")}</span>
                     </p>
-                    <p className="text-[11px] text-ink-muted">MP4, WEBM, MOV up to 100MB</p>
+                    <p className="text-[11px] text-ink-muted">{t("seller.seek.mp4WebmMovUpTo")}</p>
                   </div>
                 </>
               )}
@@ -210,7 +212,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
 
             {/* Or choose sample video footage */}
             <div className="pt-2">
-              <p className="text-[11px] font-semibold text-ink-muted mb-2">Or select preset demonstration footage:</p>
+              <p className="text-[11px] font-semibold text-ink-muted mb-2">{t("seller.seek.orSelectPresetDemonstrationFootage")}</p>
               <div className="grid grid-cols-2 gap-2.5">
                 {SAMPLE_VIDEOS.map((v, idx) => (
                   <button
@@ -260,7 +262,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-                Machinery Category
+                {t("rfq.form.machineryCategory")}
               </label>
               <select
                 value={categoryId}
@@ -277,14 +279,14 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-                Tag Linked Product
+                {t("seller.seek.tagLinkedProduct")}
               </label>
               <select
                 value={taggedProductId}
                 onChange={(e) => setTaggedProductId(e.target.value)}
                 className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm text-ink focus:border-brand-blue focus:outline-hidden bg-surface"
               >
-                <option value="">-- No Product Tagged --</option>
+                <option value="">{t("seller.seek.noProductTagged")}</option>
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name.length > 35 ? p.name.slice(0, 35) + "..." : p.name}
@@ -297,7 +299,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
           {/* Cover thumbnail (optional): device upload or URL; falls back to tagged product photo */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-              Custom Cover Thumbnail (Optional)
+              {t("seller.seek.customCoverThumbnailOptional")}
             </label>
             <div className="flex flex-col sm:flex-row gap-2">
               <button
@@ -306,7 +308,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs font-bold text-ink hover:bg-canvas transition shrink-0"
               >
                 {coverFile ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <ImageIcon className="h-3.5 w-3.5" />}
-                <span className="truncate max-w-[10rem]">{coverFile ? coverFile.name : "Upload cover"}</span>
+                <span className="truncate max-w-[10rem]">{coverFile ? coverFile.name : t("seller.seek.uploadCover")}</span>
               </button>
               <input
                 ref={coverInputRef}
@@ -322,23 +324,23 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
                   setThumbnailUrl(e.target.value);
                   setCoverFile(null);
                 }}
-                placeholder="or paste an image URL (https://...)"
+                placeholder={t("seller.seek.orPasteAnImageUrl")}
                 className="w-full rounded-lg border border-line px-3.5 py-2 text-xs text-ink focus:border-brand-blue focus:outline-hidden"
               />
             </div>
-            <p className="text-[11px] text-ink-muted mt-1">If left empty, the tagged product photo is used as the cover.</p>
+            <p className="text-[11px] text-ink-muted mt-1">{t("seller.seek.ifLeftEmptyTheTagged")}</p>
           </div>
 
           {/* Description */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-              Caption / Description
+              {t("seller.seek.captionDescription")}
             </label>
             <textarea
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe machine parameters, materials handled, and invitation for buyer inquiries..."
+              placeholder={t("seller.seek.describeMachineParametersMaterialsHandled")}
               className="w-full rounded-lg border border-line px-3.5 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-brand-blue focus:ring-2 focus:ring-brand-blue-soft focus:outline-hidden"
             />
           </div>
@@ -357,7 +359,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
               disabled={busy}
               className="btn btn-secondary px-4 py-2 text-xs disabled:opacity-50"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -365,7 +367,7 @@ export function AddSeekModal({ isOpen, onClose, products, categories, onAddSeek 
               className="btn btn-primary px-5 py-2 text-xs flex items-center gap-1.5 disabled:opacity-70"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
-              <span>{STATUS_LABEL[status]}</span>
+              <span>{t(STATUS_LABEL[status])}</span>
             </button>
           </div>
         </form>

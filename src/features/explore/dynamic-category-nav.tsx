@@ -270,7 +270,7 @@ export function DynamicCategoryNav({
   return (
     <>
       <nav
-        aria-label="Machinery Categories"
+        aria-label={t("sidebar.machineryCategories")}
         className={cn(
           "w-full rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] transition-all duration-300 overflow-hidden select-none",
           sticky ? "sticky top-[76px] z-20" : "",
@@ -290,7 +290,7 @@ export function DynamicCategoryNav({
                 }}
                 onPointerLeave={stopHoverScroll}
                 onPointerCancel={stopHoverScroll}
-                aria-label="Scroll categories to the left"
+                aria-label={t("categoryNav.scrollCategoriesToTheLeft")}
                 className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
               >
                 <ChevronLeft className="h-4 w-4 pointer-events-none" />
@@ -442,7 +442,7 @@ export function DynamicCategoryNav({
                 }}
                 onPointerLeave={stopHoverScroll}
                 onPointerCancel={stopHoverScroll}
-                aria-label="Scroll categories to the right"
+                aria-label={t("categoryNav.scrollCategoriesToTheRight")}
                 className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
               >
                 <ChevronRight className="h-4 w-4 pointer-events-none" />
@@ -486,7 +486,7 @@ export function DynamicCategoryNav({
                         {t("sidebar.allCategories", "All Machinery Categories")}
                       </h4>
                       <p className="text-[11px] text-slate-500">
-                        Browse verified machinery across {categories.length} industry sectors
+                        {t("categoryNav.browseAcross", { count: categories.length })}
                       </p>
                     </div>
                   </div>
@@ -495,7 +495,7 @@ export function DynamicCategoryNav({
                     onClick={() => setActivePopover(null)}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline"
                   >
-                    <span>Explore All</span>
+                    <span>{t("categoryNav.exploreAll")}</span>
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
@@ -536,7 +536,7 @@ export function DynamicCategoryNav({
                             </span>
                             {subs.length > 0 && (
                               <span className="block text-[10px] text-slate-400 group-hover:text-slate-500">
-                                {subs.length} subcategories
+                                {t("categoryNav.subcategoryCount", { count: subs.length })}
                               </span>
                             )}
                           </div>
@@ -551,13 +551,13 @@ export function DynamicCategoryNav({
 
                 {/* Footer */}
                 <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Direct from global verified manufacturers</span>
+                  <span>{t("categoryNav.directFromGlobalVerifiedManufacturers")}</span>
                   <Link
                     href="/explore"
                     onClick={() => setActivePopover(null)}
                     className="font-semibold text-brand-blue hover:text-blue-700 hover:underline"
                   >
-                    Full Directory →
+                    {t("categoryNav.fullDirectory")}
                   </Link>
                 </div>
               </div>
@@ -594,7 +594,7 @@ export function DynamicCategoryNav({
                             {catName}
                           </h4>
                           <span className="text-[10px] text-slate-500 font-medium">
-                            {subcategories.length} Subcategories
+                            {subcategories.length} {t("common.subcategories")}
                           </span>
                         </div>
                       </div>
@@ -613,7 +613,7 @@ export function DynamicCategoryNav({
                         }}
                         className="shrink-0 text-[11px] font-semibold text-brand-blue hover:underline ml-2"
                       >
-                        View All →
+                        {t("categoryNav.viewAll")}
                       </Link>
                     </div>
 

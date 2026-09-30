@@ -1,11 +1,12 @@
 import { requireSupplier } from "@/features/auth/require-user";
 import { FactoryDashboard } from "@/features/factory/factory-dashboard";
 import { getApi } from "@/shared/api";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = {
-  title: "Manufacturer Workspace | SeekFactory Seller Hub",
-  description: "Alibaba-grade B2B Seller Hub for managing machinery products, video reels, inquiries, and customer chat.",
-};
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.sellerWorkspace.title"), description: t("meta.sellerWorkspace.description") };
+}
 
 export const dynamic = "force-dynamic";
 

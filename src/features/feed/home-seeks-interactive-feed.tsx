@@ -214,7 +214,7 @@ export function HomeSeeksInteractiveFeed({
         setItems(next);
       })
       .catch((err: unknown) => {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : "Could not load seeks");
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : t("feed.home.couldNotLoadSeeks"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -222,7 +222,7 @@ export function HomeSeeksInteractiveFeed({
     return () => {
       cancelled = true;
     };
-  }, [sourceKey, searchQuery, selectedSub, tab]);
+  }, [sourceKey, searchQuery, selectedSub, tab, t]);
 
   const filteredItems = items;
 
@@ -235,7 +235,7 @@ export function HomeSeeksInteractiveFeed({
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h2 className="text-sm font-bold text-ink flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-brand-blue" />
-              <span>{translateCategory(expandedRoot.name)} Subcategories</span>
+              <span>{translateCategory(expandedRoot.name)} {t("common.subcategories")}</span>
             </h2>
 
             {/* Quick Actions */}
@@ -310,8 +310,8 @@ export function HomeSeeksInteractiveFeed({
         {/* Left: Heading + For You / Following Tabs */}
         <div className="flex items-center gap-4 shrink-0">
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-1.5">
-            <span>Seeks</span>
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500" title="Live Video Marketplace" />
+            <span>{t("common.seeks")}</span>
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500" title={t("feed.home.liveVideoMarketplace")} />
           </h1>
 
           <div className="flex gap-2.5 text-sm font-semibold">
@@ -364,7 +364,7 @@ export function HomeSeeksInteractiveFeed({
                 <button
                   type="button"
                   onClick={() => handleSubcategoryClick(selectedSub.slug)}
-                  aria-label="Remove category filter"
+                  aria-label={t("feed.home.removeCategoryFilter")}
                   className="hover:text-rose-600 ml-0.5 cursor-pointer"
                 >
                   <X className="h-3 w-3" />
@@ -381,7 +381,7 @@ export function HomeSeeksInteractiveFeed({
                     setSearchQuery("");
                     updateUrl(expandedCategorySlug, selectedSubcategorySlug, tab, viewMode, "");
                   }}
-                  aria-label="Clear search filter"
+                  aria-label={t("feed.home.clearSearchFilter")}
                   className="hover:text-rose-600 ml-0.5 cursor-pointer"
                 >
                   <X className="h-3 w-3" />
@@ -390,7 +390,7 @@ export function HomeSeeksInteractiveFeed({
             )}
 
             <span className="text-slate-500 font-medium">
-              ({filteredItems.length} Seeks)
+              {t("feed.home.seekCount", { count: filteredItems.length })}
             </span>
           </div>
 

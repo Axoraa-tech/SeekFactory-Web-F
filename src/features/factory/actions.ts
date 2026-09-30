@@ -16,6 +16,7 @@ import type { Product } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
 import type { OrderRequest, OrderStatus } from "@/entities/order";
 import { ORDER_STATUSES } from "@/features/orders/order-status";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Seller hub mutations. Run on the server so that:
@@ -28,11 +29,12 @@ import { ORDER_STATUSES } from "@/features/orders/order-status";
 export type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
 
 async function run<T>(mutate: () => Promise<T>): Promise<ActionResult<T>> {
+  const t = await getTranslations();
   // Mock mode: role comes from the client-writable demo cookie (see AGENTS.md §7).
   // HTTP mode: the backend is the real authority; this is an early, friendlier rejection.
   const user = await getApi().session.getCurrentUser();
   if (user?.role !== "Supplier") {
-    return { ok: false, error: "Sign in with a manufacturer account to manage your factory." };
+    return { ok: false, error: t("seller.errors.signInWithAManufacturer") };
   }
 
   try {
@@ -41,7 +43,7 @@ async function run<T>(mutate: () => Promise<T>): Promise<ActionResult<T>> {
     return { ok: true, data };
   } catch (err) {
     console.error("Factory action failed:", err);
-    return { ok: false, error: err instanceof Error ? err.message : "Something went wrong. Please retry." };
+    return { ok: false, error: err instanceof Error ? err.message : t("auth.errors.somethingWentWrongPleaseRetry") };
   }
 }
 
@@ -51,25 +53,27 @@ function isUploadableUrl(url: string) {
 }
 
 export async function createProductAction(input: NewFactoryProduct): Promise<ActionResult<Product>> {
-  if (!input.name?.trim()) return { ok: false, error: "Product name is required." };
-  if (!input.categoryId) return { ok: false, error: "Choose a category." };
-  if (!(input.priceInr > 0)) return { ok: false, error: "Price must be greater than zero." };
-  if (!isUploadableUrl(input.imageUrl)) return { ok: false, error: "Product photo was not uploaded." };
+  const t = await getTranslations();
+  if (!input.name?.trim()) return { ok: false, error: t("seller.errors.productNameIsRequired") };
+  if (!input.categoryId) return { ok: false, error: t("seller.errors.chooseACategory") };
+  if (!(input.priceInr > 0)) return { ok: false, error: t("seller.errors.priceMustBeGreaterThan") };
+  if (!isUploadableUrl(input.imageUrl)) return { ok: false, error: t("seller.errors.productPhotoWasNotUploaded") };
   return run(() => getApi().factory.addProduct({ ...input, name: input.name.trim() }));
 }
 
 export async function updateProductAction(id: string, input: FactoryProductUpdate): Promise<ActionResult<Product>> {
-  if (input.name !== undefined && !input.name.trim()) return { ok: false, error: "Product name is required." };
+  const t = await getTranslations();
+  if (input.name !== undefined && !input.name.trim()) return { ok: false, error: t("seller.errors.productNameIsRequired") };
   if (input.priceInr !== undefined && !(input.priceInr > 0)) {
-    return { ok: false, error: "Price must be greater than zero." };
+    return { ok: false, error: t("seller.errors.priceMustBeGreaterThan") };
   }
   if (input.imageUrls) {
-    if (input.imageUrls.length === 0) return { ok: false, error: "Add at least one product photo." };
-    if (input.imageUrls.length > 8) return { ok: false, error: "A product can have at most 8 photos." };
-    if (!input.imageUrls.every(isUploadableUrl)) return { ok: false, error: "A product photo was not uploaded." };
+    if (input.imageUrls.length === 0) return { ok: false, error: t("seller.errors.addAtLeastOneProduct") };
+    if (input.imageUrls.length > 8) return { ok: false, error: t("seller.errors.aProductCanHaveAt") };
+    if (!input.imageUrls.every(isUploadableUrl)) return { ok: false, error: t("seller.errors.aProductPhotoWasNot") };
   }
   if (input.datasheetUrl && !isUploadableUrl(input.datasheetUrl)) {
-    return { ok: false, error: "Datasheet was not uploaded." };
+    return { ok: false, error: t("seller.errors.datasheetWasNotUploaded") };
   }
   return run(() => getApi().factory.updateProduct(id, { ...input, name: input.name?.trim() }));
 }
@@ -86,17 +90,19 @@ export async function deleteProductAction(id: string): Promise<ActionResult> {
 }
 
 export async function createSeekAction(input: NewFactorySeek): Promise<ActionResult<Reel>> {
-  if (!input.title?.trim()) return { ok: false, error: "Video title is required." };
+  const t = await getTranslations();
+  if (!input.title?.trim()) return { ok: false, error: t("seller.errors.videoTitleIsRequired") };
   if (!input.videoUrl || !isUploadableUrl(input.videoUrl)) {
-    return { ok: false, error: "Video file was not uploaded." };
+    return { ok: false, error: t("seller.errors.videoFileWasNotUploaded") };
   }
-  if (!isUploadableUrl(input.posterUrl)) return { ok: false, error: "Cover image was not uploaded." };
+  if (!isUploadableUrl(input.posterUrl)) return { ok: false, error: t("seller.errors.coverImageWasNotUploaded") };
   return run(() => getApi().factory.addSeek({ ...input, title: input.title.trim() }));
 }
 
 export async function updateSeekAction(id: string, input: FactorySeekUpdate): Promise<ActionResult<Reel>> {
-  if (input.title !== undefined && !input.title.trim()) return { ok: false, error: "Video title is required." };
-  if (input.posterUrl && !isUploadableUrl(input.posterUrl)) return { ok: false, error: "Cover image was not uploaded." };
+  const t = await getTranslations();
+  if (input.title !== undefined && !input.title.trim()) return { ok: false, error: t("seller.errors.videoTitleIsRequired") };
+  if (input.posterUrl && !isUploadableUrl(input.posterUrl)) return { ok: false, error: t("seller.errors.coverImageWasNotUploaded") };
   return run(() => getApi().factory.updateSeek(id, { ...input, title: input.title?.trim() }));
 }
 
@@ -112,8 +118,9 @@ export async function deleteSeekAction(id: string): Promise<ActionResult> {
 }
 
 export async function submitQuoteAction(rfqId: string, quote: FactoryQuote): Promise<ActionResult> {
-  if (!(quote.quotePrice > 0)) return { ok: false, error: "Quotation amount must be greater than zero." };
-  if (!(quote.leadTimeDays > 0)) return { ok: false, error: "Lead time must be at least 1 day." };
+  const t = await getTranslations();
+  if (!(quote.quotePrice > 0)) return { ok: false, error: t("seller.errors.quotationAmountMustBeGreater") };
+  if (!(quote.leadTimeDays > 0)) return { ok: false, error: t("seller.errors.leadTimeMustBeAt") };
   return run(async () => {
     await getApi().factory.submitQuote(rfqId, quote);
     return undefined;
@@ -125,25 +132,27 @@ export async function updateOrderStatusAction(
   status: OrderStatus,
   note?: string,
 ): Promise<ActionResult<OrderRequest>> {
-  if (!ORDER_STATUSES.includes(status)) return { ok: false, error: "Unknown order status." };
-  if (note && note.length > 2000) return { ok: false, error: "Note must be at most 2000 characters." };
+  const t = await getTranslations();
+  if (!ORDER_STATUSES.includes(status)) return { ok: false, error: t("seller.errors.unknownOrderStatus") };
+  if (note && note.length > 2000) return { ok: false, error: t("orders.errors.noteMustBeAtMost") };
   return run(() => getApi().factory.updateOrderStatus(orderId, status, note?.trim() || undefined));
 }
 
 export async function updateFactoryProfileAction(
   data: Partial<Manufacturer>,
 ): Promise<ActionResult<Manufacturer>> {
+  const t = await getTranslations();
   if (data.websiteUrl !== undefined) {
     const website = data.websiteUrl.trim();
     // "example.com" → "https://example.com"; any other scheme (javascript:, data:, …) is refused
     const withScheme = !website || /^https?:\/\//i.test(website) ? website : `https://${website}`;
     if (withScheme && !/^https?:\/\/[a-z0-9.-]+\.[a-z]{2,}(:\d+)?([/?#]\S*)?$/i.test(withScheme)) {
-      return { ok: false, error: "Enter a valid website URL, e.g. https://example.com" };
+      return { ok: false, error: t("seller.errors.enterAValidWebsiteUrl") };
     }
     data = { ...data, websiteUrl: withScheme };
   }
   if (data.certificates?.some((cert) => !isUploadableUrl(cert.imageUrl))) {
-    return { ok: false, error: "A certificate image was not uploaded." };
+    return { ok: false, error: t("seller.errors.aCertificateImageWasNot") };
   }
   return run(() => getApi().factory.updateProfile(data));
 }
@@ -151,10 +160,11 @@ export async function updateFactoryProfileAction(
 export async function submitVerificationAction(
   input: VerificationSubmission,
 ): Promise<ActionResult<FactoryVerification>> {
+  const t = await getTranslations();
   if (input.companyRegNumber.trim().length < 4) {
-    return { ok: false, error: "Enter a valid business registration number." };
+    return { ok: false, error: t("seller.errors.enterAValidBusinessRegistration") };
   }
-  if (input.factoryAddress.trim().length < 10) return { ok: false, error: "Enter the full factory address." };
+  if (input.factoryAddress.trim().length < 10) return { ok: false, error: t("seller.errors.enterTheFullFactoryAddress") };
   return run(() =>
     getApi().factory.submitVerification({
       ...input,

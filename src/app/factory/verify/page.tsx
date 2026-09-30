@@ -1,10 +1,12 @@
 import { requireSupplier } from "@/features/auth/require-user";
 import { VerificationForm } from "@/features/factory/verification-form";
 import { getApi } from "@/shared/api";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = {
-  title: "Verify Your Factory | SeekFactory Seller Hub",
-};
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.verifyFactory.title") };
+}
 
 export const dynamic = "force-dynamic";
 

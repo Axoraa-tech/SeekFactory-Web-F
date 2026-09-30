@@ -1,6 +1,10 @@
 import { VerifyEmailResult } from "@/features/auth/password-reset-forms";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = { title: "Verify email | SeekFactory" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.verifyEmail.title") };
+}
 
 export const dynamic = "force-dynamic";
 

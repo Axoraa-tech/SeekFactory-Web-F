@@ -9,6 +9,7 @@ import { useRequireSignIn } from "@/features/engagement/use-engagement";
 import { pauseAllSeeks } from "@/hooks/use-seek-autoplay";
 import { CommentComposer } from "./comment-composer";
 import { CommentThreadItem } from "./comment-thread-item";
+import { useTranslations } from "next-intl";
 
 type Props = {
   reelId: string;
@@ -27,6 +28,7 @@ export function CommentsModal({
   onClose,
   onCommentAdded,
 }: Props) {
+  const t = useTranslations();
   const [comments, setComments] = useState<ReelComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [newCommentText, setNewCommentText] = useState("");
@@ -75,13 +77,13 @@ export function CommentsModal({
       .catch((err: unknown) => {
         if (!mounted) return;
         setLoading(false);
-        setActionError(err instanceof Error ? err.message : "Could not load comments");
+        setActionError(err instanceof Error ? err.message : t("comments.couldNotLoadComments"));
       });
 
     return () => {
       mounted = false;
     };
-  }, [isOpen, reelId]);
+  }, [isOpen, reelId, t]);
 
   useEffect(() => {
     if (isOpen) {
@@ -117,7 +119,7 @@ export function CommentsModal({
       setLikedMap((prev) => ({ ...prev, [id]: { liked: res.liked, count: res.likes } }));
     } catch (err) {
       setLikedMap((prev) => ({ ...prev, [id]: current }));
-      handleActionError(err, "Could not update like");
+      handleActionError(err, t("comments.couldNotUpdateLike"));
     }
   };
 
@@ -134,7 +136,7 @@ export function CommentsModal({
       setNewCommentText("");
       onCommentAdded?.();
     } catch (err) {
-      handleActionError(err, "Could not post comment");
+      handleActionError(err, t("comments.couldNotPostComment"));
     } finally {
       setIsSubmitting(false);
     }
@@ -163,7 +165,7 @@ export function CommentsModal({
       setReplyingToId(null);
       onCommentAdded?.();
     } catch (err) {
-      handleActionError(err, "Could not post reply");
+      handleActionError(err, t("comments.couldNotPostReply"));
     } finally {
       setIsSubmittingReply(false);
     }
@@ -185,7 +187,7 @@ export function CommentsModal({
         <div className="flex items-center justify-between px-5 py-4 border-b border-line bg-surface/80 backdrop-blur-md sticky top-0 z-10">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-ink">Comments</h2>
+              <h2 className="text-base font-bold text-ink">{t("comments.comments")}</h2>
               <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-xs font-semibold text-brand-blue">
                 {totalCommentCount}
               </span>
@@ -195,7 +197,7 @@ export function CommentsModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close comments"
+            aria-label={t("comments.closeComments")}
             className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted hover:bg-canvas hover:text-ink transition"
           >
             <X className="h-5 w-5" />
@@ -220,14 +222,14 @@ export function CommentsModal({
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 text-ink-muted">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-blue border-t-transparent mb-2" />
-              <p className="text-xs">Loading comments...</p>
+              <p className="text-xs">{t("comments.loadingComments")}</p>
             </div>
           ) : comments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center text-ink-muted">
               <MessageSquare className="h-10 w-10 text-ink-faint mb-2" />
-              <p className="text-sm font-semibold text-ink">No comments yet</p>
+              <p className="text-sm font-semibold text-ink">{t("comments.noCommentsYet")}</p>
               <p className="text-xs text-ink-muted mt-1">
-                Be the first verified buyer or engineer to start the discussion!
+                {t("comments.beTheFirstVerifiedBuyer")}
               </p>
             </div>
           ) : (
@@ -265,8 +267,10 @@ export function CommentsModal({
                 onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
                 className="rounded-full border border-line bg-canvas px-4 py-1.5 text-xs font-semibold text-ink hover:bg-surface hover:border-brand-blue hover:text-brand-blue shadow-sm transition"
               >
-                Load {Math.min(PAGE_SIZE, comments.length - visibleCount)} more comments (
-                {comments.length - visibleCount} remaining)
+                {t("comments.loadMore", {
+                  count: Math.min(PAGE_SIZE, comments.length - visibleCount),
+                  remaining: comments.length - visibleCount,
+                })}
               </button>
             </div>
           )}

@@ -74,6 +74,7 @@ function toSellerMessage(m: MessageItem): SellerChatMessage {
   };
 }
 import type { Category } from "@/entities/category";
+import { useTranslations } from "next-intl";
 
 type Props = {
   user: BuyerProfile;
@@ -124,6 +125,7 @@ export function FactoryDashboard({
   allCategories = NO_CATEGORIES,
   verification,
 }: Props) {
+  const t = useTranslations();
   // The open tab lives in the URL (/factory?tab=orders) so a reload or a shared link reopens it,
   // and browser back/forward moves between tabs. pushState keeps it client-side (no refetch).
   const searchParams = useSearchParams();
@@ -222,7 +224,7 @@ export function FactoryDashboard({
   async function handleSetProductListed(id: string, listed: boolean) {
     const result = await setProductListedAction(id, listed);
     if (!result.ok) {
-      setNotice(`Could not ${listed ? "relist" : "pause"} product: ${result.error}`);
+      setNotice(t("seller.dashboard.couldNotProduct", { listed: listed ? "relist" : "pause", error: result.error }));
       return;
     }
     const updated = toSellerProduct(result.data, allCategories);
@@ -235,7 +237,7 @@ export function FactoryDashboard({
     const result = await deleteProductAction(id);
     if (!result.ok) {
       setProducts(previous);
-      setNotice(`Could not delete product: ${result.error}`);
+      setNotice(t("seller.dashboard.couldNotDeleteProduct", { error: result.error }));
       return;
     }
     setStats((prev) => ({ ...prev, totalProductsCount: Math.max(0, prev.totalProductsCount - 1) }));
@@ -261,7 +263,7 @@ export function FactoryDashboard({
   async function handleSetSeekListed(id: string, listed: boolean) {
     const result = await setSeekListedAction(id, listed);
     if (!result.ok) {
-      setNotice(`Could not ${listed ? "relist" : "pause"} video: ${result.error}`);
+      setNotice(t("seller.dashboard.couldNotVideo", { listed: listed ? "relist" : "pause", error: result.error }));
       return;
     }
     setSeeks((prev) =>
@@ -277,7 +279,7 @@ export function FactoryDashboard({
     const result = await deleteSeekAction(id);
     if (!result.ok) {
       setSeeks(previous);
-      setNotice(`Could not delete video seek: ${result.error}`);
+      setNotice(t("seller.dashboard.couldNotDeleteVideoSeek", { error: result.error }));
       return;
     }
     setStats((prev) => ({ ...prev, totalSeeksCount: Math.max(0, prev.totalSeeksCount - 1) }));
@@ -378,7 +380,7 @@ export function FactoryDashboard({
       setConversations((prev) =>
         prev.map((c) => (c.id === conversationId ? { ...c, messages: c.messages.filter((m) => m.id !== tempId) } : c))
       );
-      throw new Error(err instanceof Error ? err.message : "Message not sent. Please retry.");
+      throw new Error(err instanceof Error ? err.message : t("chat.messageNotSentPleaseRetry"));
     }
   }
 
@@ -558,7 +560,7 @@ export function FactoryDashboard({
               <button
                 type="button"
                 onClick={() => setNotice(null)}
-                aria-label="Dismiss"
+                aria-label={t("upgrade.dismiss")}
                 className="shrink-0 rounded p-0.5 hover:bg-red-100"
               >
                 <X className="h-3.5 w-3.5" />
@@ -576,17 +578,17 @@ export function FactoryDashboard({
             >
               <span className="font-semibold">
                 {verification.status === "REJECTED"
-                  ? `Verification declined${verification.rejectionReason ? `: ${verification.rejectionReason}` : ""}. Your factory is hidden from buyers until it is approved.`
+                  ? t("seller.dashboard.verificationDeclinedYourFactoryIs", { rejectionReason: verification.rejectionReason ? `: ${verification.rejectionReason}` : "" })
                   : verification.submitted
-                    ? "Verification is in review. Your products and seeks become visible to buyers once SeekFactory approves your factory."
-                    : "Your factory is not verified yet, so buyers cannot see your products or seeks. Submit your business details to get approved."}
+                    ? t("seller.dashboard.verificationIsInReviewYour")
+                    : t("seller.dashboard.yourFactoryIsNotVerified")}
               </span>
               {(verification.status === "REJECTED" || !verification.submitted) && (
                 <Link
                   href="/factory/verify"
                   className="btn btn-primary shrink-0 px-3 py-1.5 text-center"
                 >
-                  {verification.status === "REJECTED" ? "Resubmit details" : "Verify factory"}
+                  {verification.status === "REJECTED" ? t("seller.dashboard.resubmitDetails") : t("seller.dashboard.verifyFactory")}
                 </Link>
               )}
             </div>

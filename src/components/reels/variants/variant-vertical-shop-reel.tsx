@@ -22,6 +22,7 @@ import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
 import { useReelImpression } from "@/hooks/use-reel-impression";
+import { useTranslations } from "next-intl";
 
 type Props = {
   reel: Reel;
@@ -35,6 +36,7 @@ type Props = {
  * English B2B product info overlay, and dual joined Add to Cart / Buy Now buttons.
  */
 export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Props) {
+  const t = useTranslations();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(reel.startSec || 0);
@@ -142,8 +144,8 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
 
   // Dynamic B2B industrial price and title in English
   const priceDisplay = "₹620";
-  const productTitle = reel.title || "Precision CNC Machined Industrial Components";
-  const relatedSearchQuery = `Related Search · ${manufacturer.name} OEM Capabilities`;
+  const productTitle = reel.title || t("seek.variant.precisionCncMachinedIndustrialComponents");
+  const relatedSearchQuery = t("seek.variant.relatedSearchOemCapabilities", { name: manufacturer.name });
 
   return (
     <>
@@ -201,7 +203,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
                 handleToggleMute();
               }}
               className="h-8 w-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/80 transition-colors shadow-xs"
-              aria-label="Toggle mute"
+              aria-label={t("seek.variant.toggleMute")}
             >
               {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </button>
@@ -212,7 +214,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
                 handleToggleFullscreen();
               }}
               className="h-8 w-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/80 transition-colors shadow-xs"
-              aria-label="Toggle fullscreen"
+              aria-label={t("seek.variant.toggleFullscreen")}
             >
               {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </button>
@@ -220,7 +222,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
 
           {/* Top Factory Pill Badge with SupplierLockOverlay */}
           <div className="absolute top-3 left-3 z-20 pointer-events-auto">
-            <SupplierLockOverlay badgeLabel="Verified Supplier" compact>
+            <SupplierLockOverlay badgeLabel={t("seek.variant.verifiedSupplier")} compact>
               <Link
                 href={`/manufacturers/${manufacturer.slug}`}
                 onClick={(e) => e.stopPropagation()}
@@ -301,10 +303,10 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
                   </span>
                   <span className="text-xs text-slate-500 font-medium">/ piece</span>
                   <span className="rounded bg-orange-50 px-1.5 py-0.2 text-[9px] font-bold text-[#FF5722] border border-orange-200">
-                    Direct OEM · 10% OFF
+                    {t("seek.variant.directOem10Off")}
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">MOQ: 50 pcs</span>
+                <span className="text-[10px] text-slate-400 font-medium">{t("seek.variant.moq50Pcs")}</span>
               </div>
 
               {/* Title & Detail Link */}
@@ -316,7 +318,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
                   href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
                   className="font-bold text-[#FF3D00] hover:underline shrink-0 text-[11px]"
                 >
-                  Details &gt;
+                  {t("seek.variant.details")}
                 </Link>
               </div>
             </div>
@@ -330,7 +332,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
             type="button"
             onClick={() => setIsCommentsOpen(true)}
             className="flex flex-col items-center justify-center text-slate-700 hover:text-[#FF3D00] transition-colors shrink-0 px-1"
-            title="Comments"
+            title={t("comments.comments")}
           >
             <MessageCircle className="h-5 w-5 stroke-[1.75]" />
             <span className="text-[10px] font-semibold text-slate-500 mt-0.5">{formatCount(commentCount)}</span>
@@ -341,7 +343,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
             type="button"
             onClick={() => setFavorited((v) => !v)}
             className="flex flex-col items-center justify-center text-slate-700 hover:text-amber-500 transition-colors shrink-0 px-1"
-            title="Favorite"
+            title={t("common.favorite")}
           >
             <Star
               className={cn(
@@ -362,10 +364,10 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
             >
               {isAddedToCart ? (
                 <span className="inline-flex items-center gap-1 text-[11px]">
-                  <Check className="h-3.5 w-3.5" /> Added
+                  <Check className="h-3.5 w-3.5" /> {t("common.added")}
                 </span>
               ) : (
-                <span>Add to Cart</span>
+                <span>{t("common.addToCart")}</span>
               )}
             </button>
 
@@ -376,7 +378,7 @@ export function VariantVerticalShopReel({ reel, manufacturer, productSlug }: Pro
               onClick={handleBuyNow}
               className="btn-buy flex-1 text-white text-xs font-bold flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-80"
             >
-              <span>{isBuying ? "Processing..." : "Buy Now"}</span>
+              <span>{isBuying ? t("common.processing") : t("common.buyNow")}</span>
             </button>
           </div>
         </div>

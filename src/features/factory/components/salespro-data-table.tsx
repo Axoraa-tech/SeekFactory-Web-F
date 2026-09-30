@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowRight, FileText, Send } from "lucide-react";
 import type { SellerRfq } from "../types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   rfqs: SellerRfq[];
@@ -20,6 +21,7 @@ const STATUS_STYLE: Record<SellerRfq["status"], string> = {
 
 /** Overview table of the factory's real RFQ leads (open ones first, newest first). */
 export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) {
+  const t = useTranslations();
   const [filter, setFilter] = useState<"awaiting" | "open">("awaiting");
 
   const open = rfqs.filter((r) => r.status !== "Closed");
@@ -31,15 +33,15 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
       {/* Table Header Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm font-bold text-[#1C1C1C]">India Buyer Equipment RFQ Leads</h3>
-          <p className="text-xs text-[#5F6368]">Open purchase inquiries routed to your factory</p>
+          <h3 className="text-sm font-bold text-[#1C1C1C]">{t("seller.table.indiaBuyerEquipmentRfqLeads")}</h3>
+          <p className="text-xs text-[#5F6368]">{t("seller.table.openPurchaseInquiriesRoutedTo")}</p>
         </div>
 
         <div className="flex items-center gap-2">
           {(
             [
-              ["awaiting", `Awaiting quote (${awaitingCount})`],
-              ["open", `All open (${open.length})`],
+              ["awaiting", t("seller.table.awaitingQuote", { awaitingCount })],
+              ["open", t("seller.table.allOpen", { length: open.length })],
             ] as const
           ).map(([key, label]) => (
             <button
@@ -61,7 +63,7 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
               onClick={onViewAll}
               className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold text-[#1A73E8] hover:underline"
             >
-              View all <ArrowRight className="h-3.5 w-3.5" />
+              {t("widgets.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -71,10 +73,10 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
         <div className="rounded-xl border border-dashed border-[#E6E8EB] py-10 text-center">
           <FileText className="mx-auto mb-2 h-8 w-8 text-[#CBD5E1]" />
           <p className="text-sm font-bold text-[#1C1C1C]">
-            {filter === "awaiting" ? "No RFQs waiting for your quote" : "No open RFQs right now"}
+            {filter === "awaiting" ? t("seller.table.noRfqsWaitingForYour") : t("seller.table.noOpenRfqsRightNow")}
           </p>
           <p className="mt-1 text-xs text-[#5F6368]">
-            New RFQs from buyers in your machinery categories appear here.
+            {t("seller.table.newRfqsFromBuyersIn")}
           </p>
         </div>
       ) : (
@@ -82,15 +84,15 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
           <table className="w-full text-left text-xs text-[#1C1C1C]">
             <thead className="bg-[#F8FAFC] text-[11px] font-bold text-[#80868B] uppercase tracking-wider border-y border-[#E6E8EB]">
               <tr>
-                <th className="py-3 px-3">Reference</th>
-                <th className="py-3 px-3">Machinery Equipment</th>
-                <th className="py-3 px-3">Category</th>
-                <th className="py-3 px-3">Buyer</th>
-                <th className="py-3 px-3">Terms</th>
-                <th className="py-3 px-3">Quantity</th>
-                <th className="py-3 px-3 text-right">Target Budget</th>
-                <th className="py-3 px-3">Status</th>
-                <th className="py-3 px-3 text-right">Action</th>
+                <th className="py-3 px-3">{t("orders.request.reference")}</th>
+                <th className="py-3 px-3">{t("seller.table.machineryEquipment")}</th>
+                <th className="py-3 px-3">{t("common.category")}</th>
+                <th className="py-3 px-3">{t("userMenu.plan.free")}</th>
+                <th className="py-3 px-3">{t("seller.table.terms")}</th>
+                <th className="py-3 px-3">{t("common.quantity")}</th>
+                <th className="py-3 px-3 text-right">{t("seller.table.targetBudget")}</th>
+                <th className="py-3 px-3">{t("common.status")}</th>
+                <th className="py-3 px-3 text-right">{t("seller.table.action")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E6E8EB]">
@@ -117,11 +119,11 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
                   <td className="py-3.5 px-3 text-[#5F6368] whitespace-nowrap">{rfq.deliveryPort}</td>
                   <td className="py-3.5 px-3 font-bold text-[#1C1C1C] whitespace-nowrap">{rfq.quantityRequested}</td>
                   <td className="py-3.5 px-3 text-right font-extrabold text-[#1C1C1C] whitespace-nowrap">
-                    {rfq.targetBudgetInr !== undefined ? `₹${rfq.targetBudgetInr.toLocaleString("en-IN")}` : "Open"}
+                    {rfq.targetBudgetInr !== undefined ? `₹${rfq.targetBudgetInr.toLocaleString("en-IN")}` : t("seller.table.open")}
                   </td>
                   <td className="py-3.5 px-3 whitespace-nowrap">
                     <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${STATUS_STYLE[rfq.status]}`}>
-                      {rfq.status}
+                      {t(`seller.status.${rfq.status}`)}
                     </span>
                   </td>
                   <td className="py-3.5 px-3 text-right whitespace-nowrap">
@@ -131,7 +133,7 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
                       className="inline-flex items-center gap-1 rounded-lg bg-[#1A73E8] hover:bg-[#1557B0] text-white px-2.5 py-1 text-xs font-bold transition active:scale-95 shadow-2xs"
                     >
                       <Send className="h-3 w-3" />
-                      <span>{rfq.status === "Quoted" ? "Edit quote" : "Quote"}</span>
+                      <span>{rfq.status === "Quoted" ? t("seller.table.editQuote") : t("seller.table.quote")}</span>
                     </button>
                   </td>
                 </tr>

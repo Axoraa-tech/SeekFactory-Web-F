@@ -1,6 +1,7 @@
 "use client";
 
 import { User, Building2, FileText, Bookmark, Crown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/shared/lib/cn";
 import type { ProfileTab } from "./profile-types";
 
@@ -19,11 +20,11 @@ const tabs: {
   count?: "rfq" | "saved" | "following";
   crown?: boolean;
 }[] = [
-  { id: "details", label: "Company & Contact", icon: Building2 },
-  { id: "rfqs", label: "My RFQs & Orders", icon: FileText, count: "rfq" },
-  { id: "saved", label: "Saved Items", icon: Bookmark, count: "saved" },
-  { id: "following", label: "Following Factories", icon: User, count: "following" },
-  { id: "premium", label: "Membership & Plans", icon: Crown, crown: true },
+  { id: "details", label: "profile.tabs.company", icon: Building2 },
+  { id: "rfqs", label: "profile.tabs.rfqs", icon: FileText, count: "rfq" },
+  { id: "saved", label: "profile.tabs.saved", icon: Bookmark, count: "saved" },
+  { id: "following", label: "profile.tabs.following", icon: User, count: "following" },
+  { id: "premium", label: "profile.tabs.membership", icon: Crown, crown: true },
 ];
 
 export function ProfileTabNav({
@@ -33,6 +34,7 @@ export function ProfileTabNav({
   savedCount,
   followingCount,
 }: Props) {
+  const t = useTranslations();
   const counts = { rfq: rfqCount, saved: savedCount, following: followingCount };
 
   return (
@@ -56,7 +58,7 @@ export function ProfileTabNav({
               )}
             >
               <Icon className={cn("h-4 w-4", tab.crown && !active && "text-amber-500")} />
-              <span>{tab.label}</span>
+              <span>{t(tab.label)}</span>
               {typeof count === "number" ? (
                 <span
                   className={cn(

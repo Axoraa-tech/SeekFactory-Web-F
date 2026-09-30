@@ -22,6 +22,7 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 import { cn } from "@/shared/lib/cn";
 import { LogoutButton } from "@/features/auth/logout-button";
 import type { SellerTab, SellerFactoryProfile } from "../types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   activeTab: SellerTab;
@@ -58,6 +59,7 @@ export function SalesproSidebar({
   verificationStatus,
   verificationSubmitted,
 }: Props) {
+  const t = useTranslations();
   const [productsOpen, setProductsOpen] = useState(true);
   const [customerOpen, setCustomerOpen] = useState(true);
   const [showPromo, setShowPromo] = useState(true);
@@ -94,7 +96,7 @@ export function SalesproSidebar({
             type="button"
             onClick={onCloseMobile}
             className="lg:hidden rounded-lg p-1.5 text-[#5F6368] hover:bg-[#F3F4F6]"
-            aria-label="Close menu"
+            aria-label={t("seller.nav.closeMenu")}
           >
             <X className="h-5 w-5" />
           </button>
@@ -105,7 +107,7 @@ export function SalesproSidebar({
         {/* Section 1: Overview */}
         <div className="space-y-0.5">
           <div className="flex items-center justify-between px-2 text-[10px] font-bold text-[#80868B] uppercase tracking-wider">
-            <span>Overview</span>
+            <span>{t("profile.certs.overview")}</span>
             <ChevronDown className="h-3 w-3" />
           </div>
           <button
@@ -119,7 +121,7 @@ export function SalesproSidebar({
             )}
           >
             <LayoutDashboard className={cn("h-4 w-4", activeTab === "overview" ? "text-[#1A73E8]" : "text-[#80868B]")} />
-            <span>Dashboard</span>
+            <span>{t("seller.nav.dashboard")}</span>
           </button>
         </div>
 
@@ -132,7 +134,7 @@ export function SalesproSidebar({
           >
             <div className="flex items-center gap-2 text-xs text-[#5F6368] font-bold">
               <Package className="h-4 w-4" />
-              <span>Machinery Products</span>
+              <span>{t("seller.nav.machineryProducts")}</span>
             </div>
             {productsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5 text-[#80868B]" />}
           </button>
@@ -149,7 +151,7 @@ export function SalesproSidebar({
                     : "text-[#5F6368] hover:text-[#1A73E8] hover:bg-[#F3F4F6]"
                 )}
               >
-                <span>Product Catalog</span>
+                <span>{t("seller.nav.productCatalog")}</span>
                 <span className="rounded-full bg-[#E8F1FD] text-[#1A73E8] px-1.5 py-0.2 text-[10px] font-bold">
                   {productsCount}
                 </span>
@@ -164,7 +166,7 @@ export function SalesproSidebar({
                     : "text-[#5F6368] hover:text-[#F26B21] hover:bg-[#F3F4F6]"
                 )}
               >
-                <span>Video Seeks (Reels)</span>
+                <span>{t("seller.nav.videoSeeksReels")}</span>
                 <span className="rounded-full bg-[#FFF1E8] text-[#F26B21] px-1.5 py-0.2 text-[10px] font-bold">
                   {seeksCount}
                 </span>
@@ -182,7 +184,7 @@ export function SalesproSidebar({
           >
             <div className="flex items-center gap-2 text-xs text-[#5F6368] font-bold">
               <FileText className="h-4 w-4" />
-              <span>India Buyer Leads</span>
+              <span>{t("seller.nav.indiaBuyerLeads")}</span>
             </div>
             {customerOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5 text-[#80868B]" />}
           </button>
@@ -199,7 +201,7 @@ export function SalesproSidebar({
                     : "text-[#5F6368] hover:text-[#F26B21] hover:bg-[#F3F4F6]"
                 )}
               >
-                <span>Active RFQs</span>
+                <span>{t("profile.hero.activeRfqs")}</span>
                 {rfqsCount > 0 && (
                   <span className="rounded-full bg-[#F26B21] text-white px-1.5 py-0.2 text-[10px] font-bold">
                     {rfqsCount}
@@ -217,7 +219,7 @@ export function SalesproSidebar({
                     : "text-[#5F6368] hover:text-[#F26B21] hover:bg-[#F3F4F6]"
                 )}
               >
-                <span>Order Requests</span>
+                <span>{t("seller.nav.orderRequests")}</span>
                 {ordersCount > 0 && (
                   <span className="rounded-full bg-[#DC2626] text-white px-1.5 py-0.2 text-[10px] font-bold">
                     {ordersCount}
@@ -235,7 +237,7 @@ export function SalesproSidebar({
                     : "text-[#5F6368] hover:text-[#1A73E8] hover:bg-[#F3F4F6]"
                 )}
               >
-                <span>Trade Messenger</span>
+                <span>{t("seller.nav.tradeMessenger")}</span>
                 {unreadMessagesCount > 0 && (
                   <span className="rounded-full bg-[#DC2626] text-white px-1.5 py-0.2 text-[10px] font-bold">
                     {unreadMessagesCount}
@@ -249,7 +251,7 @@ export function SalesproSidebar({
         {/* Section 4: Tools & Verification */}
         <div className="space-y-0.5">
           <p className="px-2 text-[10px] font-bold text-[#80868B] uppercase tracking-wider">
-            Verification & Marketplace
+            {t("seller.nav.verificationMarketplace")}
           </p>
 
           <button
@@ -263,7 +265,7 @@ export function SalesproSidebar({
             )}
           >
             <Building2 className="h-4 w-4" />
-            <span>Factory Profile & Certs</span>
+            <span>{t("seller.nav.factoryProfileCerts")}</span>
           </button>
 
           <Link
@@ -272,7 +274,7 @@ export function SalesproSidebar({
           >
             <div className="flex items-center gap-2.5">
               <ShieldCheck className="h-4 w-4 text-[#1A73E8]" />
-              <span>Factory Verification</span>
+              <span>{t("seller.nav.factoryVerification")}</span>
             </div>
             {verificationStatus && (
               <span
@@ -284,12 +286,12 @@ export function SalesproSidebar({
                 )}
               >
                 {verificationStatus === "APPROVED"
-                  ? "Verified"
+                  ? t("common.verified")
                   : verificationStatus === "REJECTED"
-                    ? "Declined"
+                    ? t("seller.nav.declined")
                     : verificationSubmitted
-                      ? "In review"
-                      : "Not started"}
+                      ? t("rfq.status.review")
+                      : t("seller.nav.notStarted")}
               </span>
             )}
           </Link>
@@ -303,7 +305,7 @@ export function SalesproSidebar({
             >
               <div className="flex items-center gap-2.5">
                 <Globe2 className="h-4 w-4 text-[#1A73E8]" />
-                <span>Official Website</span>
+                <span>{t("seller.nav.officialWebsite")}</span>
               </div>
               <ExternalLink className="h-3 w-3 text-[#80868B]" />
             </a>
@@ -312,10 +314,10 @@ export function SalesproSidebar({
               type="button"
               onClick={() => handleSelectTab("profile")}
               className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#E8F1FD] hover:text-[#1A73E8] transition font-semibold cursor-pointer"
-              title="Add your website URL in Factory Profile"
+              title={t("seller.nav.addYourWebsiteUrlIn")}
             >
               <Globe2 className="h-4 w-4 text-[#80868B]" />
-              <span>Add Official Website</span>
+              <span>{t("seller.nav.addOfficialWebsite")}</span>
             </button>
           )}
 
@@ -325,7 +327,7 @@ export function SalesproSidebar({
           >
             <div className="flex items-center gap-2.5">
               <Zap className="h-4 w-4 text-[#F26B21]" />
-              <span>Buyer Marketplace</span>
+              <span>{t("seller.nav.buyerMarketplace")}</span>
             </div>
             <ExternalLink className="h-3 w-3 text-[#80868B]" />
           </Link>
@@ -339,7 +341,7 @@ export function SalesproSidebar({
             className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8] cursor-pointer"
           >
             <Settings className="h-4 w-4" />
-            <span>Factory Settings</span>
+            <span>{t("seller.nav.factorySettings")}</span>
           </button>
           <button
             type="button"
@@ -352,7 +354,7 @@ export function SalesproSidebar({
             )}
           >
             <KeyRound className="h-4 w-4" />
-            <span>Account & Security</span>
+            <span>{t("profile.page.accountSecurity")}</span>
           </button>
         </div>
 
@@ -368,16 +370,16 @@ export function SalesproSidebar({
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20 mb-1.5">
               <Building2 className="h-3.5 w-3.5 text-white" />
             </div>
-            <h4 className="text-xs font-bold leading-tight">Verified Gold Manufacturer</h4>
+            <h4 className="text-xs font-bold leading-tight">{t("seller.nav.verifiedGoldManufacturer")}</h4>
             <p className="text-[10px] text-white/85 mt-0.5 leading-snug">
-              Get direct RFQ matchmaking with Indian industrial importers and OEM buyers.
+              {t("seller.nav.getDirectRfqMatchmakingWith")}
             </p>
             <button
               type="button"
               onClick={onOpenUpgradeModal}
               className="mt-2.5 w-full block text-center rounded-xl bg-white text-[#F26B21] py-1.5 text-xs font-extrabold shadow-sm hover:bg-amber-50 active:scale-[0.98] transition cursor-pointer"
             >
-              Upgrade Tier
+              {t("seller.nav.upgradeTier")}
             </button>
           </div>
         )}

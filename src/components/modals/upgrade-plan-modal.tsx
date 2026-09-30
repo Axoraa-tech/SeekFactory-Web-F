@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useBuyerPlan, type BuyerPlanTier, planPriceLabel } from "@/features/subscription";
+import { useTranslations } from "next-intl";
 
 /**
  * Crisp SVG flag components to avoid OS emoji rendering issues (e.g. "IN" / "CN" text on Windows)
@@ -53,6 +54,7 @@ function ChinaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
 }
 
 export function UpgradePlanModal() {
+  const t = useTranslations();
   const { tier, region, pricing, isUpgradeModalOpen, closeUpgradeModal, setRegion, upgradeTier, plans } = useBuyerPlan();
 
   const [upgradeFeedback, setUpgradeFeedback] = useState<string | null>(null);
@@ -86,7 +88,7 @@ export function UpgradePlanModal() {
           <button
             type="button"
             onClick={closeUpgradeModal}
-            aria-label="Close modal"
+            aria-label={t("common.closeModal")}
             className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white/90 backdrop-blur-xs transition hover:bg-white/30 hover:text-white cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -95,13 +97,13 @@ export function UpgradePlanModal() {
           <div className="relative z-10 space-y-2">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-xs border border-white/20">
               <Lock className="h-3.5 w-3.5 text-amber-300 shrink-0" />
-              <span>Verified Supplier Protected</span>
+              <span>{t("supplier.verifiedSupplierProtected")}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-snug">
-              Upgrade to Unlock Direct Supplier Contacts & Audits
+              {t("upgrade.upgradeToUnlockDirectSupplier")}
             </h2>
             <p className="text-xs sm:text-sm text-blue-100/90 max-w-xl leading-relaxed">
-              Connect directly with verified Chinese & Indian OEM/ODM manufacturing plants. Get unmasked direct phone numbers, plant audit certificates, and priority RFQs.
+              {t("upgrade.connectDirectlyWithVerifiedChinese")}
             </p>
           </div>
         </div>
@@ -112,19 +114,19 @@ export function UpgradePlanModal() {
             <div className="h-7 w-7 rounded-lg bg-blue-600/10 text-brand-blue flex items-center justify-center shrink-0">
               <Building2 className="h-4 w-4" />
             </div>
-            <span className="font-semibold text-slate-800 text-[11px] sm:text-xs">Full Plant Profiles</span>
+            <span className="font-semibold text-slate-800 text-[11px] sm:text-xs">{t("upgrade.fullPlantProfiles")}</span>
           </div>
           <div className="flex items-center justify-center sm:justify-start gap-2 text-slate-700">
             <div className="h-7 w-7 rounded-lg bg-emerald-600/10 text-emerald-600 flex items-center justify-center shrink-0">
               <PhoneCall className="h-4 w-4" />
             </div>
-            <span className="font-semibold text-slate-800 text-[11px] sm:text-xs">Direct WhatsApp/Call</span>
+            <span className="font-semibold text-slate-800 text-[11px] sm:text-xs">{t("upgrade.directWhatsappCall")}</span>
           </div>
           <div className="flex items-center justify-center sm:justify-start gap-2 text-slate-700">
             <div className="h-7 w-7 rounded-lg bg-indigo-600/10 text-indigo-600 flex items-center justify-center shrink-0">
               <FileCheck2 className="h-4 w-4" />
             </div>
-            <span className="font-semibold text-slate-800 text-[11px] sm:text-xs">Audit & ISO Reports</span>
+            <span className="font-semibold text-slate-800 text-[11px] sm:text-xs">{t("upgrade.auditIsoReports")}</span>
           </div>
         </div>
 
@@ -135,7 +137,7 @@ export function UpgradePlanModal() {
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4 text-blue-600 shrink-0" />
               <span className="text-xs font-bold text-slate-700">
-                Active Pricing Region:
+                {t("upgrade.activePricingRegion")}
               </span>
             </div>
             <div className="inline-flex items-center rounded-xl bg-white p-1 border border-slate-200 shadow-2xs">
@@ -150,7 +152,7 @@ export function UpgradePlanModal() {
                 )}
               >
                 <IndiaFlagIcon />
-                <span>India</span>
+                <span>{t("membership.india")}</span>
                 <span
                   className={cn(
                     "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
@@ -171,7 +173,7 @@ export function UpgradePlanModal() {
                 )}
               >
                 <ChinaFlagIcon />
-                <span>China</span>
+                <span>{t("membership.china")}</span>
                 <span
                   className={cn(
                     "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
@@ -204,10 +206,10 @@ export function UpgradePlanModal() {
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-bold text-slate-900 text-sm tracking-tight">Free Buyer</h3>
+                  <h3 className="font-bold text-slate-900 text-sm tracking-tight">{t("upgrade.freeBuyer")}</h3>
                   {tier === "free" && (
                     <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-700">
-                      Current Plan
+                      {t("membership.currentPlan")}
                     </span>
                   )}
                 </div>
@@ -224,19 +226,19 @@ export function UpgradePlanModal() {
                     <div className="flex h-4 w-4 items-center justify-center shrink-0">
                       <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
                     </div>
-                    <span>Preview factory video reels</span>
+                    <span>{t("upgrade.previewFactoryVideoReels")}</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-amber-800 font-medium">
                     <div className="flex h-4 w-4 items-center justify-center shrink-0 text-amber-600">
                       <Lock className="h-3.5 w-3.5" />
                     </div>
-                    <span>Supplier identity masked & blurred</span>
+                    <span>{t("upgrade.supplierIdentityMaskedBlurred")}</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-slate-400">
                     <div className="flex h-4 w-4 items-center justify-center shrink-0">
                       <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
                     </div>
-                    <span>Standard public RFQ only</span>
+                    <span>{t("upgrade.standardPublicRfqOnly")}</span>
                   </li>
                 </ul>
               </div>
@@ -244,7 +246,7 @@ export function UpgradePlanModal() {
               <div className="pt-4 mt-auto">
                 {tier === "free" ? (
                   <div className="w-full rounded-xl border border-slate-200/90 bg-slate-100 py-2.5 text-center text-xs font-bold text-slate-500 select-none">
-                    Current Plan Active
+                    {t("membership.currentPlanActive")}
                   </div>
                 ) : (
                   <button
@@ -252,7 +254,7 @@ export function UpgradePlanModal() {
                     onClick={() => handleUpgrade("free")}
                     className="w-full rounded-xl border border-slate-300 bg-white py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition active:scale-95 cursor-pointer"
                   >
-                    Switch to Free (Test Locked)
+                    {t("upgrade.switchToFreeTestLocked")}
                   </button>
                 )}
               </div>
@@ -278,7 +280,7 @@ export function UpgradePlanModal() {
                     : "bg-gradient-to-r from-blue-600 to-indigo-600"
                 )}
               >
-                RECOMMENDED
+                {t("upgrade.recommended")}
               </span>
 
               <div className="space-y-3">
@@ -290,11 +292,11 @@ export function UpgradePlanModal() {
                     )}
                   >
                     <Sparkles className="h-4 w-4 text-amber-500 fill-amber-400 shrink-0" />
-                    <span>Pro Sourcing Pass</span>
+                    <span>{t("upgrade.proSourcingPass")}</span>
                   </h3>
                   {(tier === "pro" || tier === "enterprise") && (
                     <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-2xs">
-                      Active
+                      {t("membership.active")}
                     </span>
                   )}
                 </div>
@@ -322,7 +324,7 @@ export function UpgradePlanModal() {
                         region === "china" ? "text-rose-600" : "text-blue-600"
                       )}
                     />
-                    <span><strong>Instant Unblur</strong> on all supplier details</span>
+                    <span><strong>{t("upgrade.instantUnblur")}</strong> {t("upgrade.onAllSupplierDetails")}</span>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <CheckCircle2
@@ -331,7 +333,7 @@ export function UpgradePlanModal() {
                         region === "china" ? "text-rose-600" : "text-blue-600"
                       )}
                     />
-                    <span>Direct verified WhatsApp & phone contacts</span>
+                    <span>{t("upgrade.directVerifiedWhatsappPhoneContacts")}</span>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <CheckCircle2
@@ -340,7 +342,7 @@ export function UpgradePlanModal() {
                         region === "china" ? "text-rose-600" : "text-blue-600"
                       )}
                     />
-                    <span>Factory size, machine line audits & certifications</span>
+                    <span>{t("upgrade.factorySizeMachineLineAudits")}</span>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <CheckCircle2
@@ -349,7 +351,7 @@ export function UpgradePlanModal() {
                         region === "china" ? "text-rose-600" : "text-blue-600"
                       )}
                     />
-                    <span>Priority RFQ dispatch with &lt; 4h response time</span>
+                    <span>{t("upgrade.priorityRfqDispatchWith4h")}</span>
                   </li>
                 </ul>
               </div>
@@ -369,10 +371,10 @@ export function UpgradePlanModal() {
                   <ShieldCheck className="h-4 w-4 shrink-0" />
                   <span>
                     {tier === "pro" || tier === "enterprise"
-                      ? "Pro Plan Active (Unlocked)"
+                      ? t("upgrade.proPlanActiveUnlocked")
                       : region === "india"
-                      ? `Upgrade to Pro • ${planPriceLabel(plans, "pro", "india")}`
-                      : `Upgrade to Pro • ${planPriceLabel(plans, "pro", "china")}`}
+                      ? t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "india") })
+                      : t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "china") })}
                   </span>
                   <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                 </button>
@@ -385,15 +387,15 @@ export function UpgradePlanModal() {
         <div className="flex items-center justify-between border-t border-slate-200/80 bg-slate-50 px-6 py-3 text-[11px] text-slate-500 sm:px-8">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-            <span>100% Satisfaction Guarantee • Direct Plant Access</span>
+            <span>{t("upgrade.n100SatisfactionGuaranteeDirectPlant")}</span>
           </div>
            <button
             type="button"
             onClick={closeUpgradeModal}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white/90 backdrop-blur-md transition hover:bg-black/40 hover:text-white"
           >
-            Dismiss
+            {t("upgrade.dismiss")}
           </button>
         </div>
       </div>

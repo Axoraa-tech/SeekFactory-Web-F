@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Conversation } from "@/entities/message";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { useLocale } from "next-intl";
 import { formatRelativeTime } from "@/shared/lib/format";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function RecentMessages({ messages }: Props) {
+  const locale = useLocale();
   const { t } = useRegionalSettings();
 
   return (
@@ -34,7 +36,7 @@ export function RecentMessages({ messages }: Props) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="truncate text-sm font-semibold">{message.manufacturer.name}</p>
-                  <span className="shrink-0 text-[11px] text-ink-faint">{formatRelativeTime(message.lastMessageAt)}</span>
+                  <span className="shrink-0 text-[11px] text-ink-faint">{formatRelativeTime(message.lastMessageAt, locale)}</span>
                 </div>
                 <p className="truncate text-xs text-ink-muted">{message.lastMessage}</p>
               </div>

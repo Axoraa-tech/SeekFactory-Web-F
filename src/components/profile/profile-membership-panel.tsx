@@ -4,6 +4,7 @@ import { CheckCircle2, Globe } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import type { MembershipTier } from "./profile-types";
 import { useBuyerPlan, planPriceLabel } from "@/features/subscription";
+import { useTranslations } from "next-intl";
 
 function IndiaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
   return (
@@ -44,6 +45,7 @@ type Props = {
 };
 
 export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
+  const t = useTranslations();
   const { region, setRegion, pricing, plans } = useBuyerPlan();
 
   return (
@@ -51,11 +53,10 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5">
           <h2 className="text-xl font-extrabold tracking-tight text-ink sm:text-2xl">
-            Choose Your Sourcing Tier
+            {t("membership.chooseYourSourcingTier")}
           </h2>
           <p className="max-w-2xl text-sm text-ink-muted">
-            Upgrade to unlock priority RFQ dispatch, live video audits, and dedicated enterprise
-            engineering support.
+            {t("membership.upgradeToUnlockPriorityRfq")}
           </p>
         </div>
 
@@ -72,7 +73,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             )}
           >
             <IndiaFlagIcon />
-            <span>India</span>
+            <span>{t("membership.india")}</span>
             <span
               className={cn(
                 "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
@@ -93,7 +94,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             )}
           >
             <ChinaFlagIcon />
-            <span>China</span>
+            <span>{t("membership.china")}</span>
             <span
               className={cn(
                 "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
@@ -116,10 +117,10 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
         >
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-extrabold text-ink text-base">Standard Buyer</h3>
+              <h3 className="font-extrabold text-ink text-base">{t("membership.standardBuyer")}</h3>
               {currentTier === "free" && (
                 <span className="rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-bold text-white">
-                  Active
+                  {t("membership.active")}
                 </span>
               )}
             </div>
@@ -129,16 +130,13 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             </div>
             <ul className="space-y-2 text-xs text-ink-muted">
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Browse 500+ Verified
-                Plants
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.browse500VerifiedPlants")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Up to 5 Active RFQs /
-                Month
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.upTo5ActiveRfqs")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Standard Trade
-                Assurance Escrow
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.standardTradeAssuranceEscrow")}
               </li>
             </ul>
           </div>
@@ -149,7 +147,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             onClick={() => onUpgradeTier("free")}
             className="glass-liquid-item mt-auto w-full h-9 rounded-full text-xs font-bold text-ink disabled:opacity-60 cursor-pointer"
           >
-            {currentTier === "free" ? "Current Plan" : "Switch to Free"}
+            {currentTier === "free" ? t("membership.currentPlan") : t("membership.switchToFree")}
           </button>
         </div>
 
@@ -161,14 +159,14 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
           )}
         >
           <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-0.5 text-[10px] font-black text-white uppercase tracking-wider shadow-sm">
-            Most Popular
+            {t("membership.mostPopular")}
           </span>
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-extrabold text-ink text-base">Pro Sourcing Lead</h3>
+              <h3 className="font-extrabold text-ink text-base">{t("membership.proSourcingLead")}</h3>
               {currentTier === "pro" && (
                 <span className="rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-bold text-white">
-                  Active
+                  {t("membership.active")}
                 </span>
               )}
             </div>
@@ -180,19 +178,16 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             <ul className="space-y-2 text-xs text-ink font-medium">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />{" "}
-                <strong>Unlimited</strong> Custom RFQs & Quotes
+                <strong>{t("membership.unlimited")}</strong> {t("membership.customRfqsQuotes")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Priority RFQ Dispatch
-                (&lt; 4h quotes)
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.priorityRfqDispatch4hQuotes")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Verified Buyer Gold
-                Badge
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.verifiedBuyerGoldBadge")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Dedicated Account
-                Manager
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.dedicatedAccountManager")}
               </li>
             </ul>
           </div>
@@ -204,10 +199,10 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             className="mt-auto w-full h-10 rounded-full bg-brand-blue text-xs font-bold text-white hover:bg-brand-blue-dark shadow-sm active:scale-95 disabled:opacity-60 transition-all cursor-pointer"
           >
             {currentTier === "pro"
-              ? "Current Plan Active"
+              ? t("membership.currentPlanActive")
               : region === "india"
-              ? `Upgrade to Pro • ${planPriceLabel(plans, "pro", "india")}`
-              : `Upgrade to Pro • ${planPriceLabel(plans, "pro", "china")}`}
+              ? t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "india") })
+              : t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "china") })}
           </button>
         </div>
 
@@ -220,10 +215,10 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
         >
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-extrabold text-ink text-base">Enterprise VIP</h3>
+              <h3 className="font-extrabold text-ink text-base">{t("membership.enterpriseVip")}</h3>
               {currentTier === "enterprise" && (
                 <span className="rounded-full bg-amber-500 text-white px-2 py-0.5 text-[10px] font-bold">
-                  Active
+                  {t("membership.active")}
                 </span>
               )}
             </div>
@@ -233,20 +228,16 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             </div>
             <ul className="space-y-2 text-xs text-ink-muted">
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> All Pro Buyer Features
-                Included
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.allProBuyerFeaturesIncluded")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Third-Party On-Site
-                Plant Inspection
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.thirdPartyOnSitePlant")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Custom Escrow Milestone
-                Contracts
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.customEscrowMilestoneContracts")}
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> 24/7 Priority Sourcing
-                Hotline
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.n247PrioritySourcingHotline")}
               </li>
             </ul>
           </div>
@@ -258,10 +249,10 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             className="mt-auto w-full h-9 rounded-full bg-ink text-xs font-bold text-white hover:bg-black active:scale-95 disabled:opacity-60 transition-all shadow-sm cursor-pointer"
           >
             {currentTier === "enterprise"
-              ? "Current Plan Active"
+              ? t("membership.currentPlanActive")
               : region === "india"
-              ? `Upgrade to Enterprise (${planPriceLabel(plans, "enterprise", "india")})`
-              : `Upgrade to Enterprise (${planPriceLabel(plans, "enterprise", "china")})`}
+              ? t("membership.upgradeToEnterprise", { planPriceLabel: planPriceLabel(plans, "enterprise", "india") })
+              : t("membership.upgradeToEnterprise", { planPriceLabel: planPriceLabel(plans, "enterprise", "china") })}
           </button>
         </div>
       </div>

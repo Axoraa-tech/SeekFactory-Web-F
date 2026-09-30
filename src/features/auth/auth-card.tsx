@@ -11,6 +11,7 @@ import { getApi } from "@/shared/api";
 
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { PhoneInput } from 'react-international-phone';
+import { useTranslations } from "next-intl";
 
 
 type Mode = "join" | "login";
@@ -32,6 +33,7 @@ export function AuthCard({
   initialPassword = "",
   initialPhone = "",
 }: AuthCardProps) {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isManufacturer = searchParams.get("role") === "manufacturer";
@@ -66,21 +68,21 @@ export function AuthCard({
 
     if (method === "email") {
       if (!isPasswordValid) {
-        setError("Invalid Password");
+        setError(t("auth.card.invalidPassword"));
         return;
       }
     } else {
       if (!otpSent) {
         if(!isValidPhoneNumber(phone || "")) {
-          setError("Enter a Valid Phone Number");
+          setError(t("auth.card.enterAValidPhoneNumber"));
           return
         }
         setOtpSent(true);
-        setNotice("Mock code sent. Use 123456.");
+        setNotice(t("auth.card.mockCodeSentUse123456"));
         return;
       }
       if (!String(form.get("otp") ?? "").trim()) {
-        setError("Enter the verification code.");
+        setError(t("auth.card.enterTheVerificationCode"));
         return;
       }
     }
@@ -110,7 +112,7 @@ export function AuthCard({
       router.push(postAuthPath(user.role, next, user.firstLogin));
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Authentication failed. Please check your credentials.");
+      setError(err instanceof Error ? err.message : t("auth.card.authenticationFailedPleaseCheckYour"));
       setSaving(false);
     }
   }
@@ -126,11 +128,11 @@ export function AuthCard({
   //? To Validate Password 
   function validatePassword(password: string) {
     const errors:string[] = [];
-    if(password.length<8) errors.push("At least 8 characters")
-    if(!/[A-Z]/.test(password)) errors.push("At least one Uppercase letter");
-    if(!/[a-z]/.test(password)) errors.push("At least one Lowercase letter");
-    if(!/[0-9]/.test(password)) errors.push("At least one Number letter");
-    if(!/[^A-Za-z0-9]/.test(password)) errors.push("At least one Special character letter");
+    if(password.length<8) errors.push(t("auth.policy.minLength"))
+    if(!/[A-Z]/.test(password)) errors.push(t("auth.policy.upper"));
+    if(!/[a-z]/.test(password)) errors.push(t("auth.policy.lower"));
+    if(!/[0-9]/.test(password)) errors.push(t("auth.policy.number"));
+    if(!/[^A-Za-z0-9]/.test(password)) errors.push(t("auth.policy.special"));
 
     return mode === "join" ? errors : [];
   }
@@ -144,10 +146,10 @@ export function AuthCard({
       {!hideHeader && (
         <>
           <h1 className="mb-1 text-center text-2xl sm:text-[30px] font-light tracking-tight text-ink">
-            {mode === "join" ? "Join SeekFactory" : "Sign in"}
+            {mode === "join" ? t("auth.card.joinSeekfactory") : t("nav.signIn")}
           </h1>
           <p className="mb-4 sm:mb-5 text-center text-xs sm:text-sm text-ink-muted">
-            {isManufacturer ? "For verified factories and manufacturers" : "For industrial buyers worldwide"}
+            {isManufacturer ? t("auth.card.forVerifiedFactoriesAndManufacturers") : t("auth.card.forIndustrialBuyersWorldwide")}
           </p>
         </>
       )}
@@ -160,13 +162,13 @@ export function AuthCard({
             <input
               name="name"
               required
-              placeholder="Contact Person / Full Name"
+              placeholder={t("auth.card.contactPersonFullName")}
               className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
             <input
               name="companyName"
               required
-              placeholder={isManufacturer ? "Factory / Manufacturer Name" : "Company / Enterprise Name"}
+              placeholder={isManufacturer ? t("auth.card.factoryManufacturerName") : t("auth.card.companyEnterpriseName")}
               className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
           </>
@@ -180,7 +182,7 @@ export function AuthCard({
               required
               value={email || ""}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
+              placeholder={t("common.email")}
               className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
             />
             <div className="relative">
@@ -191,7 +193,7 @@ export function AuthCard({
                 minLength={8}
                 value={password || ""}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password (8+ characters)"
+                placeholder={t("auth.card.password8Characters")}
                 className={`h-11 sm:h-12 w-full rounded-lg border px-3 pr-10 text-sm outline-none transition-colors ${
                   password && passwordErrors.length > 0 
                     ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" 
@@ -220,7 +222,7 @@ export function AuthCard({
                 href="/forgot-password"
                 className="block text-right text-xs font-semibold text-brand-blue hover:underline"
               >
-                Forgot password?
+                {t("auth.forgotPassword")}
               </Link>
             )}
           </>
@@ -241,7 +243,7 @@ export function AuthCard({
               <input
                 name="otp"
                 required
-                placeholder="OTP (123456)"
+                placeholder={t("auth.card.otp123456")}
                 className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
               />
             ) : null}
@@ -250,17 +252,17 @@ export function AuthCard({
 
         {mode === "join" ? (
           <p className="pt-1 text-center text-xs leading-relaxed text-ink-muted">
-            By clicking Agree & Join, you agree to the SeekFactory{" "}
+            {t("auth.card.byClickingAgreeJoinYou")}{" "}
             <Link href="/legal/terms" className="font-semibold text-brand-blue">
-              User Agreement
+              {t("layout.footer.userAgreement")}
             </Link>
             ,{" "}
             <Link href="/legal/privacy" className="font-semibold text-brand-blue">
-              Privacy Policy
+              {t("layout.footer.privacyPolicy")}
             </Link>
-            , and{" "}
+            {t("auth.card.and")}{" "}
             <Link href="/legal/cookies" className="font-semibold text-brand-blue">
-              Cookie Policy
+              {t("layout.footer.cookiePolicy")}
             </Link>
             .
           </p>
@@ -275,12 +277,12 @@ export function AuthCard({
           className="btn btn-primary h-11 sm:h-12 w-full text-sm sm:text-base disabled:opacity-60"
         >
           {saving
-            ? "Please wait…"
+            ? t("auth.card.pleaseWait")
             : method === "phone" && !otpSent
-              ? "Send code"
+              ? t("auth.card.sendCode")
               : mode === "join"
-                ? "Agree & Join"
-                : "Sign in"}
+                ? t("auth.card.agreeJoin")
+                : t("nav.signIn")}
         </button>
       </form>
 
@@ -294,38 +296,38 @@ export function AuthCard({
           setNotice("");
         }}
       >
-        {method === "email" ? "Use phone instead" : "Use email instead"}
+        {method === "email" ? t("auth.card.usePhoneInstead") : t("auth.card.useEmailInstead")}
       </button>
 
       <div className="my-4 flex items-center gap-3 text-xs sm:text-sm text-ink-faint">
         <span className="h-px flex-1 bg-line" />
-        or
+        {t("common.or")}
         <span className="h-px flex-1 bg-line" />
       </div>
 
       {isManufacturer ? (
         <button
           type="button"
-          onClick={() => setNotice("WeChat login will connect when the China backend is ready.")}
+          onClick={() => setNotice(t("auth.card.wechatLoginWillConnectWhen"))}
           className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#8c8c8c] text-xs sm:text-sm font-semibold hover:bg-canvas transition-colors"
         >
-          Continue with WeChat
+          {t("auth.card.continueWithWechat")}
         </button>
       ) : (
         <button
           type="button"
-          onClick={() => setNotice("Google login will connect when the backend is ready.")}
+          onClick={() => setNotice(t("auth.card.googleLoginWillConnectWhen"))}
           className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#8c8c8c] text-xs sm:text-sm font-semibold hover:bg-canvas transition-colors"
         >
           <GoogleMark />
-          Continue with Google
+          {t("auth.card.continueWithGoogle")}
         </button>
       )}
 
       {/* Instant Guest Demo Buttons */}
       <div className="my-3.5 flex items-center gap-2 text-[11px] sm:text-xs text-slate-400">
         <span className="h-px flex-1 bg-slate-200" />
-        <span>⚡ Quick Guest Access</span>
+        <span>{t("auth.card.quickGuestAccess")}</span>
         <span className="h-px flex-1 bg-slate-200" />
       </div>
 
@@ -337,7 +339,7 @@ export function AuthCard({
           className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:border-brand-blue/30 transition-all active:scale-[0.99] shadow-2xs group"
         >
           <Monitor className="h-3.5 w-3.5 text-brand-blue group-hover:scale-110 transition-transform" />
-          <span>Guest: Landscape B2B Feed</span>
+          <span>{t("auth.card.guestLandscapeB2bFeed")}</span>
         </button>
 
         <button
@@ -347,29 +349,29 @@ export function AuthCard({
           className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/70 px-3 text-xs font-semibold text-slate-700 hover:bg-orange-100/80 hover:border-orange-300 transition-all active:scale-[0.99] shadow-2xs group"
         >
           <Smartphone className="h-3.5 w-3.5 text-[#FF3D00] group-hover:scale-110 transition-transform" />
-          <span>Guest: Vertical Seeks Feed</span>
+          <span>{t("auth.card.guestVerticalSeeksFeed")}</span>
         </button>
       </div>
 
       <p className="mt-4 sm:mt-5 text-center text-xs sm:text-sm">
         {mode === "join" ? (
           <>
-            Already on SeekFactory?{" "}
+            {t("auth.card.alreadyOnSeekfactory")}{" "}
             <Link
               href={`/login?role=${isManufacturer ? "manufacturer" : "buyer"}`}
               className="font-semibold text-brand-blue hover:underline"
             >
-              Sign in
+              {t("nav.signIn")}
             </Link>
           </>
         ) : (
           <>
-            New to SeekFactory?{" "}
+            {t("auth.card.newToSeekfactory")}{" "}
             <Link
               href={`/join?role=${isManufacturer ? "manufacturer" : "buyer"}`}
               className="font-semibold text-brand-blue hover:underline"
             >
-              Join now
+              {t("nav.joinNow")}
             </Link>
           </>
         )}

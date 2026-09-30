@@ -62,7 +62,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
             type="button"
             onClick={() => setQuery("")}
             className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200/80 text-slate-500 hover:bg-slate-300 transition-colors mr-1"
-            aria-label="Clear search"
+            aria-label={t("layout.search.clearSearch")}
           >
             <X className="h-3 w-3" />
           </button>
@@ -84,7 +84,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
       {isFocused && query.trim().length > 0 && (
         <div className="absolute left-0 right-0 top-12 z-50 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-1 duration-150">
           <p className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Matching Categories
+            {t("layout.search.matchingCategories")}
           </p>
           <div className="space-y-0.5">
             {categories
@@ -97,7 +97,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
                   className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
                 >
                   <span>{translateCategory(cat.name)}</span>
-                  <span className="text-[10px] text-slate-400">{cat.listingCount} listings</span>
+                  <span className="text-[10px] text-slate-400">{t("layout.search.listingCount", { count: cat.listingCount })}</span>
                 </a>
               ))}
           </div>
@@ -110,7 +110,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
           type="button"
           onClick={() => setMobileSearchOpen((prev) => !prev)}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100/80 text-slate-600 hover:bg-slate-200 transition-colors"
-          aria-label="Open search"
+          aria-label={t("layout.search.openSearch")}
         >
           <Search className="h-4 w-4" />
         </button>
@@ -137,7 +137,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
                   <button
                 type="button"
                 onClick={() => setQuery("")}
-                aria-label="Clear search"
+                aria-label={t("layout.search.clearSearch")}
                 className="p-1 text-slate-400 hover:text-slate-600"
               >
                 <X className="h-4 w-4" />

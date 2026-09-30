@@ -11,6 +11,7 @@ import {
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import { getApi } from "@/shared/api";
+import { useTranslations } from "next-intl";
 
 type Props = {
   reelId?: string;
@@ -41,6 +42,7 @@ export function EngagementRail({
   onOpenComments,
   variant = "horizontal",
 }: Props) {
+  const t = useTranslations();
   const [liked, setLiked] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -73,7 +75,7 @@ export function EngagementRail({
         {/* 1. Comment Button */}
         <button
           type="button"
-          aria-label="Open comments"
+          aria-label={t("seek.rail.openComments")}
           onClick={onOpenComments}
           className="group flex items-center gap-1 transition-colors hover:text-brand-blue"
         >
@@ -86,7 +88,7 @@ export function EngagementRail({
         {/* 2. Share / Repost Button */}
         <button
           type="button"
-          aria-label={reposted ? "Undo share" : "Share reel"}
+          aria-label={reposted ? t("seek.rail.undoShare") : t("seek.rail.shareReel")}
           onClick={handleToggleRepost}
           className={cn(
             "group flex items-center gap-1 transition-colors hover:text-emerald-500",
@@ -102,7 +104,7 @@ export function EngagementRail({
         {/* 3. Like Button */}
         <button
           type="button"
-          aria-label={liked ? "Unlike reel" : "Like reel"}
+          aria-label={liked ? t("seek.rail.unlikeReel") : t("seek.rail.likeReel")}
           onClick={handleToggleLike}
           className={cn(
             "group flex items-center gap-1 transition-colors hover:text-rose-500",
@@ -131,7 +133,7 @@ export function EngagementRail({
         {/* 5. Bookmark / Save Button */}
         <button
           type="button"
-          aria-label={saved ? "Remove bookmark" : "Bookmark reel"}
+          aria-label={saved ? t("seek.rail.removeBookmark") : t("seek.rail.bookmarkReel")}
           onClick={handleToggleSave}
           className={cn(
             "group flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:text-brand-blue hover:bg-blue-50",
@@ -155,7 +157,7 @@ export function EngagementRail({
       {/* 1. Comment */}
       <button
         type="button"
-        aria-label="Open comments"
+        aria-label={t("seek.rail.openComments")}
         onClick={onOpenComments}
         className="flex flex-col items-center gap-0.5 group transition active:scale-90"
       >
@@ -170,7 +172,7 @@ export function EngagementRail({
       {/* 2. Share */}
       <button
         type="button"
-        aria-label="Share reel"
+        aria-label={t("seek.rail.shareReel")}
         className="flex flex-col items-center gap-0.5 group transition active:scale-90"
         onClick={handleToggleRepost}
       >
@@ -185,7 +187,7 @@ export function EngagementRail({
       {/* 3. Like */}
       <button
         type="button"
-        aria-label={liked ? "Unlike reel" : "Like reel"}
+        aria-label={liked ? t("seek.rail.unlikeReel") : t("seek.rail.likeReel")}
         className="flex flex-col items-center gap-0.5 group transition active:scale-90"
         onClick={handleToggleLike}
       >
@@ -220,7 +222,7 @@ export function EngagementRail({
       {/* 5. Bookmark / Save */}
       <button
         type="button"
-        aria-label={saved ? "Remove bookmark" : "Bookmark reel"}
+        aria-label={saved ? t("seek.rail.removeBookmark") : t("seek.rail.bookmarkReel")}
         className="flex flex-col items-center gap-0.5 group transition active:scale-90"
         onClick={handleToggleSave}
       >

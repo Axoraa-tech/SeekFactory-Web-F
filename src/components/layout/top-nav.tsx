@@ -9,6 +9,7 @@ import { MessagesDropdown } from "@/components/layout/messages-dropdown";
 import { NotificationsDropdown } from "@/components/layout/notifications-dropdown";
 import { UserDropdown } from "@/components/layout/user-dropdown";
 import { LanguageCurrencyDropdown } from "@/components/layout/language-currency-dropdown";
+import { LanguageToggle } from "@/components/layout/language-toggle";
 import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
 import type { BuyerProfile } from "@/entities/user";
 import type { Category } from "@/entities/category";
@@ -234,7 +235,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
             data-logo
             href="/"
             className="flex shrink-0 items-center py-1 group"
-            aria-label="SeekFactory home"
+            aria-label={t("layout.topNav.seekfactoryHome")}
           >
             <BrandLogo
               priority
@@ -249,7 +250,10 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
           <div data-actions className="ml-auto flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {user ? (
               <>
-                <LanguageCurrencyDropdown />
+                <LanguageToggle />
+                <div className="hidden sm:block">
+                  <LanguageCurrencyDropdown />
+                </div>
                 <Link
                   href="/rfq/new"
                   className="btn btn-primary inline-flex h-9 sm:h-10 items-center gap-1.5 px-3 sm:px-3.5 text-xs sm:text-sm"
@@ -267,7 +271,10 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
               </>
             ) : (
               <div className="flex items-center gap-1.5 sm:gap-2.5">
-                <LanguageCurrencyDropdown />
+                <LanguageToggle />
+                <div className="hidden sm:block">
+                  <LanguageCurrencyDropdown />
+                </div>
 
                 <Link
                   href="/join?role=manufacturer"

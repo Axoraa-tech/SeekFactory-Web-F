@@ -19,6 +19,7 @@ import type { AppNotification } from "@/entities/notification";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { getApi } from "@/shared/api";
 import { formatRelativeTime } from "@/shared/lib/format";
+import { useLocale } from "next-intl";
 import { notificationHref } from "@/features/notifications/notification-links";
 
 type Props = {
@@ -28,6 +29,7 @@ type Props = {
 type NotificationCategory = "all" | "unread" | "quotes" | "system";
 
 export function InteractiveNotificationsCenter({ initialNotifications }: Props) {
+  const locale = useLocale();
   const { t } = useRegionalSettings();
   const [notifications, setNotifications] = useState<AppNotification[]>(initialNotifications);
   const [activeTab, setActiveTab] = useState<NotificationCategory>("all");
@@ -47,7 +49,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
       if (success) showToast(success);
     } catch (err) {
       setNotifications(previous);
-      showToast(err instanceof Error ? err.message : "Could not update notifications");
+      showToast(err instanceof Error ? err.message : t("notificationsCenter.couldNotUpdateNotifications"));
     }
   };
 
@@ -55,14 +57,14 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
     optimistic(
       notifications.map((n) => ({ ...n, read: true })),
       () => getApi().notifications.markAllAsRead(),
-      "All notifications marked as read",
+      t("notificationsCenter.allNotificationsMarkedAsRead"),
     );
 
   const handleClearAll = () =>
     optimistic(
       [],
       () => Promise.all(notifications.map((n) => getApi().notifications.deleteNotification(n.id))),
-      "All notifications cleared",
+      t("notificationsCenter.allNotificationsCleared"),
     );
 
   const handleToggleRead = (id: string, e: React.MouseEvent) => {
@@ -80,7 +82,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
     void optimistic(
       notifications.filter((n) => n.id !== id),
       () => getApi().notifications.deleteNotification(id),
-      "Notification removed",
+      t("notificationsCenter.notificationRemoved"),
     );
   };
 
@@ -130,7 +132,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
             )}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Real-time updates on manufacturer quotations, RFQ responses, and factory audit verifications
+            {t("notificationsCenter.realTimeUpdatesOnManufacturer")}
           </p>
         </div>
 
@@ -154,7 +156,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
               className="btn btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              <span>Clear all</span>
+              <span>{t("notificationsCenter.clearAll")}</span>
             </button>
           )}
         </div>
@@ -206,7 +208,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <span>Quotes, RFQs & Orders</span>
+          <span>{t("notificationsCenter.quotesRfqsOrders")}</span>
         </button>
 
         <button
@@ -219,7 +221,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <span>System & Security</span>
+          <span>{t("notificationsCenter.systemSecurity")}</span>
         </button>
       </div>
 
@@ -231,9 +233,9 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
               <Inbox className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-bold text-sm text-slate-800">No notifications in this view</p>
+              <p className="font-bold text-sm text-slate-800">{t("notificationsCenter.noNotificationsInThisView")}</p>
               <p className="text-xs text-slate-500 mt-0.5">
-                {activeTab === "unread" ? "You have caught up with all updates!" : "You will receive updates here as manufacturers reply to RFQs."}
+                {activeTab === "unread" ? t("notificationsCenter.youHaveCaughtUpWith") : t("notificationsCenter.youWillReceiveUpdatesHere")}
               </p>
             </div>
           </div>
@@ -273,7 +275,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                         <span className="h-2 w-2 rounded-full bg-brand-blue shrink-0" />
                       )}
                     </div>
-                    <span className="text-[10px] text-slate-400 shrink-0 font-medium">{formatRelativeTime(item.createdAt)}</span>
+                    <span className="text-[10px] text-slate-400 shrink-0 font-medium">{formatRelativeTime(item.createdAt, locale)}</span>
                   </div>
 
                   <p className="text-xs text-slate-600 mt-1 leading-relaxed">{item.body}</p>
@@ -283,7 +285,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                       href={actionHref}
                       className="inline-flex items-center gap-1 font-bold text-brand-blue hover:underline text-[11px]"
                     >
-                      <span>Take Action / View Details</span>
+                      <span>{t("notificationsCenter.takeActionViewDetails")}</span>
                       <ExternalLink className="h-3 w-3" />
                     </Link>
 
@@ -293,7 +295,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                         onClick={(e) => handleToggleRead(item.id, e)}
                         className="text-[11px] font-semibold text-slate-500 hover:text-brand-blue"
                       >
-                        {isUnread ? "Mark as read" : "Mark as unread"}
+                        {isUnread ? t("notificationsCenter.markAsRead") : t("notificationsCenter.markAsUnread")}
                       </button>
                       <span>•</span>
                       <button
@@ -301,7 +303,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                         onClick={(e) => handleDelete(item.id, e)}
                         className="text-[11px] font-semibold text-slate-400 hover:text-red-600"
                       >
-                        Delete
+                        {t("common.delete")}
                       </button>
                     </div>
                   </div>

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { ArrowUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function BackToTop() {
+  const t = useTranslations();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -35,14 +37,14 @@ export function BackToTop() {
     <button
       type="button"
       onClick={scrollToTop}
-      aria-label="Scroll to top of page"
+      aria-label={t("ui.scrollToTopOfPage")}
       className="btn btn-secondary group fixed bottom-20 right-4 lg:bottom-8 lg:right-8 z-40 flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center"
     >
       <ArrowUp className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-200 group-hover:-translate-y-0.5" />
       
       {/* Tooltip hint on hover */}
       <span className="pointer-events-none absolute right-14 whitespace-nowrap rounded-md bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white opacity-0 shadow-md transition-opacity duration-200 group-hover:opacity-100 hidden sm:block">
-        Back to top
+        {t("ui.backToTop")}
       </span>
     </button>
   );

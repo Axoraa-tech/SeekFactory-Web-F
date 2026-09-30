@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import type { Category } from "@/entities/category";
 import { getApi } from "@/shared/api";
 import { cn } from "@/shared/lib/cn";
+import { useTranslations } from "next-intl";
 
 type Props = {
   categories: Category[];
@@ -33,6 +34,7 @@ function formatBytes(bytes: number) {
 }
 
 export function RfqForm({ categories, initialCompanyName = "", initialProductName = "", initialCategoryId = "" }: Props) {
+  const t = useTranslations();
   const [status, setStatus] = useState<"idle" | "saving" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
   const [referenceId, setReferenceId] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
         productName,
         quantity,
         unit,
-        targetPrice: targetPrice || "Negotiable",
+        targetPrice: targetPrice || t("rfq.form.negotiable"),
         currency,
         incoterm,
         categoryId: selectedCategory || undefined,
@@ -73,7 +75,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
       setReferenceId(result.referenceNumber || result.id);
       setStatus("sent");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not post your RFQ. Please try again.");
+      setError(err instanceof Error ? err.message : t("rfq.form.couldNotPostYourRfq"));
       setStatus("idle");
     }
   }
@@ -88,7 +90,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
       const uploaded = await getApi().media.upload(file, "document");
       setAttachedFile({ name: file.name, size: formatBytes(file.size), url: uploaded.url });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not upload the file");
+      setError(err instanceof Error ? err.message : t("rfq.form.couldNotUploadTheFile"));
     } finally {
       setUploading(false);
     }
@@ -111,32 +113,32 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
 
         <div className="space-y-1">
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 px-3 py-0.5 text-xs font-bold">
-            RFQ Dispatched to Verified Factories
+            {t("rfq.form.rfqDispatchedToVerifiedFactories")}
           </span>
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-            Request for Quotation Live!
+            {t("rfq.form.requestForQuotationLive")}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-            Your RFQ reference is <strong className="font-mono text-brand-blue">{referenceId}</strong>. Verified manufacturers in your category can now quote on it; you will be notified as quotes arrive.
+            {t("rfq.form.yourRfqReferenceIs")} <strong className="font-mono text-brand-blue">{referenceId}</strong>{t("rfq.form.verifiedManufacturersInYourCategory")}
           </p>
         </div>
 
         <div className="rounded-xl bg-white border border-slate-200 p-4 max-w-md mx-auto text-left text-xs space-y-1.5 shadow-2xs">
           <div className="flex justify-between">
-            <span className="text-slate-500 font-medium">Product:</span>
+            <span className="text-slate-500 font-medium">{t("rfq.form.product")}</span>
             <span className="font-bold text-slate-800">{productName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500 font-medium">Quantity:</span>
+            <span className="text-slate-500 font-medium">{t("rfq.form.quantity")}</span>
             <span className="font-bold text-slate-800">{quantity} {unit}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500 font-medium">Delivery Term:</span>
+            <span className="text-slate-500 font-medium">{t("rfq.form.deliveryTerm")}</span>
             <span className="font-bold text-slate-800">{incoterm}</span>
           </div>
           {attachedFile && (
             <div className="flex justify-between">
-              <span className="text-slate-500 font-medium">Attachment:</span>
+              <span className="text-slate-500 font-medium">{t("rfq.form.attachment")}</span>
               <span className="font-bold text-slate-800 truncate max-w-[60%]">{attachedFile.name}</span>
             </div>
           )}
@@ -147,7 +149,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
             href="/profile?tab=rfqs"
             className="btn btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-xs sm:text-sm"
           >
-            <span>Track in My RFQs & Profile</span>
+            <span>{t("rfq.form.trackInMyRfqsProfile")}</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
 
@@ -155,7 +157,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
             href="/explore"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
           >
-            <span>Browse More Machinery</span>
+            <span>{t("rfq.form.browseMoreMachinery")}</span>
           </Link>
         </div>
       </Card>
@@ -168,16 +170,16 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
         <div>
           <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
             <FileText className="h-5 w-5 text-brand-blue" />
-            <span>Post a Buying Request (RFQ)</span>
+            <span>{t("rfq.form.postABuyingRequestRfq")}</span>
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Submit your technical drawings and specs to receive competitive direct factory bids.
+            {t("rfq.form.submitYourTechnicalDrawingsAnd")}
           </p>
         </div>
 
         <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-100 px-3 py-1 text-[11px] font-bold text-brand-blue">
           <ShieldCheck className="h-3.5 w-3.5" />
-          <span>Audited OEM Direct</span>
+          <span>{t("rfq.form.auditedOemDirect")}</span>
         </div>
       </div>
 
@@ -186,28 +188,28 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Product / Component Name *
+              {t("rfq.form.productComponentName")}
             </label>
             <input
               type="text"
               required
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
-              placeholder="e.g. 5-Axis CNC Aluminum Machining"
+              placeholder={t("rfq.form.eG5AxisCnc")}
               className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Machinery Category
+              {t("rfq.form.machineryCategory")}
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors cursor-pointer"
             >
-              <option value="">All Machinery Categories</option>
+              <option value="">{t("rfq.form.allMachineryCategories")}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -221,7 +223,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Order Quantity *
+              {t("rfq.form.orderQuantity")}
             </label>
             <input
               type="number"
@@ -236,24 +238,24 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Unit
+              {t("rfq.form.unit")}
             </label>
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-colors cursor-pointer"
             >
-              <option value="Pieces">Pieces</option>
-              <option value="Sets">Sets</option>
-              <option value="Units">Units</option>
-              <option value="Meters">Meters</option>
-              <option value="Tons">Tons</option>
+              <option value="Pieces">{t("rfq.form.pieces")}</option>
+              <option value="Sets">{t("rfq.form.sets")}</option>
+              <option value="Units">{t("rfq.form.units")}</option>
+              <option value="Meters">{t("rfq.form.meters")}</option>
+              <option value="Tons">{t("rfq.form.tons")}</option>
             </select>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Target Price ({currency})
+              {t("rfq.form.targetPrice")}{currency})
             </label>
             <div className="flex gap-1">
               <select
@@ -261,10 +263,10 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
                 onChange={(e) => setCurrency(e.target.value)}
                 className="w-18 h-10 rounded-xl border border-slate-200 bg-white px-1.5 text-xs outline-none focus:border-brand-blue cursor-pointer shrink-0 transition-colors"
               >
-                <option value="INR">₹ INR</option>
-                <option value="USD">$ USD</option>
-                <option value="EUR">€ EUR</option>
-                <option value="CNY">¥ CNY</option>
+                <option value="INR">{t("rfq.form.inr")}</option>
+                <option value="USD">{t("rfq.form.usd")}</option>
+                <option value="EUR">{t("rfq.form.eur")}</option>
+                <option value="CNY">{t("rfq.form.cny")}</option>
               </select>
               <input
                 type="text"
@@ -278,17 +280,17 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Incoterm
+              {t("rfq.form.incoterm")}
             </label>
             <select
               value={incoterm}
               onChange={(e) => setIncoterm(e.target.value)}
               className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue cursor-pointer transition-colors"
             >
-              <option value="FOB">FOB (Free on Board)</option>
-              <option value="CIF">CIF (Cost, Insurance & Freight)</option>
-              <option value="EXW">EXW (Ex Works)</option>
-              <option value="DDP">DDP (Delivered Duty Paid)</option>
+              <option value="FOB">{t("rfq.form.fobFreeOnBoard")}</option>
+              <option value="CIF">{t("rfq.form.cifCostInsuranceFreight")}</option>
+              <option value="EXW">{t("rfq.form.exwExWorks")}</option>
+              <option value="DDP">{t("rfq.form.ddpDeliveredDutyPaid")}</option>
             </select>
           </div>
         </div>
@@ -296,14 +298,14 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
         {/* Company Name */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Buyer / Company Name *
+            {t("rfq.form.buyerCompanyName")}
           </label>
           <input
             type="text"
             required
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            placeholder="Your company name"
+            placeholder={t("rfq.form.yourCompanyName")}
             className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
           />
         </div>
@@ -312,16 +314,16 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs font-semibold text-slate-700">
-              Technical Specifications, Tolerances & Material Requirements *
+              {t("rfq.form.technicalSpecificationsTolerancesMaterialRequirements")}
             </label>
-            <span className="text-[11px] text-slate-400">Detailed specs yield faster quotes</span>
+            <span className="text-[11px] text-slate-400">{t("rfq.form.detailedSpecsYieldFasterQuotes")}</span>
           </div>
           <textarea
             rows={4}
             required
             value={details}
             onChange={(e) => setDetails(e.target.value)}
-            placeholder="e.g. CNC machined parts, ±0.01mm tolerance, hard anodized black, material certificates required"
+            placeholder={t("rfq.form.eGCncMachinedParts")}
             className="w-full rounded-xl border border-slate-200 bg-white p-3 text-xs sm:text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue leading-relaxed"
           />
         </div>
@@ -334,10 +336,10 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
             </div>
             <div className="min-w-0">
               <p className="font-bold text-xs text-slate-800">
-                {attachedFile ? attachedFile.name : "Attach CAD Drawing / 2D PDF / Blueprint"}
+                {attachedFile ? attachedFile.name : t("rfq.form.attachCadDrawing2dPdf")}
               </p>
               <p className="text-[11px] text-slate-500">
-                {uploading ? "Uploading…" : attachedFile ? `${attachedFile.size} · Uploaded` : "Supports .STEP, .DWG, .DXF, .PDF up to 50MB"}
+                {uploading ? t("common.uploading") : attachedFile ? `${attachedFile.size} · Uploaded` : t("rfq.form.supportsStepDwgDxfPdf")}
               </p>
             </div>
           </div>
@@ -360,7 +362,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
                 : "bg-white text-brand-blue border border-slate-200 hover:bg-blue-50"
             )}
           >
-            {attachedFile ? "Remove Drawing" : uploading ? "Uploading…" : "+ Attach CAD / PDF"}
+            {attachedFile ? t("rfq.form.removeDrawing") : uploading ? t("common.uploading") : t("rfq.form.attachCadPdf")}
           </button>
         </div>
 
@@ -377,7 +379,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
             disabled={status === "saving" || uploading}
             className="h-11 px-6 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm hover:bg-brand-blue-dark shadow-md active:scale-95 transition-all"
           >
-            {status === "saving" ? "Publishing to Verified Plants..." : "Post Buying Request to Verified Factories"}
+            {status === "saving" ? t("rfq.form.publishingToVerifiedPlants") : t("rfq.form.postBuyingRequestToVerified")}
           </Button>
         </div>
       </form>

@@ -11,6 +11,7 @@ import { getApi } from "@/shared/api";
 import type { MessageItem } from "@/shared/api/contracts";
 import type { OrderRequest } from "@/entities/order";
 import { useChatAttachment } from "@/hooks/use-chat-attachment";
+import { useTranslations } from "next-intl";
 
 function toChatMessage(m: MessageItem): ChatMessage {
   return { id: m.id, sender: m.sender, text: m.text, time: m.time, attachment: m.attachment, order: m.order };
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Props) {
+  const tr = useTranslations();
   const searchParams = useSearchParams();
   const withSlug = searchParams.get("with");
 
@@ -282,16 +284,16 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
       setThreads((prev) =>
         prev.map((t) => (t.id === currentThreadId ? { ...t, messages: t.messages.filter((m) => m.id !== tempId) } : t))
       );
-      setSendError(err instanceof Error ? `Not sent: ${err.message}` : "Message not sent. Please retry.");
+      setSendError(err instanceof Error ? tr("chat.notSent", { message: err.message }) : tr("chat.messageNotSentPleaseRetry"));
       if (!customText) setInputMessage(textToSend);
     }
   };
 
   const quickInquiries = [
-    "📋 What is your MOQ and pricing for 500 units?",
-    "🚢 Can you provide CIF shipping rates?",
-    "📹 Can we arrange a live video tour of the CNC line?",
-    "📄 Please share ISO 9001 quality certificates.",
+    tr("chat.whatIsYourMoqAnd"),
+    tr("chat.canYouProvideCifShipping"),
+    tr("chat.canWeArrangeALive"),
+    tr("chat.pleaseShareIso9001Quality"),
   ];
 
   const filteredThreads = threads.filter(
@@ -335,7 +337,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
         />
       ) : (
         <div className="flex-1 flex items-center justify-center p-8 text-center text-slate-400 text-sm">
-          Select a chat to start messaging
+          {tr("chat.selectAChatToStart")}
         </div>
       )}
     </div>

@@ -7,6 +7,7 @@ import { Mail, KeyRound, CheckCircle2, XCircle, Loader2, Eye, EyeOff } from "luc
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { requestPasswordResetAction, resetPasswordAction, verifyEmailAction } from "./account-actions";
 import { passwordPolicyErrors } from "./password-policy";
+import { useTranslations } from "next-intl";
 
 const input =
   "h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue";
@@ -25,6 +26,7 @@ function Card({ children }: { children: React.ReactNode }) {
 }
 
 export function ForgotPasswordForm() {
+  const t = useTranslations();
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -50,13 +52,12 @@ export function ForgotPasswordForm() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
             <Mail className="h-6 w-6 text-emerald-600" />
           </div>
-          <h1 className="text-lg font-bold text-ink">Check your email</h1>
+          <h1 className="text-lg font-bold text-ink">{t("auth.reset.checkYourEmail")}</h1>
           <p className="mt-2 text-sm text-ink-muted">
-            If an account exists for <strong>{email.trim()}</strong>, we sent a link to reset your password. It
-            expires in 30 minutes.
+            {t("auth.reset.ifAnAccountExistsFor")} <strong>{email.trim()}</strong>{t("auth.reset.weSentALinkTo")}
           </p>
           <Link href="/login" className="mt-5 inline-block text-sm font-semibold text-brand-blue hover:underline">
-            Back to sign in
+            {t("auth.reset.backToSignIn")}
           </Link>
         </div>
       </Card>
@@ -65,8 +66,8 @@ export function ForgotPasswordForm() {
 
   return (
     <Card>
-      <h1 className="text-xl font-bold text-ink">Forgot password?</h1>
-      <p className="mt-1 text-sm text-ink-muted">Enter your account email and we&apos;ll send you a reset link.</p>
+      <h1 className="text-xl font-bold text-ink">{t("auth.forgotPassword")}</h1>
+      <p className="mt-1 text-sm text-ink-muted">{t("auth.reset.enterYourAccountEmailAnd")}</p>
       <form onSubmit={handleSubmit} className="mt-5 space-y-3">
         <input
           type="email"
@@ -74,7 +75,7 @@ export function ForgotPasswordForm() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
+          placeholder={t("common.email")}
           className={input}
         />
         {error && (
@@ -84,17 +85,18 @@ export function ForgotPasswordForm() {
         )}
         <button type="submit" disabled={state === "sending"} className={primary}>
           {state === "sending" && <Loader2 className="h-4 w-4 animate-spin" />}
-          Send reset link
+          {t("auth.reset.sendResetLink")}
         </button>
       </form>
       <Link href="/login" className="mt-4 block text-center text-sm font-semibold text-brand-blue hover:underline">
-        Back to sign in
+        {t("auth.reset.backToSignIn")}
       </Link>
     </Card>
   );
 }
 
 export function ResetPasswordForm({ token }: { token: string }) {
+  const t = useTranslations();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
@@ -106,11 +108,11 @@ export function ResetPasswordForm({ token }: { token: string }) {
     e.preventDefault();
     if (state === "saving") return;
     if (policyErrors.length) {
-      setError("Choose a stronger password.");
+      setError(t("auth.reset.chooseAStrongerPassword"));
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError(t("auth.reset.passwordsDoNotMatch"));
       return;
     }
     setState("saving");
@@ -127,9 +129,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
   if (!token) {
     return (
       <Card>
-        <Outcome ok={false} title="Invalid reset link" body="This link is incomplete. Request a new one." />
+        <Outcome ok={false} title={t("auth.reset.invalidResetLink")} body={t("auth.reset.thisLinkIsIncompleteRequest")} />
         <Link href="/forgot-password" className="mt-5 block text-center text-sm font-semibold text-brand-blue hover:underline">
-          Request a new link
+          {t("auth.reset.requestANewLink")}
         </Link>
       </Card>
     );
@@ -138,9 +140,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
   if (state === "done") {
     return (
       <Card>
-        <Outcome ok title="Password updated" body="You can now sign in with your new password." />
+        <Outcome ok title={t("auth.reset.passwordUpdated")} body={t("auth.reset.youCanNowSignIn")} />
         <Link href="/login" className={`${primary} mt-5`}>
-          Sign in
+          {t("nav.signIn")}
         </Link>
       </Card>
     );
@@ -150,7 +152,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     <Card>
       <h1 className="flex items-center gap-2 text-xl font-bold text-ink">
         <KeyRound className="h-5 w-5 text-brand-blue" />
-        Choose a new password
+        {t("auth.reset.chooseANewPassword")}
       </h1>
       <form onSubmit={handleSubmit} className="mt-5 space-y-3">
         <div className="relative">
@@ -160,13 +162,13 @@ export function ResetPasswordForm({ token }: { token: string }) {
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="New password"
+            placeholder={t("auth.reset.newPassword")}
             className={`${input} pr-10`}
           />
           <button
             type="button"
             onClick={() => setShow((v) => !v)}
-            aria-label={show ? "Hide password" : "Show password"}
+            aria-label={show ? t("auth.reset.hidePassword") : t("auth.reset.showPassword")}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8c8c8c] hover:text-ink"
           >
             {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -175,7 +177,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         {password && policyErrors.length > 0 && (
           <ul className="space-y-0.5 text-xs text-red-500">
             {policyErrors.map((err) => (
-              <li key={err}>• {err}</li>
+              <li key={err}>• {t(err)}</li>
             ))}
           </ul>
         )}
@@ -185,7 +187,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           autoComplete="new-password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          placeholder="Confirm new password"
+          placeholder={t("auth.reset.confirmNewPassword")}
           className={input}
         />
         {error && (
@@ -193,14 +195,14 @@ export function ResetPasswordForm({ token }: { token: string }) {
             {error}{" "}
             {error.includes("expired") && (
               <Link href="/forgot-password" className="underline">
-                Request a new link
+                {t("auth.reset.requestANewLink")}
               </Link>
             )}
           </p>
         )}
         <button type="submit" disabled={state === "saving"} className={primary}>
           {state === "saving" && <Loader2 className="h-4 w-4 animate-spin" />}
-          Update password
+          {t("auth.reset.updatePassword")}
         </button>
       </form>
     </Card>
@@ -208,8 +210,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
 }
 
 export function VerifyEmailResult({ token }: { token: string }) {
+  const t = useTranslations();
   const [state, setState] = useState<"verifying" | "done" | "failed">(token ? "verifying" : "failed");
-  const [error, setError] = useState<string | null>(token ? null : "This verification link is incomplete.");
+  const [error, setError] = useState<string | null>(token ? null : t("auth.errors.thisVerificationLinkIsIncomplete"));
   // Tokens are single-use: never submit twice (React strict mode runs effects twice in dev)
   const started = useRef(false);
 
@@ -231,16 +234,16 @@ export function VerifyEmailResult({ token }: { token: string }) {
       {state === "verifying" ? (
         <div className="flex flex-col items-center py-4 text-center">
           <Loader2 className="h-8 w-8 animate-spin text-brand-blue" />
-          <p className="mt-3 text-sm text-ink-muted">Verifying your email…</p>
+          <p className="mt-3 text-sm text-ink-muted">{t("auth.reset.verifyingYourEmail")}</p>
         </div>
       ) : state === "done" ? (
-        <Outcome ok title="Email verified" body="Thanks! Your email address is confirmed." />
+        <Outcome ok title={t("auth.reset.emailVerified")} body="Thanks! Your email address is confirmed." />
       ) : (
-        <Outcome ok={false} title="Could not verify email" body={error ?? "Please request a new link."} />
+        <Outcome ok={false} title={t("auth.reset.couldNotVerifyEmail")} body={error ?? t("auth.reset.pleaseRequestANewLink")} />
       )}
       {state !== "verifying" && (
         <Link href="/" className={`${primary} mt-5`}>
-          Continue to SeekFactory
+          {t("auth.reset.continueToSeekfactory")}
         </Link>
       )}
     </Card>

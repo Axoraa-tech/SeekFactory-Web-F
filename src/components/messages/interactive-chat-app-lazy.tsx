@@ -2,6 +2,16 @@
 
 import dynamic from "next/dynamic";
 import type { ComponentProps } from "react";
+import { useTranslations } from "next-intl";
+
+function LoadingMessages() {
+  const t = useTranslations();
+  return (
+    <div className="flex h-[calc(100vh-140px)] min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm text-slate-500">
+      {t("layout.messages.loadingMessages")}
+    </div>
+  );
+}
 
 const InteractiveChatApp = dynamic(
   () =>
@@ -10,11 +20,7 @@ const InteractiveChatApp = dynamic(
     })),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex h-[calc(100vh-140px)] min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm text-slate-500">
-        Loading messages…
-      </div>
-    ),
+    loading: () => <LoadingMessages />,
   }
 );
 

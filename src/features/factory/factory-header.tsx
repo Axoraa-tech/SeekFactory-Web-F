@@ -5,6 +5,7 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 import { ShieldCheck, MessageSquare, ExternalLink, Plus } from "lucide-react";
 import type { SellerFactoryProfile } from "./types";
 import { LogoutButton } from "@/features/auth/logout-button";
+import { useTranslations } from "next-intl";
 
 type Props = {
   profile: SellerFactoryProfile;
@@ -21,12 +22,13 @@ export function FactoryHeader({
   onSelectTab,
   onOpenAddProduct,
 }: Props) {
+  const t = useTranslations();
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/95 shadow-nav backdrop-blur-md">
       <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between gap-3 sm:gap-4 lg:gap-5 px-4 sm:px-6">
         {/* Left: Brand Logo & Seller Hub Badge */}
         <div className="flex items-center gap-3">
-          <Link href="/" aria-label="SeekFactory home" className="flex shrink-0 items-center py-1 group">
+          <Link href="/" aria-label={t("layout.topNav.seekfactoryHome")} className="flex shrink-0 items-center py-1 group">
             <BrandLogo
               priority
               className="h-11 sm:h-14 md:h-16 w-auto max-w-[200px] sm:max-w-[280px] md:max-w-[320px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
@@ -34,7 +36,7 @@ export function FactoryHeader({
           </Link>
           <div className="hidden sm:flex items-center gap-1.5 border-l border-line pl-3">
             <span className="rounded-md bg-brand-blue-soft px-2.5 py-0.5 text-xs font-bold text-brand-blue">
-              Seller Hub
+              {t("seller.header.sellerHub")}
             </span>
             <span className="flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[11px] font-bold text-amber-700">
               <ShieldCheck className="h-3.5 w-3.5 text-amber-500" />
@@ -53,7 +55,7 @@ export function FactoryHeader({
               className="btn btn-primary inline-flex h-10 items-center gap-1.5 px-3.5 text-xs sm:text-sm"
             >
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Post Product</span>
+              <span className="hidden sm:inline">{t("seller.postProduct")}</span>
             </button>
           )}
 
@@ -62,7 +64,7 @@ export function FactoryHeader({
             href="/explore"
             className="btn btn-secondary inline-flex h-10 items-center gap-1.5 px-3 text-xs sm:text-sm text-ink-muted"
           >
-            <span className="hidden md:inline">Buyer Marketplace</span>
+            <span className="hidden md:inline">{t("seller.nav.buyerMarketplace")}</span>
             <ExternalLink className="h-4 w-4 text-ink-faint" />
           </Link>
 
@@ -71,7 +73,7 @@ export function FactoryHeader({
             type="button"
             onClick={() => onSelectTab("messages")}
             className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-line hover:bg-canvas text-ink-muted hover:text-ink transition"
-            title="Buyer Messages"
+            title={t("seller.header.buyerMessages")}
           >
             <MessageSquare className="h-5 w-5" />
             {unreadMessagesCount > 0 && (

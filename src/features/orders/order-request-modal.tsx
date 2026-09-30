@@ -10,6 +10,7 @@ import { getApi } from "@/shared/api";
 import { ApiError } from "@/shared/api/http-api";
 import { placeOrderAction } from "./actions";
 import { defaultOrderQuantity } from "./order-status";
+import { useTranslations } from "next-intl";
 
 type Props = {
   productSlug: string;
@@ -27,6 +28,7 @@ type Props = {
  * contact details, and follows up; the buyer tracks progress under /orders.
  */
 export function OrderRequestModal({ productSlug, productId, productName, priceInr, unit = "Unit", moq, onClose }: Props) {
+  const t = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -57,7 +59,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
       setAddedToCart(true);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) return goToLogin();
-      setError(err instanceof Error ? err.message : "Could not add to cart");
+      setError(err instanceof Error ? err.message : t("orders.request.couldNotAddToCart"));
     }
     setStatus("idle");
   }
@@ -88,7 +90,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Send order request"
+      aria-label={t("orders.sendOrderRequest")}
     >
       <div
         className="relative w-full max-w-md rounded-2xl border border-line bg-white shadow-2xl"
@@ -100,15 +102,15 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
               <ShoppingCart className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-neutral-900">{placed ? "Order request sent" : "Send order request"}</h2>
-              <p className="text-xs text-ink-muted">No payment now: the factory contacts you to confirm</p>
+              <h2 className="text-base font-bold text-neutral-900">{placed ? t("orders.request.orderRequestSent") : t("orders.sendOrderRequest")}</h2>
+              <p className="text-xs text-ink-muted">{t("orders.request.noPaymentNowTheFactory")}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={status === "sending"}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="rounded-lg p-1.5 text-neutral-400 hover:bg-canvas hover:text-neutral-700"
           >
             <X className="h-5 w-5" />
@@ -120,11 +122,10 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
             <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
               <div className="text-sm text-emerald-900">
-                <p className="font-bold">Reference {placed.referenceNumber}</p>
+                <p className="font-bold">{t("orders.request.reference")} {placed.referenceNumber}</p>
                 <p className="mt-1 text-xs leading-relaxed">
-                  {placed.manufacturer.name || "The factory"} has been notified about {placed.quantity.toLocaleString("en-IN")}{" "}
-                  {placed.unit ?? unit} of {placed.productName}. They will contact you to confirm price, specs and
-                  delivery. You&apos;ll get a notification whenever the status changes.
+                  {placed.manufacturer.name || t("orders.request.theFactory")} {t("orders.request.hasBeenNotifiedAbout")} {placed.quantity.toLocaleString("en-IN")}{" "}
+                  {t("orders.request.unitOfProduct", { unit: placed.unit ?? unit, product: placed.productName })}{t("orders.request.theyWillContactYouTo")}
                 </p>
               </div>
             </div>
@@ -134,31 +135,31 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
                 onClick={onClose}
                 className="btn btn-secondary px-4 py-2 text-xs"
               >
-                Close
+                {t("common.close")}
               </button>
               <Link
                 href="/orders"
                 className="btn btn-primary px-4 py-2 text-xs"
               >
-                View my orders
+                {t("orders.request.viewMyOrders")}
               </Link>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 p-5">
             <div className="rounded-xl border border-line bg-canvas p-3 text-xs">
-              <p className="font-bold text-neutral-900">{productName ?? "Selected product"}</p>
+              <p className="font-bold text-neutral-900">{productName ?? t("orders.request.selectedProduct")}</p>
               {priceInr !== undefined && (
                 <p className="mt-0.5 text-ink-muted">
-                  Listed at <strong className="text-neutral-900">{formatPriceInr(priceInr)}</strong> / {unit}
-                  {moq !== undefined && <> • MOQ {typeof moq === "number" ? `${moq} ${unit}` : moq}</>}
+                  {t("orders.request.listedAt")} <strong className="text-neutral-900">{formatPriceInr(priceInr)}</strong> / {unit}
+                  {moq !== undefined && <> {t("orders.request.moq")} {typeof moq === "number" ? `${moq} ${unit}` : moq}</>}
                 </p>
               )}
             </div>
 
             <label className="block">
               <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-neutral-700">
-                Quantity ({unit}) <span className="text-red-500">*</span>
+                {t("orders.request.quantity")}{unit}) <span className="text-red-500">*</span>
               </span>
               <input
                 type="number"
@@ -172,33 +173,32 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
               />
               {quantity < minQuantity && (
                 <span className="mt-1 block text-[11px] font-semibold text-amber-700">
-                  Below the listed MOQ; the factory may still accept it.
+                  {t("orders.request.belowTheListedMoqThe")}
                 </span>
               )}
             </label>
 
             <label className="block">
               <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-neutral-700">
-                Note to the factory (optional)
+                {t("orders.request.noteToTheFactoryOptional")}
               </span>
               <textarea
                 rows={3}
                 maxLength={2000}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Specs, delivery port, timeline, customization..."
+                placeholder={t("orders.request.specsDeliveryPortTimelineCustomization")}
                 className="w-full rounded-xl border border-neutral-300 px-3.5 py-2 text-sm text-neutral-900 focus:border-brand-blue focus:outline-hidden"
               />
             </label>
 
             {estimate !== undefined && (
               <p className="text-xs text-ink-muted">
-                Estimated value <strong className="text-neutral-900">{formatPriceInr(estimate)}</strong> at listing
-                price; the final price is agreed with the factory.
+                {t("orders.request.estimatedValue")} <strong className="text-neutral-900">{formatPriceInr(estimate)}</strong> {t("orders.request.atListingPriceTheFinal")}
               </p>
             )}
             <p className="text-[11px] text-ink-muted">
-              Your name, company, email and phone are shared with this factory so they can contact you.
+              {t("orders.request.yourNameCompanyEmailAnd")}
             </p>
 
             {error && (
@@ -209,9 +209,9 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
 
             {addedToCart && (
               <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
-                Added to your cart.{" "}
+                {t("orders.request.addedToYourCart")}{" "}
                 <Link href="/cart" className="underline">
-                  View cart
+                  {t("orders.request.viewCart")}
                 </Link>
               </p>
             )}
@@ -224,7 +224,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
                   disabled={status === "sending" || quantity < 1}
                   className="mr-auto rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas disabled:opacity-50"
                 >
-                  Add to cart
+                  {t("common.addToCart")}
                 </button>
               )}
               <button
@@ -233,7 +233,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
                 disabled={status === "sending"}
                 className="btn btn-secondary px-4 py-2 text-xs disabled:opacity-50"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
@@ -241,7 +241,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-amber-600 hover:to-orange-600 disabled:opacity-60"
               >
                 {status === "sending" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}
-                <span>{status === "sending" ? "Sending…" : "Send order request"}</span>
+                <span>{status === "sending" ? t("common.sending") : t("orders.sendOrderRequest")}</span>
               </button>
             </div>
           </form>

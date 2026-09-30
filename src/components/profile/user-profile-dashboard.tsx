@@ -20,6 +20,7 @@ import { ProfileSavedPanel } from "./profile-saved-panel";
 import { ProfileFollowingPanel } from "./profile-following-panel";
 import { ProfileMembershipPanel } from "./profile-membership-panel";
 import { useBuyerPlan } from "@/features/subscription";
+import { useTranslations } from "next-intl";
 
 type Props = {
   user: BuyerProfile;
@@ -40,6 +41,7 @@ export function UserProfileDashboard({
   initialRfqs,
   categories,
 }: Props) {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { tier, upgradeTier } = useBuyerPlan();
@@ -89,10 +91,10 @@ export function UserProfileDashboard({
         taxId: formData.taxId,
         address: formData.address,
       });
-      showToast("Company profile & contact details saved");
+      showToast(t("profile.dashboard.companyProfileContactDetailsSaved"));
       router.refresh();
     } catch (err) {
-      showToast(errorText(err, "Could not save your profile. Please try again."));
+      showToast(errorText(err, t("profile.dashboard.couldNotSaveYourProfile")));
     } finally {
       setIsSaving(false);
     }
@@ -104,10 +106,10 @@ export function UserProfileDashboard({
     setSavedProducts((prev) => prev.filter((p) => p.id !== productId));
     try {
       await getApi().products.toggleSave(productId);
-      showToast("Product removed from saved");
+      showToast(t("profile.dashboard.productRemovedFromSaved"));
     } catch (err) {
       setSavedProducts(previous);
-      showToast(errorText(err, "Could not remove the product"));
+      showToast(errorText(err, t("profile.dashboard.couldNotRemoveTheProduct")));
     }
   };
 
@@ -116,10 +118,10 @@ export function UserProfileDashboard({
     setSavedSeeks((prev) => prev.filter((item) => item.reel.id !== reelId));
     try {
       await getApi().feed.saveReel(reelId);
-      showToast("Seek removed from saved");
+      showToast(t("profile.dashboard.seekRemovedFromSaved"));
     } catch (err) {
       setSavedSeeks(previous);
-      showToast(errorText(err, "Could not remove the seek"));
+      showToast(errorText(err, t("profile.dashboard.couldNotRemoveTheSeek")));
     }
   };
 
@@ -128,10 +130,10 @@ export function UserProfileDashboard({
     setFollowedSuppliers((prev) => prev.filter((m) => m.id !== mId));
     try {
       await getApi().manufacturers.toggleFollow(mId);
-      showToast("Manufacturer removed from following");
+      showToast(t("profile.dashboard.manufacturerRemovedFromFollowing"));
     } catch (err) {
       setFollowedSuppliers(previous);
-      showToast(errorText(err, "Could not unfollow"));
+      showToast(errorText(err, t("profile.dashboard.couldNotUnfollow")));
     }
   };
 
@@ -142,7 +144,7 @@ export function UserProfileDashboard({
       return;
     }
     showToast(
-      next === "free" ? "Membership changed to the Free plan" : `Membership changed to the ${next === "pro" ? "Pro" : "Enterprise"} plan`
+      next === "free" ? t("profile.dashboard.membershipChangedToTheFree") : t("profile.dashboard.membershipChangedToThePlan", { next: next === "pro" ? t("profile.dashboard.pro") : t("profile.dashboard.enterprise") })
     );
   };
 

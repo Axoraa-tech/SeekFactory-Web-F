@@ -1,6 +1,7 @@
 "use client";
 
 import { Send, UserRound } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   inputRef: React.RefObject<HTMLInputElement | null>;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function CommentComposer({ inputRef, value, onChange, onSubmit, isSubmitting }: Props) {
+  const t = useTranslations();
   return (
     <form
       onSubmit={onSubmit}
@@ -28,7 +30,7 @@ export function CommentComposer({ inputRef, value, onChange, onSubmit, isSubmitt
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Add a manufacturing comment..."
+          placeholder={t("comments.addAManufacturingComment")}
           className="w-full rounded-full border border-line bg-surface px-4 py-2 text-xs text-ink placeholder:text-ink-faint focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue transition pr-10"
         />
         {value.trim().length > 0 && (

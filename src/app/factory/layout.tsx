@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { getApi } from "@/shared/api";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = {
-  title: "Seller Hub & Manufacturer Center | SeekFactory",
-  description: "Manage your industrial factory profile, machinery products, video seeks, and buyer RFQs.",
-};
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.sellerHub.title"), description: t("meta.sellerHub.description") };
+}
 
 export default async function FactoryLayout({ children }: { children: ReactNode }) {
   // Runs before the pages' loading boundary, so a signed-in buyer gets a real HTTP redirect

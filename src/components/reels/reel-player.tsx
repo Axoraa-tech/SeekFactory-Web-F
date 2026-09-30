@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { formatDuration } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+import { useTranslations } from "next-intl";
 
 type Props = {
   currentSec: number;
@@ -39,6 +40,7 @@ export function ReelPlayerChrome({
   onSkip,
   onToggleFullscreen,
 }: Props) {
+  const t = useTranslations();
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoverPosition, setHoverPosition] = useState(0);
@@ -148,7 +150,7 @@ export function ReelPlayerChrome({
           <button
             type="button"
             onClick={onTogglePlay}
-            aria-label={isPlaying ? "Pause video" : "Play video"}
+            aria-label={isPlaying ? t("player.pauseVideo") : t("player.playVideo")}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/25 active:scale-95"
           >
             {isPlaying ? <Pause className="h-4 w-4 fill-white" /> : <Play className="h-4 w-4 fill-white ml-0.5" />}
@@ -158,8 +160,8 @@ export function ReelPlayerChrome({
           <button
             type="button"
             onClick={() => onSkip(-5)}
-            aria-label="Skip backward 5 seconds"
-            title="Rewind 5s (Left Arrow)"
+            aria-label={t("player.skipBackward5Seconds")}
+            title={t("player.rewind5sLeftArrow")}
             className="flex h-8 items-center gap-1 rounded-full bg-white/10 px-2.5 text-[11px] font-semibold text-white/90 backdrop-blur-sm transition hover:bg-white/20 hover:text-white active:scale-95"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -170,8 +172,8 @@ export function ReelPlayerChrome({
           <button
             type="button"
             onClick={() => onSkip(5)}
-            aria-label="Skip forward 5 seconds"
-            title="Forward 5s (Right Arrow)"
+            aria-label={t("player.skipForward5Seconds")}
+            title={t("player.forward5sRightArrow")}
             className="flex h-8 items-center gap-1 rounded-full bg-white/10 px-2.5 text-[11px] font-semibold text-white/90 backdrop-blur-sm transition hover:bg-white/20 hover:text-white active:scale-95"
           >
             <span>+5s</span>
@@ -189,8 +191,8 @@ export function ReelPlayerChrome({
           <button
             type="button"
             onClick={onToggleMute}
-            aria-label={isMuted ? "Unmute video" : "Mute video"}
-            title={isMuted ? "Unmute (M)" : "Mute (M)"}
+            aria-label={isMuted ? t("player.unmuteVideo") : t("player.muteVideo")}
+            title={isMuted ? t("player.unmuteM") : t("player.muteM")}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/25 active:scale-95"
           >
             {isMuted ? <VolumeX className="h-4 w-4 text-white/80" /> : <Volume2 className="h-4 w-4" />}
@@ -201,8 +203,8 @@ export function ReelPlayerChrome({
             <button
               type="button"
               onClick={onToggleFullscreen}
-              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              aria-label={isFullscreen ? t("player.exitFullscreen") : t("player.enterFullscreen")}
+              title={isFullscreen ? t("player.exitFullscreen2") : t("player.fullscreen")}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/25 active:scale-95"
             >
               {isFullscreen ? (

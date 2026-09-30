@@ -1,6 +1,10 @@
 import { ResetPasswordForm } from "@/features/auth/password-reset-forms";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = { title: "Reset password | SeekFactory" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.resetPassword.title") };
+}
 
 export const dynamic = "force-dynamic";
 

@@ -3,12 +3,14 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Eye, TrendingUp, Package, Clock } from "lucide-react";
 import { getApi } from "@/shared/api";
 import { requireSupplier } from "@/features/auth/require-user";
+import { getTranslations } from "next-intl/server";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
 export default async function SeekDetailPage({ params }: Props) {
+  const t = await getTranslations();
   const { id } = await params;
   await requireSupplier(`/factory/seeks/${encodeURIComponent(id)}`);
   const api = getApi();
@@ -25,7 +27,7 @@ export default async function SeekDetailPage({ params }: Props) {
           className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-600 hover:text-brand-blue transition mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Video Seeks
+          {t("seller.seekDetail.backToVideoSeeks")}
         </Link>
 
         <div className="overflow-hidden rounded-2xl border border-line bg-black shadow-sm">
@@ -43,7 +45,7 @@ export default async function SeekDetailPage({ params }: Props) {
         <div className="mt-5 space-y-3">
           <div className="flex items-center gap-2">
             <span className="rounded-md bg-neutral-900 px-2 py-0.5 text-[10px] font-bold text-white">
-              Industrial
+              {t("seller.seekDetail.industrial")}
             </span>
             <span className="flex items-center gap-1 text-[11px] font-semibold text-neutral-500">
               <Clock className="h-3 w-3" />
@@ -56,11 +58,11 @@ export default async function SeekDetailPage({ params }: Props) {
           <div className="flex items-center gap-5 pt-3 border-t border-line text-sm text-neutral-700">
             <span className="flex items-center gap-1.5 font-semibold">
               <Eye className="h-4 w-4 text-neutral-400" />
-              {(seek.views ?? 0).toLocaleString()} Views
+              {(seek.views ?? 0).toLocaleString()} {t("seller.seekDetail.views")}
             </span>
             <span className="flex items-center gap-1.5 font-bold text-red-600">
               <TrendingUp className="h-4 w-4" />
-              0 Buyer Leads
+              {t("seller.seekDetail.n0BuyerLeads")}
             </span>
           </div>
         </div>

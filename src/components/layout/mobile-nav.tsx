@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Bell, Compass, Home, MessageCircle, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/shared/lib/cn";
@@ -12,14 +13,15 @@ type Props = {
 };
 
 const items = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/explore", label: "Explore", icon: Compass },
-  { href: "/messages", label: "Chats", icon: MessageCircle, badgeKey: "messages" as const },
-  { href: "/notifications", label: "Alerts", icon: Bell, badgeKey: "notifications" as const },
-  { href: "/profile", label: "Profile", icon: UserRound },
+  { href: "/", label: "nav.home", icon: Home },
+  { href: "/explore", label: "nav.explore", icon: Compass },
+  { href: "/messages", label: "layout.mobileNav.chats", icon: MessageCircle, badgeKey: "messages" as const },
+  { href: "/notifications", label: "layout.mobileNav.alerts", icon: Bell, badgeKey: "notifications" as const },
+  { href: "/profile", label: "nav.profile", icon: UserRound },
 ];
 
 export function MobileNav({ messageCount, notificationCount }: Props) {
+  const t = useTranslations();
   const pathname = usePathname();
   const counts = { messages: messageCount, notifications: notificationCount };
 
@@ -43,7 +45,7 @@ export function MobileNav({ messageCount, notificationCount }: Props) {
                   <Icon className="h-5 w-5" />
                   <Badge count={badge} />
                 </span>
-                {item.label}
+                {t(item.label)}
               </Link>
             </li>
           );

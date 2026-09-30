@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { Analytics } from '@vercel/analytics/react';
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { brand } from "@/shared/config/brand";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { RegionalSettingsProvider } from "@/shared/i18n/regional-context";
 import { BuyerPlanProvider } from "@/features/subscription";
@@ -17,18 +18,23 @@ const sans = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "SeekFactory",
-    template: "%s · SeekFactory",
-  },
-  description: brand.tagline,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return {
+    title: {
+      default: "SeekFactory",
+      template: "%s · SeekFactory",
+    },
+    description: t("brand.tagline"),
+  };
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale === "zh" ? "zh-CN" : "en"} suppressHydrationWarning>
       <body className={`${sans.variable} font-sans antialiased`}>
+        <NextIntlClientProvider>
         <RegionalSettingsProvider>
           <LoadingScreen />
           <BuyerPlanProvider>
@@ -37,6 +43,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <UpgradePlanModal />
           </BuyerPlanProvider>
         </RegionalSettingsProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

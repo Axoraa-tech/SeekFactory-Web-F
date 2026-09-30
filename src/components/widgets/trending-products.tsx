@@ -49,7 +49,7 @@ export function TrendingProducts({ products }: Props) {
             <button
               key={index}
               type="button"
-              aria-label={`Show products page ${index + 1}`}
+              aria-label={t("widgets.trending.showProductsPage", { index: index + 1 })}
               onClick={() => setPage(index)}
               className={cn(
                 "h-1.5 rounded-full transition-all",

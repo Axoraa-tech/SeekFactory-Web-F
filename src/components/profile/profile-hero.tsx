@@ -7,6 +7,7 @@ import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
 import type { BuyerProfile } from "@/entities/user";
 import type { MembershipTier, ProfileFormData } from "./profile-types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   user: BuyerProfile;
@@ -21,9 +22,9 @@ type Props = {
 };
 
 function tierLabel(tier: MembershipTier) {
-  if (tier === "enterprise") return "Enterprise VIP";
-  if (tier === "pro") return "Pro Buyer Member";
-  return "Standard Buyer";
+  if (tier === "enterprise") return "profile.hero.tier.enterprise";
+  if (tier === "pro") return "profile.hero.tier.pro";
+  return "profile.hero.tier.standard";
 }
 
 export function ProfileHero({
@@ -37,6 +38,7 @@ export function ProfileHero({
   onOpenPremium,
   onLogout,
 }: Props) {
+  const t = useTranslations();
   return (
     <section className="glass-panel-liquid glass-fade-in overflow-hidden">
       {/* Cover banner */}
@@ -54,13 +56,13 @@ export function ProfileHero({
         <Link href={"/"} className="btn btn-secondary absolute right-48 top-4 hidden sm:flex items-center gap-1.5 px-3 py-1 text-[12px]">
 
           <ChevronLeft className="h-3.5 w-3.5" />
-          Home
+          {t("nav.home")}
 
         </Link>
 
         <div className="absolute right-4 top-4 hidden sm:flex items-center gap-1.5 rounded-full glass-liquid-item px-3 py-1 text-[11px] font-semibold text-brand-blue">
           <ShieldCheck className="h-3.5 w-3.5" />
-          Trade Assurance Buyer
+          {t("profile.hero.tradeAssuranceBuyer")}
         </div>
         
       </div>
@@ -96,7 +98,7 @@ export function ProfileHero({
                   )}
                 >
                   <Sparkles className="h-3 w-3" />
-                  {tierLabel(currentTier)}
+                  {t(tierLabel(currentTier))}
                 </span>
               </div>
 
@@ -113,7 +115,7 @@ export function ProfileHero({
                 {user.memberSince && (
                   <>
                     {formData.country && <span>·</span>}
-                    <span>Member since {new Date(user.memberSince).getFullYear()}</span>
+                    <span>{t("profile.hero.memberSince")} {new Date(user.memberSince).getFullYear()}</span>
                   </>
                 )}
               </p>
@@ -127,7 +129,7 @@ export function ProfileHero({
               className="btn btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs"
             >
               <FileText className="h-3.5 w-3.5" />
-              Post RFQ
+              {t("nav.postRfq")}
             </Link>
             <button
               type="button"
@@ -135,7 +137,7 @@ export function ProfileHero({
               className="glass-liquid-item inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold text-brand-orange"
             >
               <Crown className="h-3.5 w-3.5" />
-              Membership
+              {t("profile.hero.membership")}
             </button>
             <button
               type="button"
@@ -144,7 +146,7 @@ export function ProfileHero({
               className="glass-liquid-item inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-ink-muted hover:text-red-600 disabled:opacity-50"
             >
               <LogOut className="h-3.5 w-3.5" />
-              {isLoggingOut ? "Signing out…" : "Sign out"}
+              {isLoggingOut ? t("userMenu.signingOut") : t("userMenu.signOut")}
             </button>
           </div>
         </div>
@@ -152,20 +154,20 @@ export function ProfileHero({
         {/* Stat chips */}
         <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           <div className="glass-liquid-item px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">Active RFQs</p>
-            <p className="mt-0.5 text-sm font-extrabold text-ink">{rfqCount} Requests</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">{t("profile.hero.activeRfqs")}</p>
+            <p className="mt-0.5 text-sm font-extrabold text-ink">{rfqCount} {t("profile.hero.requests")}</p>
           </div>
           <div className="glass-liquid-item px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">Saved Wishlist</p>
-            <p className="mt-0.5 text-sm font-extrabold text-ink">{savedCount} {savedCount === 1 ? "Item" : "Items"}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">{t("profile.hero.savedWishlist")}</p>
+            <p className="mt-0.5 text-sm font-extrabold text-ink">{savedCount} {savedCount === 1 ? t("profile.hero.item") : t("profile.hero.items")}</p>
           </div>
           <div className="glass-liquid-item px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">Following Plants</p>
-            <p className="mt-0.5 text-sm font-extrabold text-ink">{followingCount} Factories</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">{t("profile.hero.followingPlants")}</p>
+            <p className="mt-0.5 text-sm font-extrabold text-ink">{followingCount} {t("profile.hero.factories")}</p>
           </div>
           <div className="glass-liquid-item px-3 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">Escrow</p>
-            <p className="mt-0.5 text-sm font-extrabold text-emerald-600">100% Active</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">{t("profile.hero.escrow")}</p>
+            <p className="mt-0.5 text-sm font-extrabold text-emerald-600">{t("profile.hero.n100Active")}</p>
           </div>
         </div>
       </div>

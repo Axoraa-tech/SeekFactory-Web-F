@@ -32,6 +32,7 @@ import type { Reel } from "@/entities/reel";
 import { useReelImpression } from "@/hooks/use-reel-impression";
 import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
 import type { Product } from "@/entities/product";
+import { useTranslations } from "next-intl";
 
 type Props = {
   reel: Reel;
@@ -51,6 +52,7 @@ type Props = {
 const SPEC_ICONS = [PackageCheck, Layers, Clock, FileSpreadsheet];
 
 export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product }: Props) {
+  const t = useTranslations();
   const { following, toggleFollow } = useFollow(manufacturer.id, followingManufacturer, manufacturer.followerCount);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -63,7 +65,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
   const { liked, likes, saved, shares, shared, toggleLike, toggleSave, share } = useReelEngagement(reel);
 
   const specChips = [
-    ...(product?.moq ? [{ label: "Min. order", value: product.moq }] : []),
+    ...(product?.moq ? [{ label: t("common.minOrder"), value: product.moq }] : []),
     ...Object.entries(product?.specs ?? {}).map(([label, value]) => ({ label, value })),
   ].slice(0, 4);
 
@@ -156,7 +158,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
 
         <div className="p-3.5 sm:p-4 pb-2 sm:pb-2.5 space-y-2.5">
           {/* Header with SupplierLockOverlay */}
-          <SupplierLockOverlay badgeLabel="View Manufacturer">
+          <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
             <div className="flex items-center justify-between">
               <Link
                 href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
@@ -176,7 +178,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                     {manufacturer.verified ? <VerifiedBadge className="h-4 w-4" /> : null}
                   </div>
                   <p className="text-xs text-ink-muted mt-0.5">
-                    {manufacturer.country} • {formatCount(reel.views)} views
+                    {manufacturer.country} • {t("seek.viewCount", { count: formatCount(reel.views) })}
                   </p>
                 </div>
               </Link>
@@ -187,14 +189,14 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                   onClick={toggleFollow}
                   className={cn("btn h-7 px-3 text-xs", following ? "btn-soft" : "btn-secondary")}
                 >
-                  {following ? "Following" : "Follow"}
+                  {following ? t("common.following") : t("common.follow")}
                 </button>
                 <Link
                   href="/rfq/new"
                   className="btn btn-primary inline-flex h-7 items-center gap-1 px-3 text-xs"
                 >
                   <Send className="h-3 w-3" />
-                  <span>Send RFQ</span>
+                  <span>{t("feed.sendRfq")}</span>
                 </Link>
               </div>
             </div>
@@ -271,7 +273,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                   onExpand?.();
                 }}
                 className="h-7 w-7 rounded bg-black/70 text-white flex items-center justify-center hover:bg-black/90"
-                aria-label="Open reel popup"
+                aria-label={t("seek.openReelPopup")}
               >
                 <Maximize2 className="h-3.5 w-3.5" />
               </button>
@@ -310,7 +312,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
 
           {/* Technical Spec Sheet Chips with SupplierLockOverlay: the product's MOQ plus the factory's own specs */}
           {specChips.length > 0 && (
-            <SupplierLockOverlay badgeLabel="View Factory Specs" compact>
+            <SupplierLockOverlay badgeLabel={t("seek.viewFactorySpecs")} compact>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {specChips.map((chip, index) => {
                   const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
@@ -364,7 +366,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             <button
               type="button"
               onClick={share}
-              aria-label="Share seek"
+              aria-label={t("seek.shareSeek")}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition",
                 shared && "text-brand-blue bg-white shadow-xs"
@@ -380,7 +382,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             <button
               type="button"
               onClick={toggleLike}
-              aria-label={liked ? "Unlike seek" : "Like seek"}
+              aria-label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-red hover:shadow-xs transition",
                 liked && "text-brand-red bg-white shadow-xs"
@@ -404,14 +406,14 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             <button
               type="button"
               onClick={toggleSave}
-              aria-label={saved ? "Remove from saved" : "Save seek"}
+              aria-label={saved ? t("seek.removeFromSaved") : t("seek.saveSeek")}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition",
                 saved && "text-brand-blue bg-white shadow-xs"
               )}
             >
               <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-brand-blue")} />
-              <span className="font-medium text-[11px]">{saved ? "Saved" : "Save"}</span>
+              <span className="font-medium text-[11px]">{saved ? t("common.saved") : t("common.save")}</span>
             </button>
           </div>
         </div>

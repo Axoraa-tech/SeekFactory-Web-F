@@ -14,6 +14,7 @@ import {
   FileCheck,
 } from "lucide-react";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
+import { useTranslations } from "next-intl";
 
 interface CertificateLightboxModalProps {
   certificate: FactoryCertificate | null;
@@ -26,6 +27,7 @@ export function CertificateLightboxModal({
   onClose,
   manufacturerName,
 }: CertificateLightboxModalProps) {
+  const t = useTranslations();
   if (!certificate) return null;
 
   return (
@@ -40,7 +42,7 @@ export function CertificateLightboxModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          aria-label="Close certificate preview"
+          aria-label={t("profile.certModal.closeCertificatePreview")}
           className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white/80 hover:text-white hover:bg-black/90 transition backdrop-blur-xs border border-white/10"
         >
           <X className="h-5 w-5" />
@@ -70,19 +72,19 @@ export function CertificateLightboxModal({
             {/* Verification Chip */}
             <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-xs font-bold text-emerald-400">
               <ShieldCheck className="h-4 w-4 text-emerald-400" />
-              <span>Official Verified Credential</span>
+              <span>{t("profile.certModal.officialVerifiedCredential")}</span>
             </div>
 
             <div>
               <span className="text-[11px] uppercase tracking-wider text-amber-400 font-bold">
-                {certificate.category || "Certified Accreditations"}
+                {certificate.category || t("profile.certModal.certifiedAccreditations")}
               </span>
               <h3 className="text-lg sm:text-xl font-extrabold text-white mt-1 leading-snug">
                 {certificate.title}
               </h3>
               {manufacturerName && (
                 <p className="text-xs text-neutral-400 mt-1">
-                  Issued to: <span className="text-white font-semibold">{manufacturerName}</span>
+                  {t("profile.certModal.issuedTo")} <span className="text-white font-semibold">{manufacturerName}</span>
                 </p>
               )}
             </div>
@@ -90,19 +92,19 @@ export function CertificateLightboxModal({
             {/* Technical Verification Info */}
             <div className="space-y-3 rounded-2xl bg-neutral-800/60 p-4 border border-neutral-700/60 text-xs">
               <div>
-                <span className="text-neutral-400 block text-[10px] uppercase font-semibold">Issuing Registrar</span>
+                <span className="text-neutral-400 block text-[10px] uppercase font-semibold">{t("profile.certModal.issuingRegistrar")}</span>
                 <span className="text-neutral-100 font-semibold text-sm">{certificate.issuer}</span>
               </div>
 
               <div className="border-t border-neutral-700/50 pt-2 flex justify-between">
                 <div>
-                  <span className="text-neutral-400 block text-[10px] uppercase font-semibold">Certificate Number</span>
+                  <span className="text-neutral-400 block text-[10px] uppercase font-semibold">{t("profile.certModal.certificateNumber")}</span>
                   <span className="font-mono text-amber-300 font-bold">{certificate.certNumber}</span>
                 </div>
                 {certificate.verified && (
                   <span className="flex items-center gap-1 text-emerald-400 font-bold text-[11px]">
                     <CheckCircle2 className="h-3.5 w-3.5" />
-                    Verified
+                    {t("common.verified")}
                   </span>
                 )}
               </div>
@@ -111,13 +113,13 @@ export function CertificateLightboxModal({
                 <div className="border-t border-neutral-700/50 pt-2 grid grid-cols-2 gap-2">
                   {certificate.issueDate && (
                     <div>
-                      <span className="text-neutral-400 block text-[10px] uppercase font-semibold">Issue Date</span>
+                      <span className="text-neutral-400 block text-[10px] uppercase font-semibold">{t("profile.certModal.issueDate")}</span>
                       <span className="text-neutral-200">{certificate.issueDate}</span>
                     </div>
                   )}
                   {certificate.expiryDate && (
                     <div>
-                      <span className="text-neutral-400 block text-[10px] uppercase font-semibold">Valid Through</span>
+                      <span className="text-neutral-400 block text-[10px] uppercase font-semibold">{t("profile.certModal.validThrough")}</span>
                       <span className="text-emerald-400 font-semibold">{certificate.expiryDate}</span>
                     </div>
                   )}
@@ -128,10 +130,10 @@ export function CertificateLightboxModal({
             <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-[11px] text-amber-200 leading-relaxed">
               <p className="font-semibold mb-0.5 flex items-center gap-1">
                 <FileCheck className="h-3.5 w-3.5 text-amber-400" />
-                <span>On-Site Factory Compliance Guarantee</span>
+                <span>{t("profile.certModal.onSiteFactoryComplianceGuarantee")}</span>
               </p>
               <span>
-                This accreditation has been verified through SeekFactory&apos;s on-site plant verification protocol.
+                {t("profile.certModal.thisAccreditationHasBeenVerified")}
               </span>
             </div>
           </div>
@@ -144,14 +146,14 @@ export function CertificateLightboxModal({
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 font-bold py-2.5 px-4 text-xs transition shadow-lg shadow-amber-500/20"
             >
               <ExternalLink className="h-3.5 w-3.5" />
-              <span>Open Full Resolution</span>
+              <span>{t("profile.certModal.openFullResolution")}</span>
             </a>
             <button
               type="button"
               onClick={onClose}
               className="rounded-xl border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 py-2.5 px-4 text-xs font-semibold transition"
             >
-              Close
+              {t("common.close")}
             </button>
           </div>
         </div>

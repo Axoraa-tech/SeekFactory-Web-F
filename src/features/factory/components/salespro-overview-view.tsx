@@ -4,6 +4,7 @@ import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import type { SellerFactoryProfile, SellerProduct, SellerRfq, SellerSeek, SellerStats } from "../types";
 import { SalesproAnalyticsChart } from "./salespro-analytics-chart";
 import { SalesproDataTable } from "./salespro-data-table";
+import { useTranslations } from "next-intl";
 
 type Props = {
   stats: SellerStats;
@@ -20,19 +21,20 @@ function formatPercent(value: number) {
 }
 
 /** Hours → compact label; null means this factory has not quoted any RFQ yet. */
-function formatResponseTime(hours: number | null) {
-  if (hours === null) return "No quotes yet";
-  if (hours < 1) return `${Math.max(1, Math.round(hours * 60))} min`;
-  if (hours < 48) return `${formatPercent(Math.round(hours * 10) / 10)} hrs`;
-  return `${Math.round(hours / 24)} days`;
+function formatResponseTime(hours: number | null, t: (key: string, values?: Record<string, string | number>) => string) {
+  if (hours === null) return t("seller.overview.noQuotesYet");
+  if (hours < 1) return t("seller.overview.minutes", { count: Math.max(1, Math.round(hours * 60)) });
+  if (hours < 48) return t("seller.overview.hours", { count: formatPercent(Math.round(hours * 10) / 10) });
+  return t("seller.overview.days", { count: Math.round(hours / 24) });
 }
 
 /** Period-over-period change; null = no views in the previous period to compare against. */
 function ChangeBadge({ change, current }: { change: number | null; current: number }) {
+  const t = useTranslations();
   if (change === null) {
     return (
       <span className="rounded-full bg-[#F3F4F6] text-[#5F6368] px-2 py-0.2 text-[10px] font-bold">
-        {current > 0 ? "New" : "No data yet"}
+        {current > 0 ? t("seller.overview.new") : t("seller.overview.noDataYet")}
       </span>
     );
   }
@@ -52,7 +54,7 @@ function ChangeBadge({ change, current }: { change: number | null; current: numb
           ? "rounded-full bg-[#ECFDF5] text-[#059669] px-2 py-0.2 text-[10px] font-bold inline-flex items-center gap-0.5"
           : "rounded-full bg-[#FEF2F2] text-[#DC2626] px-2 py-0.2 text-[10px] font-bold inline-flex items-center gap-0.5"
       }
-      title="Compared with the previous period"
+      title={t("seller.overview.comparedWithThePreviousPeriod")}
     >
       <Icon className="h-3 w-3" /> {up ? "+" : ""}
       {formatPercent(change)}%
@@ -69,6 +71,7 @@ export function SalesproOverviewView({
   onOpenQuoteModal,
   onViewAllRfqs,
 }: Props) {
+  const t = useTranslations();
   const periodDays = stats?.periodDays ?? 30;
   const responseWindowDays = stats?.responseWindowDays ?? 90;
   const activeRfqs = stats?.activeRfqsCount ?? 0;
@@ -80,8 +83,8 @@ export function SalesproOverviewView({
       {/* Subheader Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E6E8EB]">
         <div>
-          <h2 className="text-lg font-bold text-[#1C1C1C]">India–China B2B Discovery & RFQ Analytics</h2>
-          <p className="text-xs text-[#5F6368]">Live performance metrics and purchase inquiries from Indian industrial importers</p>
+          <h2 className="text-lg font-bold text-[#1C1C1C]">{t("seller.overview.indiaChinaB2bDiscoveryRfq")}</h2>
+          <p className="text-xs text-[#5F6368]">{t("seller.overview.livePerformanceMetricsAndPurchase")}</p>
         </div>
       </div>
 
@@ -89,24 +92,24 @@ export function SalesproOverviewView({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 sf-stagger">
         {/* Card 1: Video Seek Impressions (Blue #1A73E8) */}
         <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
-          <p className="text-xs font-semibold text-[#5F6368]">Video Seek Impressions</p>
+          <p className="text-xs font-semibold text-[#5F6368]">{t("seller.overview.videoSeekImpressions")}</p>
           <p className="text-xl sm:text-2xl font-extrabold tabular-nums text-[#1A73E8]">
             {(stats?.videoSeekPlays ?? 0).toLocaleString()}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
-            <span>Last {periodDays} days</span>
+            <span>{t("seller.lastDays", { count: periodDays })}</span>
             <ChangeBadge change={stats?.videoPlaysChange ?? null} current={stats?.videoSeekPlays ?? 0} />
           </div>
         </div>
 
         {/* Card 2: India Buyer RFQs (Orangish-Yellow #F26B21) */}
         <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
-          <p className="text-xs font-semibold text-[#5F6368]">Active India Buyer RFQs</p>
+          <p className="text-xs font-semibold text-[#5F6368]">{t("seller.overview.activeIndiaBuyerRfqs")}</p>
           <p className="text-xl sm:text-2xl font-extrabold tabular-nums text-[#F26B21]">
-            {activeRfqs} {activeRfqs === 1 ? "Lead" : "Leads"}
+            {activeRfqs} {activeRfqs === 1 ? t("seller.overview.lead") : t("seller.overview.leads")}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
-            <span>Awaiting Quote</span>
+            <span>{t("seller.overview.awaitingQuote")}</span>
             <span
               className={
                 awaitingQuote > 0
@@ -114,36 +117,36 @@ export function SalesproOverviewView({
                   : "rounded-full bg-[#F3F4F6] text-[#5F6368] px-2 py-0.2 text-[10px] font-bold inline-flex items-center gap-0.5"
               }
             >
-              {awaitingQuote} New
+              {awaitingQuote} {t("seller.overview.new")}
             </span>
           </div>
         </div>
 
         {/* Card 3: Machinery Product Views */}
         <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
-          <p className="text-xs font-semibold text-[#5F6368]">Catalog Product Views</p>
+          <p className="text-xs font-semibold text-[#5F6368]">{t("seller.overview.catalogProductViews")}</p>
           <p className="text-xl sm:text-2xl font-extrabold tabular-nums text-[#1C1C1C]">
             {(stats?.totalProductViews ?? 0).toLocaleString()}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
-            <span>Last {periodDays} days</span>
+            <span>{t("seller.lastDays", { count: periodDays })}</span>
             <ChangeBadge change={stats?.productViewsChange ?? null} current={stats?.totalProductViews ?? 0} />
           </div>
         </div>
 
         {/* Card 4: Response Rate & Lead Speed */}
         <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
-          <p className="text-xs font-semibold text-[#5F6368]">Buyer Response Rate</p>
+          <p className="text-xs font-semibold text-[#5F6368]">{t("seller.overview.buyerResponseRate")}</p>
           <p
             className="text-2xl font-extrabold text-[#1C1C1C]"
-            title={`Share of RFQs received in the last ${responseWindowDays} days that you quoted`}
+            title={t("seller.overview.shareOfRfqsReceivedIn", { responseWindowDays })}
           >
             {responseRate === null ? "—" : `${formatPercent(responseRate)}%`}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
-            <span>Avg Response Speed</span>
+            <span>{t("seller.overview.avgResponseSpeed")}</span>
             <span className="whitespace-nowrap rounded-full bg-[#E8F1FD] text-[#1A73E8] px-2 py-0.2 text-[10px] font-bold">
-              {formatResponseTime(stats?.avgResponseTimeHours ?? null)}
+              {formatResponseTime(stats?.avgResponseTimeHours ?? null, t)}
             </span>
           </div>
         </div>

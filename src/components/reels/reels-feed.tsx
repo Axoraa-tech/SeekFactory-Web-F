@@ -5,6 +5,7 @@ import { ReelCard } from "@/components/reels/reel-card";
 import { ReelPopupProvider } from "@/components/reels/use-reel-popup";
 import { ReelPopupModal } from "@/components/reels/reel-popup-modal";
 import type { FeedItem } from "@/shared/api/contracts";
+import { useTranslations } from "next-intl";
 
 type Props = {
   items: FeedItem[];
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
+  const t = useTranslations();
   const [, setActiveVideoId] = useState<string | null>(null);
 
   const trackLeftRef = useRef<HTMLDivElement>(null);
@@ -50,7 +52,7 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
   if (items.length === 0) {
     return (
       <div className="rounded-card border border-line bg-surface p-8 text-center text-sm text-ink-muted">
-        No seeks in this tab yet. Follow manufacturers to fill Following.
+        {t("feed.emptyTab")}
       </div>
     );
   }

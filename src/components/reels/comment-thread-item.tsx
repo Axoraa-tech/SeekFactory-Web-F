@@ -6,6 +6,7 @@ import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import { Avatar } from "@/components/ui/avatar";
 import { formatRelativeTime } from "@/shared/lib/format";
+import { useTranslations, useLocale } from "next-intl";
 
 type LikedState = { liked: boolean; count: number };
 
@@ -38,6 +39,8 @@ export function CommentThreadItem({
   onCancelReply,
   onToggleRepliesExpanded,
 }: Props) {
+  const locale = useLocale();
+  const t = useTranslations();
   const commentLikedState = likedMap[comment.id] || {
     liked: false,
     count: comment.likes,
@@ -67,7 +70,7 @@ export function CommentThreadItem({
                 • {comment.authorCompany}
               </span>
             )}
-            <span className="text-[10px] text-ink-faint ml-auto">{formatRelativeTime(comment.createdAt)}</span>
+            <span className="text-[10px] text-ink-faint ml-auto">{formatRelativeTime(comment.createdAt, locale)}</span>
           </div>
 
           <p className="text-xs text-ink mt-1 leading-relaxed break-words">{comment.content}</p>
@@ -95,7 +98,7 @@ export function CommentThreadItem({
               onClick={() => onToggleReply(comment.id)}
               className="font-semibold hover:text-brand-blue transition"
             >
-              Reply
+              {t("common.reply")}
             </button>
           </div>
 
@@ -106,7 +109,7 @@ export function CommentThreadItem({
                 type="text"
                 value={replyText}
                 onChange={(e) => onReplyTextChange(e.target.value)}
-                placeholder={`Reply to @${comment.authorName}...`}
+                placeholder={t("comments.thread.replyTo", { authorName: comment.authorName })}
                 className="flex-1 rounded-lg border-0 bg-transparent text-xs text-ink placeholder:text-ink-faint focus:outline-none"
                 autoFocus
                 onKeyDown={(e) => {
@@ -122,14 +125,14 @@ export function CommentThreadItem({
                 disabled={!replyText.trim() || isSubmittingReply}
                 className="rounded-lg bg-brand-blue px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-blue-dark transition disabled:opacity-50"
               >
-                Reply
+                {t("common.reply")}
               </button>
               <button
                 type="button"
                 onClick={onCancelReply}
                 className="text-xs text-ink-muted hover:text-ink px-1"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           )}
@@ -144,13 +147,13 @@ export function CommentThreadItem({
                 <div className="h-0.5 w-4 bg-brand-blue/40" />
                 {isRepliesExpanded ? (
                   <>
-                    <span>Hide replies</span>
+                    <span>{t("comments.thread.hideReplies")}</span>
                     <ChevronUp className="h-3 w-3" />
                   </>
                 ) : (
                   <>
                     <span>
-                      View {comment.replies.length}{" "}
+                      {t("common.view")} {comment.replies.length}{" "}
                       {comment.replies.length === 1 ? "reply" : "replies"}
                     </span>
                     <ChevronDown className="h-3 w-3" />
@@ -185,7 +188,7 @@ export function CommentThreadItem({
                               </span>
                             )}
                             <span className="text-[10px] text-ink-faint ml-auto">
-                              {formatRelativeTime(reply.createdAt)}
+                              {formatRelativeTime(reply.createdAt, locale)}
                             </span>
                           </div>
                           <p className="text-xs text-ink mt-0.5 leading-relaxed">{reply.content}</p>

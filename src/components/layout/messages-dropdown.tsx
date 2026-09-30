@@ -9,6 +9,7 @@ import type { Conversation } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { getApi } from "@/shared/api";
 import { formatRelativeTime } from "@/shared/lib/format";
+import { useTranslations, useLocale } from "next-intl";
 
 type MessagesDropdownProps = {
   initialCount: number;
@@ -19,6 +20,8 @@ export function MessagesDropdown({
   initialCount,
   initialMessages = [],
 }: MessagesDropdownProps) {
+  const locale = useLocale();
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<(Conversation & { manufacturer: Manufacturer })[]>(initialMessages);
   const [unreadCount, setUnreadCount] = useState(initialCount);
@@ -73,7 +76,7 @@ export function MessagesDropdown({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-label="Messages"
+        aria-label={t("nav.messages")}
         aria-expanded={isOpen}
         className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-blue/30 ${
           isOpen
@@ -92,10 +95,10 @@ export function MessagesDropdown({
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 px-1">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-brand-blue" />
-              <h3 className="text-sm font-bold text-ink">Messages & Chats</h3>
+              <h3 className="text-sm font-bold text-ink">{t("layout.messages.messagesChats")}</h3>
               {unreadCount > 0 && (
                 <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-bold text-brand-blue">
-                  {unreadCount} new
+                  {t("layout.messages.newCount", { count: unreadCount })}
                 </span>
               )}
             </div>
@@ -106,7 +109,7 @@ export function MessagesDropdown({
                 className="flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
-                Mark read
+                {t("layout.messages.markRead")}
               </button>
             )}
           </div>
@@ -114,9 +117,9 @@ export function MessagesDropdown({
           {/* Messages List */}
           <div className="my-1 max-h-80 overflow-y-auto divide-y divide-slate-50">
             {loading ? (
-              <div className="py-8 text-center text-xs text-ink-muted">Loading messages...</div>
+              <div className="py-8 text-center text-xs text-ink-muted">{t("layout.messages.loadingMessages")}</div>
             ) : messages.length === 0 ? (
-              <div className="py-8 text-center text-xs text-ink-muted">No messages found.</div>
+              <div className="py-8 text-center text-xs text-ink-muted">{t("layout.messages.noMessagesFound")}</div>
             ) : (
               messages.map((item) => (
                 <Link
@@ -139,7 +142,7 @@ export function MessagesDropdown({
                         {item.manufacturer.name}
                       </p>
                       <span className="text-[10px] text-ink-faint shrink-0 ml-2">
-                        {formatRelativeTime(item.lastMessageAt)}
+                        {formatRelativeTime(item.lastMessageAt, locale)}
                       </span>
                     </div>
                     <p
@@ -167,7 +170,7 @@ export function MessagesDropdown({
               onClick={() => setIsOpen(false)}
               className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline py-1"
             >
-              View all messages in Inbox
+              {t("layout.messages.viewAllMessagesInInbox")}
               <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
