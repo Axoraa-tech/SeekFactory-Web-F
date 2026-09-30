@@ -70,16 +70,14 @@ export function LeftSidebar({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                    active
-                      ? "bg-brand-red-soft font-semibold text-brand-red-dark before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-full before:bg-brand-red"
-                      : "text-ink-muted hover:bg-canvas hover:text-ink",
+                    "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
+                    active ? "bg-brand-blue-soft text-brand-blue" : "text-ink-muted hover:bg-canvas",
                   )}
                 >
                   <Icon className="h-[18px] w-[18px]" />
                   {t(item.key, item.defaultLabel)}
                   {badge > 0 ? (
-                    <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-red px-1 text-[10px] font-bold text-white">
+                    <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                       {badge}
                     </span>
                   ) : null}
@@ -115,7 +113,7 @@ export function LeftSidebar({
           </p>
           <Link
             href="/profile"
-            className="btn mt-3 h-9 w-full bg-brand-orange text-sm text-white hover:brightness-95"
+            className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-lg bg-brand-orange text-sm font-semibold text-white"
           >
             {t("sidebar.upgradeNow", "Upgrade Now")}
           </Link>

@@ -27,15 +27,6 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-sans)", "Segoe UI", "sans-serif"],
       },
-      // "White" surfaces carry a trace of the brand vermilion (#FDF8F8) so cards, bars and
-      // panels sit in the warm canvas. Only fills and gradient stops change: text-white and
-      // border-white stay pure white.
-      backgroundColor: {
-        white: "#fefcfc",
-      },
-      gradientColorStops: {
-        white: "#fefcfc",
-      },
       // Surfaces follow the admin panels: faint edge, soft shadow tinted to the ink hue.
       // shadow-xs / shadow-2xs were used across the site but are Tailwind v4 names that v3
       // never generated, so those cards had no elevation at all until now.

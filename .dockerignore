@@ -8,3 +8,9 @@ README.md
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Environment files hold secrets and per-machine settings: never bake them into the image.
+# Pass NEXT_PUBLIC_API_URL as a build arg instead (see Dockerfile).
+.env
+.env.*
+!.env.example

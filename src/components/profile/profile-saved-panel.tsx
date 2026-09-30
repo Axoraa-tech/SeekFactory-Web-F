@@ -40,7 +40,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
           </p>
           <Link
             href="/explore"
-            className="btn btn-primary inline-block mt-2 px-4 py-1.5 text-xs"
+            className="inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white"
           >
             {t("profile.saved.exploreCatalog")}
           </Link>
@@ -101,7 +101,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                   </Link>
                   <Link
                     href={p.priceInr > 0 ? `/checkout?product=${p.slug}&qty=${minimumOrderQuantity(p.moq)}` : `/rfq/new?product=${p.slug}`}
-                    className="btn btn-buy px-3 py-1.5 text-xs"
+                    className="inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
                     <Zap className="h-3 w-3 fill-white/80" />
                     <span>{t("common.buyNow")}</span>
@@ -154,7 +154,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                   </button>
                   <Link
                     href={`/manufacturers/${manufacturer.slug}`}
-                    className="btn btn-primary inline-flex items-center gap-1 px-3 py-1.5 text-xs"
+                    className="inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
                     <span>{t("profile.saved.viewFactory")}</span>
                   </Link>

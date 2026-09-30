@@ -38,7 +38,7 @@ export function MobileNav({ messageCount, notificationCount }: Props) {
                 href={item.href}
                 className={cn(
                   "relative flex flex-col items-center gap-0.5 px-3 py-1.5 text-[11px] font-medium",
-                  active ? "text-brand-red" : "text-ink-muted",
+                  active ? "text-brand-blue" : "text-ink-muted",
                 )}
               >
                 <span className="relative">

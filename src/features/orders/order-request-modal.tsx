@@ -133,13 +133,13 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
               <button
                 type="button"
                 onClick={onClose}
-                className="btn btn-secondary px-4 py-2 text-xs"
+                className="rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas"
               >
                 {t("common.close")}
               </button>
               <Link
                 href="/orders"
-                className="btn btn-primary px-4 py-2 text-xs"
+                className="rounded-xl bg-brand-blue px-4 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark"
               >
                 {t("orders.request.viewMyOrders")}
               </Link>
@@ -231,7 +231,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
                 type="button"
                 onClick={onClose}
                 disabled={status === "sending"}
-                className="btn btn-secondary px-4 py-2 text-xs disabled:opacity-50"
+                className="rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas disabled:opacity-50"
               >
                 {t("common.cancel")}
               </button>

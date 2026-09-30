@@ -37,7 +37,7 @@ export function CommentComposer({ inputRef, value, onChange, onSubmit, isSubmitt
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn btn-primary absolute right-1.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center disabled:opacity-50"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-brand-blue text-white shadow-sm hover:bg-brand-blue-dark transition disabled:opacity-50"
           >
             <Send className="h-3.5 w-3.5" />
           </button>

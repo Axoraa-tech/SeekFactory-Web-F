@@ -152,7 +152,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
     <>
       <article
         ref={containerRef}
-        className="seek-stage group/card relative overflow-hidden rounded-card border border-[rgba(28,22,22,0.07)] shadow-[0_1px_1px_rgba(28,22,22,0.03),0_18px_40px_-26px_rgba(60,30,26,0.4)] transition-shadow duration-300 hover:shadow-[0_1px_1px_rgba(28,22,22,0.03),0_24px_48px_-26px_rgba(60,30,26,0.5)]"
+        className="seek-stage group/card relative overflow-hidden rounded-card border border-[rgba(28,22,22,0.07)] shadow-[0_1px_1px_rgba(28,22,22,0.03),0_18px_40px_-26px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_1px_1px_rgba(28,22,22,0.03),0_24px_48px_-26px_rgba(15,23,42,0.45)]"
       >
         <SeekTrustStrip manufacturer={manufacturer} />
 
@@ -187,13 +187,18 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 <button
                   type="button"
                   onClick={toggleFollow}
-                  className={cn("btn h-7 px-3 text-xs", following ? "btn-soft" : "btn-secondary")}
+                  className={cn(
+                    "rounded-lg px-3 py-1 text-xs font-semibold transition border",
+                    following
+                      ? "border-neutral-200 bg-neutral-100 text-neutral-700"
+                      : "border-brand-blue/30 bg-brand-blue-soft text-brand-blue hover:bg-brand-blue hover:text-white"
+                  )}
                 >
                   {following ? t("common.following") : t("common.follow")}
                 </button>
                 <Link
                   href="/rfq/new"
-                  className="btn btn-primary inline-flex h-7 items-center gap-1 px-3 text-xs"
+                  className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
                 >
                   <Send className="h-3 w-3" />
                   <span>{t("feed.sendRfq")}</span>
@@ -297,7 +302,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 className="relative flex h-3 w-full cursor-pointer items-center"
               >
                 <div className="relative h-1 w-full rounded-full bg-white/30">
-                  <div className="h-full rounded-full bg-brand-red" style={{ width: `${progressPercent}%` }} />
+                  <div className="h-full rounded-full bg-brand-blue" style={{ width: `${progressPercent}%` }} />
                 </div>
               </div>
               <div className="flex items-center justify-between text-[11px] text-white/90 pt-0.5 font-mono">
@@ -320,7 +325,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                     <div key={chip.label} className="glass-tile min-w-0 rounded-2xl px-3 py-2.5">
                       <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-ink-muted">
                         <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-white shadow-[0_1px_2px_rgba(28,22,22,0.08)] ring-1 ring-[rgba(28,22,22,0.05)]">
-                          <Icon className={cn("h-3 w-3", index === 0 ? "text-brand-red" : "text-ink")} strokeWidth={2} />
+                          <Icon className={cn("h-3 w-3", "text-brand-blue")} strokeWidth={2} />
                         </span>
                         <span className="truncate">{chip.label.charAt(0).toUpperCase() + chip.label.slice(1).toLowerCase()}</span>
                       </div>
@@ -384,11 +389,11 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               onClick={toggleLike}
               aria-label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-red hover:shadow-xs transition",
-                liked && "text-brand-red bg-white shadow-xs"
+                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-rose-600 hover:shadow-xs transition",
+                liked && "text-rose-600 bg-white shadow-xs"
               )}
             >
-              <Heart className={cn("h-3.5 w-3.5", liked && "fill-brand-red")} />
+              <Heart className={cn("h-3.5 w-3.5", liked && "fill-rose-500")} />
               <span className="font-medium text-[11px]">{formatCount(likes)}</span>
             </button>
 

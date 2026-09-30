@@ -397,7 +397,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
             <button
               type="submit"
               disabled={!newComment.trim()}
-              className="btn btn-primary h-8 w-8 flex items-center justify-center disabled:opacity-50 shrink-0"
+              className="h-8 w-8 rounded-lg bg-brand-blue text-white flex items-center justify-center hover:bg-brand-blue-dark disabled:opacity-50 transition-colors shrink-0"
               title={t("seek.variant.sendInquiry")}
             >
               <Send className="h-3.5 w-3.5" />
@@ -432,7 +432,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
               type="button"
               disabled={isBuying}
               onClick={handleBuyNow}
-              className="flex-1 h-10 btn btn-buy text-xs disabled:opacity-75"
+              className="flex-1 h-10 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all disabled:opacity-75"
             >
               <Zap className="h-3.5 w-3.5 fill-white/80" />
               <span>{isBuying ? t("common.processing") : t("common.buyNow")}</span>

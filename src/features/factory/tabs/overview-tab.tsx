@@ -73,14 +73,14 @@ export function OverviewTab({
         <div className="flex items-center gap-2">
           <button
             onClick={onOpenAddProduct}
-            className="btn btn-primary flex items-center gap-1.5 px-3.5 py-2 text-xs"
+            className="flex items-center gap-1.5 rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-3.5 py-2 text-xs font-semibold shadow-xs transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
             <span>{t("seller.postProduct")}</span>
           </button>
           <button
             onClick={onOpenAddSeek}
-            className="btn btn-secondary flex items-center gap-1.5 px-3.5 py-2 text-xs"
+            className="flex items-center gap-1.5 rounded-lg border border-line bg-surface hover:bg-canvas text-ink px-3.5 py-2 text-xs font-semibold shadow-xs transition active:scale-95"
           >
             <Video className="h-4 w-4 text-brand-blue" />
             <span>{t("seller.uploadSeek")}</span>

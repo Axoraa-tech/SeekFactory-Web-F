@@ -52,7 +52,7 @@ export function FactoryHeader({
             <button
               type="button"
               onClick={onOpenAddProduct}
-              className="btn btn-primary inline-flex h-10 items-center gap-1.5 px-3.5 text-xs sm:text-sm"
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-brand-blue px-3.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-brand-blue-dark active:scale-95 shadow-sm"
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">{t("seller.postProduct")}</span>
@@ -62,7 +62,7 @@ export function FactoryHeader({
           {/* Switch to Buyer Marketplace */}
           <Link
             href="/explore"
-            className="btn btn-secondary inline-flex h-10 items-center gap-1.5 px-3 text-xs sm:text-sm text-ink-muted"
+            className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-xs sm:text-sm font-semibold text-ink-muted hover:bg-canvas hover:text-ink transition"
           >
             <span className="hidden md:inline">{t("seller.nav.buyerMarketplace")}</span>
             <ExternalLink className="h-4 w-4 text-ink-faint" />

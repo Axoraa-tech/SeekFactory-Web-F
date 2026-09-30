@@ -67,7 +67,7 @@ export function CartView({ user, initialCart }: Props) {
         <p className="text-xs text-ink-muted">{t("orders.cart.addProductsFromAFactory")}</p>
         <Link
           href="/explore"
-          className="btn btn-primary inline-flex h-9 items-center px-5 text-xs"
+          className="inline-flex h-9 items-center rounded-full bg-brand-blue px-5 text-xs font-bold text-white hover:bg-brand-blue-dark"
         >
           {t("orders.exploreProducts")}
         </Link>
