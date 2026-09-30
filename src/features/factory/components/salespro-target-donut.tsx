@@ -1,13 +1,15 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 export function SalesproTargetDonut() {
+  const t = useTranslations();
   return (
     <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs flex flex-col justify-between">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-[#1C1C1C]">Machinery Lead Target</h3>
+        <h3 className="text-sm font-bold text-[#1C1C1C]">{t("seller.donut.machineryLeadTarget")}</h3>
         <button type="button" className="text-xs font-semibold text-[#1A73E8] hover:underline">
-          View All
+          {t("common.viewAll")}
         </button>
       </div>
 
@@ -50,7 +52,7 @@ export function SalesproTargetDonut() {
             <span className="text-xs font-bold text-[#80868B]">/ 50.000</span>
           </div>
           <p className="text-xs text-[#5F6368] leading-tight">
-            Compare from last month is <strong className="text-[#1C1C1C]">31.000</strong> buyer impressions
+            {t("seller.donut.compareFromLastMonthIs")} <strong className="text-[#1C1C1C]">31.000</strong> {t("seller.donut.buyerImpressions")}
           </p>
         </div>
       </div>

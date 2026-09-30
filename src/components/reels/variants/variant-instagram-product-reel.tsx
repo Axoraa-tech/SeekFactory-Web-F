@@ -131,10 +131,10 @@ export function VariantInstagramProductReel({
             <div className="flex items-center justify-between z-10 shrink-0">
               <span className="inline-flex items-center gap-1 rounded-full bg-black/75 backdrop-blur-xs px-2.5 py-1 text-[11px] font-bold text-white shadow-xs">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                Direct OEM Verified
+                {t("seek.variant.directOemVerified")}
               </span>
               <span className="text-[11px] font-bold text-slate-700 bg-white/90 backdrop-blur-xs border border-slate-200 px-2.5 py-0.5 rounded-full shadow-2xs">
-                Product {activeProductIndex + 1} of {products.length}
+                {t("seek.variant.productOf", { index: activeProductIndex + 1, total: products.length })}
               </span>
             </div>
 
@@ -155,7 +155,7 @@ export function VariantInstagramProductReel({
                   type="button"
                   onClick={handlePrevProduct}
                   className="absolute left-1 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-slate-800 shadow-md border border-slate-200 transition hover:bg-white hover:scale-110 active:scale-95 opacity-85 group-hover:opacity-100"
-                  aria-label="Previous product"
+                  aria-label={t("seek.variant.previousProduct")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -167,7 +167,7 @@ export function VariantInstagramProductReel({
                   type="button"
                   onClick={handleNextProduct}
                   className="absolute right-1 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-slate-800 shadow-md border border-slate-200 transition hover:bg-white hover:scale-110 active:scale-95 opacity-85 group-hover:opacity-100"
-                  aria-label="Next product"
+                  aria-label={t("seek.variant.nextProduct")}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -178,10 +178,10 @@ export function VariantInstagramProductReel({
             <div className="pt-2 z-10 space-y-1.5 shrink-0">
               <div className="flex items-center justify-between px-1">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                  Browse Tagged Products ({products.length})
+                  {t("seek.variant.browseTaggedProducts")}{products.length})
                 </span>
                 <span className="text-[10px] font-semibold text-brand-blue">
-                  Tap to switch
+                  {t("seek.variant.tapToSwitch")}
                 </span>
               </div>
 
@@ -241,7 +241,7 @@ export function VariantInstagramProductReel({
                       {manufacturer.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
                     </div>
                     <p className="text-[11px] text-slate-500 truncate">
-                      {manufacturer.location}, {translateCountry(manufacturer.country)} · Est. {manufacturer.yearsEstablished}
+                      {manufacturer.location}, {translateCountry(manufacturer.country)} {t("seek.variant.est")} {manufacturer.yearsEstablished}
                     </p>
                   </div>
                 </Link>
@@ -270,7 +270,7 @@ export function VariantInstagramProductReel({
                     <span className="text-xs text-slate-500 font-medium"> / {translateUnit(activeProduct.unit)}</span>
                   </div>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">
-                    MOQ: {activeProduct.moq}
+                    {t("common.moqLabel")} {activeProduct.moq}
                   </span>
                 </div>
                 <p className="mt-1 text-xs font-bold text-slate-800 line-clamp-1">
@@ -282,9 +282,9 @@ export function VariantInstagramProductReel({
             {/* Middle: 4 Industrial Technical Spec Chips */}
             <div className="flex-1 my-2.5 space-y-2">
               <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                <span>Product Specifications</span>
+                <span>{t("seek.variant.productSpecifications")}</span>
                 <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" /> On-site Audited
+                  <CheckCircle2 className="h-3 w-3" /> {t("seek.variant.onSiteAudited")}
                 </span>
               </div>
 
@@ -292,7 +292,7 @@ export function VariantInstagramProductReel({
                 <div className="p-2 rounded-xl bg-white border border-slate-200/80">
                   <p className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                     <Layers className="h-3 w-3 text-brand-blue" />
-                    <span>Material</span>
+                    <span>{t("seek.variant.material")}</span>
                   </p>
                   <p className="font-bold text-xs text-slate-800 mt-0.5 truncate">
                     {activeProduct.specs?.["Material"] || "AISI 4140"}
@@ -302,17 +302,17 @@ export function VariantInstagramProductReel({
                 <div className="p-2 rounded-xl bg-white border border-slate-200/80">
                   <p className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                     <Clock className="h-3 w-3 text-amber-500" />
-                    <span>Lead Time</span>
+                    <span>{t("seek.variant.leadTime")}</span>
                   </p>
                   <p className="font-bold text-xs text-slate-800 mt-0.5 truncate">
-                    {activeProduct.specs?.["Lead Time"] || "10 - 15 Days"}
+                    {activeProduct.specs?.["Lead Time"] || t("seek.variant.n1015Days")}
                   </p>
                 </div>
 
                 <div className="p-2 rounded-xl bg-white border border-slate-200/80">
                   <p className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                     <Sparkles className="h-3 w-3 text-purple-500" />
-                    <span>Tolerance</span>
+                    <span>{t("seek.variant.tolerance")}</span>
                   </p>
                   <p className="font-bold text-xs text-slate-800 mt-0.5 truncate">
                     {activeProduct.specs?.["Tolerance"] || "±0.005 mm"}
@@ -322,7 +322,7 @@ export function VariantInstagramProductReel({
                 <div className="p-2 rounded-xl bg-white border border-slate-200/80">
                   <p className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-emerald-500" />
-                    <span>Compliance</span>
+                    <span>{t("seek.variant.compliance")}</span>
                   </p>
                   <p className="font-bold text-xs text-slate-800 mt-0.5 truncate">
                     ISO 9001:2015
@@ -338,15 +338,15 @@ export function VariantInstagramProductReel({
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-slate-800 truncate">Sourcing Manager Online</p>
-                    <p className="text-[10px] text-slate-500">Avg. Response &lt; 2 Hours</p>
+                    <p className="text-xs font-bold text-slate-800 truncate">{t("seek.variant.sourcingManagerOnline")}</p>
+                    <p className="text-[10px] text-slate-500">{t("seek.variant.avgResponse2Hours")}</p>
                   </div>
                 </div>
                 <Link
                   href={`/messages?with=${manufacturer.slug}`}
                   className="btn btn-secondary shrink-0 px-2.5 py-1 text-xs"
                 >
-                  Chat
+                  {t("common.chat")}
                 </Link>
               </div>
             </div>
@@ -367,12 +367,12 @@ export function VariantInstagramProductReel({
                   {isAddedToCart ? (
                     <>
                       <Check className="h-3.5 w-3.5" />
-                      <span>Added</span>
+                      <span>{t("common.added")}</span>
                     </>
                   ) : (
                     <>
                       <ShoppingCart className="h-3.5 w-3.5" />
-                      <span>Add to Cart</span>
+                      <span>{t("common.addToCart")}</span>
                     </>
                   )}
                 </button>
@@ -385,7 +385,7 @@ export function VariantInstagramProductReel({
                   className="flex-1 h-10 btn btn-buy text-xs disabled:opacity-75"
                 >
                   <Zap className="h-3.5 w-3.5 fill-white/80" />
-                  <span>{buyingId === activeProduct.id ? "Processing..." : "Buy Now"}</span>
+                  <span>{buyingId === activeProduct.id ? t("common.processing") : t("common.buyNow")}</span>
                 </button>
               </div>
 
@@ -394,13 +394,13 @@ export function VariantInstagramProductReel({
                   href={`/products/${activeProduct.slug}`}
                   className="text-[11px] font-semibold text-slate-600 hover:text-brand-blue"
                 >
-                  View Full Specs →
+                  {t("seek.variant.viewFullSpecs")}
                 </Link>
                 <Link
                   href="/rfq/new"
                   className="text-[11px] font-bold text-brand-blue hover:underline"
                 >
-                  Request Custom RFQ
+                  {t("seek.variant.requestCustomRfq")}
                 </Link>
               </div>
             </div>
@@ -511,10 +511,10 @@ export function VariantInstagramProductReel({
                         <div className="flex items-center justify-between z-10">
                           <span className="inline-flex items-center gap-0.5 rounded-full bg-black/65 backdrop-blur-xs px-1.5 py-0.2 text-[9px] font-bold text-white">
                             <ShieldCheck className="h-2.5 w-2.5 text-emerald-400" />
-                            Direct OEM
+                            {t("seek.variant.directOem")}
                           </span>
                           <span className="text-[9px] font-semibold text-neutral-500 bg-neutral-100 px-1 py-0.2 rounded">
-                            MOQ: {prod.moq}
+                            {t("common.moqLabel")} {prod.moq}
                           </span>
                         </div>
 
@@ -567,7 +567,7 @@ export function VariantInstagramProductReel({
               <button
                 type="button"
                 onClick={handlePrevSlide}
-                aria-label="Previous products"
+                aria-label={t("seek.variant.previousProducts")}
                 className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-neutral-800 shadow-md border border-neutral-200 transition hover:bg-white hover:scale-110 active:scale-95 opacity-80 group-hover:opacity-100"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
@@ -578,7 +578,7 @@ export function VariantInstagramProductReel({
               <button
                 type="button"
                 onClick={handleNextSlide}
-                aria-label="Next products"
+                aria-label={t("seek.variant.nextProducts")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-neutral-800 shadow-md border border-neutral-200 transition hover:bg-white hover:scale-110 active:scale-95 opacity-80 group-hover:opacity-100"
               >
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -608,40 +608,40 @@ export function VariantInstagramProductReel({
             <div className="p-2 rounded-xl bg-neutral-50/80 border border-neutral-200/60">
               <p className="text-[10px] text-neutral-400 font-medium flex items-center gap-1">
                 <Layers className="h-3 w-3 text-brand-blue" />
-                <span>CATALOG</span>
+                <span>{t("seek.variant.catalog")}</span>
               </p>
               <p className="font-bold text-neutral-800 mt-0.5 text-xs truncate">
-                {products.length} Tagged Products
+                {products.length} {t("seek.variant.taggedProducts")}
               </p>
             </div>
 
             <div className="p-2 rounded-xl bg-neutral-50/80 border border-neutral-200/60">
               <p className="text-[10px] text-neutral-400 font-medium flex items-center gap-1">
                 <PackageCheck className="h-3 w-3 text-emerald-500" />
-                <span>MIN. ORDER</span>
+                <span>{t("seek.variant.minOrder")}</span>
               </p>
               <p className="font-bold text-neutral-800 mt-0.5 text-xs truncate">
-                {primaryProduct?.moq || "1 Set / MOQ"}
+                {primaryProduct?.moq || t("seek.variant.n1SetMoq")}
               </p>
             </div>
 
             <div className="p-2 rounded-xl bg-neutral-50/80 border border-neutral-200/60">
               <p className="text-[10px] text-neutral-400 font-medium flex items-center gap-1">
                 <Clock className="h-3 w-3 text-amber-500" />
-                <span>LEAD TIME</span>
+                <span>{t("seek.variant.leadTime2")}</span>
               </p>
               <p className="font-bold text-neutral-800 mt-0.5 text-xs truncate">
-                10–15 Days
+                {t("seek.variant.n1015Days2")}
               </p>
             </div>
 
             <div className="p-2 rounded-xl bg-neutral-50/80 border border-neutral-200/60">
               <p className="text-[10px] text-neutral-400 font-medium flex items-center gap-1">
                 <FileSpreadsheet className="h-3 w-3 text-purple-500" />
-                <span>CUSTOMIZATION</span>
+                <span>{t("seek.variant.customization")}</span>
               </p>
               <p className="font-bold text-neutral-800 mt-0.5 text-xs truncate">
-                OEM & ODM
+                {t("seek.variant.oemOdm")}
               </p>
             </div>
           </div>
@@ -726,7 +726,7 @@ export function VariantInstagramProductReel({
               )}
             >
               <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-brand-blue")} />
-              <span className="font-medium text-[11px]">{saved ? "Saved" : "Save"}</span>
+              <span className="font-medium text-[11px]">{saved ? t("common.saved") : t("common.save")}</span>
             </button>
           </div>
         </div>

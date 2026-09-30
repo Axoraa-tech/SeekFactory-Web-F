@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import type { SellerProduct } from "../types";
 import { SafeImage } from "@/components/ui/safe-image";
+import { useTranslations } from "next-intl";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type Props = {
   products: SellerProduct[];
@@ -31,6 +33,8 @@ type Props = {
 const STATUS_FILTERS = ["All", "Active", "Paused"] as const;
 
 export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetListed, onDeleteProduct }: Props) {
+  const t = useTranslations();
+  const { translateCategory } = useRegionalSettings();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState<(typeof STATUS_FILTERS)[number]>("All");
@@ -64,18 +68,18 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-neutral-900 flex items-center gap-2">
-            <span>Product Catalog & Machinery Inventory</span>
+            <span>{t("seller.products.productCatalogMachineryInventory")}</span>
             <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.2 text-xs font-bold text-brand-blue">
-              {activeCount} Live
+              {activeCount} {t("seller.products.live")}
             </span>
             {products.length > activeCount && (
               <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.2 text-xs font-bold text-amber-800">
-                {products.length - activeCount} Paused
+                {products.length - activeCount} {t("common.paused")}
               </span>
             )}
           </h2>
           <p className="text-xs text-ink-muted mt-1">
-            Manage your machinery listings, technical parameters, and export pricing
+            {t("seller.products.manageYourMachineryListingsTechnical")}
           </p>
         </div>
 
@@ -84,7 +88,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
           className="btn btn-primary flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs"
         >
           <Plus className="h-4 w-4" />
-          <span>Post New Product</span>
+          <span>{t("seller.product.postNewIndustrialProduct")}</span>
         </button>
       </div>
 
@@ -97,7 +101,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search products by model, category, or specifications..."
+            placeholder={t("seller.products.searchProductsByModelCategory")}
             className="w-full rounded-xl border border-line bg-white pl-9 pr-4 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-brand-blue focus:outline-hidden shadow-xs"
           />
         </div>
@@ -111,7 +115,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
           >
             {categories.map((c) => (
               <option key={c} value={c}>
-                Category: {c}
+                {t("rfq.buyer.category")} {c === "All" ? t("common.all") : translateCategory(c)}
               </option>
             ))}
           </select>
@@ -123,7 +127,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
           >
             {STATUS_FILTERS.map((status) => (
               <option key={status} value={status}>
-                {status === "All" ? `Status: All (${products.length})` : `${status} (${products.filter((p) => p.status === status).length})`}
+                {status === "All" ? t("seller.products.statusAll", { count: products.length }) : `${t(`seller.status.${status}`)} (${products.filter((p) => p.status === status).length})`}
               </option>
             ))}
           </select>
@@ -157,7 +161,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
               <div className="space-y-1 min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="rounded-md bg-canvas px-2 py-0.5 text-[10px] font-bold text-neutral-700">
-                    {product.category}
+                    {translateCategory(product.category)}
                   </span>
                   <span
                     className={`rounded-full px-2 py-0.2 text-[10px] font-bold ${
@@ -166,11 +170,11 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                         : "bg-amber-100 text-amber-800"
                     }`}
                   >
-                    {product.status === "Paused" ? "Paused • hidden from buyers" : "Active"}
+                    {product.status === "Paused" ? t("seller.products.pausedHiddenFromBuyers") : t("seller.products.active")}
                   </span>
                   {product.imageUrls.length > 1 && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-neutral-500">
-                      <Images className="h-3 w-3" /> {product.imageUrls.length} photos
+                      <Images className="h-3 w-3" /> {t("seller.products.photoCount", { count: product.imageUrls.length })}
                     </span>
                   )}
                   {product.datasheetUrl && (
@@ -180,7 +184,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-700 hover:underline"
                     >
-                      <FileText className="h-3 w-3" /> Datasheet
+                      <FileText className="h-3 w-3" /> {t("seller.products.datasheet")}
                     </a>
                   )}
                 </div>
@@ -195,7 +199,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
 
                 <p className="text-xs font-semibold text-neutral-800">
                   ₹{(product.priceInr ?? 0).toLocaleString()} / {product.unit} •{" "}
-                  <span className="text-ink-muted font-normal">MOQ: {product.moq}</span>
+                  <span className="text-ink-muted font-normal">{t("common.moqLabel")} {product.moq}</span>
                 </p>
 
                 {/* Key specs pills */}
@@ -217,11 +221,11 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
               <div className="flex items-center gap-4 text-center">
                 <div>
                   <p className="text-xs font-extrabold text-neutral-900 tabular-nums">{product.viewsCount}</p>
-                  <p className="text-[10px] text-neutral-400">Views</p>
+                  <p className="text-[10px] text-neutral-400">{t("seller.seekDetail.views")}</p>
                 </div>
                 <div>
                   <p className="text-xs font-extrabold text-neutral-900 tabular-nums">{product.inquiriesCount}</p>
-                  <p className="text-[10px] text-neutral-400">Inquiries</p>
+                  <p className="text-[10px] text-neutral-400">{t("seller.home.inquiries")}</p>
                 </div>
               </div>
 
@@ -230,10 +234,10 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                   <Link
                     href={`/products/${product.slug}`}
                     className="btn btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
-                    title="View Public Marketplace Listing"
+                    title={t("seller.products.viewPublicMarketplaceListing")}
                   >
                     <Eye className="h-3.5 w-3.5" />
-                    <span>View</span>
+                    <span>{t("common.view")}</span>
                   </Link>
                 )}
 
@@ -241,10 +245,10 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                   type="button"
                   onClick={() => onEditProduct(product)}
                   className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs cursor-pointer"
-                  title="Edit product"
+                  title={t("seller.products.editProduct")}
                 >
                   <Pencil className="h-3.5 w-3.5" />
-                  <span>Edit</span>
+                  <span>{t("common.edit")}</span>
                 </button>
 
                 <button
@@ -256,7 +260,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                       ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                       : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
                   }`}
-                  title={product.status === "Paused" ? "Show this product to buyers again" : "Hide from buyers without deleting"}
+                  title={product.status === "Paused" ? t("seller.products.showThisProductToBuyers") : t("seller.products.hideFromBuyersWithoutDeleting")}
                 >
                   {togglingId === product.id ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -265,15 +269,15 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                   ) : (
                     <PauseCircle className="h-3.5 w-3.5" />
                   )}
-                  <span>{product.status === "Paused" ? "Relist" : "Pause"}</span>
+                  <span>{product.status === "Paused" ? t("seller.products.relist") : t("common.pause")}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => onDeleteProduct(product.id)}
-                  aria-label="Delete product"
+                  aria-label={t("seller.products.deleteProduct")}
                   className="rounded-xl border border-line p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
-                  title="Delete Product"
+                  title={t("seller.products.deleteProduct2")}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -285,9 +289,9 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
         {filteredProducts.length === 0 && (
           <div className="text-center py-12 rounded-2xl border border-dashed border-neutral-300 bg-white p-6">
             <Package className="h-10 w-10 text-neutral-300 mx-auto mb-2" />
-            <p className="text-sm font-bold text-neutral-800">No products match your search</p>
+            <p className="text-sm font-bold text-neutral-800">{t("seller.products.noProductsMatchYourSearch")}</p>
             <p className="text-xs text-ink-muted mt-1">
-              Try adjusting your category filter or post a new product listing.
+              {t("seller.products.tryAdjustingYourCategoryFilter")}
             </p>
           </div>
         )}

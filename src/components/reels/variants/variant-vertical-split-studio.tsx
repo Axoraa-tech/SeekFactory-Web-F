@@ -22,6 +22,7 @@ import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
 import { useReelImpression } from "@/hooks/use-reel-impression";
+import { useTranslations } from "next-intl";
 
 type Props = {
   reel: Reel;
@@ -44,6 +45,7 @@ type CommentItem = {
  * Full interactive live comments stream, factory specs, and commerce buttons on the right.
  */
 export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: Props) {
+  const t = useTranslations();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(reel.startSec || 0);
@@ -174,10 +176,10 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
     if (!newComment.trim()) return;
     const entry: CommentItem = {
       id: `c-${Date.now()}`,
-      user: "You (Guest Buyer)",
+      user: t("seek.variant.youGuestBuyer"),
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80",
       text: newComment.trim(),
-      time: "Just now",
+      time: t("common.justNow"),
     };
     setCommentsList((prev) => [entry, ...prev]);
     setNewComment("");
@@ -241,7 +243,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
               handleToggleMute();
             }}
             className="h-8 w-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/80 transition-colors shadow-xs"
-            aria-label="Toggle mute"
+            aria-label={t("seek.variant.toggleMute")}
           >
             {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </button>
@@ -252,7 +254,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
               handleToggleFullscreen();
             }}
             className="h-8 w-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/80 transition-colors shadow-xs"
-            aria-label="Toggle fullscreen"
+            aria-label={t("seek.variant.toggleFullscreen")}
           >
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
@@ -289,7 +291,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
       <div className="w-full md:w-[44%] p-4 flex flex-col justify-between bg-white border-t md:border-t-0 md:border-l border-slate-100">
         {/* Top: Factory Profile Header */}
         <div className="pb-3 border-b border-slate-100 shrink-0">
-          <SupplierLockOverlay badgeLabel="View Manufacturer">
+          <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
             <div className="flex items-center justify-between gap-2">
               <Link
                 href={`/manufacturers/${manufacturer.slug}`}
@@ -323,7 +325,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
                     : "bg-brand-blue text-white hover:bg-brand-blue-dark active:scale-95"
                 )}
               >
-                {following ? "Following" : "+ Follow"}
+                {following ? t("common.following") : t("widgets.follow")}
               </button>
             </div>
           </SupplierLockOverlay>
@@ -336,11 +338,11 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
                 <span className="text-[11px] text-slate-500 font-medium">/ piece</span>
               </div>
               <span className="text-[10px] font-bold text-amber-700 bg-amber-100/70 border border-amber-200 rounded px-1.5 py-0.5">
-                Direct OEM · 10% OFF
+                {t("seek.variant.directOem10Off")}
               </span>
             </div>
             <p className="mt-1 text-xs font-semibold text-slate-800 line-clamp-1">
-              {reel.title || "Precision CNC Machined Industrial Components"}
+              {reel.title || t("seek.variant.precisionCncMachinedIndustrialComponents")}
             </p>
           </div>
         </div>
@@ -350,7 +352,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
           <div className="flex items-center justify-between pb-1.5 text-xs text-slate-500">
             <span className="font-bold text-slate-800 flex items-center gap-1.5">
               <MessageCircle className="h-3.5 w-3.5 text-brand-blue" />
-              <span>Live Inquiries ({commentsList.length})</span>
+              <span>{t("seek.variant.liveInquiries")}{commentsList.length})</span>
             </span>
             <button
               type="button"
@@ -374,7 +376,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
               >
                 <div className="flex items-center justify-between gap-1 mb-0.5">
                   <span className={cn("font-bold truncate text-[11px]", c.isFactory ? "text-brand-blue" : "text-slate-800")}>
-                    {c.user} {c.isFactory && "★ (Verified Factory)"}
+                    {c.user} {c.isFactory && t("seek.variant.verifiedFactory")}
                   </span>
                   <span className="text-[9px] text-slate-400 shrink-0">{c.time}</span>
                 </div>
@@ -389,14 +391,14 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
               type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Ask factory about specs, MOQ..."
+              placeholder={t("seek.variant.askFactoryAboutSpecsMoq")}
               className="flex-1 h-8 rounded-lg border border-slate-200 px-2.5 text-xs outline-none focus:border-brand-blue bg-slate-50/50"
             />
             <button
               type="submit"
               disabled={!newComment.trim()}
               className="btn btn-primary h-8 w-8 flex items-center justify-center disabled:opacity-50 shrink-0"
-              title="Send Inquiry"
+              title={t("seek.variant.sendInquiry")}
             >
               <Send className="h-3.5 w-3.5" />
             </button>
@@ -415,12 +417,12 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
               {isAddedToCart ? (
                 <>
                   <Check className="h-3.5 w-3.5" />
-                  <span>Added</span>
+                  <span>{t("common.added")}</span>
                 </>
               ) : (
                 <>
                   <ShoppingCart className="h-3.5 w-3.5" />
-                  <span>Add to Cart</span>
+                  <span>{t("common.addToCart")}</span>
                 </>
               )}
             </button>
@@ -433,7 +435,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
               className="flex-1 h-10 btn btn-buy text-xs disabled:opacity-75"
             >
               <Zap className="h-3.5 w-3.5 fill-white/80" />
-              <span>{isBuying ? "Processing..." : "Buy Now"}</span>
+              <span>{isBuying ? t("common.processing") : t("common.buyNow")}</span>
             </button>
           </div>
 
@@ -442,13 +444,13 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
               href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
               className="text-[11px] font-semibold text-slate-500 hover:text-brand-blue"
             >
-              View Full Specs →
+              {t("seek.variant.viewFullSpecs")}
             </Link>
             <Link
               href={`/messages?with=${manufacturer.slug}`}
               className="text-[11px] font-bold text-brand-blue hover:underline"
             >
-              Chat Sourcing Manager
+              {t("seek.variant.chatSourcingManager")}
             </Link>
           </div>
         </div>

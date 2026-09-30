@@ -10,6 +10,7 @@ import type { MessageAttachment } from "@/shared/api/contracts";
 import type { OrderRequest } from "@/entities/order";
 import type { ThreadWithMessages } from "./chat-types";
 import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "./message-extras";
+import { useTranslations } from "next-intl";
 
 type Props = {
   activeThread: ThreadWithMessages;
@@ -54,6 +55,7 @@ export function ChatConversationPane({
   onContextChange,
   sendError,
 }: Props) {
+  const t = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canSend = (inputMessage.trim().length > 0 || attachment !== null) && !attachmentUploading;
 
@@ -70,7 +72,7 @@ export function ChatConversationPane({
             type="button"
             onClick={onBackToThreads}
             className="md:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100"
-            aria-label="Back to threads"
+            aria-label={t("chat.backToThreads")}
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -102,14 +104,14 @@ export function ChatConversationPane({
             className="btn btn-secondary hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-xs"
           >
             <Building2 className="h-3.5 w-3.5" />
-            <span>Visit Plant</span>
+            <span>{t("chat.visitPlant")}</span>
           </Link>
           <Link
             href="/rfq/new"
             className="btn btn-primary inline-flex items-center gap-1 px-3 py-1.5 text-xs"
           >
             <FileText className="h-3.5 w-3.5" />
-            <span>Post RFQ</span>
+            <span>{t("nav.postRfq")}</span>
           </Link>
         </div>
       </div>
@@ -118,9 +120,9 @@ export function ChatConversationPane({
         {activeThread.messages.length === 0 && (
           <div className="mx-auto mt-10 max-w-sm text-center text-slate-500">
             <MessageSquare className="mx-auto mb-2 h-8 w-8 text-slate-300" />
-            <p className="text-sm font-semibold text-slate-700">Start the conversation</p>
+            <p className="text-sm font-semibold text-slate-700">{t("chat.startTheConversation")}</p>
             <p className="mt-1 text-xs">
-              Ask {activeThread.manufacturer.name} about pricing, specs or delivery. You can attach images or PDFs.
+              {t("chat.ask")} {activeThread.manufacturer.name} {t("chat.aboutPricingSpecsOrDelivery")}
             </p>
           </div>
         )}
@@ -171,7 +173,7 @@ export function ChatConversationPane({
 
         {isTyping && (
           <div className="flex items-center gap-2 text-xs text-slate-400 italic">
-            <span>{activeThread.manufacturer.name} is typing...</span>
+            <span>{activeThread.manufacturer.name} {t("chat.isTyping")}</span>
           </div>
         )}
 
@@ -208,7 +210,7 @@ export function ChatConversationPane({
           <span className="flex items-center gap-1.5 font-semibold truncate">
             {attachmentUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" /> : <Paperclip className="h-3.5 w-3.5 shrink-0" />}
             <span className="truncate">
-              {attachmentError ?? sendError ?? (attachmentUploading ? "Uploading…" : `Attached: ${attachment?.name} (${attachment?.size})`)}
+              {attachmentError ?? sendError ?? (attachmentUploading ? t("common.uploading") : `Attached: ${attachment?.name} (${attachment?.size})`)}
             </span>
           </span>
           {attachment && !attachmentUploading && (
@@ -217,7 +219,7 @@ export function ChatConversationPane({
               onClick={onClearAttachment}
               className="font-bold text-red-500 hover:underline text-[11px] ml-2 inline-flex items-center gap-0.5"
             >
-              <X className="h-3 w-3" /> Remove
+              <X className="h-3 w-3" /> {t("common.remove")}
             </button>
           )}
         </div>
@@ -241,8 +243,8 @@ export function ChatConversationPane({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={attachmentUploading}
-          title="Attach an image or PDF"
-          aria-label="Attach an image or PDF"
+          title={t("chat.attachAnImageOrPdf")}
+          aria-label={t("chat.attachAnImageOrPdf")}
           className={cn(
             "p-2 rounded-xl border transition-colors shadow-2xs disabled:opacity-50",
             attachment
@@ -268,7 +270,7 @@ export function ChatConversationPane({
           className="btn btn-primary h-10 px-4 text-xs sm:text-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
         >
           <Send className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Send</span>
+          <span className="hidden sm:inline">{t("common.send")}</span>
         </button>
       </form>
     </div>

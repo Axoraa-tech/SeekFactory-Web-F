@@ -6,6 +6,7 @@ import { formatCount, formatPriceInr } from "@/shared/lib/format";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import type { Product } from "@/entities/product";
 import type { FeedItem } from "@/shared/api/contracts";
+import { useTranslations } from "next-intl";
 
 type Props = {
   savedProducts: Product[];
@@ -15,32 +16,33 @@ type Props = {
 };
 
 export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, onRemoveSeek }: Props) {
+  const t = useTranslations();
   return (
     <div className="space-y-4 glass-fade-in">
       <div className="glass-panel-liquid p-4 sm:p-5 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-ink">Saved Machines & Industrial Parts</h2>
+          <h2 className="text-base font-bold text-ink">{t("profile.saved.savedMachinesIndustrialParts")}</h2>
           <p className="text-xs text-ink-muted">
-            Quickly re-order or initiate instant checkout from your bookmarked items
+            {t("profile.saved.quicklyReOrderOrInitiate")}
           </p>
         </div>
         <span className="text-xs font-semibold text-ink-muted shrink-0">
-          {savedProducts.length} products · {savedSeeks.length} seeks
+          {savedProducts.length} {t("profile.saved.products")} {t("profile.saved.seekCount", { count: savedSeeks.length })}
         </span>
       </div>
 
       {savedProducts.length === 0 && savedSeeks.length === 0 ? (
         <div className="glass-panel-liquid p-12 text-center space-y-2">
           <Bookmark className="h-8 w-8 mx-auto text-ink-faint" />
-          <p className="font-bold text-sm text-ink">Nothing saved yet</p>
+          <p className="font-bold text-sm text-ink">{t("profile.saved.nothingSavedYet")}</p>
           <p className="text-xs text-ink-muted">
-            Save products and seeks with the bookmark button to find them here.
+            {t("profile.saved.saveProductsAndSeeksWith")}
           </p>
           <Link
             href="/explore"
             className="btn btn-primary inline-block mt-2 px-4 py-1.5 text-xs"
           >
-            Explore Catalog
+            {t("profile.saved.exploreCatalog")}
           </Link>
         </div>
       ) : savedProducts.length === 0 ? null : (
@@ -73,7 +75,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                         {p.unit ? <span className="text-[11px] text-ink-faint">/{p.unit}</span> : null}
                       </>
                     ) : (
-                      <span className="text-xs font-bold text-ink-muted">Price on request</span>
+                      <span className="text-xs font-bold text-ink-muted">{t("product.actions.priceOnRequest")}</span>
                     )}
                   </div>
                 </div>
@@ -86,7 +88,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                   className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-faint hover:text-red-600 transition-colors"
                 >
                   <Trash2 className="h-3 w-3" />
-                  <span>Remove</span>
+                  <span>{t("common.remove")}</span>
                 </button>
 
                 <div className="flex items-center gap-1.5">
@@ -95,14 +97,14 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                     className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
                     <ShoppingCart className="h-3 w-3" />
-                    <span>Order</span>
+                    <span>{t("common.order")}</span>
                   </Link>
                   <Link
                     href={p.priceInr > 0 ? `/checkout?product=${p.slug}&qty=${minimumOrderQuantity(p.moq)}` : `/rfq/new?product=${p.slug}`}
                     className="btn btn-buy px-3 py-1.5 text-xs"
                   >
                     <Zap className="h-3 w-3 fill-white/80" />
-                    <span>Buy Now</span>
+                    <span>{t("common.buyNow")}</span>
                   </Link>
                 </div>
               </div>
@@ -113,7 +115,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
 
       {savedSeeks.length > 0 && (
         <div className="space-y-3">
-          <h3 className="px-1 text-sm font-bold text-ink">Saved Seeks</h3>
+          <h3 className="px-1 text-sm font-bold text-ink">{t("profile.saved.savedSeeks")}</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             {savedSeeks.map(({ reel, manufacturer }) => (
               <div
@@ -148,13 +150,13 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                     className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-faint hover:text-red-600 transition-colors"
                   >
                     <Trash2 className="h-3 w-3" />
-                    <span>Remove</span>
+                    <span>{t("common.remove")}</span>
                   </button>
                   <Link
                     href={`/manufacturers/${manufacturer.slug}`}
                     className="btn btn-primary inline-flex items-center gap-1 px-3 py-1.5 text-xs"
                   >
-                    <span>View Factory</span>
+                    <span>{t("profile.saved.viewFactory")}</span>
                   </Link>
                 </div>
               </div>

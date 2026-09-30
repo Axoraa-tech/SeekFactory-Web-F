@@ -24,6 +24,7 @@ import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
 import { useReelImpression } from "@/hooks/use-reel-impression";
+import { useTranslations } from "next-intl";
 
 type Props = {
   reel: Reel;
@@ -37,6 +38,7 @@ type Props = {
  * Full industrial spec sheet, OEM verification audit, tiered pricing, and direct RFQ on the right.
  */
 export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }: Props) {
+  const t = useTranslations();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(reel.startSec || 0);
@@ -193,7 +195,7 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
               handleToggleMute();
             }}
             className="h-8 w-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/80 transition-colors shadow-xs"
-            aria-label="Toggle mute"
+            aria-label={t("seek.variant.toggleMute")}
           >
             {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </button>
@@ -204,7 +206,7 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
               handleToggleFullscreen();
             }}
             className="h-8 w-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/80 transition-colors shadow-xs"
-            aria-label="Toggle fullscreen"
+            aria-label={t("seek.variant.toggleFullscreen")}
           >
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
@@ -241,7 +243,7 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
       <div className="w-full md:w-[44%] p-4 flex flex-col justify-between bg-slate-50/50 border-t md:border-t-0 md:border-l border-slate-100">
         {/* Top: Factory Header */}
         <div className="pb-3 border-b border-slate-200/80 shrink-0">
-          <SupplierLockOverlay badgeLabel="View Manufacturer">
+          <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
             <div className="flex items-center justify-between gap-2">
               <Link
                 href={`/manufacturers/${manufacturer.slug}`}
@@ -260,7 +262,7 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
                     {manufacturer.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
                   </div>
                   <p className="text-[11px] text-slate-500 truncate">
-                    {manufacturer.location}, {manufacturer.country} · Est. {manufacturer.yearsEstablished}
+                    {manufacturer.location}, {manufacturer.country} {t("seek.variant.est")} {manufacturer.yearsEstablished}
                   </p>
                 </div>
               </Link>
@@ -275,7 +277,7 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
                     : "bg-brand-blue text-white hover:bg-brand-blue-dark active:scale-95"
                 )}
               >
-                {following ? "Following" : "+ Follow"}
+                {following ? t("common.following") : t("widgets.follow")}
               </button>
             </div>
           </SupplierLockOverlay>
@@ -288,11 +290,11 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
                 <span className="text-xs text-slate-500 font-medium"> / piece</span>
               </div>
               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">
-                MOQ: 100 pcs
+                {t("seek.variant.moq100Pcs")}
               </span>
             </div>
             <p className="mt-1 text-xs font-bold text-slate-800 line-clamp-1">
-              {reel.title || "Heavy-Duty Forged Drive Shafts"}
+              {reel.title || t("seek.variant.heavyDutyForgedDriveShafts")}
             </p>
           </div>
         </div>
@@ -300,9 +302,9 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
         {/* Middle: 4 Industrial Technical Spec Chips */}
         <div className="flex-1 my-2.5 space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-            <span>Manufacturing Capabilities</span>
+            <span>{t("seek.variant.manufacturingCapabilities")}</span>
             <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" /> On-site Audited
+              <CheckCircle2 className="h-3 w-3" /> {t("seek.variant.onSiteAudited")}
             </span>
           </div>
 
@@ -310,31 +312,31 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
             <div className="p-2 rounded-xl bg-white border border-slate-200/80">
               <p className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                 <Layers className="h-3 w-3 text-brand-blue" />
-                <span>Capacity</span>
+                <span>{t("seek.variant.capacity")}</span>
               </p>
-              <p className="font-bold text-xs text-slate-800 mt-0.5">25,000 pcs / mo</p>
+              <p className="font-bold text-xs text-slate-800 mt-0.5">{t("seek.variant.n25000PcsMo")}</p>
             </div>
 
             <div className="p-2 rounded-xl bg-white border border-slate-200/80">
               <p className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                 <Clock className="h-3 w-3 text-amber-500" />
-                <span>Lead Time</span>
+                <span>{t("seek.variant.leadTime")}</span>
               </p>
-              <p className="font-bold text-xs text-slate-800 mt-0.5">15 - 20 Days</p>
+              <p className="font-bold text-xs text-slate-800 mt-0.5">{t("seek.variant.n1520Days")}</p>
             </div>
 
             <div className="p-2 rounded-xl bg-white border border-slate-200/80">
               <p className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                 <Sparkles className="h-3 w-3 text-purple-500" />
-                <span>Customization</span>
+                <span>{t("seek.variant.customization2")}</span>
               </p>
-              <p className="font-bold text-xs text-slate-800 mt-0.5">Logo & Mold</p>
+              <p className="font-bold text-xs text-slate-800 mt-0.5">{t("seek.variant.logoMold")}</p>
             </div>
 
             <div className="p-2 rounded-xl bg-white border border-slate-200/80">
               <p className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                 <ShieldCheck className="h-3 w-3 text-emerald-500" />
-                <span>Compliance</span>
+                <span>{t("seek.variant.compliance")}</span>
               </p>
               <p className="font-bold text-xs text-slate-800 mt-0.5">ISO 9001:2015</p>
             </div>
@@ -348,15 +350,15 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-800 truncate">Sourcing Manager Online</p>
-                <p className="text-[10px] text-slate-500">Avg. Response &lt; 2 Hours</p>
+                <p className="text-xs font-bold text-slate-800 truncate">{t("seek.variant.sourcingManagerOnline")}</p>
+                <p className="text-[10px] text-slate-500">{t("seek.variant.avgResponse2Hours")}</p>
               </div>
             </div>
             <Link
               href={`/messages?with=${manufacturer.slug}`}
               className="btn btn-secondary shrink-0 px-2.5 py-1 text-xs"
             >
-              Chat
+              {t("common.chat")}
             </Link>
           </div>
         </div>
@@ -373,12 +375,12 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
               {isAddedToCart ? (
                 <>
                   <Check className="h-3.5 w-3.5" />
-                  <span>Added</span>
+                  <span>{t("common.added")}</span>
                 </>
               ) : (
                 <>
                   <ShoppingCart className="h-3.5 w-3.5" />
-                  <span>Add to Cart</span>
+                  <span>{t("common.addToCart")}</span>
                 </>
               )}
             </button>
@@ -391,7 +393,7 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
               className="flex-1 h-10 btn btn-buy text-xs disabled:opacity-75"
             >
               <Zap className="h-3.5 w-3.5 fill-white/80" />
-              <span>{isBuying ? "Processing..." : "Buy Now"}</span>
+              <span>{isBuying ? t("common.processing") : t("common.buyNow")}</span>
             </button>
           </div>
 
@@ -400,13 +402,13 @@ export function VariantVerticalCatalogSplit({ reel, manufacturer, productSlug }:
               href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
               className="text-[11px] font-semibold text-slate-600 hover:text-brand-blue"
             >
-              Catalog & Pricing →
+              {t("seek.variant.catalogPricing")}
             </Link>
             <Link
               href="/rfq/new"
               className="text-[11px] font-bold text-brand-blue hover:underline"
             >
-              Request Custom RFQ
+              {t("seek.variant.requestCustomRfq")}
             </Link>
           </div>
         </div>

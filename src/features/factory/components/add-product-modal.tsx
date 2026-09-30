@@ -18,6 +18,7 @@ import { getApi } from "@/shared/api";
 import type { NewFactoryProduct } from "@/shared/api/contracts";
 import type { Category } from "@/entities/category";
 import type { SellerProduct } from "../types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   isOpen: boolean;
@@ -59,6 +60,7 @@ let keySeq = 0;
 const nextKey = () => `img-${++keySeq}`;
 
 export function AddProductModal({ isOpen, onClose, categories, product, onSubmit }: Props) {
+  const t = useTranslations();
   const editing = Boolean(product);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -110,15 +112,15 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
     if (!files.length) return;
     const room = MAX_IMAGES - gallery.length;
     if (room <= 0) {
-      setError(`A product can have at most ${MAX_IMAGES} photos.`);
+      setError(t("seller.product.aProductCanHaveAt", { MAX_IMAGES }));
       return;
     }
     const tooBig = files.find((file) => file.size > MAX_IMAGE_BYTES);
     if (tooBig) {
-      setError(`"${tooBig.name}" is larger than 20MB. Please choose a smaller file.`);
+      setError(t("seller.product.isLargerThan20mbPlease", { name: tooBig.name }));
       return;
     }
-    setError(files.length > room ? `Only the first ${room} photo(s) were added (max ${MAX_IMAGES}).` : null);
+    setError(files.length > room ? t("seller.product.onlyTheFirstPhotoS", { room, MAX_IMAGES }) : null);
     setGallery((prev) => [
       ...prev,
       ...files.slice(0, room).map((file) => ({ key: nextKey(), url: URL.createObjectURL(file), file })),
@@ -128,7 +130,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
   function addPreset(url: string) {
     if (gallery.some((item) => item.url === url)) return;
     if (gallery.length >= MAX_IMAGES) {
-      setError(`A product can have at most ${MAX_IMAGES} photos.`);
+      setError(t("seller.product.aProductCanHaveAt", { MAX_IMAGES }));
       return;
     }
     setGallery((prev) => [...prev, { key: nextKey(), url }]);
@@ -154,11 +156,11 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
     e.target.value = "";
     if (!file) return;
     if (file.type !== "application/pdf") {
-      setError("Datasheet must be a PDF file.");
+      setError(t("seller.product.datasheetMustBeAPdf"));
       return;
     }
     if (file.size > MAX_PDF_BYTES) {
-      setError("Datasheet is larger than 20MB.");
+      setError(t("seller.product.datasheetIsLargerThan20mb"));
       return;
     }
     setError(null);
@@ -182,11 +184,11 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
     if (!name.trim() || busy) return;
     const categoryId = subCategoryId || rootCategoryId;
     if (!categoryId) {
-      setError("Choose a category for this product.");
+      setError(t("seller.product.chooseACategoryForThis"));
       return;
     }
     if (gallery.length === 0) {
-      setError("Add at least one product photo.");
+      setError(t("seller.errors.addAtLeastOneProduct"));
       return;
     }
 
@@ -224,7 +226,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
       });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save product. Please retry.");
+      setError(err instanceof Error ? err.message : t("seller.product.couldNotSaveProductPlease"));
       setStatus("idle");
     }
   }
@@ -239,11 +241,11 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               {editing ? <Pencil className="h-5 w-5" /> : <PackagePlus className="h-5 w-5" />}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-ink">{editing ? "Edit Product" : "Post New Industrial Product"}</h2>
+              <h2 className="text-lg font-bold text-ink">{editing ? t("seller.product.editProduct") : t("seller.product.postNewIndustrialProduct")}</h2>
               <p className="text-xs text-ink-muted">
                 {editing
-                  ? "Changes go live on your public listing as soon as you save"
-                  : "Publish machinery to verified Indian & global buyers"}
+                  ? t("seller.product.changesGoLiveOnYour")
+                  : t("seller.product.publishMachineryToVerifiedIndian")}
               </p>
             </div>
           </div>
@@ -251,7 +253,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
             type="button"
             onClick={onClose}
             disabled={busy}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="rounded-lg p-1.5 text-ink-muted hover:bg-canvas hover:text-ink transition"
           >
             <X className="h-5 w-5" />
@@ -263,14 +265,14 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
           {/* Product Name */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-              Product Title / Model Name <span className="text-red-500">*</span>
+              {t("seller.product.productTitleModelName")} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Heavy-Duty 5-Axis CNC Precision Machining Center (VMC 1200)"
+              placeholder={t("seller.product.eGHeavyDuty5")}
               className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-brand-blue focus:ring-2 focus:ring-brand-blue-soft focus:outline-hidden"
             />
           </div>
@@ -279,7 +281,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-                Category <span className="text-red-500">*</span>
+                {t("common.category")} <span className="text-red-500">*</span>
               </label>
               <select
                 value={rootCategoryId}
@@ -299,10 +301,10 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                 <select
                   value={subCategoryId}
                   onChange={(e) => setSubCategoryId(e.target.value)}
-                  aria-label="Subcategory"
+                  aria-label={t("seller.product.subcategory")}
                   className="mt-2 w-full rounded-lg border border-line px-3.5 py-2 text-xs text-ink focus:border-brand-blue focus:outline-hidden bg-surface"
                 >
-                  <option value="">All subcategories</option>
+                  <option value="">{t("seller.product.allSubcategories")}</option>
                   {subCategories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -314,7 +316,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-                FOB Price Range (INR ₹) <span className="text-red-500">*</span>
+                {t("seller.product.fobPriceRangeInr")} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -328,7 +330,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-                Unit / MOQ <span className="text-red-500">*</span>
+                {t("seller.product.unitMoq")} <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <select
@@ -347,7 +349,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                   required
                   value={moq}
                   onChange={(e) => setMoq(e.target.value)}
-                  placeholder="e.g. 1 Set"
+                  placeholder={t("seller.product.eG1Set")}
                   className="rounded-lg border border-line px-2.5 py-2.5 text-sm text-ink focus:border-brand-blue focus:outline-hidden"
                 />
               </div>
@@ -358,10 +360,10 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold uppercase tracking-wider text-ink">
-                Product Photos <span className="text-red-500">*</span>
+                {t("seller.product.productPhotos")} <span className="text-red-500">*</span>
               </label>
               <span className="text-[11px] text-ink-muted">
-                {gallery.length}/{MAX_IMAGES} • first photo is the cover
+                {gallery.length}/{MAX_IMAGES} {t("seller.product.firstPhotoIsTheCover")}
               </span>
             </div>
 
@@ -377,7 +379,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                   <img src={item.url} alt="" className="h-full w-full object-cover" />
                   {index === 0 && (
                     <span className="absolute left-1 top-1 rounded bg-brand-blue px-1.5 py-0.5 text-[9px] font-bold text-white">
-                      Cover
+                      {t("seller.product.cover")}
                     </span>
                   )}
                   <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-black/50 p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition">
@@ -385,8 +387,8 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                       <button
                         type="button"
                         onClick={() => makeCover(item.key)}
-                        aria-label="Make cover photo"
-                        title="Make cover photo"
+                        aria-label={t("seller.product.makeCoverPhoto")}
+                        title={t("seller.product.makeCoverPhoto")}
                         className="rounded p-1 text-white hover:bg-white/20"
                       >
                         <Star className="h-3.5 w-3.5" />
@@ -395,8 +397,8 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                     <button
                       type="button"
                       onClick={() => removeImage(item.key)}
-                      aria-label="Remove photo"
-                      title="Remove photo"
+                      aria-label={t("seller.product.removePhoto")}
+                      title={t("seller.product.removePhoto")}
                       className="rounded p-1 text-white hover:bg-white/20"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -412,7 +414,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                   className="aspect-4/3 rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas flex flex-col items-center justify-center gap-1 text-brand-blue transition"
                 >
                   <ImageIcon className="h-5 w-5" />
-                  <span className="text-[10px] font-bold">Add photos</span>
+                  <span className="text-[10px] font-bold">{t("seller.product.addPhotos")}</span>
                 </button>
               )}
             </div>
@@ -424,10 +426,10 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               onChange={addDeviceImages}
               className="hidden"
             />
-            <p className="text-[11px] text-ink-muted">PNG, JPG, WEBP up to 20MB each.</p>
+            <p className="text-[11px] text-ink-muted">{t("seller.product.pngJpgWebpUpTo")}</p>
 
             <div className="pt-1">
-              <p className="text-[11px] font-semibold text-ink-muted mb-2">Or add a catalog preset photo:</p>
+              <p className="text-[11px] font-semibold text-ink-muted mb-2">{t("seller.product.orAddACatalogPreset")}</p>
               <div className="grid grid-cols-5 gap-2.5">
                 {SAMPLE_IMAGES.map((imgSrc) => {
                   const added = gallery.some((item) => item.url === imgSrc);
@@ -455,14 +457,14 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
           {/* Datasheet PDF */}
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-ink">
-              Technical Datasheet (PDF, optional)
+              {t("seller.product.technicalDatasheetPdfOptional")}
             </label>
             {datasheet ? (
               <div className="flex items-center justify-between gap-3 rounded-lg border border-line bg-canvas px-3 py-2">
                 <span className="flex min-w-0 items-center gap-2 text-xs font-semibold text-ink">
                   <FileText className="h-4 w-4 shrink-0 text-red-600" />
                   <span className="truncate">{datasheet.name}</span>
-                  {datasheet.file && <span className="shrink-0 text-[10px] text-ink-muted">(uploads on save)</span>}
+                  {datasheet.file && <span className="shrink-0 text-[10px] text-ink-muted">{t("seller.product.uploadsOnSave")}</span>}
                 </span>
                 <div className="flex shrink-0 items-center gap-2">
                   <button
@@ -470,12 +472,12 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                     onClick={() => pdfInputRef.current?.click()}
                     className="text-[11px] font-bold text-brand-blue hover:underline"
                   >
-                    Replace
+                    {t("seller.product.replace")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setDatasheet(null)}
-                    aria-label="Remove datasheet"
+                    aria-label={t("seller.product.removeDatasheet")}
                     className="p-1 text-ink-muted hover:text-red-500"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -490,7 +492,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               >
                 <FileText className="h-4 w-4 text-brand-blue" />
                 <span>
-                  Attach a <span className="font-bold text-brand-blue underline">PDF datasheet</span> buyers can download (max 20MB)
+                  {t("seller.product.attachA")} <span className="font-bold text-brand-blue underline">{t("seller.product.pdfDatasheet")}</span> {t("seller.product.buyersCanDownloadMax20mb")}
                 </span>
               </button>
             )}
@@ -501,7 +503,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-ink">
-                Technical Specifications (Key Buyer Criteria)
+                {t("seller.product.technicalSpecificationsKeyBuyerCriteria")}
               </label>
               <button
                 type="button"
@@ -509,7 +511,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                 className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>Add Specification</span>
+                <span>{t("seller.product.addSpecification")}</span>
               </button>
             </div>
             <div className="space-y-2">
@@ -517,14 +519,14 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                 <div key={idx} className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="Spec Name (e.g. Spindle Speed)"
+                    placeholder={t("seller.product.specNameEGSpindle")}
                     value={s.key}
                     onChange={(e) => handleSpecChange(idx, "key", e.target.value)}
                     className="flex-1 rounded-lg border border-line px-3 py-1.5 text-xs text-ink focus:border-brand-blue focus:outline-hidden"
                   />
                   <input
                     type="text"
-                    placeholder="Spec Value (e.g. 12,000 RPM)"
+                    placeholder={t("seller.product.specValueEG12")}
                     value={s.value}
                     onChange={(e) => handleSpecChange(idx, "value", e.target.value)}
                     className="flex-1 rounded-lg border border-line px-3 py-1.5 text-xs text-ink focus:border-brand-blue focus:outline-hidden"
@@ -533,7 +535,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                     <button
                       type="button"
                       onClick={() => setSpecs((prev) => prev.filter((_, i) => i !== idx))}
-                      aria-label="Remove specification"
+                      aria-label={t("seller.product.removeSpecification")}
                       className="p-1.5 text-ink-muted hover:text-red-500 transition"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -547,13 +549,13 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
           {/* Description */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-              Product Overview & Manufacturing Capabilities
+              {t("seller.product.productOverviewManufacturingCapabilities")}
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Highlight machinery features, precision tolerances, warranty, and OEM customization options..."
+              placeholder={t("seller.product.highlightMachineryFeaturesPrecisionTolerances")}
               className="w-full rounded-lg border border-line px-3.5 py-2 text-sm text-ink placeholder:text-ink-faint focus:border-brand-blue focus:ring-2 focus:ring-brand-blue-soft focus:outline-hidden"
             />
           </div>
@@ -561,7 +563,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
           {!editing && (
             <div className="flex items-start gap-2 rounded-lg bg-brand-blue-soft p-3 border border-blue-100 text-xs text-brand-blue">
               <Info className="h-4 w-4 shrink-0 mt-0.5 text-brand-blue" />
-              <p>Your listing will be indexed in your factory catalog and presented directly to industrial buyers.</p>
+              <p>{t("seller.product.yourListingWillBeIndexed")}</p>
             </div>
           )}
 
@@ -579,7 +581,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               disabled={busy}
               className="btn btn-secondary px-4 py-2 text-xs disabled:opacity-50"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -589,12 +591,12 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
               <span>
                 {status === "uploading"
-                  ? "Uploading files…"
+                  ? t("seller.product.uploadingFiles")
                   : status === "saving"
-                    ? "Saving…"
+                    ? t("common.saving")
                     : editing
-                      ? "Save Changes"
-                      : "Publish Product"}
+                      ? t("common.saveChanges")
+                      : t("seller.product.publishProduct")}
               </span>
             </button>
           </div>

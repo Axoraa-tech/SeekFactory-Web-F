@@ -12,6 +12,7 @@ import type { BuyerProfile } from "@/entities/user";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import { ShippingForm } from "@/features/orders/shipping-form";
 import { PAYMENT_NOTE, formatMoney } from "@/features/orders/order-status";
+import { useTranslations } from "next-intl";
 
 type Props = {
   user: BuyerProfile;
@@ -35,6 +36,8 @@ function unitPriceFor(product: Product, quantity: number) {
 
 /** "Buy Now": order a single product without going through the cart. */
 export function DirectCheckout({ user, product, manufacturer, initialQuantity }: Props) {
+  const tx = useTranslations();
+  const tr = useTranslations();
   const router = useRouter();
   const minQty = minimumOrderQuantity(product.moq);
   const [quantity, setQuantity] = useState(Math.max(minQty, initialQuantity));
@@ -53,7 +56,7 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
       router.push(`/orders?placed=${encodeURIComponent(order.referenceNumber)}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send your order request");
+      setError(err instanceof Error ? err.message : tr("orders.checkout.couldNotSendYourOrder"));
       setPlacing(false);
     }
   };
@@ -76,18 +79,18 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
               {manufacturer.name}
             </Link>
             <p className="text-xs text-ink-muted">
-              {unitPrice !== null ? `${formatMoney(unitPrice, "INR")} / ${product.unit || "unit"}` : "Price on request"}
+              {unitPrice !== null ? `${formatMoney(unitPrice, "INR")} / ${product.unit || "unit"}` : tr("product.actions.priceOnRequest")}
               {minQty > 1 ? ` • MOQ ${minQty}` : ""}
             </p>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
-          <span className="text-xs font-semibold text-ink-muted">Quantity</span>
+          <span className="text-xs font-semibold text-ink-muted">{tr("common.quantity")}</span>
           <div className="inline-flex items-center rounded-lg border border-line">
             <button
               type="button"
-              aria-label="Decrease quantity"
+              aria-label={tr("orders.decreaseQuantity")}
               disabled={quantity <= minQty}
               onClick={() => setQuantity((q) => Math.max(minQty, q - 1))}
               className="flex h-9 w-9 items-center justify-center text-ink-muted hover:text-brand-blue disabled:opacity-40"
@@ -95,7 +98,7 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
               <Minus className="h-3.5 w-3.5" />
             </button>
             <input
-              aria-label="Quantity"
+              aria-label={tr("common.quantity")}
               type="number"
               min={minQty}
               value={quantity}
@@ -104,7 +107,7 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
             />
             <button
               type="button"
-              aria-label="Increase quantity"
+              aria-label={tr("orders.increaseQuantity")}
               onClick={() => setQuantity((q) => q + 1)}
               className="flex h-9 w-9 items-center justify-center text-ink-muted hover:text-brand-blue"
             >
@@ -115,7 +118,7 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
 
         {(product.priceTiers?.length ?? 0) > 0 && (
           <p className="text-[11px] text-ink-muted">
-            Bulk pricing:{" "}
+            {tr("orders.checkout.bulkPricing")}{" "}
             {product.priceTiers!.map((t) => `${t.minQty}+ at ${formatMoney(t.priceInr, "INR")}`).join(" • ")}
           </p>
         )}
@@ -123,14 +126,14 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
 
       <aside className="rounded-2xl border border-line bg-white p-5 shadow-2xs space-y-4 lg:sticky lg:top-24">
         <div className="flex items-baseline justify-between">
-          <span className="text-sm font-bold text-ink">Estimated total</span>
-          <span className="text-xl font-extrabold text-ink tabular-nums">{total !== null ? formatMoney(total, "INR") : "On request"}</span>
+          <span className="text-sm font-bold text-ink">{tr("orders.estimatedTotal")}</span>
+          <span className="text-xl font-extrabold text-ink tabular-nums">{total !== null ? formatMoney(total, "INR") : tr("orders.checkout.onRequest")}</span>
         </div>
         <p className="flex gap-2 rounded-lg bg-blue-50/70 px-3 py-2 text-[11px] text-slate-700">
           <Info className="h-3.5 w-3.5 shrink-0 text-brand-blue mt-0.5" />
-          <span>{PAYMENT_NOTE}</span>
+          <span>{tr(PAYMENT_NOTE)}</span>
         </p>
-        <ShippingForm user={user} submitLabel="Send order request" submitting={placing} error={error} onSubmit={placeOrder} />
+        <ShippingForm user={user} submitLabel={tx("orders.sendOrderRequest")} submitting={placing} error={error} onSubmit={placeOrder} />
       </aside>
     </div>
   );

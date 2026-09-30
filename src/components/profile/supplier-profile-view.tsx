@@ -43,6 +43,7 @@ import { AlibabaCertSection } from "@/components/profile/alibaba-cert-section";
 import { cn } from "@/shared/lib/cn";
 import { useFollow } from "@/features/engagement/use-engagement";
 import { PLACEHOLDER_IMAGE } from "@/shared/api/http-api";
+import { useTranslations } from "next-intl";
 
 
 type Props = {
@@ -68,6 +69,7 @@ export function SupplierProfileView({
   avgResponseTimeHours,
   followedByMe,
 }: Props) {
+  const t = useTranslations();
   const [activeTab, setActiveTab] = useState<"products" | "videos" | "about">("products");
   const { following: isFollowing, followerCount, toggleFollow } = useFollow(
     manufacturer.id,
@@ -124,15 +126,15 @@ export function SupplierProfileView({
 
             <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 border border-blue-200/60 mb-2">
               <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-              <span>Verified Supplier Protected</span>
+              <span>{t("supplier.verifiedSupplierProtected")}</span>
             </div>
 
             <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-              Direct Supplier Profile Access Locked
+              {t("supplier.directSupplierProfileAccessLocked")}
             </h2>
 
             <p className="mt-2 text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-              Full plant inspection reports, machine tooling lines, verified ISO certifications, and direct contact details for <strong className="text-slate-900 font-bold">{manufacturer.name}</strong> are reserved for verified Pro buyers.
+              {t("supplier.fullPlantInspectionReportsMachine")} <strong className="text-slate-900 font-bold">{manufacturer.name}</strong> {t("supplier.areReservedForVerifiedPro")}
             </p>
 
             {/* 3 Value Pillars */}
@@ -141,24 +143,24 @@ export function SupplierProfileView({
                 <div className="h-6 w-6 rounded-lg bg-blue-600/10 text-brand-blue flex items-center justify-center mb-1.5">
                   <Building2 className="h-3.5 w-3.5" />
                 </div>
-                <p className="text-[11px] font-bold text-slate-900">Plant Audits</p>
-                <p className="text-[10px] text-slate-500 leading-tight">ISO 9001, plant size & machines</p>
+                <p className="text-[11px] font-bold text-slate-900">{t("supplier.plantAudits")}</p>
+                <p className="text-[10px] text-slate-500 leading-tight">{t("supplier.iso9001PlantSizeMachines")}</p>
               </div>
 
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3">
                 <div className="h-6 w-6 rounded-lg bg-emerald-600/10 text-emerald-600 flex items-center justify-center mb-1.5">
                   <PhoneCall className="h-3.5 w-3.5" />
                 </div>
-                <p className="text-[11px] font-bold text-slate-900">Direct Contact</p>
-                <p className="text-[10px] text-slate-500 leading-tight">Verified WhatsApp & phone</p>
+                <p className="text-[11px] font-bold text-slate-900">{t("supplier.directContact")}</p>
+                <p className="text-[10px] text-slate-500 leading-tight">{t("supplier.verifiedWhatsappPhone")}</p>
               </div>
 
               <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-3">
                 <div className="h-6 w-6 rounded-lg bg-indigo-600/10 text-indigo-600 flex items-center justify-center mb-1.5">
                   <FileCheck2 className="h-3.5 w-3.5" />
                 </div>
-                <p className="text-[11px] font-bold text-slate-900">Priority RFQ</p>
-                <p className="text-[10px] text-slate-500 leading-tight">&lt; 4h quote response time</p>
+                <p className="text-[11px] font-bold text-slate-900">{t("supplier.priorityRfq")}</p>
+                <p className="text-[10px] text-slate-500 leading-tight">{t("supplier.n4hQuoteResponseTime")}</p>
               </div>
             </div>
 
@@ -171,7 +173,7 @@ export function SupplierProfileView({
               >
                 <Sparkles className="h-4 w-4 fill-amber-300 text-amber-300" />
                 <span>
-                  Upgrade to Pro • Unlock Full Profile ({pricing.proPriceFormatted} / {pricing.proPriceSub})
+                  {t("supplier.upgradeToProUnlockFull")}{pricing.proPriceFormatted} / {pricing.proPriceSub})
                 </span>
                 <ArrowRight className="h-4 w-4" />
               </button>
@@ -182,7 +184,7 @@ export function SupplierProfileView({
                   onClick={openUpgradeModal}
                   className="text-brand-blue hover:underline cursor-pointer"
                 >
-                  Compare All Sourcing Plans
+                  {t("supplier.compareAllSourcingPlans")}
                 </button>
                 <span>•</span>
                 <Link
@@ -190,7 +192,7 @@ export function SupplierProfileView({
                   className="text-slate-500 hover:text-slate-900 transition flex items-center gap-1"
                 >
                   <ArrowLeft className="h-3 w-3" />
-                  <span>Back to Video Feed</span>
+                  <span>{t("supplier.backToVideoFeed")}</span>
                 </Link>
               </div>
             </div>
@@ -204,9 +206,9 @@ export function SupplierProfileView({
     <div className="space-y-6">
       {/* 1. Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-        <Link href="/" className="hover:text-brand-blue transition-colors">Home</Link>
+        <Link href="/" className="hover:text-brand-blue transition-colors">{t("nav.home")}</Link>
         <span>/</span>
-        <Link href="/explore" className="hover:text-brand-blue transition-colors">Manufacturers</Link>
+        <Link href="/explore" className="hover:text-brand-blue transition-colors">{t("supplier.manufacturers")}</Link>
         <span>/</span>
         <span className="text-slate-900 font-semibold truncate">{manufacturer.name}</span>
       </nav>
@@ -227,13 +229,13 @@ export function SupplierProfileView({
             {manufacturer.verified && (
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-amber-400 border border-white/10 shadow-xs">
                 <Award className="h-3.5 w-3.5" />
-                Verified OEM Manufacturer
+                {t("feed.verifiedOem")}
               </span>
             )}
             {isoCertified && (
               <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-slate-900/80 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white/90 border border-white/10 shadow-xs">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                ISO 9001 Certified
+                {t("supplier.iso9001Certified")}
               </span>
             )}
           </div>
@@ -243,10 +245,10 @@ export function SupplierProfileView({
               type="button"
               onClick={handleShare}
               className="inline-flex items-center gap-1 rounded-full bg-slate-900/70 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-900 transition-colors border border-white/10"
-              title="Share profile"
+              title={t("supplier.shareProfile")}
             >
               <Share2 className="h-3.5 w-3.5" />
-              <span>{copiedLink ? "Link Copied!" : "Share"}</span>
+              <span>{copiedLink ? t("supplier.linkCopied") : t("common.share")}</span>
             </button>
           </div>
         </div>
@@ -276,7 +278,7 @@ export function SupplierProfileView({
                   </h1>
                   {manufacturer.premium && (
                     <span className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
-                      Gold Manufacturer
+                      {t("supplier.goldManufacturer")}
                     </span>
                   )}
                 </div>
@@ -291,7 +293,7 @@ export function SupplierProfileView({
                       <span>•</span>
                       <span className="inline-flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                        Est. {established} ({new Date().getFullYear() - established} yrs)
+                        {t("showcase.single.est")} {established} ({new Date().getFullYear() - established} {t("supplier.yrs")}
                       </span>
                     </>
                   )}
@@ -313,10 +315,10 @@ export function SupplierProfileView({
                   target="_blank"
                   rel="noopener noreferrer nofollow"
                   className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
-                  title="Visit Official Seller Website"
+                  title={t("supplier.visitOfficialSellerWebsite")}
                 >
                   <Globe2 className="h-4 w-4 text-brand-blue group-hover:text-white transition-colors" />
-                  <span>Visit Website</span>
+                  <span>{t("supplier.visitWebsite")}</span>
                   <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100" />
                 </a>
               )}
@@ -334,12 +336,12 @@ export function SupplierProfileView({
                 {isFollowing ? (
                   <>
                     <Check className="h-4 w-4" />
-                    <span>Following</span>
+                    <span>{t("common.following")}</span>
                   </>
                 ) : (
                   <>
                     <Plus className="h-4 w-4" />
-                    <span>Follow</span>
+                    <span>{t("common.follow")}</span>
                   </>
                 )}
               </button>
@@ -349,7 +351,7 @@ export function SupplierProfileView({
                 className="btn btn-secondary inline-flex h-10 items-center justify-center gap-1.5 px-4 text-xs"
               >
                 <MessageSquare className="h-4 w-4 text-brand-blue" />
-                <span>Chat Now</span>
+                <span>{t("supplier.chatNow")}</span>
               </Link>
 
               <Link
@@ -357,7 +359,7 @@ export function SupplierProfileView({
                 className="btn btn-primary inline-flex h-10 items-center justify-center gap-1.5 px-4 text-xs"
               >
                 <Send className="h-3.5 w-3.5" />
-                <span>Send RFQ</span>
+                <span>{t("feed.sendRfq")}</span>
               </Link>
             </div>
           </div>
@@ -367,7 +369,7 @@ export function SupplierProfileView({
             <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
               <Building2 className="h-4 w-4 text-brand-blue shrink-0" />
               <div>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase">Plant Area</p>
+                <p className="text-[10px] text-slate-400 font-semibold uppercase">{t("supplier.plantArea")}</p>
                 <p className="font-bold text-slate-800">{manufacturer.factorySize || "—"}</p>
               </div>
             </div>
@@ -375,7 +377,7 @@ export function SupplierProfileView({
             <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
               <Users className="h-4 w-4 text-brand-blue shrink-0" />
               <div>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase">Workforce</p>
+                <p className="text-[10px] text-slate-400 font-semibold uppercase">{t("supplier.workforce")}</p>
                 <p className="font-bold text-slate-800">{manufacturer.employees ? `${manufacturer.employees} Employees` : "—"}</p>
               </div>
             </div>
@@ -383,7 +385,7 @@ export function SupplierProfileView({
             <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
               <Globe2 className="h-4 w-4 text-brand-blue shrink-0" />
               <div>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase">Exports To</p>
+                <p className="text-[10px] text-slate-400 font-semibold uppercase">{t("supplier.exportsTo")}</p>
                 <p className="font-bold text-slate-800 truncate">{manufacturer.exportCountries.slice(0, 3).join(", ") || "—"}</p>
               </div>
             </div>
@@ -391,10 +393,10 @@ export function SupplierProfileView({
             <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
               <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
               <div>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase">Response Rate</p>
+                <p className="text-[10px] text-slate-400 font-semibold uppercase">{t("supplier.responseRate")}</p>
                 <p className="font-bold text-emerald-600">
                   {responseRatePercent === null
-                    ? "No RFQs yet"
+                    ? t("rfq.buyer.noRfqsYet")
                     : `${responseRatePercent}%${avgResponseTimeHours !== null ? ` (~${Math.max(1, Math.round(avgResponseTimeHours))}h)` : ""}`}
                 </p>
               </div>
@@ -420,7 +422,7 @@ export function SupplierProfileView({
               )}
             >
               <Package className="h-4 w-4" />
-              <span>Products Catalog</span>
+              <span>{t("supplier.productsCatalog")}</span>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-semibold">
                 {products.length}
               </span>
@@ -437,7 +439,7 @@ export function SupplierProfileView({
               )}
             >
               <Film className="h-4 w-4" />
-              <span>Factory Video Seeks</span>
+              <span>{t("supplier.factoryVideoSeeks")}</span>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-semibold">
                 {reels.length}
               </span>
@@ -454,9 +456,9 @@ export function SupplierProfileView({
               )}
             >
               <FileCheck className="h-4 w-4" />
-              <span>Overview & Audits</span>
+              <span>{t("supplier.overviewAudits")}</span>
               <span className="rounded-full bg-slate-100 text-slate-700 px-2 py-0.5 text-xs font-semibold">
-                {displayCertificates.length} {displayCertificates.length === 1 ? "Certification" : "Certifications"}
+                {displayCertificates.length} {displayCertificates.length === 1 ? t("supplier.certification") : t("profile.certs.certifications")}
               </span>
             </button>
           </div>
@@ -466,10 +468,10 @@ export function SupplierProfileView({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">Direct Factory Products</h2>
-                  <p className="text-xs text-slate-500">Verified OEM specifications with direct order & quote capabilities</p>
+                  <h2 className="text-base font-bold text-slate-900">{t("supplier.directFactoryProducts")}</h2>
+                  <p className="text-xs text-slate-500">{t("supplier.verifiedOemSpecificationsWithDirect")}</p>
                 </div>
-                <span className="text-xs font-semibold text-slate-500">{products.length} machines listed</span>
+                <span className="text-xs font-semibold text-slate-500">{products.length} {t("supplier.machinesListed")}</span>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -490,7 +492,7 @@ export function SupplierProfileView({
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                         <span className="absolute top-2.5 left-2.5 rounded-md bg-black/60 backdrop-blur-md px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
-                          OEM Direct
+                          {t("supplier.oemDirect")}
                         </span>
                       </Link>
 
@@ -531,13 +533,13 @@ export function SupplierProfileView({
               {activeTab === "videos" && (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-base font-bold text-slate-900">Machinery Video Demos & Facility Tours</h2>
-                    <p className="text-xs text-slate-500">Live technical demonstrations of manufacturing lines</p>
+                    <h2 className="text-base font-bold text-slate-900">{t("supplier.machineryVideoDemosFacilityTours")}</h2>
+                    <p className="text-xs text-slate-500">{t("supplier.liveTechnicalDemonstrationsOfManufacturing")}</p>
                   </div>
 
                   {reels.length === 0 ? (
                     <Card className="p-8 text-center text-sm text-slate-500">
-                      No video seeks uploaded for this manufacturer yet.
+                      {t("supplier.noVideoSeeksUploadedFor")}
                     </Card>
                   ) : (
                 <div className="space-y-6">
@@ -559,12 +561,12 @@ export function SupplierProfileView({
           {activeTab === "about" && (
             <div className="space-y-4">
               <Card className="p-5 border-slate-200/90 shadow-2xs space-y-3">
-                <h3 className="text-base font-bold text-slate-900">About {manufacturer.name}</h3>
+                <h3 className="text-base font-bold text-slate-900">{t("supplier.about")} {manufacturer.name}</h3>
                 <p className="text-sm text-slate-600 leading-relaxed">{manufacturer.description}</p>
                 <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
                   {manufacturer.chairmanName && (
                     <p className="text-slate-700">
-                      Managing Director / Chairman: <strong className="text-slate-900">{manufacturer.chairmanName}</strong>
+                      {t("supplier.managingDirectorChairman")} <strong className="text-slate-900">{manufacturer.chairmanName}</strong>
                     </p>
                   )}
                   {manufacturer.websiteUrl && (
@@ -575,7 +577,7 @@ export function SupplierProfileView({
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
                     >
                       <Globe2 className="h-3.5 w-3.5" />
-                      <span>Official Factory Website: {manufacturer.websiteUrl}</span>
+                      <span>{t("supplier.officialFactoryWebsite")} {manufacturer.websiteUrl}</span>
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
@@ -584,25 +586,25 @@ export function SupplierProfileView({
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Card className="p-5 border-slate-200/90 shadow-2xs space-y-2.5">
-                  <h4 className="text-sm font-bold text-slate-900">Plant & Capability</h4>
+                  <h4 className="text-sm font-bold text-slate-900">{t("supplier.plantCapability")}</h4>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Factory Floor Space</span>
+                      <span className="text-slate-500">{t("supplier.factoryFloorSpace")}</span>
                       <span className="font-semibold text-slate-800">{manufacturer.factorySize || "—"}</span>
                     </div>
                     <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Full-Time Staff</span>
+                      <span className="text-slate-500">{t("supplier.fullTimeStaff")}</span>
                       <span className="font-semibold text-slate-800">{manufacturer.employees || "—"}</span>
                     </div>
                     {manufacturer.productionLines != null && manufacturer.productionLines > 0 && (
                       <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                        <span className="text-slate-500">Production Lines</span>
+                        <span className="text-slate-500">{t("supplier.productionLines")}</span>
                         <span className="font-semibold text-slate-800">{manufacturer.productionLines}</span>
                       </div>
                     )}
                     {manufacturer.annualTurnover && (
                       <div className="flex justify-between pb-1">
-                        <span className="text-slate-500">Annual Turnover</span>
+                        <span className="text-slate-500">{t("supplier.annualTurnover")}</span>
                         <span className="font-semibold text-slate-800">{manufacturer.annualTurnover}</span>
                       </div>
                     )}
@@ -610,22 +612,22 @@ export function SupplierProfileView({
                 </Card>
 
                 <Card className="p-5 border-slate-200/90 shadow-2xs space-y-2.5">
-                  <h4 className="text-sm font-bold text-slate-900">Export & Compliance</h4>
+                  <h4 className="text-sm font-bold text-slate-900">{t("supplier.exportCompliance")}</h4>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Main Export Markets</span>
+                      <span className="text-slate-500">{t("supplier.mainExportMarkets")}</span>
                       <span className="font-semibold text-slate-800">{manufacturer.exportCountries.join(", ") || "—"}</span>
                     </div>
                     <div className="flex justify-between gap-3 border-b border-slate-100 pb-1.5">
-                      <span className="shrink-0 text-slate-500">Quality Certifications</span>
+                      <span className="shrink-0 text-slate-500">{t("supplier.qualityCertifications")}</span>
                       <span className={cn("text-right font-semibold", certificationNames.length ? "text-emerald-600" : "text-slate-400")}>
-                        {certificationNames.length ? certificationNames.join(", ") : "Not provided"}
+                        {certificationNames.length ? certificationNames.join(", ") : t("common.notProvided")}
                       </span>
                     </div>
                     <div className="flex justify-between pb-1">
-                      <span className="text-slate-500">SeekFactory Verification</span>
+                      <span className="text-slate-500">{t("supplier.seekfactoryVerification")}</span>
                       <span className="font-semibold text-slate-800">
-                        {manufacturer.verified ? "Business details verified" : "Not verified"}
+                        {manufacturer.verified ? t("supplier.businessDetailsVerified") : t("supplier.notVerified")}
                       </span>
                     </div>
                   </div>

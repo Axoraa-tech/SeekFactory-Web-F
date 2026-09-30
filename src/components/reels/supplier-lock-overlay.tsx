@@ -4,6 +4,7 @@ import React from "react";
 import { Eye } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useBuyerPlan } from "@/features/subscription";
+import { useTranslations } from "next-intl";
 
 interface SupplierLockOverlayProps {
   children: React.ReactNode;
@@ -19,9 +20,10 @@ interface SupplierLockOverlayProps {
 export function SupplierLockOverlay({
   children,
   className,
-  badgeLabel = "View Manufacturer",
+  badgeLabel,
   compact = false,
 }: SupplierLockOverlayProps) {
+  const t = useTranslations();
   const { isSupplierLocked, openUpgradeModal } = useBuyerPlan();
 
   if (!isSupplierLocked) {
@@ -41,7 +43,7 @@ export function SupplierLockOverlay({
         "group/lock relative overflow-hidden rounded-xl cursor-pointer transition-all",
         className
       )}
-      title="Click to view supplier details"
+      title={t("seek.lock.clickToViewSupplierDetails")}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -67,7 +69,7 @@ export function SupplierLockOverlay({
           <div className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-blue text-white shrink-0 transition-colors">
             <Eye className="h-2.5 w-2.5" />
           </div>
-          <span className="font-extrabold tracking-tight truncate">{badgeLabel}</span>
+          <span className="font-extrabold tracking-tight truncate">{badgeLabel ?? t("seek.viewManufacturer")}</span>
         </div>
       </div>
     </div>

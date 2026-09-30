@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
+import { useTranslations } from "next-intl";
 
 type Props = {
   images: string[];
@@ -12,6 +13,7 @@ type Props = {
 
 /** Product photo gallery: main image with thumbnails and prev/next. */
 export function ProductGallery({ images, alt, badge }: Props) {
+  const t = useTranslations();
   const photos = images.filter(Boolean);
   const [index, setIndex] = useState(0);
   const current = photos[Math.min(index, photos.length - 1)];
@@ -41,7 +43,7 @@ export function ProductGallery({ images, alt, badge }: Props) {
             <button
               type="button"
               onClick={() => go(-1)}
-              aria-label="Previous photo"
+              aria-label={t("ui.gallery.previousPhoto")}
               className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -49,7 +51,7 @@ export function ProductGallery({ images, alt, badge }: Props) {
             <button
               type="button"
               onClick={() => go(1)}
-              aria-label="Next photo"
+              aria-label={t("ui.gallery.nextPhoto")}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70"
             >
               <ChevronRight className="h-5 w-5" />
@@ -68,7 +70,7 @@ export function ProductGallery({ images, alt, badge }: Props) {
               key={src}
               type="button"
               onClick={() => setIndex(i)}
-              aria-label={`Show photo ${i + 1}`}
+              aria-label={t("ui.gallery.showPhoto", { i: i + 1 })}
               aria-current={i === index}
               className={cn(
                 "h-14 w-16 shrink-0 overflow-hidden rounded-md border-2 transition",

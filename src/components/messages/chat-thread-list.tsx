@@ -5,6 +5,7 @@ import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
 import type { ThreadWithMessages } from "./chat-types";
 import { formatRelativeTime } from "@/shared/lib/format";
+import { useTranslations, useLocale } from "next-intl";
 
 type Props = {
   threads: ThreadWithMessages[];
@@ -25,6 +26,8 @@ export function ChatThreadList({
   onSelectThread,
   mobileShowChat,
 }: Props) {
+  const locale = useLocale();
+  const t = useTranslations();
   return (
     <div
       className={cn(
@@ -35,7 +38,7 @@ export function ChatThreadList({
       <div className="p-3.5 border-b border-slate-100 bg-white space-y-2.5">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
-            <span>Messages & Chats</span>
+            <span>{t("layout.messages.messagesChats")}</span>
             <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-brand-blue">
               {threads.length}
             </span>
@@ -48,7 +51,7 @@ export function ChatThreadList({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search manufacturers & chats..."
+            placeholder={t("chat.searchManufacturersChats")}
             className="w-full h-8 rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs outline-none focus:border-brand-blue focus:bg-white transition-colors"
           />
         </div>
@@ -90,7 +93,7 @@ export function ChatThreadList({
                     )}
                   </div>
                   <span className="text-[10px] text-slate-400 shrink-0 font-medium">
-                    {formatRelativeTime(thread.lastMessageAt)}
+                    {formatRelativeTime(thread.lastMessageAt, locale)}
                   </span>
                 </div>
 

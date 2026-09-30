@@ -2,6 +2,7 @@
 
 import { Calendar } from "lucide-react";
 import type { SellerTrendPoint } from "../types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   /** Weekly points, oldest first. */
@@ -32,6 +33,7 @@ function weekLabel(iso: string) {
 
 /** Weekly seek views and product views (lines, left axis) vs RFQs received (bars, right axis). */
 export function SalesproAnalyticsChart({ trend }: Props) {
+  const t = useTranslations();
   const weeks = trend.length;
   const viewMax = niceMax(Math.max(0, ...trend.map((p) => Math.max(p.seekViews, p.productViews))));
   const rfqMax = niceMax(Math.max(0, ...trend.map((p) => p.rfqs)));
@@ -56,9 +58,9 @@ export function SalesproAnalyticsChart({ trend }: Props) {
     <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs flex flex-col justify-between h-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
-          <h3 className="text-sm font-bold text-[#1C1C1C]">Video Seeks Discovery vs Buyer RFQs</h3>
+          <h3 className="text-sm font-bold text-[#1C1C1C]">{t("seller.chart.videoSeeksDiscoveryVsBuyer")}</h3>
           <p className="text-xs text-[#5F6368]">
-            Weekly views of your seeks and products compared with RFQs routed to your factory
+            {t("seller.chart.weeklyViewsOfYourSeeks")}
           </p>
         </div>
 
@@ -66,21 +68,21 @@ export function SalesproAnalyticsChart({ trend }: Props) {
           <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
             <span className="flex items-center gap-1.5 text-[#1A73E8]">
               <span className="h-2.5 w-2.5 rounded-full bg-[#1A73E8]" />
-              <span>Seek views ({totals.seekViews.toLocaleString()})</span>
+              <span>{t("seller.chart.seekViews")}{totals.seekViews.toLocaleString()})</span>
             </span>
             <span className="flex items-center gap-1.5 text-[#5F6368]">
               <span className="h-2.5 w-2.5 rounded-full bg-[#5F6368]" />
-              <span>Product views ({totals.productViews.toLocaleString()})</span>
+              <span>{t("seller.chart.productViews")}{totals.productViews.toLocaleString()})</span>
             </span>
             <span className="flex items-center gap-1.5 text-[#F26B21]">
               <span className="h-2.5 w-2.5 rounded-sm bg-[#F26B21]" />
-              <span>RFQs ({totals.rfqs.toLocaleString()})</span>
+              <span>{t("seller.chart.rfqs")}{totals.rfqs.toLocaleString()})</span>
             </span>
           </div>
 
           <div className="flex items-center gap-1 rounded-lg border border-[#E6E8EB] bg-[#F8FAFC] px-2.5 py-1 text-xs font-semibold text-[#5F6368]">
             <Calendar className="h-3.5 w-3.5" />
-            <span>Last {weeks || 12} weeks</span>
+            <span>{t("seller.lastWeeks", { count: weeks || 12 })}</span>
           </div>
         </div>
       </div>
@@ -99,7 +101,7 @@ export function SalesproAnalyticsChart({ trend }: Props) {
             preserveAspectRatio="none"
             className="h-[200px] w-full overflow-visible"
             role="img"
-            aria-label={`Last ${weeks} weeks: ${totals.seekViews} seek views, ${totals.productViews} product views, ${totals.rfqs} RFQs`}
+            aria-label={t("seller.chart.lastWeeksSeekViewsProduct", { weeks, seekViews: totals.seekViews, productViews: totals.productViews, rfqs: totals.rfqs })}
           >
             {[0, 0.5, 1].map((f) => (
               <line
@@ -142,7 +144,7 @@ export function SalesproAnalyticsChart({ trend }: Props) {
             {trend.map((p, i) => (
               <rect key={`hit-${p.weekStart}`} x={slot * i} y="0" width={slot} height={H} fill="transparent">
                 <title>
-                  {`Week of ${weekLabel(p.weekStart)}\nSeek views: ${p.seekViews}\nProduct views: ${p.productViews}\nRFQs: ${p.rfqs}`}
+                  {t("seller.chart.weekOfSeekViewsProduct", { weekLabel: weekLabel(p.weekStart), seekViews: p.seekViews, productViews: p.productViews, rfqs: p.rfqs })}
                 </title>
               </rect>
             ))}
@@ -151,7 +153,7 @@ export function SalesproAnalyticsChart({ trend }: Props) {
           {!hasData && (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="rounded-lg bg-white/90 px-3 py-2 text-center text-xs font-semibold text-[#5F6368]">
-                No activity yet. Views and RFQs appear here as buyers discover your seeks and products.
+                {t("seller.chart.noActivityYetViewsAnd")}
               </p>
             </div>
           )}

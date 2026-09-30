@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ShieldCheck, Building2, CheckCircle2, Clock, AlertCircle, XCircle, Loader2 } from "lucide-react";
 import type { FactoryVerification } from "@/shared/api/contracts";
 import { submitVerificationAction } from "./actions";
+import { useTranslations } from "next-intl";
 
 const AVAILABLE_CERTS = ["ISO 9001", "ISO 14001", "CE Certification", "RoHS Compliance", "BSCI Audit", "SGS Verified"];
 
@@ -41,6 +42,7 @@ type Props = {
  * the admin console; approval makes the factory visible to buyers.
  */
 export function VerificationForm({ initial, factoryName, factoryCountry }: Props) {
+  const t = useTranslations();
   const [verification, setVerification] = useState(initial);
   // A pending application is shown as a status card; "Edit" reopens the form
   const [editing, setEditing] = useState(!initial.submitted && initial.status !== "APPROVED");
@@ -65,11 +67,11 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
-    if (companyRegNumber.trim().length < 4) next.companyRegNumber = "Enter a valid business registration number.";
-    if (!country) next.country = "Please select your country.";
-    if (!regDate) next.regDate = "Please provide the business registration date.";
-    else if (regDate > today) next.regDate = "Registration date cannot be in the future.";
-    if (factoryAddress.trim().length < 10) next.factoryAddress = "Please enter the complete factory address.";
+    if (companyRegNumber.trim().length < 4) next.companyRegNumber = t("seller.errors.enterAValidBusinessRegistration");
+    if (!country) next.country = t("seller.verify.pleaseSelectYourCountry");
+    if (!regDate) next.regDate = t("seller.verify.pleaseProvideTheBusinessRegistration");
+    else if (regDate > today) next.regDate = t("seller.verify.registrationDateCannotBeIn");
+    if (factoryAddress.trim().length < 10) next.factoryAddress = t("seller.verify.pleaseEnterTheCompleteFactory");
     return next;
   }
 
@@ -105,8 +107,8 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
       <StatusCard
         tone="success"
         icon={<CheckCircle2 className="h-7 w-7 text-emerald-600" />}
-        title="Your factory is verified"
-        body={`${factoryName} is approved and visible to buyers on SeekFactory.`}
+        title={t("seller.verify.yourFactoryIsVerified")}
+        body={t("seller.verify.isApprovedAndVisibleTo", { factoryName })}
       />
     );
   }
@@ -119,23 +121,23 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
         icon={
           rejected ? <XCircle className="h-7 w-7 text-red-600" /> : <Clock className="h-7 w-7 text-amber-600" />
         }
-        title={rejected ? "Verification was not approved" : "Verification submitted"}
+        title={rejected ? t("seller.verify.verificationWasNotApproved") : t("seller.verify.verificationSubmitted")}
         body={
           rejected
-            ? "Please review the reason below, correct your details and submit again."
-            : "Our team is reviewing your business details. This usually takes 1–2 business days. Your products stay hidden from buyers until approval."
+            ? t("seller.verify.pleaseReviewTheReasonBelow")
+            : t("seller.verify.ourTeamIsReviewingYour")
         }
         detail={
           rejected
-            ? verification.rejectionReason || "No reason was given."
+            ? verification.rejectionReason || t("seller.verify.noReasonWasGiven")
             : verification.submittedAt
               ? `Submitted ${new Date(verification.submittedAt).toLocaleString("en-IN")}`
               : undefined
         }
         onEdit={() => setEditing(true)}
-        editLabel={rejected ? "Correct & resubmit" : "Update details"}
+        editLabel={rejected ? t("seller.verify.correctResubmit") : t("seller.verify.updateDetails")}
         continueHref="/factory?tab=products"
-        continueLabel="Continue to Product Catalog"
+        continueLabel={t("seller.verify.continueToProductCatalog")}
       />
     );
   }
@@ -154,16 +156,16 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue-soft">
             <ShieldCheck className="h-6 w-6 text-brand-blue" />
           </div>
-          <h1 className="text-xl font-bold text-ink">Verify Your Factory</h1>
+          <h1 className="text-xl font-bold text-ink">{t("seller.verify.verifyYourFactory")}</h1>
           <p className="mt-1 text-sm text-ink-muted">
-            Provide {factoryName}&apos;s business details so buyers can confidently work with your factory.
+            {t("seller.verify.provide")} {factoryName}{t("seller.verify.sBusinessDetailsSoBuyers")}
           </p>
         </div>
 
         {verification.status === "REJECTED" && verification.rejectionReason && (
           <p className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>Previous application declined: {verification.rejectionReason}</span>
+            <span>{t("seller.verify.previousApplicationDeclined")} {verification.rejectionReason}</span>
           </p>
         )}
 
@@ -175,7 +177,7 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
           <div className="space-y-3">
             <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ink-muted">
               <Building2 className="h-3.5 w-3.5" />
-              Business Details
+              {t("seller.verify.businessDetails")}
             </p>
 
             <div>
@@ -186,7 +188,7 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
                   if (errors.companyRegNumber) setErrors((prev) => ({ ...prev, companyRegNumber: undefined }));
                 }}
                 maxLength={120}
-                placeholder="Business registration / license number *"
+                placeholder={t("seller.verify.businessRegistrationLicenseNumber")}
                 className={inputClass(errors.companyRegNumber)}
               />
               {errors.companyRegNumber && <FieldError message={errors.companyRegNumber} />}
@@ -196,7 +198,7 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
               value={taxId}
               onChange={(e) => setTaxId(e.target.value)}
               maxLength={120}
-              placeholder="Tax / GST identification number (optional)"
+              placeholder={t("seller.verify.taxGstIdentificationNumberOptional")}
               className={inputClass()}
             />
 
@@ -208,11 +210,11 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
                     setCountry(e.target.value);
                     if (errors.country) setErrors((prev) => ({ ...prev, country: undefined }));
                   }}
-                  aria-label="Country"
+                  aria-label={t("seller.verify.country")}
                   className={`${inputClass(errors.country)} bg-white ${!country ? "text-neutral-400" : "text-ink"}`}
                 >
                   <option value="" disabled>
-                    Country *
+                    {t("seller.verify.country2")}
                   </option>
                   {COUNTRIES.map((c) => (
                     <option key={c} value={c} className="text-ink">
@@ -228,7 +230,7 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
                   type="date"
                   value={regDate}
                   max={today}
-                  aria-label="Business registration date"
+                  aria-label={t("seller.verify.businessRegistrationDate")}
                   onChange={(e) => {
                     setRegDate(e.target.value);
                     if (errors.regDate) setErrors((prev) => ({ ...prev, regDate: undefined }));
@@ -247,7 +249,7 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
                   if (errors.factoryAddress) setErrors((prev) => ({ ...prev, factoryAddress: undefined }));
                 }}
                 maxLength={1000}
-                placeholder="Full factory address *"
+                placeholder={t("seller.verify.fullFactoryAddress")}
                 rows={3}
                 className={`w-full resize-none rounded-lg border px-3 py-2.5 text-sm outline-none focus:ring-1 ${
                   errors.factoryAddress
@@ -261,9 +263,9 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
 
           <div className="space-y-2">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-ink-muted">Certifications you hold</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-ink-muted">{t("seller.verify.certificationsYouHold")}</p>
               <p className="mt-1 text-[11px] text-ink-muted">
-                Select all that apply. Upload certificate copies from Factory Profile &amp; Certs in your seller hub.
+                {t("seller.verify.selectAllThatApplyUpload")}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -292,8 +294,7 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
           </div>
 
           <p className="rounded-lg bg-brand-blue-soft px-3 py-2 text-[11px] leading-relaxed text-brand-blue">
-            Our verification team may contact you at your registered email for copies of your business
-            licence before approving.
+            {t("seller.verify.ourVerificationTeamMayContact")}
           </p>
 
           {submitError && (
@@ -308,14 +309,14 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
             className="btn btn-primary flex h-11 w-full items-center justify-center gap-2 text-sm disabled:opacity-70"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {submitting ? "Submitting…" : verification.submitted ? "Resubmit for Verification" : "Submit for Verification"}
+            {submitting ? t("seller.verify.submitting") : verification.submitted ? t("seller.verify.resubmitForVerification") : t("seller.verify.submitForVerification")}
           </button>
 
           <Link
             href="/factory?tab=products"
             className="block text-center text-xs font-semibold text-ink-muted hover:text-brand-blue"
           >
-            Skip for now, go to your product catalog
+            {t("seller.verify.skipForNowGoTo")}
           </Link>
         </form>
       </div>
@@ -341,7 +342,7 @@ function StatusCard({
   onEdit,
   editLabel,
   continueHref = "/factory",
-  continueLabel = "Continue to Dashboard",
+  continueLabel,
 }: {
   tone: "success" | "pending" | "error";
   icon: React.ReactNode;
@@ -353,6 +354,7 @@ function StatusCard({
   continueHref?: string;
   continueLabel?: string;
 }) {
+  const t = useTranslations();
   const ring = { success: "bg-emerald-50", pending: "bg-amber-50", error: "bg-red-50" }[tone];
   const detailTone = {
     success: "bg-emerald-50 text-emerald-700",
@@ -370,7 +372,7 @@ function StatusCard({
           href={continueHref}
           className="btn btn-primary mt-5 inline-flex h-11 w-full items-center justify-center text-sm"
         >
-          {continueLabel}
+          {continueLabel ?? t("seller.verify.continueToDashboard")}
         </Link>
         {onEdit && (
           <button

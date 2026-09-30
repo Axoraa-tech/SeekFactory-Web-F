@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getApi } from "@/shared/api";
 import type { NewOrderRequest, OrderRequest } from "@/entities/order";
+import { getTranslations } from "next-intl/server";
 
 export type PlaceOrderResult =
   | { ok: true; data: OrderRequest }
@@ -14,18 +15,19 @@ export type PlaceOrderResult =
  * No payment is taken: the factory is notified and follows up with the buyer.
  */
 export async function placeOrderAction(input: NewOrderRequest): Promise<PlaceOrderResult> {
+  const t = await getTranslations();
   const user = await getApi().session.getCurrentUser();
   if (!user) {
-    return { ok: false, error: "Sign in to send an order request.", needsLogin: true };
+    return { ok: false, error: t("orders.errors.signInToSendAn"), needsLogin: true };
   }
 
   const quantity = Number(input.quantity);
-  if (!input.productSlug) return { ok: false, error: "Product is missing." };
+  if (!input.productSlug) return { ok: false, error: t("orders.errors.productIsMissing") };
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 1_000_000) {
-    return { ok: false, error: "Enter a whole quantity between 1 and 1,000,000." };
+    return { ok: false, error: t("orders.errors.enterAWholeQuantityBetween") };
   }
   if (input.note && input.note.length > 2000) {
-    return { ok: false, error: "Note must be at most 2000 characters." };
+    return { ok: false, error: t("orders.errors.noteMustBeAtMost") };
   }
 
   try {
@@ -39,6 +41,6 @@ export async function placeOrderAction(input: NewOrderRequest): Promise<PlaceOrd
     return { ok: true, data: order };
   } catch (err) {
     console.error("Order request failed:", err);
-    return { ok: false, error: err instanceof Error ? err.message : "Could not send the order request." };
+    return { ok: false, error: err instanceof Error ? err.message : t("orders.errors.couldNotSendTheOrder") };
   }
 }

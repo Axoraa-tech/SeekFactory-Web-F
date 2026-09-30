@@ -6,6 +6,7 @@ import { useRegionalSettings, CURRENCIES } from "@/shared/i18n/regional-context"
 import { getApi } from "@/shared/api";
 import type { BuyerPlan } from "@/entities/plan";
 import type { BuyerPlanTier } from "@/entities/user";
+import { useTranslations } from "next-intl";
 
 export type { BuyerPlanTier } from "@/entities/user";
 export type SubscriptionRegion = "india" | "china";
@@ -100,6 +101,7 @@ const BuyerPlanContext = createContext<BuyerPlanContextValue | null>(null);
 const REGION_STORAGE_KEY = "seekfactory_subscription_region";
 
 export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
+  const t = useTranslations();
   const router = useRouter();
   const { selectedCurrency, setCurrency } = useRegionalSettings();
   const [tier, setTier] = useState<BuyerPlanTier>("free");
@@ -154,7 +156,7 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
     if (!signedIn) {
       setIsUpgradeModalOpen(false);
       router.push(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-      return { ok: false, message: "Sign in to change your plan" };
+      return { ok: false, message: t("plans.signInToChangeYour") };
     }
     try {
       const profile = await getApi().session.updatePlan(newTier);
@@ -163,9 +165,9 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
       router.refresh();
       return { ok: true };
     } catch (err) {
-      return { ok: false, message: err instanceof Error ? err.message : "Could not change your plan" };
+      return { ok: false, message: err instanceof Error ? err.message : t("plans.couldNotChangeYourPlan") };
     }
-  }, [signedIn, router]);
+  }, [signedIn, router, t]);
 
   const openUpgradeModal = useCallback(() => {
     setIsUpgradeModalOpen(true);
@@ -200,6 +202,7 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useBuyerPlan(): BuyerPlanContextValue {
+  const t = useTranslations();
   const context = useContext(BuyerPlanContext);
   if (!context) {
     return {
@@ -210,7 +213,7 @@ export function useBuyerPlan(): BuyerPlanContextValue {
       isSupplierLocked: true,
       isUpgradeModalOpen: false,
       setRegion: () => {},
-      upgradeTier: async () => ({ ok: false, message: "Plans are unavailable" }),
+      upgradeTier: async () => ({ ok: false, message: t("plans.plansAreUnavailable") }),
       syncPlan: () => {},
       openUpgradeModal: () => {},
       closeUpgradeModal: () => {},

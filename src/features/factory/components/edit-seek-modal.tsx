@@ -5,6 +5,7 @@ import { X, Pencil, Loader2, Save, Image as ImageIcon, Check } from "lucide-reac
 import { getApi } from "@/shared/api";
 import type { FactorySeekUpdate } from "@/shared/api/contracts";
 import type { SellerProduct, SellerSeek } from "../types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   seek: SellerSeek;
@@ -18,6 +19,7 @@ const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
 /** Edits a published seek's details. The video itself stays; upload a new seek to replace footage. */
 export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
+  const t = useTranslations();
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState(seek.title);
   const [description, setDescription] = useState(seek.description);
@@ -34,7 +36,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
     e.target.value = "";
     if (!file) return;
     if (file.size > MAX_IMAGE_BYTES) {
-      setError("Cover image is larger than 20MB.");
+      setError(t("seller.seek.coverImageIsLargerThan"));
       return;
     }
     if (coverPreview) URL.revokeObjectURL(coverPreview);
@@ -72,7 +74,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
       if (coverPreview) URL.revokeObjectURL(coverPreview);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save changes. Please retry.");
+      setError(err instanceof Error ? err.message : t("seller.seek.couldNotSaveChangesPlease"));
       setStatus("idle");
     }
   }
@@ -86,15 +88,15 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
               <Pencil className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-ink">Edit Video Seek</h2>
-              <p className="text-xs text-ink-muted">Update the title, caption, cover and tagged products</p>
+              <h2 className="text-lg font-bold text-ink">{t("seller.seek.editVideoSeek")}</h2>
+              <p className="text-xs text-ink-muted">{t("seller.seek.updateTheTitleCaptionCover")}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="rounded-lg p-1.5 text-ink-muted hover:bg-canvas hover:text-ink transition"
           >
             <X className="h-5 w-5" />
@@ -104,7 +106,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
-              Video Title <span className="text-red-500">*</span>
+              {t("seller.seek.videoTitle")} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -117,7 +119,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">Caption</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">{t("seller.seek.caption")}</label>
             <textarea
               rows={3}
               value={description}
@@ -127,7 +129,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">Hashtags</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">{t("seller.seek.hashtags")}</label>
             <input
               type="text"
               value={hashtags}
@@ -138,7 +140,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-ink">Cover Image</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-ink">{t("seller.seek.coverImage")}</label>
             <div className="flex items-center gap-3">
               <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-line bg-neutral-900">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -150,7 +152,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs font-bold text-ink hover:border-brand-blue hover:text-brand-blue transition"
               >
                 <ImageIcon className="h-4 w-4" />
-                {coverFile ? "Choose another" : "Replace cover"}
+                {coverFile ? t("seller.seek.chooseAnother") : t("seller.seek.replaceCover")}
               </button>
               <input
                 ref={coverInputRef}
@@ -165,7 +167,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
           {products.length > 0 && (
             <div className="space-y-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-ink">
-                Tagged Products (shown under &quot;View Products&quot;)
+                {t("seller.seek.taggedProductsShownUnderView")}
               </label>
               <div className="max-h-44 space-y-1 overflow-y-auto rounded-lg border border-line p-2">
                 {products.map((product) => {
@@ -189,7 +191,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
                       </span>
                       <span className="truncate font-semibold">{product.name}</span>
                       {product.status === "Paused" && (
-                        <span className="ml-auto shrink-0 text-[10px] font-bold text-amber-700">Paused</span>
+                        <span className="ml-auto shrink-0 text-[10px] font-bold text-amber-700">{t("common.paused")}</span>
                       )}
                     </button>
                   );
@@ -211,7 +213,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
               disabled={busy}
               className="btn btn-secondary px-4 py-2 text-xs disabled:opacity-50"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -219,7 +221,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
               className="btn btn-primary px-5 py-2 text-xs flex items-center gap-1.5 disabled:opacity-70"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              <span>{status === "uploading" ? "Uploading cover…" : status === "saving" ? "Saving…" : "Save Changes"}</span>
+              <span>{status === "uploading" ? t("seller.seek.status.uploadingCover") : status === "saving" ? t("common.saving") : t("common.saveChanges")}</span>
             </button>
           </div>
         </form>

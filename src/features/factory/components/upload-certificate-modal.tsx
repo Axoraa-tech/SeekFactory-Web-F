@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
 import { getApi } from "@/shared/api";
+import { useTranslations } from "next-intl";
 
 interface UploadCertificateModalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export function UploadCertificateModal({
   onClose,
   onAddCertificate,
 }: UploadCertificateModalProps) {
+  const t = useTranslations();
   const [title, setTitle] = useState("");
   const [issuer, setIssuer] = useState("");
   const [certNumber, setCertNumber] = useState("");
@@ -64,7 +66,7 @@ export function UploadCertificateModal({
       setImageUrl(media.url);
       setPreviewError(false);
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload failed. Please retry.");
+      setUploadError(err instanceof Error ? err.message : t("chat.attach.uploadFailedPleaseRetry"));
     } finally {
       setIsUploading(false);
     }
@@ -75,11 +77,11 @@ export function UploadCertificateModal({
     if (!title.trim() || !issuer.trim() || isUploading) return;
     // Buyers see this as the factory's certificate: it must be the real document, not a stock photo
     if (!imageUrl.trim()) {
-      setUploadError("Upload a photo or scan of the certificate.");
+      setUploadError(t("seller.cert.uploadAPhotoOrScan"));
       return;
     }
     if (issueDate && expiryDate && expiryDate < issueDate) {
-      setUploadError("Expiry date cannot be before the issue date.");
+      setUploadError(t("seller.cert.expiryDateCannotBeBefore"));
       return;
     }
 
@@ -116,8 +118,8 @@ export function UploadCertificateModal({
               <Award className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-neutral-900">Upload Certificate to Hall of Fame</h2>
-              <p className="text-xs text-neutral-500">Showcase real quality certifications & audit credentials to buyers</p>
+              <h2 className="text-base font-bold text-neutral-900">{t("seller.cert.uploadCertificateToHallOf")}</h2>
+              <p className="text-xs text-neutral-500">{t("seller.cert.showcaseRealQualityCertificationsAudit")}</p>
             </div>
           </div>
           <button
@@ -133,7 +135,7 @@ export function UploadCertificateModal({
           {/* Quick Presets */}
           <div>
             <label className="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">
-              Quick Authority Presets
+              {t("seller.cert.quickAuthorityPresets")}
             </label>
             <div className="flex flex-wrap gap-1.5">
               {COMMON_PRESETS.map((p, i) => (
@@ -152,12 +154,12 @@ export function UploadCertificateModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                Certificate Title *
+                {t("seller.cert.certificateTitle")}
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. ISO 9001:2015 Quality Management"
+                placeholder={t("seller.cert.eGIso90012015")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-xs focus:border-brand-blue focus:outline-hidden"
@@ -166,12 +168,12 @@ export function UploadCertificateModal({
 
             <div>
               <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                Issuing Authority / Registrar *
+                {t("seller.cert.issuingAuthorityRegistrar")}
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. TUV Rheinland / SGS / Bureau Veritas"
+                placeholder={t("seller.cert.eGTuvRheinlandSgs")}
                 value={issuer}
                 onChange={(e) => setIssuer(e.target.value)}
                 className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-xs focus:border-brand-blue focus:outline-hidden"
@@ -182,11 +184,11 @@ export function UploadCertificateModal({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                Certificate Number
+                {t("profile.certModal.certificateNumber")}
               </label>
               <input
                 type="text"
-                placeholder="e.g. TUV-QM-984210"
+                placeholder={t("seller.cert.eGTuvQm984210")}
                 value={certNumber}
                 onChange={(e) => setCertNumber(e.target.value)}
                 className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-xs focus:border-brand-blue focus:outline-hidden"
@@ -195,7 +197,7 @@ export function UploadCertificateModal({
 
             <div>
               <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                Issue Date
+                {t("profile.certModal.issueDate")}
               </label>
               <input
                 type="date"
@@ -207,7 +209,7 @@ export function UploadCertificateModal({
 
             <div>
               <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                Valid Through
+                {t("profile.certModal.validThrough")}
               </label>
               <input
                 type="date"
@@ -221,7 +223,7 @@ export function UploadCertificateModal({
           {/* Certificate Image Upload & Preview */}
           <div className="space-y-2 pt-2 border-t border-neutral-100">
             <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider">
-              Real Certificate Document / Image *
+              {t("seller.cert.realCertificateDocumentImage")}
             </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-3 items-center">
@@ -229,10 +231,10 @@ export function UploadCertificateModal({
                 <label className="flex flex-col items-center justify-center border-2 border-dashed border-neutral-300 hover:border-amber-500 rounded-2xl p-4 cursor-pointer bg-neutral-50 hover:bg-amber-50/20 transition group text-center">
                   <UploadCloud className="h-6 w-6 text-neutral-400 group-hover:text-amber-600 transition" />
                   <span className="font-bold text-neutral-800 text-xs mt-1">
-                    {isUploading ? "Uploading…" : "Upload Certificate Image"}
+                    {isUploading ? t("common.uploading") : t("seller.cert.uploadCertificateImage")}
                   </span>
                   <span className="text-[10px] text-neutral-400 mt-0.5">
-                    Supports PNG, JPG or WEBP up to 20MB
+                    {t("seller.cert.supportsPngJpgOrWebp")}
                   </span>
                   <input
                     type="file"
@@ -249,7 +251,7 @@ export function UploadCertificateModal({
                 )}
 
                 <div className="mt-2">
-                  <span className="text-[10px] text-neutral-400 font-semibold block mb-1">Or paste image URL:</span>
+                  <span className="text-[10px] text-neutral-400 font-semibold block mb-1">{t("seller.cert.orPasteImageUrl")}</span>
                   <input
                     type="url"
                     placeholder="https://.../certificate.jpg"
@@ -268,14 +270,14 @@ export function UploadCertificateModal({
                 {imageUrl && !previewError ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img loading="lazy" decoding="async" src={imageUrl}
-                    alt="Certificate Preview"
+                    alt={t("seller.cert.certificatePreview")}
                     onError={() => setPreviewError(true)}
                     className="h-full w-full object-contain rounded-lg border border-amber-300 shadow-sm"
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center p-2 text-amber-700">
                     <Award className="h-6 w-6 mb-1 text-amber-600" />
-                    <span className="text-[10px] font-semibold">Framed Document Preview</span>
+                    <span className="text-[10px] font-semibold">{t("seller.cert.framedDocumentPreview")}</span>
                   </div>
                 )}
               </div>
@@ -289,7 +291,7 @@ export function UploadCertificateModal({
               onClick={onClose}
               className="rounded-xl border border-neutral-300 px-4 py-2 font-semibold text-neutral-700 hover:bg-neutral-50 transition"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -297,7 +299,7 @@ export function UploadCertificateModal({
               className="disabled:opacity-60 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 font-bold px-5 py-2 transition shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
             >
               <CheckCircle2 className="h-4 w-4" />
-              <span>Publish to Hall of Fame</span>
+              <span>{t("seller.cert.publishToHallOfFame")}</span>
             </button>
           </div>
         </form>

@@ -19,6 +19,8 @@ import { getApi } from "@/shared/api";
 import { formatPriceInr } from "@/shared/lib/format";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import type { Product } from "@/entities/product";
+import { getLocale, getTranslations } from "next-intl/server";
+import { localizeCategoryName } from "@/i18n/zh-terms";
 
 type PriceBand = { label: string; priceInr: number; savingPercent: number };
 
@@ -43,15 +45,18 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props) {
+  const t = await getTranslations();
   const { slug } = await params;
   const detail = await getApi().products.getBySlug(slug);
   return {
-    title: detail?.product.name ?? "Product Details",
+    title: detail?.product.name ?? t("product.page.productDetails"),
     description: detail?.product.description,
   };
 }
 
 export default async function ProductPage({ params, searchParams }: Props) {
+  const t = await getTranslations();
+  const locale = await getLocale();
   const { slug } = await params;
   const { order } = await searchParams;
   const api = getApi();
@@ -73,9 +78,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-        <Link href="/" className="hover:text-brand-blue transition-colors">Home</Link>
+        <Link href="/" className="hover:text-brand-blue transition-colors">{t("nav.home")}</Link>
         <span>/</span>
-        <Link href="/explore" className="hover:text-brand-blue transition-colors">Products</Link>
+        <Link href="/explore" className="hover:text-brand-blue transition-colors">{t("common.products")}</Link>
         <span>/</span>
         <span className="text-slate-900 font-semibold truncate">{product.name}</span>
       </nav>
@@ -87,7 +92,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
             <ProductGallery
               images={product.imageUrls?.length ? product.imageUrls : [product.imageUrl]}
               alt={product.name}
-              badge="OEM Direct"
+              badge={t("supplier.oemDirect")}
             />
           </Card>
 
@@ -111,7 +116,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                   </div>
                   <p className="text-xs text-slate-500 truncate">
                     {[manufacturer.location, manufacturer.country].filter(Boolean).join(", ")}
-                    {manufacturer.yearsEstablished > 0 ? ` • Est. ${manufacturer.yearsEstablished}` : ""}
+                    {manufacturer.yearsEstablished > 0 ? ` • ${t("seek.trust.since", { year: manufacturer.yearsEstablished })}` : ""}
                   </p>
                 </div>
               </Link>
@@ -121,7 +126,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 className="btn btn-secondary shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-xs"
               >
                 <Building2 className="h-3.5 w-3.5" />
-                <span>Visit Factory</span>
+                <span>{t("product.page.visitFactory")}</span>
               </Link>
             </div>
           </Card>
@@ -130,12 +135,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
           <Card className="p-5 border-slate-200/90 shadow-2xs">
             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
               <FileSpreadsheet className="h-4 w-4 text-brand-blue" />
-              <span>Technical Specifications</span>
+              <span>{t("product.page.technicalSpecifications")}</span>
             </h3>
             <dl className="divide-y divide-slate-100 text-xs sm:text-sm">
               {product.moq && (
                 <div className="flex justify-between py-2">
-                  <dt className="text-slate-500 font-medium">Minimum Order Quantity (MOQ)</dt>
+                  <dt className="text-slate-500 font-medium">{t("product.page.minimumOrderQuantityMoq")}</dt>
                   <dd className="font-bold text-slate-900">{product.moq}</dd>
                 </div>
               )}
@@ -155,10 +160,10 @@ export default async function ProductPage({ params, searchParams }: Props) {
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <FileText className="h-4 w-4 shrink-0 text-red-600" />
-                  <span className="truncate">{product.datasheetName || "Technical datasheet"}</span>
+                  <span className="truncate">{product.datasheetName || t("product.page.technicalDatasheet")}</span>
                 </span>
                 <span className="inline-flex shrink-0 items-center gap-1 text-brand-blue">
-                  <Download className="h-3.5 w-3.5" /> PDF
+                  <Download className="h-3.5 w-3.5" /> {t("product.page.pdf")}
                 </span>
               </a>
             )}
@@ -176,17 +181,17 @@ export default async function ProductPage({ params, searchParams }: Props) {
                       href={categoryHref}
                       className="rounded-md bg-brand-blue/10 px-2 py-0.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue/15"
                     >
-                      {category.name}
+                      {localizeCategoryName(category.name, locale)}
                     </Link>
                     <span className="text-xs text-slate-400">•</span>
                   </>
                 )}
                 {hasPrice ? (
                   <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" /> Ready to Order
+                    <CheckCircle2 className="h-3 w-3" /> {t("product.page.readyToOrder")}
                   </span>
                 ) : (
-                  <span className="text-xs text-slate-500 font-semibold">Price on request</span>
+                  <span className="text-xs text-slate-500 font-semibold">{t("product.actions.priceOnRequest")}</span>
                 )}
               </div>
               <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
@@ -201,7 +206,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
             {bands.length > 0 && (
               <div className="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
-                  {bands.length > 1 ? "Bulk Wholesale Pricing" : "Wholesale Price"}
+                  {bands.length > 1 ? t("product.page.bulkWholesalePricing") : t("product.page.wholesalePrice")}
                 </p>
                 <div
                   className={
@@ -228,9 +233,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
                         {formatPriceInr(band.priceInr)}
                       </p>
                       {band.savingPercent > 0 ? (
-                        <p className="text-[10px] text-emerald-600 font-bold">Save {band.savingPercent}%</p>
+                        <p className="text-[10px] text-emerald-600 font-bold">{t("product.page.save")} {band.savingPercent}%</p>
                       ) : (
-                        <p className="text-[10px] text-slate-400 font-medium">Standard</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{t("product.page.standard")}</p>
                       )}
                     </div>
                   ))}
@@ -256,12 +261,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
             {/* Secondary Request Quotation Link */}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-              <span>Need custom specs or CIF shipping rates?</span>
+              <span>{t("product.page.needCustomSpecsOrCif")}</span>
               <Link
                 href={`/rfq/new?product=${product.slug}`}
                 className="font-bold text-brand-blue hover:underline"
               >
-                Request Custom RFQ →
+                {t("product.page.requestCustomRfq")}
               </Link>
             </div>
           </Card>
@@ -269,15 +274,15 @@ export default async function ProductPage({ params, searchParams }: Props) {
           {/* Trade Assurance & Buyer Guarantees */}
           <Card className="p-5 border-slate-200/90 shadow-2xs space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Buyer Protection & Guarantees
+              {t("product.page.buyerProtectionGuarantees")}
             </h3>
             <div className="space-y-3 text-xs">
               <div className="flex items-start gap-3">
                 <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
                 <div>
-                  <p className="font-bold text-slate-900">Trade Assurance Covered</p>
+                  <p className="font-bold text-slate-900">{t("product.page.tradeAssuranceCovered")}</p>
                   <p className="text-slate-500 mt-0.5">
-                    Your payment is held in escrow until goods are delivered and confirmed to specification.
+                    {t("product.page.yourPaymentIsHeldIn")}
                   </p>
                 </div>
               </div>
@@ -285,9 +290,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <div className="flex items-start gap-3">
                 <Truck className="h-5 w-5 shrink-0 text-brand-blue mt-0.5" />
                 <div>
-                  <p className="font-bold text-slate-900">On-Time Shipment Guarantee</p>
+                  <p className="font-bold text-slate-900">{t("product.page.onTimeShipmentGuarantee")}</p>
                   <p className="text-slate-500 mt-0.5">
-                    Compensation paid if shipping dispatch exceeds agreed contractual lead times.
+                    {t("product.page.compensationPaidIfShippingDispatch")}
                   </p>
                 </div>
               </div>
@@ -295,9 +300,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <div className="flex items-start gap-3">
                 <Award className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
                 <div>
-                  <p className="font-bold text-slate-900">Pre-Shipment Quality Inspection</p>
+                  <p className="font-bold text-slate-900">{t("product.page.preShipmentQualityInspection")}</p>
                   <p className="text-slate-500 mt-0.5">
-                    Factory provides production inspection report and high-resolution video run-tests prior to dispatch.
+                    {t("product.page.factoryProvidesProductionInspectionReport")}
                   </p>
                 </div>
               </div>

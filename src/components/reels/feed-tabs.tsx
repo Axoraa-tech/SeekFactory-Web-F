@@ -55,7 +55,7 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
         )}
       >
         <div className="flex items-center gap-5">
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Seeks</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{t("common.seeks")}</h1>
           <div className="flex gap-4 text-sm font-semibold">
             <TabLink
               href={`/?tab=for-you${isVertical ? "&view=vertical" : ""}`}

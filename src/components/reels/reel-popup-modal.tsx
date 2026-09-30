@@ -33,12 +33,14 @@ import { useReelPopup } from "@/components/reels/use-reel-popup";
 import type { FeedItem } from "@/shared/api/contracts";
 import { useReelImpression } from "@/hooks/use-reel-impression";
 import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
+import { useTranslations } from "next-intl";
 
 interface Props {
   items: FeedItem[];
 }
 
 export function ReelPopupModal({ items }: Props) {
+  const t = useTranslations();
   const { state, close, goNext, goPrev } = useReelPopup();
   const { isOpen, currentIndex } = state;
 
@@ -186,7 +188,7 @@ export function ReelPopupModal({ items }: Props) {
         onClick={close}
         aria-modal="true"
         role="dialog"
-        aria-label="Reel popup"
+        aria-label={t("seek.popup.reelPopup")}
       >
         {/* ── Card ── */}
         <div
@@ -255,7 +257,7 @@ export function ReelPopupModal({ items }: Props) {
                 type="button"
                 onClick={close}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition active:scale-95"
-                aria-label="Close popup"
+                aria-label={t("seek.popup.closePopup")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -266,7 +268,7 @@ export function ReelPopupModal({ items }: Props) {
                   type="button"
                   onClick={handleToggleMute}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition active:scale-95"
-                  aria-label={isMuted ? "Unmute" : "Mute"}
+                  aria-label={isMuted ? t("common.unmute") : t("common.mute")}
                 >
                   {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </button>
@@ -278,7 +280,7 @@ export function ReelPopupModal({ items }: Props) {
                     "flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition active:scale-95",
                     isFirst && "opacity-30 cursor-not-allowed"
                   )}
-                  aria-label="Previous reel"
+                  aria-label={t("seek.popup.previousReel")}
                 >
                   <ChevronUp className="h-4 w-4" />
                 </button>
@@ -324,7 +326,7 @@ export function ReelPopupModal({ items }: Props) {
                     type="button"
                     onClick={handleTogglePlay}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 hover:bg-white/25 transition active:scale-95"
-                    aria-label={isPlaying ? "Pause" : "Play"}
+                    aria-label={isPlaying ? t("common.pause") : t("common.play")}
                   >
                     {isPlaying ? (
                       <Pause className="h-4 w-4 fill-white" />
@@ -337,7 +339,7 @@ export function ReelPopupModal({ items }: Props) {
                     type="button"
                     onClick={() => handleSeek(currentTime - 5)}
                     className="flex h-8 items-center gap-1 rounded-full bg-white/10 px-2.5 text-[11px] font-semibold hover:bg-white/20 transition active:scale-95"
-                    aria-label="Skip back 5s"
+                    aria-label={t("seek.popup.skipBack5s")}
                   >
                     <RotateCcw className="h-3.5 w-3.5" /> -5s
                   </button>
@@ -346,7 +348,7 @@ export function ReelPopupModal({ items }: Props) {
                     type="button"
                     onClick={() => handleSeek(currentTime + 5)}
                     className="flex h-8 items-center gap-1 rounded-full bg-white/10 px-2.5 text-[11px] font-semibold hover:bg-white/20 transition active:scale-95"
-                    aria-label="Skip forward 5s"
+                    aria-label={t("seek.popup.skipForward5s")}
                   >
                     +5s <RotateCw className="h-3.5 w-3.5" />
                   </button>
@@ -398,7 +400,7 @@ export function ReelPopupModal({ items }: Props) {
                       : "border-brand-blue/30 bg-blue-50 text-brand-blue hover:bg-brand-blue hover:text-white"
                   )}
                 >
-                  {following ? "Following" : "Follow"}
+                  {following ? t("common.following") : t("common.follow")}
                 </button>
                 <Link
                   href="/rfq/new"
@@ -406,7 +408,7 @@ export function ReelPopupModal({ items }: Props) {
                   className="btn btn-primary inline-flex h-7 items-center gap-1 px-3 text-xs"
                 >
                   <Send className="h-3 w-3" />
-                  <span>Send RFQ</span>
+                  <span>{t("feed.sendRfq")}</span>
                 </Link>
               </div>
             </div>
@@ -433,7 +435,7 @@ export function ReelPopupModal({ items }: Props) {
               <button
                 type="button"
                 onClick={share}
-                aria-label="Share seek"
+                aria-label={t("seek.shareSeek")}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-emerald-600 hover:shadow-xs transition",
                   shared && "text-emerald-600 bg-white shadow-xs"
@@ -447,7 +449,7 @@ export function ReelPopupModal({ items }: Props) {
               <button
                 type="button"
                 onClick={toggleLike}
-                aria-label={liked ? "Unlike seek" : "Like seek"}
+                aria-label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-rose-600 hover:shadow-xs transition",
                   liked && "text-rose-600 bg-white shadow-xs"
@@ -467,14 +469,14 @@ export function ReelPopupModal({ items }: Props) {
               <button
                 type="button"
                 onClick={toggleSave}
-                aria-label={saved ? "Remove from saved" : "Save seek"}
+                aria-label={saved ? t("seek.removeFromSaved") : t("seek.saveSeek")}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition",
                   saved && "text-brand-blue bg-white shadow-xs"
                 )}
               >
                 <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-brand-blue")} />
-                <span className="font-medium text-[11px]">{saved ? "Saved" : "Save"}</span>
+                <span className="font-medium text-[11px]">{saved ? t("common.saved") : t("common.save")}</span>
               </button>
             </div>
 
@@ -489,10 +491,10 @@ export function ReelPopupModal({ items }: Props) {
                   ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
                   : "bg-slate-900 text-white hover:bg-slate-700 active:scale-95"
               )}
-              aria-label="Next reel"
+              aria-label={t("seek.popup.nextReel")}
             >
               <ChevronDown className="h-4 w-4" />
-              {isLast ? "No more seeks" : "Next Seek  ↓"}
+              {isLast ? t("seek.popup.noMoreSeeks") : t("seek.popup.nextSeek")}
             </button>
           </div>
         </div>

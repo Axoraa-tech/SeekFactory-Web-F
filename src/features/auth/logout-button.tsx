@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getApi } from "@/shared/api";
+import { useTranslations } from "next-intl";
 
 export function LogoutButton() {
+  const t = useTranslations();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -12,7 +14,7 @@ export function LogoutButton() {
     <button
       type="button"
       disabled={loggingOut}
-      aria-label="Sign out"
+      aria-label={t("userMenu.signOut")}
       className="mt-4 text-sm font-semibold text-brand-blue disabled:opacity-60 disabled:cursor-not-allowed"
       onClick={async () => {
         if (loggingOut) return;
@@ -26,7 +28,7 @@ export function LogoutButton() {
         }
       }}
     >
-      {loggingOut ? "Signing out…" : "Sign out"}
+      {loggingOut ? t("userMenu.signingOut") : t("userMenu.signOut")}
     </button>
   );
 }

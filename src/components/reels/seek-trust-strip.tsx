@@ -1,5 +1,6 @@
 import { Award, Factory, ShieldCheck } from "lucide-react";
 import type { Manufacturer } from "@/entities/manufacturer";
+import { useTranslations } from "next-intl";
 
 /**
  * The line above a seek that says who is selling: a vermilion seal for verified OEMs, the
@@ -7,6 +8,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
  * label and no claims.
  */
 export function SeekTrustStrip({ manufacturer }: { manufacturer: Pick<Manufacturer, "verified" | "yearsEstablished"> }) {
+  const t = useTranslations();
   const since = manufacturer.yearsEstablished > 0 ? manufacturer.yearsEstablished : null;
 
   return (
@@ -22,12 +24,12 @@ export function SeekTrustStrip({ manufacturer }: { manufacturer: Pick<Manufactur
           </span>
         )}
         <span className="truncate font-semibold tracking-[-0.005em] text-ink">
-          {manufacturer.verified ? "Verified OEM manufacturer" : "OEM manufacturer"}
+          {manufacturer.verified ? t("seek.trust.verifiedOemManufacturer") : t("seek.trust.oemManufacturer")}
         </span>
         {since && (
           <>
             <span className="h-3 w-px shrink-0 bg-[rgba(28,22,22,0.14)]" aria-hidden="true" />
-            <span className="shrink-0 text-ink-muted">Since {since}</span>
+            <span className="shrink-0 text-ink-muted">{t("seek.trust.since", { year: since })}</span>
           </>
         )}
       </div>
@@ -35,7 +37,7 @@ export function SeekTrustStrip({ manufacturer }: { manufacturer: Pick<Manufactur
       {manufacturer.verified && (
         <span className="hidden shrink-0 items-center gap-1 rounded-full sm:inline-flex bg-white/85 px-2 py-0.5 font-semibold text-ink ring-1 ring-[rgba(28,22,22,0.07)] shadow-[0_1px_2px_rgba(28,22,22,0.05)]">
           <ShieldCheck className="h-3 w-3 text-brand-red" strokeWidth={2.25} />
-          Verified factory
+          {t("seek.trust.verifiedFactory")}
         </span>
       )}
     </div>

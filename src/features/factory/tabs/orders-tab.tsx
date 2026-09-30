@@ -7,6 +7,7 @@ import type { OrderRequest, OrderStatus } from "@/entities/order";
 import { ORDER_STATUSES, ORDER_STATUS_META, formatMoney } from "@/features/orders/order-status";
 import { formatPriceInr } from "@/shared/lib/format";
 import { ProductThumb } from "@/features/orders/product-thumb";
+import { useTranslations } from "next-intl";
 
 type Props = {
   orders: OrderRequest[];
@@ -25,6 +26,7 @@ function formatDate(iso: string | undefined) {
 }
 
 export function OrdersTab({ orders, onUpdateStatus, onChatWithBuyer }: Props) {
+  const t = useTranslations();
   const [filter, setFilter] = useState<OrderStatus | "ALL">("ALL");
   const [query, setQuery] = useState("");
 
@@ -45,14 +47,13 @@ export function OrdersTab({ orders, onUpdateStatus, onChatWithBuyer }: Props) {
       {/* Header */}
       <div className="px-1">
         <h2 className="text-lg font-semibold tracking-tight text-neutral-900 flex flex-wrap items-center gap-2">
-          <span>Buyer Order Requests</span>
+          <span>{t("seller.top.buyerOrderRequests")}</span>
           <span className="rounded-full bg-red-100 border border-red-200 px-2 py-0.2 text-xs font-bold text-red-600">
-            {orders.filter((o) => o.status === "PENDING").length} New
+            {orders.filter((o) => o.status === "PENDING").length} {t("seller.overview.new")}
           </span>
         </h2>
         <p className="text-xs text-ink-muted mt-1">
-          Buyers who clicked <strong>Order</strong> on your products. No payment is taken on SeekFactory: contact the
-          buyer, agree terms, and keep the status updated so they can follow along.
+          {t("seller.orders.buyersWhoClicked")} <strong>{t("common.order")}</strong> {t("seller.orders.onYourProductsNoPayment")}
         </p>
       </div>
 
@@ -64,7 +65,7 @@ export function OrdersTab({ orders, onUpdateStatus, onChatWithBuyer }: Props) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by reference, product or buyer..."
+            placeholder={t("seller.orders.searchByReferenceProductOr")}
             className="w-full rounded-xl border border-line bg-white pl-9 pr-4 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-brand-blue focus:outline-hidden shadow-xs"
           />
         </div>
@@ -82,7 +83,7 @@ export function OrdersTab({ orders, onUpdateStatus, onChatWithBuyer }: Props) {
                     : "bg-white border border-line text-neutral-700 hover:bg-canvas"
                 }`}
               >
-                {status === "ALL" ? "All" : ORDER_STATUS_META[status].label} ({count})
+                {status === "ALL" ? t("common.all") : t(ORDER_STATUS_META[status].label)} ({count})
               </button>
             );
           })}
@@ -99,10 +100,10 @@ export function OrdersTab({ orders, onUpdateStatus, onChatWithBuyer }: Props) {
           <div className="text-center py-12 rounded-2xl border border-dashed border-neutral-300 bg-white p-6">
             <ShoppingBag className="h-10 w-10 text-neutral-300 mx-auto mb-2" />
             <p className="text-sm font-bold text-neutral-800">
-              {orders.length === 0 ? "No order requests yet" : "No orders in this view"}
+              {orders.length === 0 ? t("seller.orders.noOrderRequestsYet") : t("seller.orders.noOrdersInThisView")}
             </p>
             <p className="text-xs text-ink-muted mt-1">
-              When a buyer clicks Order on one of your products, it appears here and you get a notification.
+              {t("seller.orders.whenABuyerClicksOrder")}
             </p>
           </div>
         )}
@@ -120,6 +121,7 @@ function OrderCard({
   onUpdateStatus: Props["onUpdateStatus"];
   onChatWithBuyer?: Props["onChatWithBuyer"];
 }) {
+  const t = useTranslations();
   const [openingChat, setOpeningChat] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
 
@@ -130,7 +132,7 @@ function OrderCard({
     try {
       await onChatWithBuyer(order);
     } catch (err) {
-      setChatError(err instanceof Error ? err.message : "Could not open the chat.");
+      setChatError(err instanceof Error ? err.message : t("seller.couldNotOpenChat"));
       setOpeningChat(false);
     }
   }
@@ -152,7 +154,7 @@ function OrderCard({
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update the order.");
+      setError(err instanceof Error ? err.message : t("seller.orders.couldNotUpdateTheOrder"));
     } finally {
       setSaving(false);
     }
@@ -170,7 +172,7 @@ function OrderCard({
           <ProductThumb src={order.productImageUrl} />
           <div className="min-w-0">
             <p className="text-[11px] font-bold text-brand-blue">
-              {order.referenceNumber} • Received {formatDate(order.createdAt)}
+              {order.referenceNumber} {t("seller.orders.received")} {formatDate(order.createdAt)}
             </p>
             {order.productSlug ? (
               <Link
@@ -184,16 +186,16 @@ function OrderCard({
               <p className="text-sm font-bold text-neutral-900">{order.productName}</p>
             )}
             <p className="text-xs text-neutral-600 mt-0.5">
-              Quantity: <strong className="text-neutral-900">{order.quantity.toLocaleString("en-IN")} {order.unit}</strong>
+              {t("rfq.form.quantity")} <strong className="text-neutral-900">{order.quantity.toLocaleString("en-IN")} {order.unit}</strong>
               {order.quotedTotal != null ? (
                 <>
-                  {" "}• Accepted quote{" "}
+                  {" "}{t("seller.orders.acceptedQuote")}{" "}
                   <strong className="text-neutral-900">{formatMoney(order.quotedTotal, order.currency || "INR")}</strong>
                 </>
               ) : order.estimatedTotalInr !== undefined && (
                 <>
-                  {" "}• Est. value <strong className="text-neutral-900">{formatPriceInr(order.estimatedTotalInr)}</strong>
-                  <span className="text-ink-muted"> at listing price</span>
+                  {" "}{t("seller.orders.estValue")} <strong className="text-neutral-900">{formatPriceInr(order.estimatedTotalInr)}</strong>
+                  <span className="text-ink-muted"> {t("seller.orders.atListingPrice")}</span>
                 </>
               )}
             </p>
@@ -201,9 +203,9 @@ function OrderCard({
         </div>
         <span
           className={`self-start rounded-full border px-2.5 py-0.5 text-xs font-bold whitespace-nowrap ${meta.className}`}
-          title={meta.hint}
+          title={t(meta.hint)}
         >
-          {meta.label}
+          {t(meta.label)}
         </span>
       </div>
 
@@ -236,7 +238,7 @@ function OrderCard({
               className="btn btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] disabled:opacity-60"
             >
               {openingChat ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageSquare className="h-3.5 w-3.5" />}
-              Chat with buyer
+              {t("seller.chatWithBuyer")}
             </button>
           )}
         </div>
@@ -253,7 +255,7 @@ function OrderCard({
         {/* Delivery contact the buyer entered at checkout (cart, Buy Now or accepted quote) */}
         {(order.deliveryAddress || order.contactPhone) && (
           <p className="sm:col-span-2 pt-2 border-t border-line text-neutral-700 leading-relaxed">
-            <span className="font-bold text-neutral-900">Deliver to:</span>{" "}
+            <span className="font-bold text-neutral-900">{t("seller.orders.deliverTo")}</span>{" "}
             {[order.contactName, order.contactPhone, order.deliveryAddress].filter(Boolean).join(" · ")}
           </p>
         )}
@@ -262,7 +264,7 @@ function OrderCard({
       {/* Status control */}
       <div className="flex flex-col md:flex-row md:items-end gap-2.5">
         <label className="md:w-56">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-neutral-600 mb-1">Status</span>
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-neutral-600 mb-1">{t("common.status")}</span>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as OrderStatus)}
@@ -270,21 +272,21 @@ function OrderCard({
           >
             {ORDER_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {ORDER_STATUS_META[s].label}
+                {t(ORDER_STATUS_META[s].label)}
               </option>
             ))}
           </select>
         </label>
         <label className="flex-1">
           <span className="block text-[11px] font-bold uppercase tracking-wider text-neutral-600 mb-1">
-            Note to buyer (optional)
+            {t("seller.orders.noteToBuyerOptional")}
           </span>
           <input
             type="text"
             value={note}
             maxLength={2000}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="e.g. Sent revised pricing by email"
+            placeholder={t("seller.orders.eGSentRevisedPricing")}
             className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
           />
         </label>
@@ -295,12 +297,12 @@ function OrderCard({
           className="btn btn-primary px-4 py-2 text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-          <span>{saving ? "Saving…" : "Update status"}</span>
+          <span>{saving ? t("common.saving") : t("seller.orders.updateStatus")}</span>
         </button>
       </div>
       {(error || saved || order.statusUpdatedAt) && (
         <p className={`text-[11px] font-semibold ${error ? "text-red-600" : saved ? "text-emerald-600" : "text-ink-muted"}`} role={error ? "alert" : undefined}>
-          {error ?? (saved ? "Saved. The buyer has been notified." : `Status last changed ${formatDate(order.statusUpdatedAt)}`)}
+          {error ?? (saved ? t("seller.orders.savedTheBuyerHasBeen") : t("seller.orders.statusLastChanged", { formatDate: formatDate(order.statusUpdatedAt) }))}
         </p>
       )}
     </div>

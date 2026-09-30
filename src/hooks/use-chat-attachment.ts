@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { getApi } from "@/shared/api";
 import type { MessageAttachment } from "@/shared/api/contracts";
 import { CHAT_ATTACHMENT_ACCEPT, CHAT_ATTACHMENT_MAX_BYTES } from "@/shared/lib/chat";
+import { useTranslations } from "next-intl";
 
 const ALLOWED = new Set(CHAT_ATTACHMENT_ACCEPT.split(","));
 
@@ -12,6 +13,7 @@ const ALLOWED = new Set(CHAT_ATTACHMENT_ACCEPT.split(","));
  * The uploaded attachment is then passed to messages.sendMessage().
  */
 export function useChatAttachment(conversationId: string | undefined) {
+  const t = useTranslations();
   const [attachment, setAttachment] = useState<MessageAttachment | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,23 +23,23 @@ export function useChatAttachment(conversationId: string | undefined) {
       if (!file || !conversationId) return;
       setError(null);
       if (!ALLOWED.has(file.type)) {
-        setError("Only images (PNG, JPG, WEBP, GIF) and PDF files can be attached.");
+        setError(t("chat.attach.onlyImagesPngJpgWebp"));
         return;
       }
       if (file.size > CHAT_ATTACHMENT_MAX_BYTES) {
-        setError("File is larger than 20 MB.");
+        setError(t("chat.attach.fileIsLargerThan20"));
         return;
       }
       setUploading(true);
       try {
         setAttachment(await getApi().messages.uploadAttachment(conversationId, file));
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Upload failed. Please retry.");
+        setError(err instanceof Error ? err.message : t("chat.attach.uploadFailedPleaseRetry"));
       } finally {
         setUploading(false);
       }
     },
-    [conversationId],
+    [conversationId, t],
   );
 
   const clear = useCallback(() => {

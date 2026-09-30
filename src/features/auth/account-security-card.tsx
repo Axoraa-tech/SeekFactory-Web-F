@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { KeyRound, MailCheck, MailWarning, Loader2, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { changePasswordAction, sendEmailVerificationAction } from "./account-actions";
+import { useTranslations } from "next-intl";
 
 type Props = {
   email?: string;
@@ -22,6 +23,7 @@ export function AccountSecurityCard({ email, emailVerified }: Props) {
 }
 
 function EmailVerificationRow({ email, verified }: { email: string; verified: boolean }) {
+  const t = useTranslations();
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -49,10 +51,10 @@ function EmailVerificationRow({ email, verified }: { email: string; verified: bo
             {verified ? <MailCheck className="h-5 w-5" /> : <MailWarning className="h-5 w-5" />}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-neutral-900">Email address</p>
+            <p className="text-sm font-bold text-neutral-900">{t("auth.security.emailAddress")}</p>
             <p className="truncate text-xs text-ink-muted">{email}</p>
             <p className={`mt-0.5 text-[11px] font-bold ${verified ? "text-emerald-700" : "text-amber-700"}`}>
-              {verified ? "Verified" : "Not verified — confirm it so buyers and SeekFactory can reach you"}
+              {verified ? t("common.verified") : t("auth.security.notVerifiedConfirmItSo")}
             </p>
           </div>
         </div>
@@ -65,7 +67,7 @@ function EmailVerificationRow({ email, verified }: { email: string; verified: bo
           >
             {state === "sending" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {state === "sent" && <CheckCircle2 className="h-3.5 w-3.5" />}
-            {state === "sent" ? "Link sent — check your inbox" : "Send verification link"}
+            {state === "sent" ? t("auth.security.linkSentCheckYourInbox") : t("auth.security.sendVerificationLink")}
           </button>
         )}
       </div>
@@ -79,6 +81,7 @@ function EmailVerificationRow({ email, verified }: { email: string; verified: bo
 }
 
 function ChangePasswordForm() {
+  const t = useTranslations();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -115,7 +118,7 @@ function ChangePasswordForm() {
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-bold text-neutral-900">
           <KeyRound className="h-4 w-4 text-brand-blue" />
-          Change Password
+          {t("auth.security.changePassword")}
         </h2>
         <button
           type="button"
@@ -123,13 +126,13 @@ function ChangePasswordForm() {
           className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-muted hover:text-brand-blue"
         >
           {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-          {show ? "Hide" : "Show"}
+          {show ? t("common.hide") : t("common.show")}
         </button>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="block">
-          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">Current</span>
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">{t("auth.security.current")}</span>
           <input
             type={show ? "text" : "password"}
             autoComplete="current-password"
@@ -140,7 +143,7 @@ function ChangePasswordForm() {
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">New</span>
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">{t("auth.security.new")}</span>
           <input
             type={show ? "text" : "password"}
             autoComplete="new-password"
@@ -153,7 +156,7 @@ function ChangePasswordForm() {
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">Confirm new</span>
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">{t("auth.security.confirmNew")}</span>
           <input
             type={show ? "text" : "password"}
             autoComplete="new-password"
@@ -173,7 +176,7 @@ function ChangePasswordForm() {
             {message.text}
           </p>
         ) : (
-          <p className="text-[11px] text-ink-muted">8+ characters with upper &amp; lower case, a number and a symbol.</p>
+          <p className="text-[11px] text-ink-muted">{t("auth.security.n8CharactersWithUpperLower")}</p>
         )}
         <button
           type="submit"
@@ -181,7 +184,7 @@ function ChangePasswordForm() {
           className="btn btn-primary inline-flex items-center justify-center gap-1.5 px-5 py-2 text-xs disabled:opacity-70"
         >
           {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          Update Password
+          {t("auth.security.updatePassword")}
         </button>
       </div>
     </form>

@@ -7,6 +7,7 @@ import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import type { FeedItem } from "@/shared/api/contracts";
+import { useTranslations } from "next-intl";
 
 /**
  * Shared building blocks for the seek showcase layouts (feed / compact / grid / spotlight).
@@ -39,6 +40,7 @@ export function Poster({ src, alt, className }: { src?: string; alt: string; cla
  * open a connection per seek.
  */
 export function HoverPlayMedia({ item, className }: { item: FeedItem; className?: string }) {
+  const t = useTranslations();
   const [armed, setArmed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { videoUrl, posterUrl, title } = item.reel;
@@ -68,7 +70,7 @@ export function HoverPlayMedia({ item, className }: { item: FeedItem; className?
       )}
       {videoUrl && (
         <span className="pointer-events-none absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white">
-          <Play className="h-3 w-3" /> Video
+          <Play className="h-3 w-3" /> {t("showcase.video")}
         </span>
       )}
     </div>
@@ -128,6 +130,7 @@ export function Hashtags({ item, limit = 3 }: { item: FeedItem; limit?: number }
 
 /** Primary buyer actions for a seek. */
 export function SeekActions({ item }: { item: FeedItem }) {
+  const t = useTranslations();
   const productHref = item.primaryProductSlug ? `/products/${item.primaryProductSlug}` : null;
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -136,14 +139,14 @@ export function SeekActions({ item }: { item: FeedItem }) {
           href={productHref}
           className="btn btn-primary px-3.5 py-1.5 text-xs font-medium"
         >
-          View products
+          {t("feed.viewProducts")}
         </Link>
       )}
       <Link
         href={`/manufacturers/${item.manufacturer.slug}`}
         className="btn btn-secondary px-3.5 py-1.5 text-xs"
       >
-        View manufacturer
+        {t("showcase.viewManufacturer")}
       </Link>
     </div>
   );
@@ -151,9 +154,10 @@ export function SeekActions({ item }: { item: FeedItem }) {
 
 /** Shown when a tab, category or search leaves no seeks to display. */
 export function EmptyShowcase() {
+  const t = useTranslations();
   return (
     <div className="rounded-card border border-line bg-surface p-8 text-center text-sm text-ink-muted">
-      No seeks in this tab yet. Follow manufacturers to fill Following.
+      {t("feed.emptyTab")}
     </div>
   );
 }

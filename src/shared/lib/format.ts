@@ -58,20 +58,21 @@ export function formatDuration(totalSeconds: number): string {
 }
 
 /**
- * "just now", "5m ago", "3h ago", "2d ago", then a short date. Non-date strings pass through
- * unchanged; an empty value renders as an empty string.
+ * "just now", "5m ago", "3h ago", "2d ago", then a short date (Chinese: 刚刚, 5 分钟前 …).
+ * Non-date strings pass through unchanged; an empty value renders as an empty string.
  */
-export function formatRelativeTime(value: string | undefined): string {
+export function formatRelativeTime(value: string | undefined, locale: string = "en"): string {
   if (!value) return "";
   const time = Date.parse(value);
   if (Number.isNaN(time)) return value;
+  const zh = locale.startsWith("zh");
   const seconds = Math.round((Date.now() - time) / 1000);
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return zh ? "刚刚" : "just now";
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return zh ? `${minutes} 分钟前` : `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return zh ? `${hours} 小时前` : `${hours}h ago`;
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(time).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  if (days < 7) return zh ? `${days} 天前` : `${days}d ago`;
+  return new Date(time).toLocaleDateString(zh ? "zh-CN" : undefined, { day: "numeric", month: "short", year: "numeric" });
 }

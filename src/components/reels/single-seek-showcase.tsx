@@ -8,6 +8,7 @@ import { formatCount, formatPriceInr } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
+import { useTranslations } from "next-intl";
 
 type Props = {
   items: FeedItem[];
@@ -33,6 +34,7 @@ type Props = {
  * own left menu occupies that column instead.
  */
 export function SingleSeekShowcase({ items, settings, variant = "single" }: Props) {
+  const t = useTranslations();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const [active, setActive] = useState(0);
@@ -95,7 +97,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
   if (items.length === 0) {
     return (
       <div className="rounded-card border border-line bg-surface p-8 text-center text-sm text-ink-muted">
-        No seeks in this tab yet. Follow manufacturers to fill Following.
+        {t("feed.emptyTab")}
       </div>
     );
   }
@@ -130,7 +132,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
           <div
             ref={scrollerRef}
             className="h-[58vh] min-h-[340px] lg:h-[calc(100vh-240px)] lg:min-h-[480px] overflow-y-auto snap-y snap-mandatory rounded-2xl bg-slate-950 scrollbar-none"
-            aria-label="Seeks"
+            aria-label={t("common.seeks")}
           >
             {items.map((item, i) => (
               <div
@@ -177,16 +179,16 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
 
           {/* Controls */}
           <div className="absolute right-3 top-3 z-10 flex flex-col gap-2">
-            <IconBtn label={paused ? "Play" : "Pause"} onClick={() => setPaused((p) => !p)}>
+            <IconBtn label={paused ? t("common.play") : t("common.pause")} onClick={() => setPaused((p) => !p)}>
               {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
             </IconBtn>
-            <IconBtn label={muted ? "Unmute" : "Mute"} onClick={() => setMuted((m) => !m)}>
+            <IconBtn label={muted ? t("common.unmute") : t("common.mute")} onClick={() => setMuted((m) => !m)}>
               {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </IconBtn>
           </div>
           <div className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 flex-col gap-2 sm:flex">
-            <IconBtn label="Previous seek" onClick={() => go(safeActive - 1)} disabled={safeActive === 0}><ChevronUp className="h-5 w-5" /></IconBtn>
-            <IconBtn label="Next seek" onClick={() => go(safeActive + 1)} disabled={safeActive >= items.length - 1}><ChevronDown className="h-5 w-5" /></IconBtn>
+            <IconBtn label={t("showcase.single.previousSeek")} onClick={() => go(safeActive - 1)} disabled={safeActive === 0}><ChevronUp className="h-5 w-5" /></IconBtn>
+            <IconBtn label={t("showcase.single.nextSeek")} onClick={() => go(safeActive + 1)} disabled={safeActive >= items.length - 1}><ChevronDown className="h-5 w-5" /></IconBtn>
           </div>
           <span className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white tabular-nums">
             {safeActive + 1} / {items.length}
@@ -220,6 +222,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
 /* ─────────── panels ─────────── */
 
 function ProfilePanel({ item }: { item: FeedItem }) {
+  const t = useTranslations();
   const m = item.manufacturer;
   return (
     <div key={m.id} className="rounded-2xl border border-line bg-surface p-5 shadow-2xs transition-opacity duration-300">
@@ -240,16 +243,16 @@ function ProfilePanel({ item }: { item: FeedItem }) {
       </div>
 
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-        <Stat label="Est." value={m.yearsEstablished ? String(m.yearsEstablished) : "—"} />
-        <Stat label="Followers" value={formatCount(m.followerCount || 0)} />
-        <Stat label="Staff" value={m.employees || "—"} />
+        <Stat label={t("showcase.single.est")} value={m.yearsEstablished ? String(m.yearsEstablished) : "—"} />
+        <Stat label={t("showcase.single.followers")} value={formatCount(m.followerCount || 0)} />
+        <Stat label={t("showcase.single.staff")} value={m.employees || "—"} />
       </dl>
 
       {m.description && <p className="mt-4 text-sm text-ink-muted line-clamp-4">{m.description}</p>}
 
       {m.exportCountries?.length > 0 && (
         <div className="mt-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">Exports to</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">{t("showcase.single.exportsTo")}</p>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {m.exportCountries.slice(0, 5).map((c) => (
               <span key={c} className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700">{c}</span>
@@ -260,10 +263,10 @@ function ProfilePanel({ item }: { item: FeedItem }) {
 
       <div className="mt-5 grid gap-2">
         <Link href="/rfq/new" className="rounded-xl bg-orange-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-orange-400">
-          Send RFQ
+          {t("feed.sendRfq")}
         </Link>
         <Link href={`/manufacturers/${m.slug}`} className="rounded-xl border border-line px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-slate-50">
-          View factory profile
+          {t("showcase.single.viewFactoryProfile")}
         </Link>
       </div>
     </div>
@@ -271,6 +274,7 @@ function ProfilePanel({ item }: { item: FeedItem }) {
 }
 
 function ProfileBar({ item }: { item: FeedItem }) {
+  const t = useTranslations();
   const m = item.manufacturer;
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3">
@@ -285,17 +289,18 @@ function ProfileBar({ item }: { item: FeedItem }) {
           <span className="flex items-center gap-0.5"><Users className="h-3 w-3" />{formatCount(m.followerCount || 0)}</span>
         </p>
       </div>
-      <Link href={`/manufacturers/${m.slug}`} className="btn btn-secondary shrink-0 px-3 py-1.5 text-xs">Profile</Link>
-      <Link href="/rfq/new" className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">RFQ</Link>
+      <Link href={`/manufacturers/${m.slug}`} className="btn btn-secondary shrink-0 px-3 py-1.5 text-xs">{t("nav.profile")}</Link>
+      <Link href="/rfq/new" className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
     </div>
   );
 }
 
 function PhotoPanel({ item }: { item: FeedItem }) {
+  const t = useTranslations();
   const products = item.products ?? [];
   return (
     <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs">
-      <p className="mb-3 text-sm font-bold text-ink">Seek photos</p>
+      <p className="mb-3 text-sm font-bold text-ink">{t("showcase.single.seekPhotos")}</p>
       {products.length === 0 ? (
         <EmptyPhotos />
       ) : (
@@ -321,10 +326,11 @@ function PhotoPanel({ item }: { item: FeedItem }) {
 }
 
 function PhotoStrip({ item }: { item: FeedItem }) {
+  const t = useTranslations();
   const products = item.products ?? [];
   if (products.length === 0) return null;
   return (
-    <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label="Seek photos">
+    <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label={t("showcase.single.seekPhotos")}>
       {products.map((p) => (
         <Link key={p.id} href={`/products/${p.slug}`} className="w-32 shrink-0 snap-start">
           <div className="aspect-square overflow-hidden rounded-xl bg-slate-100">
@@ -343,10 +349,11 @@ function PhotoStrip({ item }: { item: FeedItem }) {
 }
 
 function EmptyPhotos() {
+  const t = useTranslations();
   return (
     <div className="flex flex-col items-center justify-center rounded-xl bg-slate-50 py-10 text-center text-xs text-ink-muted">
       <ImageOff className="mb-2 h-6 w-6 text-slate-300" />
-      No product photos for this seek yet
+      {t("showcase.single.noProductPhotosForThis")}
     </div>
   );
 }

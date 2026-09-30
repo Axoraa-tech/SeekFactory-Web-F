@@ -16,6 +16,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/shared/lib/cn";
 import type { SellerTab, SellerFactoryProfile } from "./types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   activeTab: SellerTab;
@@ -40,6 +41,7 @@ export function FactorySidebar({
   onOpenAddSeek,
   profile,
 }: Props) {
+  const t = useTranslations();
   const navItems: Array<{
     id: SellerTab;
     label: string;
@@ -73,7 +75,7 @@ export function FactorySidebar({
         {/* Navigation Card */}
         <Card className="overflow-hidden p-2">
           <p className="px-3 pt-2 pb-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-            Supplier Center
+            {t("seller.sidebar.supplierCenter")}
           </p>
 
           <nav className="flex flex-col gap-0.5">
@@ -121,7 +123,7 @@ export function FactorySidebar({
               className="btn btn-primary flex w-full items-center justify-center gap-1.5 py-2 text-xs"
             >
               <Plus className="h-4 w-4" />
-              <span>Post New Product</span>
+              <span>{t("seller.product.postNewIndustrialProduct")}</span>
             </button>
             <button
               type="button"
@@ -129,7 +131,7 @@ export function FactorySidebar({
               className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-line bg-surface hover:bg-canvas text-ink py-2 text-xs font-semibold transition active:scale-95"
             >
               <Video className="h-4 w-4 text-brand-blue" />
-              <span>Upload Video Seek</span>
+              <span>{t("seller.sidebar.uploadVideoSeek")}</span>
             </button>
           </div>
         </Card>
@@ -141,12 +143,12 @@ export function FactorySidebar({
               <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-xs font-bold text-ink">Verified OEM Showroom</p>
-              <p className="text-[10px] text-amber-700 font-semibold">Tier-1 Manufacturer</p>
+              <p className="text-xs font-bold text-ink">{t("seller.sidebar.verifiedOemShowroom")}</p>
+              <p className="text-[10px] text-amber-700 font-semibold">{t("seller.sidebar.tier1Manufacturer")}</p>
             </div>
           </div>
           <p className="text-[11px] text-ink-muted">
-            Your factory showroom is live and active for enterprise buyers searching globally.
+            {t("seller.sidebar.yourFactoryShowroomIsLive")}
           </p>
         </Card>
       </div>

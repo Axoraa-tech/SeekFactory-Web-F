@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { X, Sparkles } from "lucide-react";
 import { AuthCard } from "@/features/auth/auth-card";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { useTranslations } from "next-intl";
 
 export function TimedAuthPrompt({ user }: { user: unknown }) {
+  const t = useTranslations();
   const [showModal, setShowModal] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -85,13 +87,13 @@ export function TimedAuthPrompt({ user }: { user: unknown }) {
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 shrink-0 text-amber-300" />
             <p className="text-xs font-semibold tracking-wide">
-              Welcome to SeekFactory
+              {t("auth.welcomeToSeekfactory")}
             </p>
           </div>
           <button
             onClick={handleClose}
             type="button"
-            aria-label="Close modal"
+            aria-label={t("common.closeModal")}
             className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             <X className="h-4 w-4" />

@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
+import { useTranslations } from "next-intl";
 
 type Role = "buyer" | "manufacturer";
 
 export function RoleToggle() {
+  const t = useTranslations();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const role: Role = searchParams.get("role") === "manufacturer" ? "manufacturer" : "buyer";
@@ -26,7 +28,7 @@ export function RoleToggle() {
           role === "buyer" ? "bg-brand-blue text-white" : "text-ink-muted",
         )}
       >
-        Buyer
+        {t("userMenu.plan.free")}
       </Link>
       <Link
         href={hrefFor("manufacturer")}
@@ -35,7 +37,7 @@ export function RoleToggle() {
           role === "manufacturer" ? "bg-brand-blue text-white" : "text-ink-muted",
         )}
       >
-        Manufacturer
+        {t("userMenu.manufacturer")}
       </Link>
     </div>
   );

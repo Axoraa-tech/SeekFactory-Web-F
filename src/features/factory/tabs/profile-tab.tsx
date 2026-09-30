@@ -21,6 +21,7 @@ import type { FactoryCertificate } from "@/entities/factory-certificate";
 import { UploadCertificateModal } from "../components/upload-certificate-modal";
 import { CertificateLightboxModal } from "@/components/profile/certificate-lightbox-modal";
 import { AlibabaCertSection } from "@/components/profile/alibaba-cert-section";
+import { useTranslations } from "next-intl";
 
 type Props = {
   profile: SellerFactoryProfile;
@@ -30,6 +31,7 @@ type Props = {
 };
 
 export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Props) {
+  const t = useTranslations();
   const [name, setName] = useState(profile.name);
   const [location, setLocation] = useState(profile.location);
   const [websiteUrl, setWebsiteUrl] = useState(profile.websiteUrl || "");
@@ -57,7 +59,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
       await onUpdateProfile({ certificates: next });
     } catch (err) {
       setCertificates(previous);
-      setSaveError(err instanceof Error ? err.message : "Could not update certificates.");
+      setSaveError(err instanceof Error ? err.message : t("seller.profile.couldNotUpdateCertificates"));
     }
   }
 
@@ -74,11 +76,11 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
     if (isSaving) return;
     const year = Number(yearsEstablished);
     if (!Number.isInteger(year) || year < 1900 || year > new Date().getFullYear()) {
-      setSaveError(`Year founded must be between 1900 and ${new Date().getFullYear()}.`);
+      setSaveError(t("seller.profile.yearFoundedMustBeBetween", { new: new Date().getFullYear() }));
       return;
     }
     if (!Number.isInteger(Number(productionLines)) || Number(productionLines) < 0) {
-      setSaveError("Production lines must be a whole number (0 or more).");
+      setSaveError(t("seller.profile.productionLinesMustBeA"));
       return;
     }
     setIsSaving(true);
@@ -98,7 +100,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Could not save profile. Please retry.");
+      setSaveError(err instanceof Error ? err.message : t("seller.profile.couldNotSaveProfilePlease"));
     } finally {
       setIsSaving(false);
     }
@@ -113,7 +115,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-neutral-900 flex flex-wrap items-center gap-2">
-            <span>Factory Profile & Verified Showroom</span>
+            <span>{t("seller.profile.factoryProfileVerifiedShowroom")}</span>
             <span className="rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 text-xs font-bold text-amber-800">
               ★ {profile.tier}
             </span>
@@ -123,12 +125,12 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
                 onClick={onOpenUpgradeModal}
                 className="btn btn-primary inline-flex items-center gap-1 px-2.5 py-0.5 text-xs"
               >
-                <span>Upgrade Plan</span>
+                <span>{t("seller.profile.upgradePlan")}</span>
               </button>
             )}
           </h2>
           <p className="text-xs text-ink-muted mt-1">
-            Maintain your manufacturing credentials, facility capacity, official website, and export certificates
+            {t("seller.profile.maintainYourManufacturingCredentialsFacility")}
           </p>
         </div>
 
@@ -140,10 +142,10 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-xl border border-[#1A73E8]/30 bg-[#E8F1FD] hover:bg-[#1A73E8] hover:text-white px-3.5 py-2 text-xs font-bold text-[#1A73E8] transition group"
-              title="Open official company website in new tab"
+              title={t("seller.top.openOfficialCompanyWebsiteIn")}
             >
               <Globe2 className="h-3.5 w-3.5" />
-              <span>Visit Website</span>
+              <span>{t("supplier.visitWebsite")}</span>
               <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
             </a>
           )}
@@ -172,13 +174,13 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
         {/* Core Profile Details */}
         <div className="rounded-2xl border border-line bg-white p-6 shadow-xs space-y-4">
           <h2 className="text-sm font-bold text-neutral-900">
-            Company overview & factory identity
+            {t("seller.profile.companyOverviewFactoryIdentity")}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                Registered Factory Name
+                {t("seller.profile.registeredFactoryName")}
               </label>
               <input
                 type="text"
@@ -190,7 +192,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
 
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                Industrial Estate / Location
+                {t("seller.profile.industrialEstateLocation")}
               </label>
               <input
                 type="text"
@@ -203,7 +205,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
 
           <div>
             <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-              Official Factory Website (Direct Link for Buyers)
+              {t("seller.profile.officialFactoryWebsiteDirectLink")}
             </label>
             <div className="relative">
               <Globe2 className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
@@ -217,14 +219,14 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
               />
             </div>
             <p className="text-[11px] text-ink-muted mt-1">
-              Shown as &quot;Official Website&quot; on your public profile and in your seller hub. Leave empty to hide it.
+              {t("seller.profile.shownAsOfficialWebsiteOn")}
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                Year Founded
+                {t("seller.profile.yearFounded")}
               </label>
               <input
                 type="number"
@@ -238,7 +240,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
 
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                Plant Area
+                {t("supplier.plantArea")}
               </label>
               <input
                 type="text"
@@ -250,7 +252,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
 
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                Total Workforce
+                {t("seller.profile.totalWorkforce")}
               </label>
               <input
                 type="text"
@@ -262,7 +264,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
 
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                Production Lines
+                {t("supplier.productionLines")}
               </label>
               <input
                 type="number"
@@ -276,21 +278,21 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
 
           <div className="sm:w-1/2">
             <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-              Annual Turnover
+              {t("supplier.annualTurnover")}
             </label>
             <input
               type="text"
               maxLength={64}
               value={annualTurnover}
               onChange={(e) => setAnnualTurnover(e.target.value)}
-              placeholder="e.g. USD 5–10 Million"
+              placeholder={t("seller.profile.eGUsd510")}
               className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-              Company Overview & OEM Capability
+              {t("seller.profile.companyOverviewOemCapability")}
             </label>
             <textarea
               rows={3}
@@ -305,7 +307,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
         <div className="rounded-2xl border border-line bg-white p-5 shadow-xs space-y-3">
           <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
             <Globe2 className="h-4 w-4 text-brand-blue" />
-            <span>Primary Export Markets</span>
+            <span>{t("seller.profile.primaryExportMarkets")}</span>
           </h2>
           <div className="flex flex-wrap gap-2">
             {profile.exportCountries.map((country, i) => (
@@ -328,11 +330,11 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
           ) : isSaved ? (
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 animate-in fade-in">
               <CheckCircle2 className="h-4 w-4" />
-              <span>Factory Profile Changes Successfully Saved!</span>
+              <span>{t("seller.profile.factoryProfileChangesSuccessfullySaved")}</span>
             </div>
           ) : (
             <span className="text-xs text-ink-muted">
-              Changes reflect immediately on your live public manufacturer profile.
+              {t("seller.profile.changesReflectImmediatelyOnYour")}
             </span>
           )}
 
@@ -342,7 +344,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
             className="btn btn-primary px-5 py-2.5 text-xs flex items-center gap-1.5 disabled:opacity-70"
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            <span>{isSaving ? "Saving\u2026" : "Save Profile Changes"}</span>
+            <span>{isSaving ? t("common.saving") : t("profile.details.saveProfileChanges")}</span>
           </button>
         </div>
       </form>

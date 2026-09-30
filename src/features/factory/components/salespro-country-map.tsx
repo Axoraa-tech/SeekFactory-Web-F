@@ -1,25 +1,27 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 export function SalesproCountryMap() {
+  const t = useTranslations();
   return (
     <div className="rounded-2xl border border-[#E6E8EB] bg-white p-5 shadow-xs flex flex-col justify-between relative overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-[#1C1C1C]">Customers Countries</h3>
+        <h3 className="text-sm font-bold text-[#1C1C1C]">{t("seller.map.customersCountries")}</h3>
         <button type="button" className="text-xs font-semibold text-[#1A73E8] hover:underline">
-          View All
+          {t("common.viewAll")}
         </button>
       </div>
 
       {/* Stats Summary Row */}
       <div className="grid grid-cols-2 gap-4 my-2 z-10">
         <div>
-          <p className="text-[11px] font-semibold text-[#80868B]">Total Customers</p>
+          <p className="text-[11px] font-semibold text-[#80868B]">{t("seller.map.totalCustomers")}</p>
           <p className="text-lg font-extrabold text-[#1C1C1C]">65,000</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-[#80868B]">Total Countries</p>
-          <p className="text-lg font-extrabold text-[#1C1C1C]">8 Active</p>
+          <p className="text-[11px] font-semibold text-[#80868B]">{t("seller.map.totalCountries")}</p>
+          <p className="text-lg font-extrabold text-[#1C1C1C]">{t("seller.map.n8Active")}</p>
         </div>
       </div>
 
@@ -49,7 +51,7 @@ export function SalesproCountryMap() {
         <div className="absolute top-2.5 right-6 z-20 rounded-xl bg-white/95 px-3 py-1.5 shadow-lg border border-[#E6E8EB] backdrop-blur-xs flex items-center gap-2 animate-in fade-in">
           <span className="text-sm">🇮🇳</span>
           <div className="text-left">
-            <p className="text-[10px] font-bold text-[#1C1C1C] leading-none">India Buyers</p>
+            <p className="text-[10px] font-bold text-[#1C1C1C] leading-none">{t("seller.map.indiaBuyers")}</p>
             <p className="text-[10px] font-extrabold text-[#F26B21]">3,000 (85%)</p>
           </div>
         </div>

@@ -16,15 +16,16 @@ import {
   Package,
   ShoppingCart,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
-
-const PLAN_LABELS: Record<BuyerPlanTier, string> = {
-  free: "Buyer",
-  pro: "Pro Buyer",
-  enterprise: "Enterprise Buyer",
-};
 import { getApi } from "@/shared/api";
+
+const PLAN_KEYS: Record<BuyerPlanTier, string> = {
+  free: "userMenu.plan.free",
+  pro: "userMenu.plan.pro",
+  enterprise: "userMenu.plan.enterprise",
+};
 
 type UserDropdownProps = {
   user: BuyerProfile;
@@ -37,6 +38,7 @@ export function UserDropdown({
   messageCount = 0,
   notificationCount = 0,
 }: UserDropdownProps) {
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -106,7 +108,7 @@ export function UserDropdown({
             {user.name}
           </span>
           <span className="block text-[11px] font-medium text-ink-muted">
-            {user.role === "Supplier" ? "Manufacturer" : "Buyer"}
+            {user.role === "Supplier" ? t("userMenu.manufacturer") : t("userMenu.plan.free")}
           </span>
         </span>
         <ChevronDown
@@ -128,7 +130,7 @@ export function UserDropdown({
                 <div className="mt-1.5 flex items-center gap-1.5">
                   <span className="inline-flex items-center gap-1 rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-semibold text-brand-blue">
                     <Sparkles className="h-3 w-3 text-brand-blue" />
-                    {user.role === "Supplier" ? "Manufacturer" : PLAN_LABELS[user.plan ?? "free"]}
+                    {user.role === "Supplier" ? t("userMenu.manufacturer") : t(PLAN_KEYS[user.plan ?? "free"])}
                   </span>
                 </div>
               </div>
@@ -144,9 +146,9 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <User className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>View Profile</span>
+                <span>{t("userMenu.viewProfile")}</span>
               </div>
-              <span className="text-[10px] text-ink-faint group-hover:text-brand-blue">Public</span>
+              <span className="text-[10px] text-ink-faint group-hover:text-brand-blue">{t("userMenu.public")}</span>
             </Link>
 
             <Link
@@ -156,10 +158,10 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <Edit3 className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>Edit Profile & Company</span>
+                <span>{t("userMenu.editProfile")}</span>
               </div>
               <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-ink-muted group-hover:bg-blue-100 group-hover:text-brand-blue">
-                Edit
+                {t("common.edit")}
               </span>
             </Link>
 
@@ -170,7 +172,7 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <MessageSquare className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>Messages</span>
+                <span>{t("nav.messages")}</span>
               </div>
               {messageCount > 0 && (
                 <span className="rounded-full bg-brand-blue px-1.5 py-0.5 text-[10px] font-bold text-white">
@@ -186,7 +188,7 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <Bell className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>Notifications</span>
+                <span>{t("nav.notifications")}</span>
               </div>
               {notificationCount > 0 && (
                 <span className="rounded-full bg-brand-orange px-1.5 py-0.5 text-[10px] font-bold text-white">
@@ -202,7 +204,7 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <FileText className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>My RFQs & Quotes</span>
+                <span>{t("userMenu.myRfqs")}</span>
               </div>
             </Link>
 
@@ -213,7 +215,7 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <Package className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>My Orders</span>
+                <span>{t("userMenu.myOrders")}</span>
               </div>
             </Link>
 
@@ -224,7 +226,7 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <ShoppingCart className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>Cart</span>
+                <span>{t("userMenu.cart")}</span>
               </div>
             </Link>
           </div>
@@ -240,7 +242,7 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <Settings className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>Account Settings</span>
+                <span>{t("userMenu.accountSettings")}</span>
               </div>
             </Link>
 
@@ -252,7 +254,7 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <LogOut className="h-4 w-4 text-red-500 transition-transform group-hover:-translate-x-0.5" />
-                <span className="font-semibold">{isLoggingOut ? "Signing out..." : "Sign out"}</span>
+                <span className="font-semibold">{isLoggingOut ? t("userMenu.signingOut") : t("userMenu.signOut")}</span>
               </div>
             </button>
           </div>

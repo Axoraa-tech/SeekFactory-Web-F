@@ -8,10 +8,10 @@ describe("passwordPolicyErrors", () => {
 
   it("lists every missing rule", () => {
     expect(passwordPolicyErrors("short")).toEqual([
-      "At least 8 characters",
-      "At least one uppercase letter",
-      "At least one number",
-      "At least one special character",
+      "auth.policy.minLength",
+      "auth.policy.upper",
+      "auth.policy.number",
+      "auth.policy.special",
     ]);
   });
 });

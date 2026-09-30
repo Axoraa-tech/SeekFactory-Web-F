@@ -7,6 +7,7 @@ import type { OrderRequest } from "@/entities/order";
 import { ORDER_STATUS_META } from "@/features/orders/order-status";
 import { attachmentHref, isImageAttachment, isPdfAttachment } from "@/shared/lib/chat";
 import { cn } from "@/shared/lib/cn";
+import { useTranslations } from "next-intl";
 
 type Tone = "own" | "other";
 
@@ -56,8 +57,9 @@ export function MessageAttachmentView({ attachment, tone }: { attachment: Messag
 
 /** "Re: ORD-2026-XXXX · product" tag shown above a message sent with order context. */
 export function MessageOrderTag({ order, tone }: { order: MessageOrderContext; tone: Tone }) {
+  const t = useTranslations();
   const status = order.status && order.status in ORDER_STATUS_META
-    ? ORDER_STATUS_META[order.status as keyof typeof ORDER_STATUS_META].label
+    ? t(ORDER_STATUS_META[order.status as keyof typeof ORDER_STATUS_META].label)
     : undefined;
   return (
     <div
@@ -68,7 +70,7 @@ export function MessageOrderTag({ order, tone }: { order: MessageOrderContext; t
     >
       <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
       <span className="truncate">
-        <strong>Re: {order.referenceNumber}</strong> · {order.productName}
+        <strong>{t("chat.re")} {order.referenceNumber}</strong> · {order.productName}
         {order.quantity !== undefined && ` · ${order.quantity} ${order.unit ?? ""}`}
         {status && ` · ${status}`}
       </span>
@@ -86,17 +88,18 @@ export function OrderContextPicker({
   value: string;
   onChange: (orderId: string) => void;
 }) {
+  const t = useTranslations();
   if (orders.length === 0) return null;
   return (
     <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
       <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-amber-600" />
-      <span className="shrink-0">About order:</span>
+      <span className="shrink-0">{t("chat.aboutOrder")}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="min-w-0 max-w-[260px] rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-800 focus:border-brand-blue focus:outline-hidden"
       >
-        <option value="">General (no specific order)</option>
+        <option value="">{t("chat.generalNoSpecificOrder")}</option>
         {orders.map((order) => (
           <option key={order.id} value={order.id}>
             {order.referenceNumber} · {order.productName.length > 28 ? `${order.productName.slice(0, 28)}…` : order.productName}

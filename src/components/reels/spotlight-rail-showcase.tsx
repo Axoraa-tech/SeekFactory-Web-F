@@ -7,6 +7,7 @@ import { EmptyShowcase, FactoryLine, Hashtags, Poster, SeekActions, Stats } from
 import { cn } from "@/shared/lib/cn";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
+import { useTranslations } from "next-intl";
 
 type Props = { items: FeedItem[]; settings: FeedShowcase };
 
@@ -19,6 +20,7 @@ type Props = { items: FeedItem[]; settings: FeedShowcase };
  * showPhotos → product strip under the hero.
  */
 export function SpotlightRailShowcase({ items, settings }: Props) {
+  const t = useTranslations();
   const [active, setActive] = useState(0);
   const railRef = useRef<HTMLDivElement>(null);
 
@@ -73,9 +75,9 @@ export function SpotlightRailShowcase({ items, settings }: Props) {
                 <p className="mt-3 line-clamp-4 text-xs text-ink-muted">{hero.manufacturer.description}</p>
               )}
               <dl className="mt-3 space-y-1.5 text-xs">
-                <Fact label="Established" value={hero.manufacturer.yearsEstablished ? String(hero.manufacturer.yearsEstablished) : undefined} />
-                <Fact label="Employees" value={hero.manufacturer.employees} />
-                <Fact label="Factory size" value={hero.manufacturer.factorySize} />
+                <Fact label={t("showcase.spotlight.established")} value={hero.manufacturer.yearsEstablished ? String(hero.manufacturer.yearsEstablished) : undefined} />
+                <Fact label={t("showcase.spotlight.employees")} value={hero.manufacturer.employees} />
+                <Fact label={t("showcase.spotlight.factorySize")} value={hero.manufacturer.factorySize} />
               </dl>
             </div>
           </aside>
@@ -86,10 +88,10 @@ export function SpotlightRailShowcase({ items, settings }: Props) {
       {items.length > 1 && (
         <section className="relative">
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-ink">More seeks</h3>
+            <h3 className="text-sm font-semibold text-ink">{t("showcase.spotlight.moreSeeks")}</h3>
             <div className="flex gap-1">
-              <RailButton label="Scroll left" onClick={() => scrollRail(-1)}><ChevronLeft className="h-4 w-4" /></RailButton>
-              <RailButton label="Scroll right" onClick={() => scrollRail(1)}><ChevronRight className="h-4 w-4" /></RailButton>
+              <RailButton label={t("showcase.spotlight.scrollLeft")} onClick={() => scrollRail(-1)}><ChevronLeft className="h-4 w-4" /></RailButton>
+              <RailButton label={t("showcase.spotlight.scrollRight")} onClick={() => scrollRail(1)}><ChevronRight className="h-4 w-4" /></RailButton>
             </div>
           </div>
 

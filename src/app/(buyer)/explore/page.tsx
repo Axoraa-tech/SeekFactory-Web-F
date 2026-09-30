@@ -6,6 +6,7 @@ import { getApi } from "@/shared/api";
 import { buildCategoryTree } from "@/features/categories/category-tree";
 import { formatPriceInr } from "@/shared/lib/format";
 import { Package, ShieldCheck } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default async function ExplorePage({ searchParams }: Props) {
+  const t = await getTranslations();
   const { q = "", category = "", sub = "" } = await searchParams;
   const api = getApi();
   const { roots, childrenByRoot } = buildCategoryTree(await api.categories.list());
@@ -38,13 +40,13 @@ export default async function ExplorePage({ searchParams }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-ink flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-brand-blue" />
-              <span>{selectedRoot.name} Subcategories</span>
+              <span>{selectedRoot.name} {t("common.subcategories")}</span>
             </h2>
             <Link
               href={`/explore?category=${selectedRoot.slug}`}
               className="text-xs font-semibold text-brand-blue hover:underline"
             >
-              Show all
+              {t("feed.showAll")}
             </Link>
           </div>
 
@@ -57,7 +59,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                   : "rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
               }
             >
-              All {selectedRoot.name}
+              {t("common.all")} {selectedRoot.name}
             </Link>
             {children.map((child) => {
               const href = `/explore?category=${selectedRoot.slug}&sub=${child.slug}`;
@@ -89,12 +91,12 @@ export default async function ExplorePage({ searchParams }: Props) {
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-ink flex items-center gap-2">
             <Package className="h-4 w-4 text-brand-orange" />
-            <span>Featured Machinery & Products</span>
+            <span>{t("explore.featuredMachineryProducts")}</span>
             <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-bold text-brand-orange">
               {visibleProducts.length}
             </span>
           </h2>
-          <span className="text-xs text-neutral-500">Direct Factory Pricing</span>
+          <span className="text-xs text-neutral-500">{t("explore.directFactoryPricing")}</span>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -109,7 +111,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                   />
                   <div className="absolute top-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-emerald-400" />
-                    Verified OEM
+                    {t("explore.verifiedOem")}
                   </div>
                 </div>
                 <div className="p-3 flex flex-col flex-1 justify-between gap-2">
@@ -117,13 +119,13 @@ export default async function ExplorePage({ searchParams }: Props) {
                     <p className="font-bold text-xs sm:text-sm text-ink group-hover:text-brand-blue transition line-clamp-1">
                       {product.name}
                     </p>
-                    {product.moq ? <p className="text-[11px] text-neutral-500 mt-0.5">MOQ: {product.moq}</p> : null}
+                    {product.moq ? <p className="text-[11px] text-neutral-500 mt-0.5">{t("common.moqLabel")} {product.moq}</p> : null}
                   </div>
                   <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
                     <p className="text-xs sm:text-sm font-bold text-brand-orange">
                       {formatPriceInr(product.priceInr)} <span className="text-[10px] font-normal text-neutral-500">/ {product.unit}</span>
                     </p>
-                    <span className="text-[11px] font-semibold text-brand-blue group-hover:underline">Inquire →</span>
+                    <span className="text-[11px] font-semibold text-brand-blue group-hover:underline">{t("explore.inquire")}</span>
                   </div>
                 </div>
               </Card>
@@ -134,13 +136,13 @@ export default async function ExplorePage({ searchParams }: Props) {
 
       {visibleManufacturers.length === 0 && visibleProducts.length === 0 ? (
         <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center space-y-2">
-          <p className="text-sm font-bold text-neutral-800">No machinery matching this category or query.</p>
-          <p className="text-xs text-neutral-500">Try browsing all categories or searching another term.</p>
+          <p className="text-sm font-bold text-neutral-800">{t("explore.noMachineryMatchingThisCategory")}</p>
+          <p className="text-xs text-neutral-500">{t("explore.tryBrowsingAllCategoriesOr")}</p>
           <Link
             href="/explore"
             className="btn btn-primary inline-flex h-8 items-center px-4 text-xs mt-2"
           >
-            Explore All Categories
+            {t("explore.exploreAllCategories")}
           </Link>
         </div>
       ) : null}

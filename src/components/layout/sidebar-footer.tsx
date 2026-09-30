@@ -6,50 +6,52 @@ import { ChevronDown } from "lucide-react";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { cn } from "@/shared/lib/cn";
 import { getMessages } from "@/shared/lib/messages";
+import { useTranslations } from "next-intl";
 
 const year = new Date().getFullYear();
 const messages = getMessages("en");
 
 export function SidebarFooter() {
+  const t = useTranslations();
   return (
     <footer className="px-2 pb-2 pt-3 text-center text-[12px] leading-6 text-ink-muted">
       <nav className="flex flex-wrap justify-center gap-x-3">
         <Link href="/explore" className="hover:text-brand-blue hover:underline">
-          About
+          {t("layout.footer.about")}
         </Link>
         <Link href="/legal/accessibility" className="hover:text-brand-blue hover:underline">
-          Accessibility
+          {t("layout.footer.accessibility")}
         </Link>
         <Link href="/explore" className="hover:text-brand-blue hover:underline">
-          Help Center
+          {t("layout.footer.helpCenter")}
         </Link>
         <FooterMenu
-          label="Privacy & Terms"
+          label={t("layout.footer.privacyTerms")}
           items={[
-            { href: "/legal/privacy", label: "Privacy Policy" },
-            { href: "/legal/terms", label: "User Agreement" },
-            { href: "/legal/cookies", label: "Cookie Policy" },
+            { href: "/legal/privacy", label: t("layout.footer.privacyPolicy") },
+            { href: "/legal/terms", label: t("layout.footer.userAgreement") },
+            { href: "/legal/cookies", label: t("layout.footer.cookiePolicy") },
           ]}
         />
         <Link href="/legal/cookies" className="hover:text-brand-blue hover:underline">
-          Ad Choices
+          {t("layout.footer.adChoices")}
         </Link>
         <Link href="/join?role=manufacturer" className="hover:text-brand-blue hover:underline">
-          Advertising
+          {t("layout.footer.advertising")}
         </Link>
         <FooterMenu
-          label="Business Services"
+          label={t("layout.footer.businessServices")}
           items={[
-            { href: "/join?role=manufacturer", label: "For manufacturers" },
-            { href: "/rfq/new", label: "Post RFQ" },
-            { href: "/factory", label: "Factory home" },
+            { href: "/join?role=manufacturer", label: t("layout.footer.forManufacturers") },
+            { href: "/rfq/new", label: t("nav.postRfq") },
+            { href: "/factory", label: t("layout.footer.factoryHome") },
           ]}
         />
         <Link href="/join" className="hover:text-brand-blue hover:underline">
-          Get the SeekFactory app
+          {t("layout.footer.getTheSeekfactoryApp")}
         </Link>
         <Link href="/explore" className="hover:text-brand-blue hover:underline">
-          More
+          {t("layout.footer.more")}
         </Link>
       </nav>
       <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-ink-muted">

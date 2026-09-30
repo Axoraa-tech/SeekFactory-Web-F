@@ -1,12 +1,14 @@
 import { requireUser } from "@/features/auth/require-user";
 import { RfqForm } from "@/features/rfq/rfq-form";
 import { getApi } from "@/shared/api";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Post RFQ | SeekFactory",
-};
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.rfqNew.title") };
+}
 
 type Props = {
   searchParams: Promise<{ product?: string; category?: string }>;

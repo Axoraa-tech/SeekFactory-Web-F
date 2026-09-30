@@ -18,6 +18,7 @@ import { useBuyerPlan } from "@/features/subscription";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import type { Manufacturer } from "@/entities/manufacturer";
+import { useTranslations } from "next-intl";
 
 type Layout = "rail" | "explore";
 
@@ -75,7 +76,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
           </Link>
         )}
       </div>
-      <SupplierLockOverlay badgeLabel="View Manufacturers">
+      <SupplierLockOverlay badgeLabel={t("manufacturers.list.viewManufacturers")}>
         <ul className="space-y-3">
           {manufacturers.slice(0, 4).map((manufacturer) => {
             const isFollowing = !!followedMap[manufacturer.id];
@@ -135,6 +136,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
 }
 
 function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
+  const t = useTranslations();
   const [isExpanded, setIsExpanded] = useState(false);
   const visibleManufacturers = isExpanded ? manufacturers : manufacturers.slice(0, 4);
 
@@ -147,23 +149,23 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-neutral-900 leading-tight flex items-center gap-1.5">
-              <span>Verified Manufacturers</span>
+              <span>{t("widgets.verifiedManufacturers")}</span>
               <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-brand-blue">
                 {manufacturers.length}
               </span>
             </h2>
-            <p className="text-[11px] text-neutral-500 font-medium">Direct OEM / ODM audited factories</p>
+            <p className="text-[11px] text-neutral-500 font-medium">{t("manufacturers.list.directOemOdmAuditedFactories")}</p>
           </div>
         </div>
 
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          title={isExpanded ? "Show fewer manufacturers" : `View all ${manufacturers.length} manufacturers`}
+          title={isExpanded ? t("manufacturers.list.showFewerManufacturers") : t("manufacturers.list.viewAllManufacturers", { length: manufacturers.length })}
           className="group flex items-center gap-1.5 rounded-full bg-neutral-900 hover:bg-black text-white px-3 py-1.5 text-xs font-bold shadow-md transition-all active:scale-95"
         >
           <span className="hidden sm:inline">
-            {isExpanded ? "Show Less" : `View All (${manufacturers.length})`}
+            {isExpanded ? t("common.showLess") : t("manufacturers.list.viewAll", { length: manufacturers.length })}
           </span>
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition">
             {isExpanded ? (
@@ -175,7 +177,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
         </button>
       </div>
 
-      <SupplierLockOverlay badgeLabel="View Verified Manufacturers">
+      <SupplierLockOverlay badgeLabel={t("manufacturers.list.viewVerifiedManufacturers")}>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {visibleManufacturers.map((m) => (
             <Link
@@ -191,7 +193,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                 />
                 <div className="absolute top-1.5 left-1.5 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-xs flex items-center gap-1">
                   <Building2 className="h-3 w-3 text-brand-blue" />
-                  <span>OEM</span>
+                  <span>{t("manufacturers.list.oem")}</span>
                 </div>
                 <div className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-lg overflow-hidden border border-white shadow-xs bg-white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -213,9 +215,9 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                 </div>
 
                 <div className="flex items-center justify-between pt-1 border-t border-neutral-100 text-[11px]">
-                  <span className="text-neutral-500 font-medium">{m.yearsEstablished || 8}+ Yrs Exp</span>
+                  <span className="text-neutral-500 font-medium">{m.yearsEstablished || 8}{t("manufacturers.list.yrsExp")}</span>
                   <span className="font-bold text-brand-blue flex items-center gap-0.5 group-hover:underline">
-                    Visit <ExternalLink className="h-2.5 w-2.5" />
+                    {t("manufacturers.list.visit")} <ExternalLink className="h-2.5 w-2.5" />
                   </span>
                 </div>
               </div>
@@ -231,7 +233,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
             onClick={() => setIsExpanded(true)}
             className="text-xs font-bold text-brand-blue hover:text-brand-blue-dark hover:underline transition inline-flex items-center gap-1"
           >
-            <span>+ See all {manufacturers.length} verified factories</span>
+            <span>{t("manufacturers.list.seeAll")} {manufacturers.length} {t("manufacturers.list.verifiedFactories")}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>

@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
+import { useTranslations } from "next-intl";
 
 interface AlibabaCertSectionProps {
   certificates: FactoryCertificate[];
@@ -36,6 +37,7 @@ export function AlibabaCertSection({
   onDeleteCertificate,
   onInspect,
 }: AlibabaCertSectionProps) {
+  const t = useTranslations();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [startIndex, setStartIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
@@ -83,10 +85,10 @@ export function AlibabaCertSection({
   const exportMarkets = manufacturer.exportCountries?.filter(Boolean) ?? [];
   // Only facts the factory entered; nothing is filled in on its behalf
   const facts = [
-    founded && { label: "Year founded", value: String(founded) },
-    yearsInIndustry !== null && { label: "Years in industry", value: String(yearsInIndustry) },
-    manufacturer.factorySize && { label: "Floor space", value: manufacturer.factorySize },
-    exportMarkets.length > 0 && { label: "Export markets", value: exportMarkets.join(", ") },
+    founded && { label: t("profile.certs.yearFounded"), value: String(founded) },
+    yearsInIndustry !== null && { label: t("profile.certs.yearsInIndustry"), value: String(yearsInIndustry) },
+    manufacturer.factorySize && { label: t("profile.certs.floorSpace"), value: manufacturer.factorySize },
+    exportMarkets.length > 0 && { label: t("profile.certs.exportMarkets"), value: exportMarkets.join(", ") },
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (
@@ -94,7 +96,7 @@ export function AlibabaCertSection({
       {/* Header: title, owner upload action and SeekFactory verification state */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-100">
         <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-          Profile
+          {t("nav.profile")}
         </h2>
 
         <div className="flex items-center gap-4 text-xs font-semibold">
@@ -105,14 +107,14 @@ export function AlibabaCertSection({
               className="btn btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>Add Real Certificate</span>
+              <span>{t("profile.certs.addRealCertificate")}</span>
             </button>
           )}
 
           {manufacturer.verified && (
             <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">
               <Check className="h-3.5 w-3.5" />
-              Verified by SeekFactory
+              {t("profile.certs.verifiedBySeekfactory")}
             </span>
           )}
         </div>
@@ -122,7 +124,7 @@ export function AlibabaCertSection({
       <div className="py-6 border-b border-slate-100">
         <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4">
           <div className="text-sm font-bold text-slate-900">
-            Overview
+            {t("profile.certs.overview")}
           </div>
 
           {facts.length > 0 ? (
@@ -136,7 +138,7 @@ export function AlibabaCertSection({
             </dl>
           ) : (
             <p className="text-xs text-slate-500">
-              {isOwner ? "Add your founding year and floor space below to show them here." : "Not provided yet."}
+              {isOwner ? t("profile.certs.addYourFoundingYearAnd") : t("profile.certs.notProvidedYet")}
             </p>
           )}
         </div>
@@ -146,7 +148,7 @@ export function AlibabaCertSection({
       <div className="pt-6">
         <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
           <div className="text-sm font-bold text-slate-900 pt-2">
-            Certifications
+            {t("profile.certs.certifications")}
           </div>
 
           <div className="relative">
@@ -155,7 +157,7 @@ export function AlibabaCertSection({
               <button
                 type="button"
                 onClick={handlePrev}
-                aria-label="Previous certificates"
+                aria-label={t("profile.certs.previousCertificates")}
                 className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -167,7 +169,7 @@ export function AlibabaCertSection({
               <button
                 type="button"
                 onClick={handleNext}
-                aria-label="Next certificates"
+                aria-label={t("profile.certs.nextCertificates")}
                 className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -176,9 +178,9 @@ export function AlibabaCertSection({
 
             {certificates.length === 0 && (
               <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 px-4 py-6 text-center">
-                <p className="text-sm font-semibold text-slate-800">No certificates yet</p>
+                <p className="text-sm font-semibold text-slate-800">{t("profile.certs.noCertificatesYet")}</p>
                 <p className="mt-1 text-xs text-slate-500">
-                  Upload scans of ISO, CE or audit certificates. Buyers see them on your public profile.
+                  {t("profile.certs.uploadScansOfIsoCe")}
                 </p>
               </div>
             )}
@@ -207,7 +209,7 @@ export function AlibabaCertSection({
                       <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span className="rounded-md bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-800 shadow-xs flex items-center gap-1">
                           <ExternalLink className="h-3 w-3" />
-                          <span>View Full</span>
+                          <span>{t("profile.certs.viewFull")}</span>
                         </span>
                       </div>
                     </div>
@@ -227,7 +229,7 @@ export function AlibabaCertSection({
                       {/* Certificate Number + Copy Icon */}
                       <div className="flex items-center justify-between text-slate-500 text-[11px] pt-1">
                         <span className="truncate max-w-[140px] font-mono text-[11px]">
-                          {cert.certNumber || "Declared by factory"}
+                          {cert.certNumber || t("profile.certs.declaredByFactory")}
                         </span>
 
                         <div className="flex items-center gap-1">
@@ -235,7 +237,7 @@ export function AlibabaCertSection({
                           <button
                             type="button"
                             onClick={(e) => handleCopy(e, cert.certNumber, cert.id)}
-                            title="Copy Certificate Number"
+                            title={t("profile.certs.copyCertificateNumber")}
                             className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded transition"
                           >
                             {isCopied ? (
@@ -253,7 +255,7 @@ export function AlibabaCertSection({
                                 e.stopPropagation();
                                 onDeleteCertificate(cert.id);
                               }}
-                              title="Delete Certificate"
+                              title={t("profile.certs.deleteCertificate")}
                               className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition"
                             >
                               <Trash2 className="h-3.5 w-3.5" />

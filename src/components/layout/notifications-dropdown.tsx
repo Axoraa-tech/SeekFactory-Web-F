@@ -8,12 +8,15 @@ import type { AppNotification } from "@/entities/notification";
 import { getApi } from "@/shared/api";
 import { formatRelativeTime } from "@/shared/lib/format";
 import { notificationHref } from "@/features/notifications/notification-links";
+import { useTranslations, useLocale } from "next-intl";
 
 type NotificationsDropdownProps = {
   initialCount: number;
 };
 
 export function NotificationsDropdown({ initialCount }: NotificationsDropdownProps) {
+  const locale = useLocale();
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(initialCount);
@@ -76,7 +79,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-label="Notifications"
+        aria-label={t("nav.notifications")}
         aria-expanded={isOpen}
         className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-blue/30 ${
           isOpen
@@ -95,10 +98,10 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 px-1">
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-brand-blue" />
-              <h3 className="text-sm font-bold text-ink">Notifications</h3>
+              <h3 className="text-sm font-bold text-ink">{t("nav.notifications")}</h3>
               {unreadCount > 0 && (
                 <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600">
-                  {unreadCount} unread
+                  {t("layout.notifications.unreadCount", { count: unreadCount })}
                 </span>
               )}
             </div>
@@ -109,7 +112,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
                 className="flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
-                Mark all read
+                {t("layout.notifications.markAllRead")}
               </button>
             )}
           </div>
@@ -117,9 +120,9 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
           {/* Notification List */}
           <div className="my-1 max-h-80 overflow-y-auto divide-y divide-slate-50">
             {loading ? (
-              <div className="py-8 text-center text-xs text-ink-muted">Loading notifications...</div>
+              <div className="py-8 text-center text-xs text-ink-muted">{t("layout.notifications.loadingNotifications")}</div>
             ) : notifications.length === 0 ? (
-              <div className="py-8 text-center text-xs text-ink-muted">No notifications yet.</div>
+              <div className="py-8 text-center text-xs text-ink-muted">{t("layout.notifications.noNotificationsYet")}</div>
             ) : (
               notifications.map((item) => (
                 <Link
@@ -139,7 +142,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
                         {item.title}
                       </p>
                       <span className="text-[10px] text-ink-faint shrink-0 ml-2">
-                        {formatRelativeTime(item.createdAt)}
+                        {formatRelativeTime(item.createdAt, locale)}
                       </span>
                     </div>
                     <p className="text-xs text-ink-muted mt-0.5 line-clamp-2 leading-relaxed">
@@ -161,7 +164,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
               onClick={() => setIsOpen(false)}
               className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline py-1"
             >
-              View all notifications
+              {t("layout.notifications.viewAllNotifications")}
               <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>

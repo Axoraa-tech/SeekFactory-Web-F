@@ -8,6 +8,7 @@ import { useChatAttachment } from "@/hooks/use-chat-attachment";
 import { CHAT_ATTACHMENT_ACCEPT, formatChatTime } from "@/shared/lib/chat";
 import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "@/components/messages/message-extras";
 import type { SellerConversation } from "../types";
+import { useTranslations } from "next-intl";
 
 type Props = {
   conversations: SellerConversation[];
@@ -57,6 +58,7 @@ export function MessagesTab({
   initialContext,
   onContextConsumed,
 }: Props) {
+  const t = useTranslations();
   const [inputText, setInputText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [contextOrderId, setContextOrderId] = useState("");
@@ -110,7 +112,7 @@ export function MessagesTab({
         upload.clear();
       }
     } catch (err) {
-      setSendError(err instanceof Error ? `Not sent: ${err.message}` : "Message not sent. Please retry.");
+      setSendError(err instanceof Error ? t("chat.notSent", { message: err.message }) : t("chat.messageNotSentPleaseRetry"));
     } finally {
       setSending(false);
     }
@@ -130,9 +132,9 @@ export function MessagesTab({
         {/* Search header */}
         <div className="p-3.5 border-b border-line bg-white">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-bold text-neutral-900">Trade Messenger</h2>
+            <h2 className="text-sm font-bold text-neutral-900">{t("seller.nav.tradeMessenger")}</h2>
             <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[10px] font-bold text-brand-blue">
-              {conversations.length} {conversations.length === 1 ? "Buyer" : "Buyers"}
+              {conversations.length} {conversations.length === 1 ? t("seller.messages.buyer") : t("seller.messages.buyers")}
             </span>
           </div>
           <div className="relative">
@@ -141,7 +143,7 @@ export function MessagesTab({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search conversations..."
+              placeholder={t("seller.messages.searchConversations")}
               className="w-full rounded-xl border border-line bg-canvas pl-8 pr-3 py-1.5 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-brand-blue focus:outline-hidden"
             />
           </div>
@@ -187,7 +189,7 @@ export function MessagesTab({
           })}
           {filteredConversations.length === 0 && (
             <p className="p-6 text-center text-xs text-ink-muted">
-              No conversations yet. Use <strong>Chat with buyer</strong> on an order request to start one.
+              {t("seller.messages.noConversationsYetUse")} <strong>{t("seller.chatWithBuyer")}</strong> {t("seller.messages.onAnOrderRequestTo")}
             </p>
           )}
         </div>
@@ -209,7 +211,7 @@ export function MessagesTab({
                     </span>
                   )}
                 </h3>
-                <p className="text-[11px] text-ink-muted">Contact person: {activeConv.buyerName}</p>
+                <p className="text-[11px] text-ink-muted">{t("seller.messages.contactPerson")} {activeConv.buyerName}</p>
               </div>
             </div>
 
@@ -226,11 +228,11 @@ export function MessagesTab({
             {activeConv.messages.length === 0 && (
               <div className="mx-auto mt-10 max-w-sm text-center text-neutral-500">
                 <MessageSquare className="mx-auto mb-2 h-8 w-8 text-neutral-300" />
-                <p className="text-sm font-semibold text-neutral-700">No messages yet</p>
+                <p className="text-sm font-semibold text-neutral-700">{t("seller.messages.noMessagesYet")}</p>
                 <p className="mt-1 text-xs">
                   {buyerOrders.length > 0
-                    ? "Pick the order you are contacting them about below, then send your message."
-                    : "Send a message to start the conversation."}
+                    ? t("seller.messages.pickTheOrderYouAre")
+                    : t("seller.messages.sendAMessageToStart")}
                 </p>
               </div>
             )}
@@ -265,7 +267,7 @@ export function MessagesTab({
                         <p className="text-[11px] opacity-85 mt-0.5">{msg.attachmentData.detail}</p>
                         {msg.attachmentData.price && (
                           <p className="font-extrabold text-amber-300 mt-1">
-                            Quoted: ₹{(msg.attachmentData.price ?? 0).toLocaleString()}
+                            {t("seller.messages.quoted")}{(msg.attachmentData.price ?? 0).toLocaleString()}
                           </p>
                         )}
                       </div>
@@ -280,13 +282,13 @@ export function MessagesTab({
           {/* Quick Smart Replies */}
           <div className="px-4 py-2 bg-white border-t border-line flex items-center gap-1.5 overflow-x-auto">
             <span className="text-[10px] font-bold text-ink-muted flex items-center gap-1 shrink-0">
-              <Sparkles className="h-3 w-3 text-brand-blue" /> Quick Replies:
+              <Sparkles className="h-3 w-3 text-brand-blue" /> {t("seller.messages.quickReplies")}
             </span>
             {[
-              "Thank you for your order request. Let me confirm the details.",
-              "Yes, this model is available in ready stock.",
-              "I have attached our quotation / test report.",
-              "Please share your CAD drawing or technical specifications.",
+              t("seller.messages.thankYouForYourOrder"),
+              t("seller.messages.yesThisModelIsAvailable"),
+              t("seller.messages.iHaveAttachedOurQuotation"),
+              t("seller.messages.pleaseShareYourCadDrawing"),
             ].map((qr, i) => (
               <button
                 key={i}
@@ -319,7 +321,7 @@ export function MessagesTab({
                 <span className="truncate">
                   {upload.error ??
                     sendError ??
-                    (upload.uploading ? "Uploading…" : `Attached: ${upload.attachment?.name} (${upload.attachment?.size})`)}
+                    (upload.uploading ? t("common.uploading") : `Attached: ${upload.attachment?.name} (${upload.attachment?.size})`)}
                 </span>
               </span>
               {upload.attachment && !upload.uploading && (
@@ -328,7 +330,7 @@ export function MessagesTab({
                   onClick={upload.clear}
                   className="font-bold text-red-500 hover:underline text-[11px] ml-2 inline-flex items-center gap-0.5"
                 >
-                  <X className="h-3 w-3" /> Remove
+                  <X className="h-3 w-3" /> {t("common.remove")}
                 </button>
               )}
             </div>
@@ -350,8 +352,8 @@ export function MessagesTab({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={upload.uploading}
-              title="Attach an image or PDF"
-              aria-label="Attach an image or PDF"
+              title={t("chat.attachAnImageOrPdf")}
+              aria-label={t("chat.attachAnImageOrPdf")}
               className={`flex items-center justify-center h-9 w-9 rounded-xl border shrink-0 transition disabled:opacity-50 ${
                 upload.attachment ? "bg-blue-100 text-brand-blue border-brand-blue" : "bg-canvas text-neutral-500 border-line hover:bg-neutral-200"
               }`}
@@ -363,15 +365,15 @@ export function MessagesTab({
               value={inputText}
               maxLength={5000}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Type your message, FOB terms, or technical reply to buyer..."
+              placeholder={t("seller.messages.typeYourMessageFobTerms")}
               className="flex-1 min-w-0 rounded-xl border border-line px-3.5 py-2.5 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
             />
             <button
               type="submit"
               disabled={!canSend}
               className="btn btn-primary flex items-center justify-center h-9 w-9 shrink-0 disabled:opacity-50"
-              title="Send Message"
-              aria-label="Send message"
+              title={t("seller.messages.sendMessage")}
+              aria-label={t("seller.messages.sendMessage2")}
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </button>
@@ -379,7 +381,7 @@ export function MessagesTab({
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center p-8 text-neutral-400 text-xs">
-          Select a conversation from the left to start chatting
+          {t("seller.messages.selectAConversationFromThe")}
         </div>
       )}
     </div>

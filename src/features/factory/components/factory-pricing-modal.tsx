@@ -24,6 +24,7 @@ import {
   Star,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
+import { useTranslations } from "next-intl";
 
 export type FactoryPlanTier =
   | "basic"
@@ -44,6 +45,7 @@ export function FactoryPricingModal({
   currentTier = "basic",
   onSelectPlan,
 }: Props) {
+  const tr = useTranslations();
   const [activeView, setActiveView] = useState<"cards" | "matrix">("cards");
   const [remarksOpen, setRemarksOpen] = useState(false);
   const [selectedPlanFeedback, setSelectedPlanFeedback] = useState<string | null>(null);
@@ -223,7 +225,7 @@ export function FactoryPricingModal({
   ];
 
   const handleSelect = (tierId: FactoryPlanTier, title: string) => {
-    setSelectedPlanFeedback(`Selected ${title}! Updating factory membership status...`);
+    setSelectedPlanFeedback(tr("seller.pricing.selectedUpdatingFactoryMembershipStatus", { title }));
     setTimeout(() => {
       onSelectPlan(tierId, title);
       setSelectedPlanFeedback(null);
@@ -248,7 +250,7 @@ export function FactoryPricingModal({
             type="button"
             onClick={onClose}
             className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
-            aria-label="Close modal"
+            aria-label={tr("common.closeModal")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -370,7 +372,7 @@ export function FactoryPricingModal({
                     {/* Features List */}
                     <div className="space-y-2 flex-1 pt-2">
                       <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                        Key Inclusions:
+                        {tr("seller.pricing.keyInclusions")}
                       </p>
                       <ul className="space-y-2 text-xs text-slate-600">
                         {t.features.map((f, idx) => (
@@ -384,7 +386,7 @@ export function FactoryPricingModal({
                       {t.notIncluded.length > 0 && (
                         <div className="pt-2 border-t border-slate-100 mt-3">
                           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                            Not Included:
+                            {tr("seller.pricing.notIncluded")}
                           </p>
                           <ul className="space-y-1.5 text-[11px] text-slate-400">
                             {t.notIncluded.map((nf, idx) => (
@@ -553,7 +555,7 @@ export function FactoryPricingModal({
             onClick={onClose}
             className="btn btn-secondary px-4 py-2"
           >
-            Close
+            {tr("common.close")}
           </button>
         </div>
       </div>

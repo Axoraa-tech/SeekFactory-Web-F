@@ -3,12 +3,18 @@ import { ShieldCheck, Factory, Zap } from "lucide-react";
 import { AuthCard } from "@/features/auth/auth-card";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { WorkingIllustrationAnimation } from "@/components/auth/working-illustration-animation";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = { title: "Sign in | SeekFactory" };
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return { title: t("meta.login.title") };
+}
 
 export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
+  const t = useTranslations();
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-8 lg:gap-12 py-2 sm:py-6 px-2 sm:px-4">
       {/* Left Column: Visual Showcase with High-Quality Animated Vector Illustration */}
@@ -19,10 +25,10 @@ export default function LoginPage() {
             <BrandLogo className="h-11 sm:h-12 lg:h-14 w-auto max-w-[270px] sm:max-w-[300px] object-contain object-left" priority />
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
-            Source smarter with verified global factories.
+            {t("auth.loginPage.sourceSmarterWithVerifiedGlobal")}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            Connect directly with audited manufacturers, request wholesale RFQs, and discover machinery on live video feeds.
+            {t("auth.loginPage.connectDirectlyWithAuditedManufacturers")}
           </p>
         </div>
 
@@ -36,25 +42,25 @@ export default function LoginPage() {
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="flex items-center gap-1 text-xs font-bold text-slate-900">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-              <span>Verified</span>
+              <span>{t("common.verified")}</span>
             </div>
-            <span className="text-[11px] text-slate-500 font-medium">Audited factories</span>
+            <span className="text-[11px] text-slate-500 font-medium">{t("auth.loginPage.auditedFactories")}</span>
           </div>
 
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="flex items-center gap-1 text-xs font-bold text-slate-900">
               <Factory className="h-3.5 w-3.5 text-brand-blue shrink-0" />
-              <span>Direct RFQ</span>
+              <span>{t("auth.loginPage.directRfq")}</span>
             </div>
-            <span className="text-[11px] text-slate-500 font-medium">Wholesale pricing</span>
+            <span className="text-[11px] text-slate-500 font-medium">{t("auth.loginPage.wholesalePricing")}</span>
           </div>
 
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="flex items-center gap-1 text-xs font-bold text-slate-900">
               <Zap className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-              <span>Real-time</span>
+              <span>{t("auth.loginPage.realTime")}</span>
             </div>
-            <span className="text-[11px] text-slate-500 font-medium">Live video feeds</span>
+            <span className="text-[11px] text-slate-500 font-medium">{t("auth.loginPage.liveVideoFeeds")}</span>
           </div>
         </div>
       </div>
