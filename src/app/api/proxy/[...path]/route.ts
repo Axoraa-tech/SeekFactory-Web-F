@@ -84,8 +84,13 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     }
 
     // Copy headers and status from backend
+    // fetch() has already decompressed the body, so the encoding and length the backend declared
+    // (Render gzips responses) no longer describe it. Forwarding content-length truncates the JSON
+    // mid-string in the browser; let the runtime set the framing for the body it actually sends.
     const responseHeaders = new Headers(backendRes.headers);
-    responseHeaders.delete("content-encoding");
+    for (const name of ["content-encoding", "content-length", "transfer-encoding"]) {
+      responseHeaders.delete(name);
+    }
 
     const response = new NextResponse(backendRes.body, {
       status: backendRes.status,
