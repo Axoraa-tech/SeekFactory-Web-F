@@ -123,7 +123,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
               <button
                 type="button"
                 onClick={onOpenUpgradeModal}
-                className="btn btn-primary inline-flex items-center gap-1 px-2.5 py-0.5 text-xs"
+                className="inline-flex items-center gap-1 rounded-full bg-[#1A73E8] px-2.5 py-0.5 text-xs font-bold text-white shadow-xs hover:bg-[#1557B0] active:scale-95 transition cursor-pointer"
               >
                 <span>{t("seller.profile.upgradePlan")}</span>
               </button>
@@ -341,7 +341,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
           <button
             type="submit"
             disabled={isSaving}
-            className="btn btn-primary px-5 py-2.5 text-xs flex items-center gap-1.5 disabled:opacity-70"
+            className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 text-xs font-bold shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-70 disabled:active:scale-100"
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span>{isSaving ? t("common.saving") : t("profile.details.saveProfileChanges")}</span>

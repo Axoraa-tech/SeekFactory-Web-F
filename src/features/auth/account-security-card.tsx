@@ -181,7 +181,7 @@ function ChangePasswordForm() {
         <button
           type="submit"
           disabled={saving}
-          className="btn btn-primary inline-flex items-center justify-center gap-1.5 px-5 py-2 text-xs disabled:opacity-70"
+          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-5 py-2 text-xs font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"
         >
           {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
           {t("auth.security.updatePassword")}

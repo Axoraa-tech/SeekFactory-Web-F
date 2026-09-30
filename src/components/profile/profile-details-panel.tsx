@@ -122,7 +122,7 @@ export function ProfileDetailsPanel({ formData, setFormData, isSaving, onSave }:
           <button
             type="submit"
             disabled={isSaving}
-            className="btn btn-primary inline-flex items-center gap-1.5 px-5 py-2.5 text-xs sm:text-sm disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-[0_8px_24px_rgba(26,115,232,0.35)] transition-all hover:bg-brand-blue-dark active:scale-95 disabled:opacity-50"
           >
             <Save className="h-4 w-4 shrink-0 text-white" />
             <span className="text-white">{isSaving ? t("profile.details.savingUpdates") : t("profile.details.saveProfileChanges")}</span>

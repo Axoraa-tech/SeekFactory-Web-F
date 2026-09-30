@@ -74,7 +74,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
 
         <button
           type="submit"
-          className="btn btn-primary ml-2 flex h-7 px-3 items-center justify-center gap-1 text-xs"
+          className="ml-2 flex h-7 px-3 items-center justify-center gap-1 rounded-full bg-brand-blue text-xs font-semibold text-white transition-all hover:bg-brand-blue-dark active:scale-95 shadow-xs"
         >
           <span>{t("nav.search", "Search")}</span>
         </button>
@@ -145,7 +145,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
             )}
             <button
               type="submit"
-              className="btn btn-primary flex h-7 px-3 items-center justify-center text-xs ml-1"
+              className="flex h-7 px-3 items-center justify-center rounded-full bg-brand-blue text-xs font-semibold text-white ml-1"
             >
               {t("nav.search", "Search")}
             </button>

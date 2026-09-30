@@ -109,7 +109,8 @@
     "status": "Status",
     "published": "Published",
     "processingStatus": "Processing",
-    "or": "or"
+    "or": "or",
+    "done": "Done"
   },
   "feed": {
     "forYou": "For You",
@@ -1592,5 +1593,13 @@
     "verifyFactory": {
       "title": "Verify Your Factory | SeekFactory Seller Hub"
     }
+  },
+  "regional": {
+    "regionalSettings": "Regional Settings",
+    "languageCurrencyPreferences": "Language & Currency Preferences",
+    "language": "Language",
+    "searchLanguage": "Search language...",
+    "noLanguageFound": "No language found",
+    "autoSavesPreferences": "Auto-saves preferences"
   }
 }

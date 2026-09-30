@@ -553,7 +553,7 @@ export function FactoryPricingModal({
           <button
             type="button"
             onClick={onClose}
-            className="btn btn-secondary px-4 py-2"
+            className="rounded-xl border border-slate-300 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
           >
             {tr("common.close")}
           </button>

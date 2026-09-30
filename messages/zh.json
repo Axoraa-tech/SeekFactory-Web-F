@@ -109,7 +109,8 @@
     "status": "状态",
     "published": "已发布",
     "processingStatus": "处理中",
-    "or": "或"
+    "or": "或",
+    "done": "完成"
   },
   "feed": {
     "forYou": "精选推荐",
@@ -1592,5 +1593,13 @@
     "verifyFactory": {
       "title": "认证你的工厂 | SeekFactory 卖家中心"
     }
+  },
+  "regional": {
+    "regionalSettings": "地区设置",
+    "languageCurrencyPreferences": "语言与货币偏好",
+    "language": "语言",
+    "searchLanguage": "搜索语言...",
+    "noLanguageFound": "未找到该语言",
+    "autoSavesPreferences": "自动保存偏好设置"
   }
 }

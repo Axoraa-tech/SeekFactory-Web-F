@@ -32,9 +32,8 @@
   --brand-blue-soft: #e8f1fd;
   --brand-orange: #f26b21;
   --brand-orange-soft: #fff1e8;
-  /* Chinese vermilion: the theme colour. Used as an accent (prices, trust seals, progress,
-     active navigation, the canvas glow), not as a button fill, so it reads as atmosphere
-     rather than alarm. Blue stays for links, category tiles and informational states. */
+  /* Red is kept for the few places that used it before the redesign (e.g. Buy Now). Brand blue
+     is the main action colour. */
   --brand-red: #ca4136;
   --brand-red-dark: #a9352b;
   --brand-red-soft: #fbeceb;
@@ -43,8 +42,7 @@
   --ink-faint: #80868b;
   --line: #e9e9ed;
   --canvas: #f3f4f6;
-  /* Surfaces carry a trace of the vermilion so they sit in the warm canvas instead of on it */
-  --surface: #fefcfc;
+  --surface: #ffffff;
   --font-sans: "Plus Jakarta Sans", "Segoe UI", sans-serif;
 
   /* Admin chart tokens. These alias the brand tokens above so the dashboard marks
@@ -586,17 +584,17 @@ html[data-sf-intro="skip"] #sf-intro {
 
 
 /* ─── Site canvas ────────────────────────────────────────────────────────────
-   Panels float over a still, lit surface: a warm off-white with a vermilion glow top-right,
-   a faint amber glow bottom-left and a cool breath of blue top-left. A fine dot grid sits on
-   a fixed, pointer-less layer (never on a scrolling box) and fades out down the page. */
+   Panels float over a still, lit surface: a light neutral grey with a faint blue glow in two
+   corners. A fine dot grid sits on a fixed, pointer-less layer (never on a scrolling box) and
+   fades out down the page. */
 .site-canvas {
   position: relative;
   isolation: isolate;
   background:
-    radial-gradient(1100px 640px at 104% -14%, rgba(202, 65, 54, 0.1), transparent 62%),
-    radial-gradient(900px 620px at -10% 112%, rgba(240, 150, 60, 0.09), transparent 62%),
+    radial-gradient(1100px 640px at 104% -14%, rgba(26, 115, 232, 0.06), transparent 62%),
+    radial-gradient(900px 620px at -10% 112%, rgba(26, 115, 232, 0.04), transparent 62%),
     radial-gradient(820px 520px at -6% -12%, rgba(26, 115, 232, 0.05), transparent 60%),
-    linear-gradient(180deg, #f8f7f6 0%, #f2f0ef 100%);
+    linear-gradient(180deg, #f6f7f9 0%, #f1f2f5 100%);
   background-attachment: fixed;
 }
 .site-canvas::before {
@@ -605,7 +603,7 @@ html[data-sf-intro="skip"] #sf-intro {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: radial-gradient(rgba(60, 30, 26, 0.09) 1px, transparent 1.3px);
+  background-image: radial-gradient(rgba(15, 23, 42, 0.07) 1px, transparent 1.3px);
   background-size: 20px 20px;
   -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 90%);
   mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 90%);
@@ -618,19 +616,19 @@ html[data-sf-intro="skip"] #sf-intro {
 @layer components {
   .glass-tile {
     border: 1px solid rgba(255, 255, 255, 0.8);
-    background: linear-gradient(150deg, rgba(254, 252, 252, 0.94) 0%, rgba(254, 252, 252, 0.58) 100%);
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.6) 100%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
     backdrop-filter: blur(14px) saturate(160%);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.9),
       0 0 0 1px rgba(28, 22, 22, 0.045),
-      0 12px 26px -20px rgba(60, 30, 26, 0.45);
+      0 12px 26px -20px rgba(15, 23, 42, 0.35);
   }
   /* The stage a seek's glass tiles sit on: white up top, warming toward the bottom corners */
   .seek-stage {
     background:
-      radial-gradient(120% 55% at 100% 100%, rgba(202, 65, 54, 0.12), transparent 64%),
-      radial-gradient(95% 50% at 0% 100%, rgba(240, 150, 60, 0.12), transparent 64%),
+      radial-gradient(120% 55% at 100% 100%, rgba(26, 115, 232, 0.08), transparent 64%),
+      radial-gradient(95% 50% at 0% 100%, rgba(15, 23, 42, 0.05), transparent 64%),
       var(--surface);
   }
 }
@@ -680,7 +678,7 @@ html[data-sf-intro="skip"] #sf-intro {
     cursor: pointer;
   }
   .btn:focus-visible {
-    outline: 2px solid var(--brand-red);
+    outline: 2px solid var(--brand-blue);
     outline-offset: 2px;
   }
   .btn:not(:disabled):active {
@@ -693,22 +691,16 @@ html[data-sf-intro="skip"] #sf-intro {
     box-shadow: none;
   }
 
-  /* Flat vermilion: the one main action in a group. Matte on purpose (no gloss, a soft
-     tinted shadow) so it reads as the brand colour rather than an alarm. White text on
-     #CA4136 is 4.9:1 (WCAG AA). */
+  /* Brand blue: the one main action in a group. */
   .btn-primary {
-    background: var(--brand-red);
+    background: var(--brand-blue);
     color: #fff;
-    box-shadow:
-      0 1px 2px rgba(120, 30, 24, 0.18),
-      0 8px 16px -12px rgba(202, 65, 54, 0.7);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
   }
   .btn-primary:not(:disabled):hover {
-    background: var(--brand-red-dark);
+    background: var(--brand-blue-dark);
   }
 
-  /* Buy Now only: warm ink with a lit top edge, so the purchase action stands apart from
-     the red actions around it. */
   .btn-buy {
     background: linear-gradient(180deg, #34302f 0%, #1c1a1a 100%);
     color: #fff;
@@ -819,5 +811,47 @@ html[data-sf-intro="skip"] #sf-intro {
     box-shadow:
       0 1px 1px rgba(28, 22, 22, 0.03),
       0 14px 34px -22px rgba(28, 22, 22, 0.32);
+  }
+}
+
+/* ─── Verified band (seek card header, seek-trust-strip.tsx) ──────────────────
+   A calm, slightly muted brand blue so it frames the card without competing with the video
+   (white 11-12px text stays above 4.5:1). A faint sheen crosses it once every 5 seconds and
+   rests in between; it never reacts to the pointer. Off for reduced-motion users. */
+@layer components {
+  .trust-bar {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: linear-gradient(100deg, #2c6bc8 0%, #2a64bb 60%, #285aa9 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+  .trust-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 38%, rgba(255, 255, 255, 0.1) 50%, transparent 62%);
+    transform: translateX(-120%);
+    animation: trust-sheen 5s cubic-bezier(0.4, 0, 0.2, 1) 1.5s infinite;
+  }
+  .trust-seal {
+    display: grid;
+    place-items: center;
+    border-radius: 9999px;
+    color: #2a64bb;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(10, 40, 90, 0.25);
+  }
+}
+/* One sweep (~1.2 s) at the start of each 5 s cycle, then still */
+@keyframes trust-sheen {
+  0% { transform: translateX(-120%); }
+  24%, 100% { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trust-bar::after {
+    animation: none;
   }
 }

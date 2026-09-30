@@ -86,6 +86,7 @@ type MessageValues = Record<string, string | number | Date>;
 const RegionalSettingsContext = createContext<RegionalSettingsContextType | null>(null);
 
 const keepAsWritten = (text: string) => text;
+const subscribeNever = () => () => {};
 
 export function RegionalSettingsProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -95,6 +96,9 @@ export function RegionalSettingsProvider({ children }: { children: ReactNode }) 
 
   // Re-render prices once the backend exchange rates arrive
   useSyncExternalStore(subscribeExchangeRates, getExchangeRatesSnapshot, getExchangeRatesSnapshot);
+  // The server has no exchange rates, so the first client render must also show INR or hydration
+  // fails; converted prices appear right after hydration.
+  const hydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
   useEffect(() => {
     getApi()
       .platform.getExchangeRates()
@@ -144,7 +148,7 @@ export function RegionalSettingsProvider({ children }: { children: ReactNode }) 
 
   const formatPrice = (amountInr: number): string => {
     // Rates come from the backend; until they load (or for an unknown currency) show INR
-    const rate = rateFromInr(selectedCurrency.code);
+    const rate = hydrated ? rateFromInr(selectedCurrency.code) : undefined;
     if (selectedCurrency.code === "INR" || rate === undefined) {
       return `₹${amountInr.toLocaleString("en-IN")}`;
     }
