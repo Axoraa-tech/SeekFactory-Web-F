@@ -1,48 +1,40 @@
-import { BadgeCheck, Factory, ShieldCheck } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { useTranslations } from "next-intl";
+import { cn } from "@/shared/lib/cn";
 
 /**
- * The band above a seek that says who is selling. Verified OEMs get a solid brand-blue band
- * (white seal, white text, a faint sheen every 5 s); the founding year and a "Verified factory" chip sit
- * in it. Unverified factories get a neutral grey line and no claims.
- * Styles: .trust-bar / .trust-seal in globals.css.
+ * Small pill next to the factory name on a seek: "✓ Verified OEM · Since 2008".
+ * Deliberately quiet (neutral surface, only the check in brand blue) so the video stays the focus.
+ * It replaces the name's separate verified check, so "verified" is said once.
+ * Unverified factories get the same pill without the check or the claim.
  */
-export function SeekTrustStrip({ manufacturer }: { manufacturer: Pick<Manufacturer, "verified" | "yearsEstablished"> }) {
+export function SeekTrustBadge({
+  manufacturer,
+  className,
+}: {
+  manufacturer: Pick<Manufacturer, "verified" | "yearsEstablished">;
+  className?: string;
+}) {
   const t = useTranslations();
   const since = manufacturer.yearsEstablished > 0 ? manufacturer.yearsEstablished : null;
 
-  if (!manufacturer.verified) {
-    return (
-      <div className="flex items-center gap-2 border-b border-slate-100 px-3.5 py-2 text-[11px] text-ink-muted sm:px-4 sm:text-xs">
-        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-500">
-          <Factory className="h-3 w-3" />
-        </span>
-        <span className="truncate font-medium">{t("seek.trust.oemManufacturer")}</span>
-        {since && <span className="shrink-0 text-ink-faint">· {t("seek.trust.since", { year: since })}</span>}
-      </div>
-    );
-  }
-
   return (
-    <div className="trust-bar flex items-center justify-between gap-3 px-3.5 py-1.5 text-[11px] text-white sm:px-4 sm:text-xs">
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="trust-seal h-[18px] w-[18px] shrink-0">
-          <BadgeCheck className="h-3 w-3" strokeWidth={2.5} />
-        </span>
-        <span className="truncate font-semibold tracking-[-0.005em]">{t("seek.trust.verifiedOemManufacturer")}</span>
-        {since && (
-          <>
-            <span className="h-3 w-px shrink-0 bg-white/30" aria-hidden="true" />
-            <span className="shrink-0 font-medium tabular-nums text-white/75">{t("seek.trust.since", { year: since })}</span>
-          </>
-        )}
-      </div>
-
-      <span className="hidden shrink-0 items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 font-medium text-white/90 ring-1 ring-inset ring-white/20 sm:inline-flex">
-        <ShieldCheck className="h-3 w-3" strokeWidth={2.25} />
-        {t("seek.trust.verifiedFactory")}
-      </span>
-    </div>
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-slate-50 py-[2px] pl-1 pr-2 text-[10.5px] font-medium leading-4 text-slate-600 ring-1 ring-inset ring-slate-200/80",
+        !manufacturer.verified && "pl-2",
+        className,
+      )}
+    >
+      {manufacturer.verified && <BadgeCheck className="h-3.5 w-3.5 fill-brand-blue text-white" aria-hidden="true" />}
+      <span>{manufacturer.verified ? t("seek.trust.verifiedOem") : t("seek.trust.oem")}</span>
+      {since && (
+        <>
+          <span className="text-slate-300" aria-hidden="true">·</span>
+          <span className="tabular-nums text-slate-500">{t("seek.trust.since", { year: since })}</span>
+        </>
+      )}
+    </span>
   );
 }

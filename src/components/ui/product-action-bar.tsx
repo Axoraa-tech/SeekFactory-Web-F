@@ -7,10 +7,10 @@ import { ShoppingCart, Zap, MessageSquare, FileText } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
-import { OrderRequestModal } from "@/features/orders/order-request-modal";
+import { AddToCartModal } from "@/features/orders/add-to-cart-modal";
 
 type ProductActionBarProps = {
-  /** Enables "Add to cart" in the order dialog. */
+  /** Needed for "Add to cart". */
   productId?: string;
   priceInr?: number;
   unit?: string;
@@ -18,7 +18,7 @@ type ProductActionBarProps = {
   productSlug?: string;
   productName?: string;
   manufacturerSlug?: string;
-  /** Open the order dialog on mount (after signing in from it). */
+  /** Open the add-to-cart dialog on mount (after signing in from it). */
   autoOpenOrder?: boolean;
   size?: "sm" | "md" | "lg";
   layout?: "horizontal" | "vertical" | "inline";
@@ -42,12 +42,12 @@ export function ProductActionBar({
 }: ProductActionBarProps) {
   const { t, formatPrice, translateUnit } = useRegionalSettings();
   const router = useRouter();
-  const [isOrderOpen, setIsOrderOpen] = useState(autoOpenOrder && Boolean(productSlug));
+  const [isOrderOpen, setIsOrderOpen] = useState(autoOpenOrder && Boolean(productSlug && productId));
 
   const hasPrice = priceInr !== undefined && priceInr > 0;
   const minQty = minimumOrderQuantity(moq);
 
-  // "Order" sends an order request to the factory (no payment); the price may be negotiated
+  // "Add to cart" collects products; order requests are sent from the cart (no payment)
   const handleOrder = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -121,8 +121,8 @@ export function ProductActionBar({
           <span>{t("common.chat", "Chat")}</span>
         </Link>
 
-        {productSlug && (
-          /* 2. Order Request Button */
+        {productSlug && productId && (
+          /* 2. Add to cart */
           <button
             type="button"
             onClick={handleOrder}
@@ -131,10 +131,9 @@ export function ProductActionBar({
               "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
-            title={t("product.actions.sendAnOrderRequestTo")}
           >
             <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-            <span>{t("common.order", "Order")}</span>
+            <span>{t("common.addToCart")}</span>
           </button>
         )}
 
@@ -168,8 +167,8 @@ export function ProductActionBar({
         )}
       </div>
 
-      {isOrderOpen && productSlug && (
-        <OrderRequestModal
+      {isOrderOpen && productSlug && productId && (
+        <AddToCartModal
           productSlug={productSlug}
           productId={productId}
           productName={productName}

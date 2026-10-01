@@ -58,6 +58,9 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
         // Abort the upstream call when the browser goes away (e.g. a closed chat's SSE stream),
         // otherwise long-lived backend streams would leak.
         signal: req.signal,
+        // Pass redirects to the browser (e.g. a chat attachment's short-lived signed link to the
+        // bucket) instead of downloading the file through this server
+        redirect: "manual",
       };
       if (bufferedBody) {
         init.body = bufferedBody;

@@ -246,9 +246,8 @@
     "removeFromSaved": "Remove from saved",
     "saveSeek": "Save seek",
     "trust": {
-      "verifiedOemManufacturer": "Verified OEM manufacturer",
-      "oemManufacturer": "OEM manufacturer",
-      "verifiedFactory": "Verified factory",
+      "verifiedOem": "Verified OEM",
+      "oem": "OEM",
       "since": "Since {year}"
     },
     "rail": {
@@ -1456,7 +1455,15 @@
       "addProductsFromAFactory": "Add products from a factory page or a seek to order them here.",
       "sentToThisFactory": "Sent to this factory",
       "sendsOrderRequestsOnePer": "Sends {length} order requests, one per product.",
-      "sendOrderRequests": "Send order requests"
+      "sendOrderRequests": "Send order requests",
+      "selectAll": "Select all ({count})",
+      "selectItem": "Send {product}",
+      "noteForFactory": "Note for this factory (optional)",
+      "addNote": "Add a note",
+      "sendCount": "{count, plural, one {Send # order request} other {Send # order requests}}",
+      "selectToSend": "Select at least one product to send.",
+      "selectionSummary": "{selected} of {total} selected. Unselected products stay in your cart.",
+      "selectedTotal": "Estimated total (selected)"
     },
     "exploreProducts": "Explore products",
     "decreaseQuantity": "Decrease quantity",
@@ -1535,6 +1542,18 @@
       "deliveryAddress": "Delivery address",
       "notesForTheFactoryOptional": "Notes for the factory (optional)",
       "packagingDeliveryWindowInspectionRequirements": "Packaging, delivery window, inspection requirements…"
+    },
+    "addToCart": {
+      "title": "Add to cart",
+      "subtitle": "Collect products, then send your order requests from the cart",
+      "added": "Added to your cart",
+      "addedDetail": "{quantity} {unit} of {product}. Send order requests from your cart when you're ready. No payment now.",
+      "continueBrowsing": "Continue browsing",
+      "viewCart": "View cart",
+      "quantity": "Quantity ({unit})",
+      "listed": "Listed at {price} / {unit}",
+      "moq": "MOQ {moq}",
+      "adding": "Adding..."
     }
   },
   "plans": {

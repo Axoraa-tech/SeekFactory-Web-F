@@ -47,7 +47,7 @@ import type { Product } from "@/entities/product";
 import type { AppNotification } from "@/entities/notification";
 import type { Conversation } from "@/entities/message";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
-import type { Cart, NewOrderRequest, OrderContact, OrderParty, OrderRequest, OrderStatus } from "@/entities/order";
+import type { Cart, CheckoutLine, NewOrderRequest, OrderContact, OrderParty, OrderRequest, OrderStatus } from "@/entities/order";
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
 import type { SellerStats } from "@/features/factory/types";
 import {
@@ -1465,10 +1465,10 @@ export function createHttpApi(baseUrl: string): ApiClient {
       );
     },
 
-    async checkout(contact: OrderContact): Promise<OrderRequest[]> {
+    async checkout(contact: OrderContact, lines?: CheckoutLine[]): Promise<OrderRequest[]> {
       const list = await fetchJson<BackendOrder[]>("/api/v1/cart/checkout", {
         method: "POST",
-        body: JSON.stringify(contact),
+        body: JSON.stringify(lines ? { ...contact, items: lines } : contact),
       });
       return list.map(normalizeOrder);
     },
@@ -1502,21 +1502,33 @@ function mapBackendRole(role: string | undefined): "Buyer" | "Supplier" {
 
 const BACKEND_MEDIA_PREFIX = "/api/v1/media/";
 const MEDIA_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/+$/, "");
+/**
+ * CDN in front of the media bucket (e.g. https://media.seekfactory.com) when the backend runs with
+ * APP_MEDIA_STORAGE=s3. Empty: media loads through the API, which redirects to the bucket.
+ */
+const MEDIA_CDN = (process.env.NEXT_PUBLIC_MEDIA_BASE_URL ?? "").trim().replace(/\/+$/, "");
+const CDN_MEDIA_PREFIX = MEDIA_CDN ? `${MEDIA_CDN}/media/` : "";
 
 /**
  * Backend uploads are stored as server-relative paths (/api/v1/media/<key>) so the DB
- * survives a backend host change. Prefix them with the API origin for <img>/<video>.
- * Other relative paths (e.g. /videos/*.mp4) are frontend assets and pass through.
+ * survives a backend host or storage change. They load from the CDN when one is configured,
+ * otherwise from the API origin. Other relative paths (e.g. /videos/*.mp4) are frontend assets
+ * and pass through.
  */
 export function resolveMediaUrl(url: string | undefined): string | undefined {
-  if (url && url.startsWith(BACKEND_MEDIA_PREFIX) && MEDIA_ORIGIN) return MEDIA_ORIGIN + url;
+  if (!url || !url.startsWith(BACKEND_MEDIA_PREFIX)) return url;
+  if (CDN_MEDIA_PREFIX) return CDN_MEDIA_PREFIX + url.slice(BACKEND_MEDIA_PREFIX.length);
+  if (MEDIA_ORIGIN) return MEDIA_ORIGIN + url;
   return url;
 }
 
 /** Inverse of resolveMediaUrl: store backend media as relative paths. */
-function toStoredMediaUrl(url: string): string;
-function toStoredMediaUrl(url: string | undefined): string | undefined;
-function toStoredMediaUrl(url: string | undefined) {
+export function toStoredMediaUrl(url: string): string;
+export function toStoredMediaUrl(url: string | undefined): string | undefined;
+export function toStoredMediaUrl(url: string | undefined) {
+  if (url && CDN_MEDIA_PREFIX && url.startsWith(CDN_MEDIA_PREFIX)) {
+    return BACKEND_MEDIA_PREFIX + url.slice(CDN_MEDIA_PREFIX.length);
+  }
   if (url && MEDIA_ORIGIN && url.startsWith(MEDIA_ORIGIN + BACKEND_MEDIA_PREFIX)) {
     return url.slice(MEDIA_ORIGIN.length);
   }

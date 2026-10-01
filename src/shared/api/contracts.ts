@@ -6,7 +6,7 @@ import type { Product } from "@/entities/product";
 import type { FeedTab, Reel } from "@/entities/reel";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
-import type { Cart, NewOrderRequest, OrderContact, OrderRequest, OrderStatus } from "@/entities/order";
+import type { Cart, CheckoutLine, NewOrderRequest, OrderContact, OrderRequest, OrderStatus } from "@/entities/order";
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
 import type { BuyerPlan, ExchangeRates } from "@/entities/plan";
 import type { JoinInput, LoginInput } from "@/features/auth/session-cookie";
@@ -312,8 +312,11 @@ export interface OrderRepository {
   addToCart(productId: string, quantity: number): Promise<Cart>;
   updateCartQuantity(cartItemId: string, quantity: number): Promise<Cart>;
   removeFromCart(cartItemId: string): Promise<Cart>;
-  /** Sends every cart line to its factory as an order request and empties the cart. */
-  checkout(contact: OrderContact): Promise<OrderRequest[]>;
+  /**
+   * Sends cart lines to their factories as order requests and removes them from the cart:
+   * the given lines (each with its own note), or every line with contact.note when omitted.
+   */
+  checkout(contact: OrderContact, lines?: CheckoutLine[]): Promise<OrderRequest[]>;
 }
 
 /** Password and email-verification flows (buyers and suppliers). */

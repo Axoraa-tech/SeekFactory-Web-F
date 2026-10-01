@@ -64,6 +64,12 @@ export type OrderContact = {
   note?: string;
 };
 
+/** A cart line chosen at checkout, with the note sent to its factory. */
+export type CheckoutLine = {
+  cartItemId: string;
+  note?: string;
+};
+
 export type NewOrderRequest = {
   productSlug: string;
   quantity: number;
