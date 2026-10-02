@@ -11,17 +11,25 @@ import { AdminApiError, type AdminPage } from "@/shared/api/admin-api";
  * Loads a paged admin list. Keeps the previous rows visible while refetching (no flicker),
  * ignores out-of-order responses, and redirects to login when the session has expired.
  */
-export function useAdminList<T, P extends object>(fetcher: (params: P) => Promise<AdminPage<T>>, params: P) {
+export function useAdminList<T, P extends object>(
+  fetcher: (params: P) => Promise<AdminPage<T>>,
+  params: P,
+  /** Re-fetch quietly this often while the tab is visible, and when it regains focus. */
+  options: { refreshMs?: number } = {},
+) {
   const router = useRouter();
   const [data, setData] = useState<AdminPage<T> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const reqId = useRef(0);
   const key = JSON.stringify(params);
+  const { refreshMs } = options;
 
-  const reload = useCallback(async () => {
+  // `background` refreshes keep the rows on screen: no loading state, and a failed poll does not
+  // replace the list with an error (the next poll or a manual retry recovers)
+  const fetchPage = useCallback(async (background: boolean) => {
     const id = ++reqId.current;
-    setLoading(true);
+    if (!background) setLoading(true);
     try {
       const next = await fetcher(JSON.parse(key));
       if (id !== reqId.current) return;
@@ -33,16 +41,29 @@ export function useAdminList<T, P extends object>(fetcher: (params: P) => Promis
         router.replace("/admin/login");
         return;
       }
-      setError((err as Error).message);
+      if (!background) setError((err as Error).message);
     } finally {
-      if (id === reqId.current) setLoading(false);
+      if (id === reqId.current && !background) setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, router]);
 
+  const reload = useCallback(() => fetchPage(false), [fetchPage]);
+
   useEffect(() => {
     reload();
   }, [reload]);
+
+  useEffect(() => {
+    if (!refreshMs) return;
+    const refresh = () => { if (document.visibilityState === "visible") fetchPage(true); };
+    const timer = setInterval(refresh, refreshMs);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [refreshMs, fetchPage]);
 
   /** Optimistically patch one row locally, e.g. after a toggle. */
   const patch = useCallback((match: (row: T) => boolean, update: Partial<T>) => {

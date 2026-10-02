@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Play } from "lucide-react";
 import { EmptyShowcase, FactoryLine, Hashtags, Poster, SeekActions, Stats } from "@/components/reels/showcase-parts";
 import { formatDuration } from "@/shared/lib/format";
+import { useTranslations } from "next-intl";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 
@@ -18,6 +19,7 @@ type Props = { items: FeedItem[]; settings: FeedShowcase };
  * Settings: showProfile → factory line per row. showPhotos and autoplay do not apply.
  */
 export function CompactListShowcase({ items, settings }: Props) {
+  const t = useTranslations();
   if (items.length === 0) return <EmptyShowcase />;
 
   return (
@@ -58,7 +60,7 @@ export function CompactListShowcase({ items, settings }: Props) {
                 <p className="truncate text-xs text-ink-muted">
                   <span className="font-medium text-ink"><Price inr={product.priceInr} /></span>
                   {product.unit ? ` / ${product.unit}` : ""}
-                  {product.moq ? ` · MOQ ${product.moq}` : ""}
+                  {product.moq ? ` · ${t("common.minOrder")} ${product.moq}` : ""}
                 </p>
               )}
 

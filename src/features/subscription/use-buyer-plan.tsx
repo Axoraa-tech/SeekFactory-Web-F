@@ -76,7 +76,8 @@ export function planPriceLabel(plans: BuyerPlan[], code: BuyerPlanTier, region: 
   return `${trim(plan.priceCny)} Yuan (¥${trim(plan.priceCny)})`;
 }
 
-type UpgradeResult = { ok: true } | { ok: false; message: string };
+/** `redirected` means the buyer was sent on to sign in or pay, so callers should not show an error. */
+type UpgradeResult = { ok: true } | { ok: false; message: string; redirected?: boolean };
 
 interface BuyerPlanContextValue {
   tier: BuyerPlanTier;
@@ -84,6 +85,8 @@ interface BuyerPlanContextValue {
   pricing: SubscriptionPricing;
   /** Plans as the backend defines them (name, prices, features). */
   plans: BuyerPlan[];
+  /** False for guests; upgrading needs an account. */
+  isSignedIn: boolean;
   isSupplierLocked: boolean;
   isUpgradeModalOpen: boolean;
   setRegion: (region: SubscriptionRegion) => void;
@@ -156,7 +159,13 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
     if (!signedIn) {
       setIsUpgradeModalOpen(false);
       router.push(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-      return { ok: false, message: t("plans.signInToChangeYour") };
+      return { ok: false, message: t("plans.signInToChangeYour"), redirected: true };
+    }
+    // Paid plans are activated by an admin once a payment proof is approved, so every upgrade
+    // button leads to the payment flow instead of switching the plan directly
+    if (newTier !== "free") {
+      setIsUpgradeModalOpen(true);
+      return { ok: false, message: "", redirected: true };
     }
     try {
       const profile = await getApi().session.updatePlan(newTier);
@@ -187,6 +196,7 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
         region,
         pricing,
         plans,
+        isSignedIn: signedIn,
         isSupplierLocked,
         isUpgradeModalOpen,
         setRegion,
@@ -210,6 +220,7 @@ export function useBuyerPlan(): BuyerPlanContextValue {
       region: "india",
       pricing: buildPricing([], "india"),
       plans: [],
+      isSignedIn: false,
       isSupplierLocked: true,
       isUpgradeModalOpen: false,
       setRegion: () => {},

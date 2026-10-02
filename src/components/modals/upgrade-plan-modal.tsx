@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   X,
   Sparkles,
@@ -16,6 +16,9 @@ import {
 import { cn } from "@/shared/lib/cn";
 import { useBuyerPlan, type BuyerPlanTier, planPriceLabel } from "@/features/subscription";
 import { useTranslations } from "next-intl";
+import { getApi } from "@/shared/api";
+import type { PlanPayment } from "@/entities/plan";
+import { PlanPaymentStep } from "./plan-payment-step";
 
 /**
  * Crisp SVG flag components to avoid OS emoji rendering issues (e.g. "IN" / "CN" text on Windows)
@@ -55,15 +58,41 @@ function ChinaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
 
 export function UpgradePlanModal() {
   const t = useTranslations();
-  const { tier, region, pricing, isUpgradeModalOpen, closeUpgradeModal, setRegion, upgradeTier, plans } = useBuyerPlan();
+  const tp = useTranslations("payment");
+  const { tier, region, pricing, isUpgradeModalOpen, closeUpgradeModal, setRegion, upgradeTier, plans, isSignedIn } = useBuyerPlan();
 
   const [upgradeFeedback, setUpgradeFeedback] = useState<string | null>(null);
+  const [step, setStep] = useState<"plans" | "pay">("plans");
+  const [payments, setPayments] = useState<PlanPayment[]>([]);
+
+  // Load the buyer's payment requests each time the modal opens, so a pending or rejected one shows
+  useEffect(() => {
+    if (!isUpgradeModalOpen) return;
+    setStep("plans");
+    if (!isSignedIn) return setPayments([]);
+    let cancelled = false;
+    getApi()
+      .session.listMyPlanPayments()
+      .then((list) => { if (!cancelled) setPayments(list); })
+      .catch(() => { if (!cancelled) setPayments([]); });
+    return () => { cancelled = true; };
+  }, [isUpgradeModalOpen, isSignedIn]);
 
   if (!isUpgradeModalOpen) return null;
 
+  const latestPayment = payments[0];
+  const pendingPayment = latestPayment?.status === "PENDING" ? latestPayment : undefined;
+  const rejectedPayment = latestPayment?.status === "REJECTED" ? latestPayment : undefined;
+  const proPlan = plans.find((p) => p.code === "pro");
+
   const handleUpgrade = async (targetTier: BuyerPlanTier) => {
+    // Paid plans are bought with a payment proof, not switched on directly
+    if (targetTier !== "free" && isSignedIn) {
+      setStep("pay");
+      return;
+    }
     const result = await upgradeTier(targetTier);
-    if (!result.ok) {
+    if (!result.ok && !result.redirected) {
       setUpgradeFeedback(result.message);
       setTimeout(() => setUpgradeFeedback(null), 3000);
     }
@@ -132,6 +161,35 @@ export function UpgradePlanModal() {
 
         {/* Plan Content Section */}
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto sm:p-7">
+          {step === "pay" ? (
+            <PlanPaymentStep
+              planCode="pro"
+              planName={proPlan?.name ?? "Pro"}
+              amountLabel={planPriceLabel(plans, "pro", region)}
+              region={region}
+              onBack={() => setStep("plans")}
+              onSubmitted={(payment) => {
+                setPayments([payment]);
+                setStep("plans");
+                setUpgradeFeedback(tp("submittedThanks"));
+                setTimeout(() => setUpgradeFeedback(null), 4000);
+              }}
+            />
+          ) : (
+          <>
+          {pendingPayment && (
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
+              <p className="font-bold">{tp("underReviewTitle")}</p>
+              <p className="mt-0.5">{tp("underReviewBody", { plan: pendingPayment.planName })}</p>
+            </div>
+          )}
+          {rejectedPayment && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs">
+              <p className="font-bold">{tp("rejectedTitle")}</p>
+              <p className="mt-0.5">{tp("rejectedBody", { reason: rejectedPayment.rejectionReason ?? "—" })}</p>
+            </div>
+          )}
+
           {/* Active Pricing Region Selector Pill Bar */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200/90 shadow-2xs">
             <div className="flex items-center gap-2">
@@ -359,7 +417,7 @@ export function UpgradePlanModal() {
               <div className="pt-4 mt-auto">
                 <button
                   type="button"
-                  disabled={upgradeFeedback !== null}
+                  disabled={upgradeFeedback !== null || !!pendingPayment || tier === "pro" || tier === "enterprise"}
                   onClick={() => handleUpgrade("pro")}
                   className={cn(
                     "w-full inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-xs font-bold text-white shadow-md transition-all active:scale-[0.98] cursor-pointer disabled:opacity-75",
@@ -372,6 +430,8 @@ export function UpgradePlanModal() {
                   <span>
                     {tier === "pro" || tier === "enterprise"
                       ? t("upgrade.proPlanActiveUnlocked")
+                      : pendingPayment
+                      ? tp("underReviewTitle")
                       : region === "india"
                       ? t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "india") })
                       : t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "china") })}
@@ -381,6 +441,8 @@ export function UpgradePlanModal() {
               </div>
             </div>
           </div>
+          </>
+          )}
         </div>
 
         {/* Footer info */}

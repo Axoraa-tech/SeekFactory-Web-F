@@ -3,7 +3,9 @@
 import { Price } from "@/components/ui/price";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, Eye, Heart, ImageOff, MapPin, Pause, Play, Users, Volume2, VolumeX } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, ImageOff, MapPin, MessageCircle, Pause, Play, Repeat2, Users, Volume2, VolumeX } from "lucide-react";
+import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
+import { useReelEngagement } from "@/features/engagement/use-engagement";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
@@ -231,7 +233,6 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
                   )}
                   <p className="mt-2 flex items-center gap-4 text-xs text-white/80">
                     <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{formatCount(item.reel.views)}</span>
-                    <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" />{formatCount(item.reel.likes)}</span>
                   </p>
                 </div>
               </div>
@@ -254,6 +255,9 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
           <span className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white tabular-nums">
             {safeActive + 1} / {items.length}
           </span>
+          {/* Like, comment, share and save act on the seek in view */}
+          <SeekActionRail item={current} />
+
         </div>
 
         {/* Below 1024px: photos as a horizontal strip under the video */}
@@ -277,6 +281,85 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
         </aside>
       )}
     </div>
+  );
+}
+
+/* ─────────── actions ─────────── */
+
+/**
+ * Like / comment / share / save for the seek in view, backed by the same engagement code as the
+ * seek popup: optimistic updates that roll back on failure, and guests are sent to sign in.
+ */
+function SeekActionRail({ item }: { item: FeedItem }) {
+  const t = useTranslations();
+  const reel = item.reel;
+  const { liked, likes, saved, shares, shared, toggleLike, toggleSave, share } = useReelEngagement(reel);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  // Comments added in this session, per seek, on top of the count the server sent
+  const [added, setAdded] = useState<Record<string, number>>({});
+  const comments = reel.comments + (added[reel.id] ?? 0);
+
+  return (
+    <>
+      <div className="absolute bottom-24 right-3 z-10 flex flex-col items-center gap-3 sm:bottom-28">
+        <RailBtn
+          label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
+          count={likes}
+          active={liked}
+          activeClass="text-rose-400"
+          onClick={toggleLike}
+        >
+          <Heart className={cn("h-5 w-5", liked && "fill-rose-500 text-rose-500")} />
+        </RailBtn>
+        <RailBtn label={t("seek.rail.openComments")} count={comments} onClick={() => setCommentsOpen(true)}>
+          <MessageCircle className="h-5 w-5" />
+        </RailBtn>
+        <RailBtn label={t("seek.shareSeek")} count={shares} active={shared} activeClass="text-emerald-400" onClick={share}>
+          <Repeat2 className="h-5 w-5" />
+        </RailBtn>
+        <RailBtn
+          label={saved ? t("seek.removeFromSaved") : t("seek.saveSeek")}
+          text={saved ? t("common.saved") : t("common.save")}
+          active={saved}
+          activeClass="text-sky-300"
+          onClick={toggleSave}
+        >
+          <Bookmark className={cn("h-5 w-5", saved && "fill-sky-300")} />
+        </RailBtn>
+      </div>
+
+      <CommentsModalLazy
+        reelId={reel.id}
+        reelTitle={reel.title}
+        isOpen={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+        onCommentAdded={() => setAdded((a) => ({ ...a, [reel.id]: (a[reel.id] ?? 0) + 1 }))}
+      />
+    </>
+  );
+}
+
+function RailBtn({ label, count, text, active, activeClass, onClick, children }: {
+  label: string; count?: number; text?: string; active?: boolean; activeClass?: string; onClick: () => void; children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      aria-pressed={active}
+      className="group flex flex-col items-center gap-0.5 transition active:scale-90"
+    >
+      <span className={cn(
+        "flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition group-hover:bg-black/75",
+        active && activeClass,
+      )}>
+        {children}
+      </span>
+      <span className="text-[11px] font-semibold tabular-nums text-white drop-shadow">
+        {text ?? formatCount(count ?? 0)}
+      </span>
+    </button>
   );
 }
 

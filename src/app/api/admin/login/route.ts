@@ -1,29 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_URL?.replace("localhost", "127.0.0.1") || "http://127.0.0.1:8080/api/v1";
+import { BACKEND_API_URL } from "@/features/auth/backend-url";
+import { readBackendJson } from "../_backend";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const backendRes = await fetch(`${BACKEND_URL}/admin/auth/login`, {
+    const backendRes = await fetch(`${BACKEND_API_URL}/admin/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
-    const data = await backendRes.json();
+    const data = (await readBackendJson(backendRes)) as {
+      data?: { accessToken?: string; refreshToken?: string; expiresIn?: number };
+    } & Record<string, unknown>;
 
     // Backend wraps the payload: { success, message, data: { accessToken, expiresIn, ... } }
-    const accessToken: string | undefined = data?.data?.accessToken;
+    const payload = data?.data;
+    const accessToken = payload?.accessToken;
 
-    if (!backendRes.ok || !accessToken) {
+    if (!backendRes.ok || !payload || !accessToken) {
       return NextResponse.json(data, { status: backendRes.status });
     }
 
     // Keep tokens out of the browser: they live only in the HttpOnly cookie
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { accessToken: _a, refreshToken: _r, ...safeData } = data.data;
+    const { accessToken: _a, refreshToken: _r, ...safeData } = payload;
     const response = NextResponse.json({ ...data, data: safeData }, { status: backendRes.status });
 
     response.cookies.set({
@@ -33,7 +36,7 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: data.data.expiresIn ? Math.floor(data.data.expiresIn / 1000) : undefined,
+      maxAge: payload.expiresIn ? Math.floor(payload.expiresIn / 1000) : undefined,
     });
 
     return response;

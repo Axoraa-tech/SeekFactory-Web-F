@@ -5,6 +5,7 @@
  * short-lived; when it expires the refresh token is exchanged for a new pair.
  */
 import type { NextResponse } from "next/server";
+import { BACKEND_API_URL, BACKEND_ORIGIN } from "@/features/auth/backend-url";
 
 /**
  * The buyer site and the seller hub (/factory) keep separate sessions, so a manufacturer signed in
@@ -46,9 +47,8 @@ const REFRESH_MAX_AGE = 60 * 60 * 24 * 7;
 /** Refresh slightly early so a token does not expire mid-request. */
 const EXPIRY_SKEW_SECONDS = 60;
 
-export const BACKEND_URL = (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080")
-  .replace(/\/+$/, "")
-  .replace("localhost", "127.0.0.1");
+/** Backend origin without the API prefix; the proxy appends the full `/api/v1/...` path itself. */
+export const BACKEND_URL = BACKEND_ORIGIN;
 
 export type TokenPair = { accessToken: string; refreshToken?: string; expiresIn?: number };
 
@@ -114,7 +114,7 @@ export function isExpired(token: string | undefined): boolean {
 /** Exchanges a refresh token for a new pair; null when the session is over. */
 export async function refreshTokens(refreshToken: string): Promise<TokenPair | null> {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/v1/auth/refresh`, {
+    const res = await fetch(`${BACKEND_API_URL}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),

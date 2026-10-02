@@ -131,6 +131,12 @@ const session: SessionRepository = {
     if (!profile) throw new Error("Sign in to change your plan");
     return profile;
   },
+  async submitPlanPayment() {
+    throw new Error("Plan payments need the live backend");
+  },
+  async listMyPlanPayments() {
+    return [];
+  },
 };
 
 const feed: FeedRepository = {

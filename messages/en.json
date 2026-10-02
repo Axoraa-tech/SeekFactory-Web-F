@@ -1551,6 +1551,31 @@
       "packagingDeliveryWindowInspectionRequirements": "Packaging, delivery window, inspection requirements…"
     }
   },
+  "payment": {
+    "payTitle": "Pay for {plan}",
+    "step1": "Scan with Alipay and pay",
+    "step2": "Upload your payment proof",
+    "amountToPay": "Amount to pay",
+    "qrNote": "This QR code has no fixed amount. Please enter exactly {amount} when paying.",
+    "openScan": "Open \"Scan\" inside Alipay",
+    "proofLabel": "Payment screenshot or invoice",
+    "proofHint": "JPG, PNG, WebP or PDF, up to 5 MB",
+    "chooseFile": "Choose file",
+    "referenceLabel": "Transaction ID (optional)",
+    "referencePlaceholder": "Alipay order number",
+    "submit": "Submit payment",
+    "submitting": "Submitting…",
+    "back": "Back",
+    "pleaseAttach": "Please attach your payment screenshot or invoice",
+    "fileTooLarge": "The file is too large. The limit is 5 MB.",
+    "fileType": "Only JPG, PNG, WebP or PDF files are accepted",
+    "underReviewTitle": "Payment under review",
+    "underReviewBody": "We received your payment proof for {plan}. Your plan is activated as soon as an admin confirms it.",
+    "rejectedTitle": "Last payment was not approved",
+    "rejectedBody": "Reason: {reason}. You can submit a new proof.",
+    "couldNotSubmit": "Could not submit your payment",
+    "submittedThanks": "Payment submitted. We will confirm it shortly."
+  },
   "plans": {
     "signInToChangeYour": "Sign in to change your plan",
     "couldNotChangeYourPlan": "Could not change your plan",
