@@ -30,7 +30,8 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
   const rightItemsRaw = items
     .map((item, i) => ({ item, originalIndex: i }))
     .filter((_, i) => i % 2 !== 0);
-  const finalRightItems = rightItemsRaw.length > 0 ? rightItemsRaw : leftItems;
+  // With a single seek the right column stays empty rather than repeating the left one
+  const finalRightItems = rightItemsRaw;
 
   // IntersectionObserver for active reel focus tracking
   useEffect(() => {
