@@ -80,6 +80,11 @@ export interface AdminPlan {
   id: string; name: string; priceUsd: number; featuresJson?: string; manufacturerCount: number; createdAt?: string;
 }
 
+export interface AdminBuyerPlan {
+  /** Lower case: free, pro, enterprise */
+  code: string; name: string; priceInr: number; priceCny: number; features: string[];
+}
+
 export interface AdminShowcase {
   mode: ShowcaseMode;
   autoplay: boolean;
@@ -138,6 +143,10 @@ export const adminData = {
     adminRequest<AdminPage<AdminRfq>>("rfqs", { query }),
   setRfqStatus: (id: string, status: string) =>
     adminRequest<void>(`rfqs/${id}/status`, { method: "PUT", body: JSON.stringify({ status }) }),
+
+  buyerPlans: () => adminRequest<AdminBuyerPlan[]>("pricing/buyer-plans"),
+  setBuyerPlanPrice: (code: string, prices: { priceInr: number; priceCny: number }) =>
+    adminRequest<void>(`pricing/buyer-plans/${code}`, { method: "PUT", body: JSON.stringify(prices) }),
 
   plans: () => adminRequest<AdminPlan[]>("pricing/plans"),
   createPlan: (plan: { name: string; priceUsd: number; features: string[] }) =>
