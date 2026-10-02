@@ -54,6 +54,8 @@ export function useViewportLock(ref: RefObject<HTMLElement | null>, enabled: boo
     // Anything above changing height (subcategory panel, filter bar, email banner) moves the top
     const observer = new ResizeObserver(update);
     observer.observe(document.body);
+    // The header shrinks when its category bar collapses to text, which leaves the body's size alone
+    document.querySelectorAll("header").forEach((header) => observer.observe(header));
     window.addEventListener("resize", update);
     wide.addEventListener("change", update);
     desktop.addEventListener("change", update);

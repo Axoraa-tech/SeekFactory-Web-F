@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
@@ -21,6 +21,8 @@ type Props = {
   onForYouClick?: () => void;
   className?: string;
   sticky?: boolean;
+  /** Text-only while the page is scrolled down; icons come back on scroll up or hover. */
+  collapseOnScroll?: boolean;
 };
 
 type PopoverState =
@@ -35,6 +37,13 @@ type PopoverState =
       rect: DOMRect;
     };
 
+const tileClass =
+  "group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center rounded-xl px-1.5 select-none transition-[padding,gap] duration-200 ease-out focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden";
+const iconClass =
+  "flex w-7 shrink-0 items-center justify-center overflow-hidden rounded-[10px] transition-[height,opacity,transform,background-color] duration-200 ease-out motion-reduce:transition-none";
+const iconShown = "h-7 opacity-100 group-hover:-translate-y-px";
+const iconCompact = "h-0 opacity-0 scale-75";
+
 export function DynamicCategoryNav({
   categories,
   allCategories,
@@ -46,6 +55,7 @@ export function DynamicCategoryNav({
   onForYouClick,
   className,
   sticky = true,
+  collapseOnScroll = false,
 }: Props) {
   const searchParams = useSearchParams();
   const currentCategory =
@@ -61,6 +71,14 @@ export function DynamicCategoryNav({
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeItemRef = useRef<HTMLAnchorElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  /** Item the open popover hangs from, so it can follow the bar when the bar changes height. */
+  const popoverAnchorRef = useRef<HTMLElement | null>(null);
+
+  const pathname = usePathname();
+  const [scrolledDown, setScrolledDown] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const compact = collapseOnScroll && scrolledDown && !hovered && !activePopover;
 
   useEffect(() => {
     setMounted(true);
@@ -103,6 +121,7 @@ export function DynamicCategoryNav({
 
   const handleForYouHover = (el: HTMLElement) => {
     clearCloseTimer();
+    popoverAnchorRef.current = el;
     const rect = el.getBoundingClientRect();
     setActivePopover({
       type: "for-you",
@@ -118,6 +137,7 @@ export function DynamicCategoryNav({
       return;
     }
     clearCloseTimer();
+    popoverAnchorRef.current = el;
     const rect = el.getBoundingClientRect();
     setActivePopover({
       type: "category",
@@ -143,6 +163,52 @@ export function DynamicCategoryNav({
       window.removeEventListener("scroll", handleScroll);
     };
   }, [activePopover]);
+
+  // Collapse to text on scroll down, expand on scroll up. Listens in the capture phase so it also
+  // sees scrolling areas inside the page (the locked Seeks dashboard scrolls its columns, not the window).
+  useEffect(() => {
+    if (!collapseOnScroll) return;
+    const lastTop = new WeakMap<Element, number>();
+    let collapsed = false;
+    // Collapsing resizes the areas below, which can scroll them a little; ignore that echo
+    let quietUntil = 0;
+    const onScroll = (e: Event) => {
+      const el = e.target === document ? document.scrollingElement : e.target;
+      if (!(el instanceof Element)) return;
+      if (navRef.current?.contains(el) || el.closest("[data-category-popover]")) return;
+      const top = el.scrollTop;
+      const prev = lastTop.get(el);
+      lastTop.set(el, top);
+      if (prev === undefined || performance.now() < quietUntil) return;
+      const delta = top - prev;
+      if (Math.abs(delta) < 4) return; // sideways scrolling or jitter
+      const next = delta > 0 && top > 24;
+      if (next === collapsed) return;
+      collapsed = next;
+      quietUntil = performance.now() + 450;
+      setScrolledDown(next);
+    };
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    return () => document.removeEventListener("scroll", onScroll, { capture: true });
+  }, [collapseOnScroll]);
+
+  // A new page starts at the top, with icons
+  useEffect(() => {
+    setScrolledDown(false);
+  }, [pathname]);
+
+  // Keep an open popover attached to its item while the bar grows or shrinks
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const observer = new ResizeObserver(() => {
+      const anchor = popoverAnchorRef.current;
+      if (!anchor) return;
+      setActivePopover((current) => (current ? { ...current, rect: anchor.getBoundingClientRect() } : current));
+    });
+    observer.observe(nav);
+    return () => observer.disconnect();
+  }, []);
 
   // Check horizontal scroll arrows
   const updateArrowVisibility = useCallback(() => {
@@ -270,6 +336,9 @@ export function DynamicCategoryNav({
   return (
     <>
       <nav
+        ref={navRef}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         aria-label={t("sidebar.machineryCategories")}
         className={cn(
           "w-full rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] transition-all duration-300 overflow-hidden select-none",
@@ -291,7 +360,7 @@ export function DynamicCategoryNav({
                 onPointerLeave={stopHoverScroll}
                 onPointerCancel={stopHoverScroll}
                 aria-label={t("categoryNav.scrollCategoriesToTheLeft")}
-                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
+                className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
               >
                 <ChevronLeft className="h-4 w-4 pointer-events-none" />
               </button>
@@ -322,11 +391,13 @@ export function DynamicCategoryNav({
                 }}
                 title={`${t("feed.forYou", "For You")} - ${t("sidebar.allCategories", "All Categories")}`}
                 aria-current={!currentCategory ? "page" : undefined}
-                className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"}
+                className={cn(tileClass, compact ? "gap-0 py-1.5" : "gap-0.5 pt-0.5 pb-1.5")}
               >
                 <span
+                  aria-hidden={compact || undefined}
                   className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-[10px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
+                    iconClass,
+                    compact ? iconCompact : iconShown,
                     !currentCategory
                       ? "bg-brand-blue-soft"
                       : activePopover?.type === "for-you"
@@ -334,7 +405,7 @@ export function DynamicCategoryNav({
                         : "group-hover:bg-neutral-100"
                   )}
                 >
-                  <CategoryIcon icon="for-you" size={24} />
+                  <CategoryIcon icon="for-you" size={22} />
                 </span>
                 <span className="block max-w-full">
                   <span
@@ -394,11 +465,13 @@ export function DynamicCategoryNav({
                     }}
                     title={translatedName}
                     aria-current={isActive ? "page" : undefined}
-                    className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"}
+                    className={cn(tileClass, compact ? "gap-0 py-1.5" : "gap-0.5 pt-0.5 pb-1.5")}
                   >
                     <span
+                      aria-hidden={compact || undefined}
                       className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-[10px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
+                        iconClass,
+                    compact ? iconCompact : iconShown,
                         isActive
                           ? "bg-brand-blue-soft"
                           : isHovered
@@ -406,7 +479,7 @@ export function DynamicCategoryNav({
                             : "group-hover:bg-neutral-100"
                       )}
                     >
-                      <CategoryIcon icon={item.icon} size={24} />
+                      <CategoryIcon icon={item.icon} size={22} />
                     </span>
                     <span className="block max-w-full">
                       <span
@@ -443,7 +516,7 @@ export function DynamicCategoryNav({
                 onPointerLeave={stopHoverScroll}
                 onPointerCancel={stopHoverScroll}
                 aria-label={t("categoryNav.scrollCategoriesToTheRight")}
-                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
+                className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
               >
                 <ChevronRight className="h-4 w-4 pointer-events-none" />
               </button>
@@ -457,6 +530,7 @@ export function DynamicCategoryNav({
         ? createPortal(
             activePopover.type === "for-you" ? (
               <div
+                data-category-popover
                 className="fixed z-[9999] rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-xl shadow-2xl p-4 transition-all duration-200 animate-in fade-in zoom-in-95"
                 style={{
                   top: activePopover.rect.bottom + 6,
@@ -574,6 +648,7 @@ export function DynamicCategoryNav({
 
                 return (
                   <div
+                    data-category-popover
                     className="fixed z-[9999] rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-xl shadow-2xl p-3.5 transition-all duration-200 animate-in fade-in zoom-in-95"
                     style={{
                       top: rect.bottom + 6,

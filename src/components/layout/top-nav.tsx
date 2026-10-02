@@ -72,7 +72,8 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
         x_right = actionsEl ? actionsEl.getBoundingClientRect().right - headerRect.left : cRect.right - headerRect.left;
       }
 
-      const H_tot = hasCategories ? Math.max(headerRect.height, H1 + 54) : H1;
+      // The category bar sets the depth: shallower while it shows text only (see DynamicCategoryNav)
+      const H_tot = hasCategories ? Math.max(headerRect.height, H1 + 24) : H1;
 
       setLayout({
         viewportWidth: W,
@@ -311,13 +312,14 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
         {/* Tier 2: Categories */}
         {categories && categories.length > 0 && (
           <div className="mx-auto max-w-[1440px] px-3 sm:px-6">
-            <div className="pl-11 sm:pl-14 pr-14 sm:pr-18">
+            <div className="pl-7 sm:pl-9 pr-12 sm:pr-16">
               <DynamicCategoryNav
                 categories={categories}
                 allCategories={allCategories}
                 childrenByParentId={childrenByParentId}
                 forYouHref="/"
                 sticky={false}
+                collapseOnScroll
                 className="rounded-none border-0 bg-transparent shadow-none"
               />
             </div>
