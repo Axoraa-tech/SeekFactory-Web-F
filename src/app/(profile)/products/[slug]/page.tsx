@@ -22,6 +22,7 @@ import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import type { Product } from "@/entities/product";
 import { getLocale, getTranslations } from "next-intl/server";
 import { localizeCategoryName } from "@/i18n/zh-terms";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 type PriceBand = { label: string; priceInr: number; savingPercent: number };
 
@@ -261,7 +262,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
               <span>{t("product.page.needCustomSpecsOrCif")}</span>
               <Link
-                href={`/rfq/new?product=${product.slug}`}
+                href={rfqHref({ product: product.slug, manufacturer: manufacturer.slug })}
                 className="font-bold text-brand-blue hover:underline"
               >
                 {t("product.page.requestCustomRfq")}

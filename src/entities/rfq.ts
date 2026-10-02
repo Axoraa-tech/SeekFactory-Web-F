@@ -12,9 +12,26 @@ export type RfqDraft = {
   attachmentName?: string;
   attachmentSize?: string;
   attachmentUrl?: string;
+  /** Send to this factory only (its page, a seek, a product); omitted = every factory in the category. */
+  manufacturerId?: string;
+  /** One of that factory's products; the backend takes the name and category from it. */
+  productId?: string;
+  /** The seek (video) the buyer was watching. */
+  reelId?: string;
 };
 
-export type RfqItem = {
+/** The factory, product and seek an RFQ was sent about (absent for RFQs open to a whole category). */
+export type RfqTarget = {
+  manufacturerId?: string;
+  manufacturerName?: string;
+  manufacturerSlug?: string;
+  productId?: string;
+  productSlug?: string;
+  productImageUrl?: string;
+  sourceReelId?: string;
+};
+
+export type RfqItem = RfqTarget & {
   id: string;
   referenceNumber: string;
   productName: string;

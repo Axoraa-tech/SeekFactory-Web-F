@@ -44,6 +44,7 @@ import { cn } from "@/shared/lib/cn";
 import { useFollow } from "@/features/engagement/use-engagement";
 import { PLACEHOLDER_IMAGE } from "@/shared/api/http-api";
 import { useTranslations } from "next-intl";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 
 type Props = {
@@ -355,7 +356,7 @@ export function SupplierProfileView({
               </Link>
 
               <Link
-                href="/rfq/new"
+                href={rfqHref({ manufacturer: manufacturer.slug })}
                 className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-4 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
               >
                 <Send className="h-3.5 w-3.5" />

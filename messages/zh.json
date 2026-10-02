@@ -648,7 +648,8 @@
       "viewOrder": "查看订单",
       "acceptOrder": "接受并下单",
       "deliveryDetailsForTheOrder": "填写与以下工厂订单的收货信息：",
-      "acceptQuote": "接受报价（{formatMoney}）"
+      "acceptQuote": "接受报价（{formatMoney}）",
+      "sentTo": "发送至"
     },
     "form": {
       "negotiable": "面议",
@@ -698,7 +699,34 @@
       "removeDrawing": "移除图纸",
       "attachCadPdf": "+ 上传 CAD / PDF",
       "publishingToVerifiedPlants": "正在推送给认证工厂...",
-      "postBuyingRequestToVerified": "向认证工厂发布采购需求"
+      "postBuyingRequestToVerified": "向认证工厂发布采购需求",
+      "requestGoesTo": "询价发送至",
+      "categoryLabel": "类别 *",
+      "chooseCategory": "选择类别",
+      "manufacturerLabel": "制造商",
+      "manufacturer": "制造商：",
+      "allManufacturersInCategory": "该类别所有认证制造商（{count}）",
+      "loadingCatalog": "正在加载制造商…",
+      "couldNotLoadCatalog": "无法加载该类别的制造商，请重试。",
+      "productLabel": "产品",
+      "chooseProduct": "选择产品 *",
+      "generalRequirement": "一般需求（不指定产品）",
+      "generalEnquiry": "一般询价",
+      "fromTheSeek": "已关联您正在观看的视频",
+      "verifiedFactory": "认证工厂",
+      "viewFactory": "查看工厂",
+      "viewProduct": "查看产品",
+      "yourRequirement": "您的需求",
+      "moqHint": "起订量：{moq}",
+      "targetPriceLabel": "目标单价",
+      "currency": "币种",
+      "specificApplication": "具体用途与要求 *",
+      "specificApplicationPlaceholder": "例如：用于汽车生产线，公差 ±0.01mm，黑色硬质阳极氧化，需提供材质证明",
+      "buyerCompany": "采购公司：",
+      "fromYourProfile": "来自您的资料",
+      "sendRfqTo": "向 {name} 发送询价",
+      "rfqSentTo": "询价已发送至 {name}",
+      "factoryNotified": "。{name} 已收到通知并可报价，对方回复时您将收到通知。"
     }
   },
   "supplier": {
@@ -1291,7 +1319,9 @@
       "editQuotation": "修改报价",
       "submitQuotation": "提交报价",
       "noRfqsInThisView": "此视图下暂无询价",
-      "newRfqsFromBuyersSearching": "在你的机械类目中搜索的采购商发布新询价后，会显示在这里。"
+      "newRfqsFromBuyersSearching": "在你的机械类目中搜索的采购商发布新询价后，会显示在这里。",
+      "directToYou": "直接发送给您",
+      "directFromSeek": "来自您的视频的直接询价"
     },
     "seeks": {
       "factoryVideoSeeksShortReels": "工厂视频希克（短视频）",

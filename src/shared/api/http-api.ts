@@ -46,7 +46,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { AppNotification } from "@/entities/notification";
 import type { Conversation } from "@/entities/message";
-import type { RfqDraft, RfqItem } from "@/entities/rfq";
+import type { RfqDraft, RfqItem, RfqTarget } from "@/entities/rfq";
 import type { Cart, NewOrderRequest, OrderContact, OrderParty, OrderRequest, OrderStatus } from "@/entities/order";
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
 import type { SellerStats } from "@/features/factory/types";
@@ -341,7 +341,7 @@ interface BackendNotification {
   referenceId?: string;
 }
 
-interface BackendRfq {
+interface BackendRfq extends RfqTarget {
   id: string;
   referenceNumber?: string;
   productName?: string;
@@ -845,6 +845,9 @@ export function createHttpApi(baseUrl: string): ApiClient {
           attachmentName: draft.attachmentName,
           attachmentSize: draft.attachmentSize,
           attachmentUrl: toStoredMediaUrl(draft.attachmentUrl),
+          manufacturerId: draft.manufacturerId,
+          productId: draft.productId,
+          reelId: draft.reelId,
         }),
       });
       return { ok: true, id: result.id, referenceNumber: result.referenceNumber };
@@ -1339,7 +1342,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async getRfqs(): Promise<RfqItem[]> {
       try {
-        interface BackendRfqItem {
+        interface BackendRfqItem extends RfqTarget {
           id: string;
           referenceNumber?: string;
           reference_number?: string;
@@ -1390,6 +1393,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
           quoteIncoterm: item.myQuoteIncoterm,
           quoteNotes: item.myQuoteNotes,
           quotedAt: item.myQuotedAt,
+          ...rfqTarget(item),
         }));
       } catch {
         return [];
@@ -1786,6 +1790,18 @@ function normalizeNotification(n: BackendNotification): AppNotification {
   };
 }
 
+function rfqTarget(item: RfqTarget): RfqTarget {
+  return {
+    manufacturerId: item.manufacturerId,
+    manufacturerName: item.manufacturerName,
+    manufacturerSlug: item.manufacturerSlug,
+    productId: item.productId,
+    productSlug: item.productSlug,
+    productImageUrl: resolveMediaUrl(item.productImageUrl),
+    sourceReelId: item.sourceReelId,
+  };
+}
+
 function normalizeRfq(item: BackendRfq): RfqItem {
   return {
     id: item.id,
@@ -1804,6 +1820,7 @@ function normalizeRfq(item: BackendRfq): RfqItem {
     status: item.status || "",
     createdAt: item.createdAt || "",
     quoteCount: item.quoteCount,
+    ...rfqTarget(item),
     quotes: item.quotes?.map(
       (q): RfqQuote => ({
         id: q.id,

@@ -33,6 +33,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
 import type { Product } from "@/entities/product";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 type Props = {
   reel: Reel;
@@ -397,7 +398,7 @@ export function VariantInstagramProductReel({
                   {t("seek.variant.viewFullSpecs")}
                 </Link>
                 <Link
-                  href="/rfq/new"
+                  href={rfqHref({ manufacturer: manufacturer.slug, product: activeProduct?.slug ?? productSlug, reel: reel.id })}
                   className="text-[11px] font-bold text-brand-blue hover:underline"
                 >
                   {t("seek.variant.requestCustomRfq")}
@@ -469,7 +470,7 @@ export function VariantInstagramProductReel({
               </button>
 
               <Link
-                href="/rfq/new"
+                href={rfqHref({ manufacturer: manufacturer.slug, product: primaryProduct?.slug || productSlug, reel: reel.id })}
                 className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3 py-1 text-xs font-bold text-white hover:bg-brand-blue-dark transition shadow-2xs"
               >
                 <Send className="h-3 w-3" /> {t("feed.sendRfq", "Send RFQ")}
@@ -656,6 +657,7 @@ export function VariantInstagramProductReel({
               moq={100}
               productSlug={primaryProduct?.slug || productSlug}
               manufacturerSlug={manufacturer.slug}
+              reelId={reel.id}
               size="sm"
             />
           </div>

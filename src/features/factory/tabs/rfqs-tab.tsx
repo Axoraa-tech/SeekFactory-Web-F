@@ -159,6 +159,11 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <p className="text-xs font-bold text-neutral-900">
                   {t("seller.rfqs.requested")} <span className="text-brand-blue">{rfq.productName}</span>
+                  {rfq.direct && (
+                    <span className="ml-2 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                      {rfq.fromSeek ? t("seller.rfqs.directFromSeek") : t("seller.rfqs.directToYou")}
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs text-neutral-600">
                   {t("rfq.form.quantity")} <strong className="text-neutral-900">{rfq.quantityRequested}</strong>

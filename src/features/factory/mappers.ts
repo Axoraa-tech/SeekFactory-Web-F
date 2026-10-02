@@ -82,6 +82,8 @@ export function toSellerRfq(rfq: RfqItem, categories: Category[] = []): SellerRf
     buyerAvatarUrl: rfq.buyerAvatarUrl,
     productName: rfq.productName,
     productCategory: categoryName(categories, rfq.categoryId, legacyCategory || "Machinery"),
+    direct: Boolean(rfq.manufacturerId),
+    fromSeek: Boolean(rfq.sourceReelId),
     quantityRequested: [rfq.quantity, rfq.unit].filter(Boolean).join(" ") || "—",
     targetBudgetInr: rfq.targetPrice && Number.isFinite(budget) ? budget : undefined,
     deliveryPort: rfq.incoterm || "—",

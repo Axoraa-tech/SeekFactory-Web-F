@@ -648,7 +648,8 @@
       "viewOrder": "View order",
       "acceptOrder": "Accept & order",
       "deliveryDetailsForTheOrder": "Delivery details for the order with",
-      "acceptQuote": "Accept quote ({formatMoney})"
+      "acceptQuote": "Accept quote ({formatMoney})",
+      "sentTo": "Sent to"
     },
     "form": {
       "negotiable": "Negotiable",
@@ -698,7 +699,34 @@
       "removeDrawing": "Remove Drawing",
       "attachCadPdf": "+ Attach CAD / PDF",
       "publishingToVerifiedPlants": "Publishing to Verified Plants...",
-      "postBuyingRequestToVerified": "Post Buying Request to Verified Factories"
+      "postBuyingRequestToVerified": "Post Buying Request to Verified Factories",
+      "requestGoesTo": "Request goes to",
+      "categoryLabel": "Category *",
+      "chooseCategory": "Choose a category",
+      "manufacturerLabel": "Manufacturer",
+      "manufacturer": "Manufacturer:",
+      "allManufacturersInCategory": "All verified manufacturers in this category ({count})",
+      "loadingCatalog": "Loading manufacturers…",
+      "couldNotLoadCatalog": "Could not load the manufacturers of this category. Please try again.",
+      "productLabel": "Product",
+      "chooseProduct": "Choose a product *",
+      "generalRequirement": "General requirement (no specific product)",
+      "generalEnquiry": "General enquiry",
+      "fromTheSeek": "Linked to the seek you were watching",
+      "verifiedFactory": "Verified factory",
+      "viewFactory": "View factory",
+      "viewProduct": "View product",
+      "yourRequirement": "Your requirement",
+      "moqHint": "MOQ: {moq}",
+      "targetPriceLabel": "Target price per unit",
+      "currency": "Currency",
+      "specificApplication": "Specific application & requirements *",
+      "specificApplicationPlaceholder": "e.g. For an automotive line: ±0.01mm tolerance, hard anodized black, material certificates required",
+      "buyerCompany": "Buyer company:",
+      "fromYourProfile": "from your profile",
+      "sendRfqTo": "Send RFQ to {name}",
+      "rfqSentTo": "RFQ sent to {name}",
+      "factoryNotified": ". {name} has been notified and can quote on it; you will be notified when they reply."
     }
   },
   "supplier": {
@@ -1291,7 +1319,9 @@
       "editQuotation": "Edit Quotation",
       "submitQuotation": "Submit Quotation",
       "noRfqsInThisView": "No RFQs in this view",
-      "newRfqsFromBuyersSearching": "New RFQs from buyers searching in your machinery category will appear here."
+      "newRfqsFromBuyersSearching": "New RFQs from buyers searching in your machinery category will appear here.",
+      "directToYou": "Sent directly to you",
+      "directFromSeek": "Sent to you from your seek"
     },
     "seeks": {
       "factoryVideoSeeksShortReels": "Factory Video Seeks (Short Reels)",

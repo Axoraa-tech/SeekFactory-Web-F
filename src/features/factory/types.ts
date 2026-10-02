@@ -95,6 +95,10 @@ export type SellerRfq = {
   buyerAvatarUrl?: string;
   productName: string;
   productCategory: string;
+  /** The buyer sent this RFQ to this factory only (from its page, a seek or a product). */
+  direct: boolean;
+  /** It was sent while watching one of this factory's seeks. */
+  fromSeek: boolean;
   quantityRequested: string;
   targetBudgetInr?: number;
   deliveryPort: string;

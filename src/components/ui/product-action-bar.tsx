@@ -8,6 +8,7 @@ import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import { OrderRequestModal } from "@/features/orders/order-request-modal";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 type ProductActionBarProps = {
   /** Enables "Add to cart" in the order dialog. */
@@ -18,6 +19,8 @@ type ProductActionBarProps = {
   productSlug?: string;
   productName?: string;
   manufacturerSlug?: string;
+  /** The seek this bar is shown on, so an RFQ from it is linked to that seek. */
+  reelId?: string;
   /** Open the order dialog on mount (after signing in from it). */
   autoOpenOrder?: boolean;
   size?: "sm" | "md" | "lg";
@@ -34,6 +37,7 @@ export function ProductActionBar({
   productSlug,
   productName,
   manufacturerSlug,
+  reelId,
   autoOpenOrder = false,
   size = "md",
   layout = "horizontal",
@@ -155,7 +159,7 @@ export function ProductActionBar({
         ) : (
           /* No listed price (or no product): the factory quotes on request */
           <Link
-            href={productSlug ? `/rfq/new?product=${productSlug}` : "/rfq/new"}
+            href={rfqHref({ product: productSlug, manufacturer: manufacturerSlug, reel: reelId })}
             onClick={(e) => e.stopPropagation()}
             className={cn(
               "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-blue hover:bg-brand-blue-dark",

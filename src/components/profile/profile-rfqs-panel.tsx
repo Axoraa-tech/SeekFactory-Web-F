@@ -160,6 +160,18 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                       <span className="text-[11px] text-ink-faint">{t("rfq.buyer.posted")} {formatRelativeTime(rfq.createdAt, locale)}</span>
                     </div>
                     <h3 className="font-bold text-sm sm:text-base text-ink truncate">{rfq.productName}</h3>
+                    {rfq.manufacturerName && (
+                      <p className="text-xs text-ink-muted truncate">
+                        {t("rfq.buyer.sentTo")}{" "}
+                        {rfq.manufacturerSlug ? (
+                          <Link href={`/manufacturers/${rfq.manufacturerSlug}`} className="font-semibold text-brand-blue hover:underline">
+                            {rfq.manufacturerName}
+                          </Link>
+                        ) : (
+                          <strong className="text-ink">{rfq.manufacturerName}</strong>
+                        )}
+                      </p>
+                    )}
                     <div className="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
                       {category && (
                         <>

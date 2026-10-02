@@ -12,6 +12,7 @@ import type { ThreadWithMessages } from "./chat-types";
 import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "./message-extras";
 import { useLocale, useTranslations } from "next-intl";
 import { formatRelativeTime } from "@/shared/lib/format";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 type Props = {
   activeThread: ThreadWithMessages;
@@ -129,7 +130,7 @@ export function ChatConversationPane({
             <span className="hidden xl:inline">{t("chat.visitPlant")}</span>
           </Link>
           <Link
-            href="/rfq/new"
+            href={rfqHref({ manufacturer: activeThread.manufacturer.slug })}
             title={t("nav.postRfq")}
             aria-label={t("nav.postRfq")}
             className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-2.5 xl:px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"

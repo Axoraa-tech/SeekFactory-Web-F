@@ -33,6 +33,7 @@ import { useReelImpression } from "@/hooks/use-reel-impression";
 import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
 import type { Product } from "@/entities/product";
 import { useTranslations } from "next-intl";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 type Props = {
   reel: Reel;
@@ -197,7 +198,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                   {following ? t("common.following") : t("common.follow")}
                 </button>
                 <Link
-                  href="/rfq/new"
+                  href={rfqHref({ manufacturer: manufacturer.slug, product: product?.slug ?? productSlug, reel: reel.id })}
                   className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
                 >
                   <Send className="h-3 w-3" />
@@ -348,6 +349,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               moq={product?.moq}
               productSlug={product?.slug ?? productSlug}
               manufacturerSlug={manufacturer.slug}
+              reelId={reel.id}
               size="sm"
             />
           </div>

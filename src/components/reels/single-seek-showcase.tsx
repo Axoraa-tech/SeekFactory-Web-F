@@ -11,6 +11,7 @@ import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { useTranslations } from "next-intl";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 type Props = {
   items: FeedItem[];
@@ -282,6 +283,15 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
 
 /* ─────────── panels ─────────── */
 
+/** RFQ about the seek on screen: its factory, the product it shows and the seek itself. */
+function seekRfqHref(item: FeedItem) {
+  return rfqHref({
+    manufacturer: item.manufacturer.slug,
+    product: item.primaryProductSlug ?? item.products?.[0]?.slug,
+    reel: item.reel.id,
+  });
+}
+
 function ProfilePanel({ item }: { item: FeedItem }) {
   const t = useTranslations();
   const m = item.manufacturer;
@@ -323,7 +333,7 @@ function ProfilePanel({ item }: { item: FeedItem }) {
       )}
 
       <div className="mt-5 grid gap-2">
-        <Link href="/rfq/new" className="rounded-xl bg-orange-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-orange-400">
+        <Link href={seekRfqHref(item)} className="rounded-xl bg-orange-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-orange-400">
           {t("feed.sendRfq")}
         </Link>
         <Link href={`/manufacturers/${m.slug}`} className="rounded-xl border border-line px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-slate-50">
@@ -351,7 +361,7 @@ function ProfileBar({ item }: { item: FeedItem }) {
         </p>
       </div>
       <Link href={`/manufacturers/${m.slug}`} className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink">{t("nav.profile")}</Link>
-      <Link href="/rfq/new" className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
+      <Link href={seekRfqHref(item)} className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
     </div>
   );
 }

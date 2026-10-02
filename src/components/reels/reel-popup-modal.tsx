@@ -34,6 +34,7 @@ import type { FeedItem } from "@/shared/api/contracts";
 import { useReelImpression } from "@/hooks/use-reel-impression";
 import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
 import { useTranslations } from "next-intl";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 interface Props {
   items: FeedItem[];
@@ -450,7 +451,7 @@ export function ReelPopupModal({ items }: Props) {
                   {following ? t("common.following") : t("common.follow")}
                 </button>
                 <Link
-                  href="/rfq/new"
+                  href={rfqHref({ manufacturer: manufacturer.slug, product: productSlug, reel: reel.id })}
                   onClick={close}
                   className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white hover:bg-brand-blue-dark transition active:scale-95"
                 >

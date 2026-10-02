@@ -8,6 +8,7 @@ import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import type { Product } from "@/entities/product";
 import type { FeedItem } from "@/shared/api/contracts";
 import { useTranslations } from "next-intl";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 type Props = {
   savedProducts: Product[];
@@ -101,7 +102,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                     <span>{t("common.order")}</span>
                   </Link>
                   <Link
-                    href={p.priceInr > 0 ? `/checkout?product=${p.slug}&qty=${minimumOrderQuantity(p.moq)}` : `/rfq/new?product=${p.slug}`}
+                    href={p.priceInr > 0 ? `/checkout?product=${p.slug}&qty=${minimumOrderQuantity(p.moq)}` : rfqHref({ product: p.slug })}
                     className="inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
                     <Zap className="h-3 w-3 fill-white/80" />

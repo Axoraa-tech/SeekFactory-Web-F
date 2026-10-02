@@ -23,6 +23,7 @@ import type { Manufacturer } from "@/entities/manufacturer";
 import type { Reel } from "@/entities/reel";
 import { useReelImpression } from "@/hooks/use-reel-impression";
 import { useTranslations } from "next-intl";
+import { rfqHref } from "@/features/rfq/rfq-link";
 
 type Props = {
   reel: Reel;
@@ -167,7 +168,7 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
     setIsBuying(true);
     setTimeout(() => {
       setIsBuying(false);
-      window.location.href = productSlug ? `/products/${productSlug}?action=checkout` : "/rfq/new";
+      window.location.href = productSlug ? `/products/${productSlug}?action=checkout` : rfqHref({ manufacturer: manufacturer.slug, reel: reel.id });
     }, 400);
   };
 
