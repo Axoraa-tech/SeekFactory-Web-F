@@ -8,12 +8,14 @@ import { SearchBar } from "@/components/layout/search-bar";
 import { MessagesDropdown } from "@/components/layout/messages-dropdown";
 import { NotificationsDropdown } from "@/components/layout/notifications-dropdown";
 import { UserDropdown } from "@/components/layout/user-dropdown";
+import { VerifyEmailBanner } from "@/features/auth/verify-email-banner";
 import { LanguageCurrencyDropdown } from "@/components/layout/language-currency-dropdown";
 import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
 import type { BuyerProfile } from "@/entities/user";
 import type { Category } from "@/entities/category";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { useBuyerPlan } from "@/features/subscription";
+import { useUnreadCountsRefresh } from "@/features/inbox/unread-store";
 
 type Props = {
   user: BuyerProfile | null;
@@ -198,6 +200,8 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
 
   // The buyer plan lives on the account; keep the (root-level) plan provider in step with it
   const { syncPlan } = useBuyerPlan();
+  // Live badge counts; the periodic refresh is also the "I'm online" heartbeat
+  useUnreadCountsRefresh(Boolean(user));
   useEffect(() => {
     syncPlan(user ? user.plan ?? "free" : null);
   }, [user, syncPlan]);
@@ -213,6 +217,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
   }, [allCategories]);
 
   return (
+    <>
     <header className="sticky top-0 z-40 w-full select-none transform-gpu will-change-transform">
       {/* ==================================================================
           UNIFIED ARCHITECTURAL BACKGROUND — One single seamless surface.
@@ -320,5 +325,8 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
         )}
       </div>
     </header>
+    {/* Below the header, not inside it: the notched header background covers everything within */}
+    {user && user.emailVerified === false && user.email && <VerifyEmailBanner email={user.email} />}
+    </>
   );
 }

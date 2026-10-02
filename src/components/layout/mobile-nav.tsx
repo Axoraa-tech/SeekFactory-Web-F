@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Bell, Compass, Home, MessageCircle, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useUnreadCounts } from "@/features/inbox/unread-store";
 import { cn } from "@/shared/lib/cn";
 
 type Props = {
@@ -23,7 +24,7 @@ const items = [
 export function MobileNav({ messageCount, notificationCount }: Props) {
   const t = useTranslations();
   const pathname = usePathname();
-  const counts = { messages: messageCount, notifications: notificationCount };
+  const counts = useUnreadCounts({ messages: messageCount, notifications: notificationCount });
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface px-2 py-1 lg:hidden">

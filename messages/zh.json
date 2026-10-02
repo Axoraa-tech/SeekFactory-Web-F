@@ -188,7 +188,8 @@
     "cart": "购物车",
     "accountSettings": "账户设置",
     "signingOut": "正在退出...",
-    "signOut": "退出登录"
+    "signOut": "退出登录",
+    "myProfile": "我的资料"
   },
   "layout": {
     "search": {
@@ -520,7 +521,8 @@
       "taxIdGstinBusinessReg": "税号 / GSTIN / 营业执照号",
       "primaryShippingPlantDeliveryAddress": "主要收货 / 工厂送货地址",
       "savingUpdates": "正在保存...",
-      "saveProfileChanges": "保存资料修改"
+      "saveProfileChanges": "保存资料修改",
+      "notVerifiedLoginId": "未验证"
     },
     "following": {
       "verifiedPartnerFacilities": "认证合作工厂",
@@ -580,7 +582,9 @@
       "membershipChangedToThePlan": "会员已切换为 {next}",
       "pro": "专业版",
       "enterprise": "企业版",
-      "loadingProfile": "正在加载资料…"
+      "loadingProfile": "正在加载资料…",
+      "nameIsRequired": "请输入您的姓名。",
+      "companyNameIsRequired": "请输入公司名称。"
     }
   },
   "membership": {
@@ -831,7 +835,8 @@
       "guestLandscapeB2bFeed": "访客：横屏 B2B 视频流",
       "guestVerticalSeeksFeed": "访客：竖屏希克视频流",
       "alreadyOnSeekfactory": "已有 SeekFactory 账号？",
-      "newToSeekfactory": "初次使用 SeekFactory？"
+      "newToSeekfactory": "初次使用 SeekFactory？",
+      "welcomeCheckEmail": "欢迎加入 SeekFactory！我们已向 {email} 发送验证链接。"
     },
     "policy": {
       "minLength": "至少 8 个字符",
@@ -869,7 +874,13 @@
       "youCanNowSignIn": "现在可以使用新密码登录了。"
     },
     "welcomeToSeekfactory": "欢迎来到 SeekFactory",
-    "onlineWorkAnimation": "在线办公动画"
+    "onlineWorkAnimation": "在线办公动画",
+    "verifyBanner": {
+      "message": "请验证您的邮箱。我们已向 {email} 发送确认链接。",
+      "resend": "重新发送",
+      "sent": "验证链接已发送至 {email}，请查看收件箱和垃圾邮件。",
+      "dismiss": "隐藏此提醒"
+    }
   },
   "notFound": {
     "pageNotFound": "页面不存在",
@@ -1389,7 +1400,10 @@
       "onlyImagesPngJpgWebp": "仅支持上传图片（PNG、JPG、WEBP、GIF）和 PDF 文件。",
       "fileIsLargerThan20": "文件超过 20 MB。",
       "uploadFailedPleaseRetry": "上传失败，请重试。"
-    }
+    },
+    "online": "在线",
+    "offline": "离线",
+    "lastSeen": "最后在线 {time}"
   },
   "upgrade": {
     "upgradeToUnlockDirectSupplier": "升级解锁供应商直接联系方式与验厂报告",
@@ -1601,5 +1615,12 @@
     "searchLanguage": "搜索语言...",
     "noLanguageFound": "未找到该语言",
     "autoSavesPreferences": "自动保存偏好设置"
+  },
+  "products": {
+    "carousel": {
+      "previousPhoto": "上一张图片",
+      "nextPhoto": "下一张图片",
+      "showPhoto": "查看第 {index} 张，共 {count} 张"
+    }
   }
 }

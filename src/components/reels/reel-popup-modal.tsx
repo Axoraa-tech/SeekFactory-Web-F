@@ -121,6 +121,53 @@ export function ReelPopupModal({ items }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, currentIndex]);
 
+  // Controlled single-seek mouse wheel and trackpad navigation inside the popup modal
+  useEffect(() => {
+    if (!isOpen) return;
+    let isLocked = false;
+    let unlockTimer: NodeJS.Timeout | null = null;
+    let accumulatedDelta = 0;
+
+    const onWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-prevent-seek-wheel]") || target.closest(".overflow-y-auto")) return;
+
+      e.preventDefault();
+
+      if (isLocked) {
+        if (unlockTimer) clearTimeout(unlockTimer);
+        unlockTimer = setTimeout(() => {
+          isLocked = false;
+          accumulatedDelta = 0;
+        }, 200);
+        return;
+      }
+
+      accumulatedDelta += e.deltaY;
+      if (Math.abs(accumulatedDelta) >= 12) {
+        if (accumulatedDelta > 0) {
+          goNext();
+        } else {
+          goPrev();
+        }
+        accumulatedDelta = 0;
+        isLocked = true;
+
+        if (unlockTimer) clearTimeout(unlockTimer);
+        unlockTimer = setTimeout(() => {
+          isLocked = false;
+          accumulatedDelta = 0;
+        }, 550);
+      }
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      if (unlockTimer) clearTimeout(unlockTimer);
+      window.removeEventListener("wheel", onWheel);
+    };
+  }, [isOpen, goNext, goPrev]);
+
   const handleTogglePlay = useCallback(() => {
     const vid = videoRef.current;
     if (!vid) return;

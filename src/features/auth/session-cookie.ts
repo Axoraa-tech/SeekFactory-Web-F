@@ -1,4 +1,5 @@
 import type { BuyerProfile } from "@/entities/user";
+import { cookieNames, portalForUrl, type Portal } from "@/features/auth/auth-tokens";
 
 export const SESSION_COOKIE = "sf-session";
 const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
@@ -51,18 +52,20 @@ export function payloadToProfile(payload: SessionPayload): BuyerProfile {
   };
 }
 
-export function readBrowserCookie(): SessionPayload | null {
+/** Display-only session of one section (buyer site or seller hub); mock mode uses the buyer one. */
+export function readBrowserCookie(portal: Portal = "buyer"): SessionPayload | null {
   if (typeof document === "undefined") return null;
-  const match = document.cookie.split("; ").find((row) => row.startsWith(`${SESSION_COOKIE}=`));
-  return parseSessionCookie(match?.slice(SESSION_COOKIE.length + 1));
+  const name = cookieNames(portal).session;
+  const match = document.cookie.split("; ").find((row) => row.startsWith(`${name}=`));
+  return parseSessionCookie(match?.slice(name.length + 1));
 }
 
-export function writeBrowserCookie(payload: SessionPayload) {
-  document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(JSON.stringify(payload))}; Path=/; Max-Age=${MAX_AGE}; SameSite=Lax`;
+export function writeBrowserCookie(payload: SessionPayload, portal: Portal = "buyer") {
+  document.cookie = `${cookieNames(portal).session}=${encodeURIComponent(JSON.stringify(payload))}; Path=/; Max-Age=${MAX_AGE}; SameSite=Lax`;
 }
 
-export function clearBrowserCookie() {
-  document.cookie = `${SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+export function clearBrowserCookie(portal: Portal = "buyer") {
+  document.cookie = `${cookieNames(portal).session}=; Path=/; Max-Age=0; SameSite=Lax`;
 }
 
 export function displayRole(role: BuyerProfile["role"]) {
@@ -70,12 +73,18 @@ export function displayRole(role: BuyerProfile["role"]) {
 }
 
 /**
- * Where to go after signing in. An explicit same-origin `next` wins; otherwise a supplier's
- * first sign-in opens the product catalog (client request), later ones the seller dashboard.
+ * Where to go after signing in, by the section signed in to (the tab chosen on the sign-in page,
+ * not the account's role: a manufacturer may sign in to the buyer site too).
+ * A same-origin `next` in that same section wins; otherwise a supplier's first sign-in opens the
+ * product catalog (client request), later ones the seller dashboard.
  */
-export function postAuthPath(role: BuyerProfile["role"], next?: string, firstLogin = false) {
-  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
-  if (role !== "Supplier") return "/";
+export function postAuthPath(signedInAs: BuyerProfile["role"], next?: string, firstLogin = false) {
+  const portal: Portal = signedInAs === "Supplier" ? "seller" : "buyer";
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    const target = new URL(next, "http://local");
+    if (portalForUrl(target.pathname, target.searchParams) === portal) return next;
+  }
+  if (portal === "buyer") return "/";
   return firstLogin ? "/factory?tab=products" : "/factory";
 }
 

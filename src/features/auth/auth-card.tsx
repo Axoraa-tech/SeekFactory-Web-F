@@ -7,6 +7,7 @@ import { Monitor, Smartphone, Eye, EyeOff } from "lucide-react";
 import { RoleToggle } from "@/features/auth/role-toggle";
 
 import { postAuthPath } from "@/features/auth/session-cookie";
+import { useToast } from "@/components/ui/toast";
 import { getApi } from "@/shared/api";
 
 import { isValidPhoneNumber } from "libphonenumber-js";
@@ -35,6 +36,7 @@ export function AuthCard({
 }: AuthCardProps) {
   const t = useTranslations();
   const router = useRouter();
+  const toast = useToast();
   const searchParams = useSearchParams();
   const isManufacturer = searchParams.get("role") === "manufacturer";
   const role: "Buyer" | "Supplier" = isManufacturer ? "Supplier" : "Buyer";
@@ -101,6 +103,9 @@ export function AuthCard({
     try {
       const api = getApi();
       const user = mode === "join" ? await api.session.join(input) : await api.session.login(input);
+      if (mode === "join" && user.email && user.emailVerified === false) {
+        toast.success(t("auth.card.welcomeCheckEmail", { email: user.email }));
+      }
 
       // New manufacturers go through verification step before landing on their dashboard
       if (mode === "join" && role === "Supplier") {
@@ -109,7 +114,7 @@ export function AuthCard({
         return;
       }
 
-      router.push(postAuthPath(user.role, next, user.firstLogin));
+      router.push(postAuthPath(role, next, user.firstLogin));
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("auth.card.authenticationFailedPleaseCheckYour"));

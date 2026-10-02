@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
-  ACCESS_COOKIE,
-  REFRESH_COOKIE,
+  PORTAL_HEADER,
   clearTokenCookies,
+  cookieNames,
   isExpired,
+  portalForUrl,
   refreshTokens,
   setTokenCookies,
   type TokenPair,
 } from "@/features/auth/auth-tokens";
-import { SESSION_COOKIE } from "@/features/auth/session-cookie";
 
 /**
  * Edge middleware.
@@ -40,23 +40,28 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Buyer site and seller hub have separate sessions; server components and server actions of
+  // this request read the session named by this header (see http-api getAuthHeaders)
+  const portal = portalForUrl(pathname, request.nextUrl.searchParams);
+  const names = cookieNames(portal);
+  request.headers.set(PORTAL_HEADER, portal);
+
   let tokens: TokenPair | null = null;
   let sessionEnded = false;
-  const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
-  if (refreshToken && isExpired(request.cookies.get(ACCESS_COOKIE)?.value)) {
+  const refreshToken = request.cookies.get(names.refresh)?.value;
+  if (refreshToken && isExpired(request.cookies.get(names.access)?.value)) {
     tokens = await refreshTokens(refreshToken);
     sessionEnded = !tokens;
     // Make the outcome visible to server components rendering this same request
-    if (tokens) request.cookies.set(ACCESS_COOKIE, tokens.accessToken);
-    else request.cookies.delete([ACCESS_COOKIE, REFRESH_COOKIE, SESSION_COOKIE]);
+    if (tokens) request.cookies.set(names.access, tokens.accessToken);
+    else request.cookies.delete([names.access, names.refresh, names.session]);
   }
 
   const response = NextResponse.next({ request: { headers: request.headers } });
   if (tokens) {
-    setTokenCookies(response, tokens);
+    setTokenCookies(response, tokens, portal);
   } else if (sessionEnded) {
-    clearTokenCookies(response);
-    response.cookies.delete(SESSION_COOKIE);
+    clearTokenCookies(response, portal);
   }
 
   // SAMEORIGIN (not DENY) so the admin Seek Showcase page can preview the home page in an iframe;

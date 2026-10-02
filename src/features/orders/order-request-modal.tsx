@@ -1,10 +1,10 @@
 "use client";
 
+import { Price } from "@/components/ui/price";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, ShoppingCart, X } from "lucide-react";
-import { formatPriceInr } from "@/shared/lib/format";
 import type { OrderRequest } from "@/entities/order";
 import { getApi } from "@/shared/api";
 import { ApiError } from "@/shared/api/http-api";
@@ -151,7 +151,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
               <p className="font-bold text-neutral-900">{productName ?? t("orders.request.selectedProduct")}</p>
               {priceInr !== undefined && (
                 <p className="mt-0.5 text-ink-muted">
-                  {t("orders.request.listedAt")} <strong className="text-neutral-900">{formatPriceInr(priceInr)}</strong> / {unit}
+                  {t("orders.request.listedAt")} <strong className="text-neutral-900"><Price inr={priceInr} /></strong> / {unit}
                   {moq !== undefined && <> {t("orders.request.moq")} {typeof moq === "number" ? `${moq} ${unit}` : moq}</>}
                 </p>
               )}
@@ -194,7 +194,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
 
             {estimate !== undefined && (
               <p className="text-xs text-ink-muted">
-                {t("orders.request.estimatedValue")} <strong className="text-neutral-900">{formatPriceInr(estimate)}</strong> {t("orders.request.atListingPriceTheFinal")}
+                {t("orders.request.estimatedValue")} <strong className="text-neutral-900"><Price inr={estimate} /></strong> {t("orders.request.atListingPriceTheFinal")}
               </p>
             )}
             <p className="text-[11px] text-ink-muted">

@@ -10,7 +10,8 @@ import type { MessageAttachment } from "@/shared/api/contracts";
 import type { OrderRequest } from "@/entities/order";
 import type { ThreadWithMessages } from "./chat-types";
 import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "./message-extras";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { formatRelativeTime } from "@/shared/lib/format";
 
 type Props = {
   activeThread: ThreadWithMessages;
@@ -56,6 +57,7 @@ export function ChatConversationPane({
   sendError,
 }: Props) {
   const t = useTranslations();
+  const locale = useLocale();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canSend = (inputMessage.trim().length > 0 || attachment !== null) && !attachmentUploading;
 
@@ -93,7 +95,24 @@ export function ChatConversationPane({
               )}
             </div>
             <p className="text-[11px] text-slate-500 truncate">
-              {[activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).join(", ")}
+              {activeThread.counterpartOnline ? (
+                <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  {t("chat.online")}
+                </span>
+              ) : (
+                <span>
+                  {activeThread.counterpartLastSeenAt
+                    ? t("chat.lastSeen", { time: formatRelativeTime(activeThread.counterpartLastSeenAt, locale) })
+                    : t("chat.offline")}
+                </span>
+              )}
+              {[activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).length > 0 && (
+                <span>
+                  {" · "}
+                  {[activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).join(", ")}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -101,17 +120,22 @@ export function ChatConversationPane({
         <div className="flex items-center gap-1.5 shrink-0">
           <Link
             href={`/manufacturers/${activeThread.manufacturer.slug}`}
-            className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors shadow-2xs"
+            title={t("chat.visitPlant")}
+            aria-label={t("chat.visitPlant")}
+            className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 xl:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors shadow-2xs"
           >
             <Building2 className="h-3.5 w-3.5" />
-            <span>{t("chat.visitPlant")}</span>
+            {/* Icon only while the chat pane is narrow, so the factory name keeps its room */}
+            <span className="hidden xl:inline">{t("chat.visitPlant")}</span>
           </Link>
           <Link
             href="/rfq/new"
-            className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
+            title={t("nav.postRfq")}
+            aria-label={t("nav.postRfq")}
+            className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-2.5 xl:px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
           >
             <FileText className="h-3.5 w-3.5" />
-            <span>{t("nav.postRfq")}</span>
+            <span className="hidden xl:inline">{t("nav.postRfq")}</span>
           </Link>
         </div>
       </div>
@@ -261,13 +285,13 @@ export function ChatConversationPane({
           onChange={(e) => onInputChange(e.target.value)}
           maxLength={5000}
           placeholder={`Message ${activeThread.manufacturer.name}...`}
-          className="flex-1 h-10 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs sm:text-sm outline-none focus:border-brand-blue focus:bg-white transition-colors"
+          className="flex-1 min-w-0 h-10 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs sm:text-sm outline-none focus:border-brand-blue focus:bg-white transition-colors"
         />
 
         <button
           type="submit"
           disabled={!canSend}
-          className="h-10 px-4 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs disabled:opacity-50"
+          className="h-10 shrink-0 px-4 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs disabled:opacity-50"
         >
           <Send className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{t("common.send")}</span>

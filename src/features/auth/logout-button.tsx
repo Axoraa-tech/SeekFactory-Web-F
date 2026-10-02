@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getApi } from "@/shared/api";
+import { resetFollowStore } from "@/features/engagement/follow-store";
+import { resetUnreadCounts } from "@/features/inbox/unread-store";
 import { useTranslations } from "next-intl";
 
 export function LogoutButton() {
   const t = useTranslations();
   const router = useRouter();
+  const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
 
   return (
@@ -21,7 +24,10 @@ export function LogoutButton() {
         setLoggingOut(true);
         try {
           await getApi().session.logout();
-          router.push("/");
+          resetFollowStore();
+          resetUnreadCounts();
+          // Signing out of the seller hub leaves the buyer site session alone; go back to its sign-in
+          router.push(pathname.startsWith("/factory") ? "/login?role=manufacturer" : "/");
           router.refresh();
         } catch {
           setLoggingOut(false);

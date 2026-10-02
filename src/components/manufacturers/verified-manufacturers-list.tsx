@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -15,6 +15,8 @@ import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { useBuyerPlan } from "@/features/subscription";
+import { useFollow } from "@/features/engagement/use-engagement";
+import { loadFollowedFactories } from "@/features/engagement/follow-store";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -41,20 +43,55 @@ export function VerifiedManufacturersList({ manufacturers, layout = "rail" }: Pr
   return <RailLayout manufacturers={manufacturers} />;
 }
 
-function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
-  const { t, translateCountry } = useRegionalSettings();
-  const [followedMap, setFollowedMap] = useState<Record<string, boolean>>({});
+/** Follow button backed by the backend and the page-wide follow state (see follow-store). */
+function RailFollowButton({ manufacturer }: { manufacturer: Manufacturer }) {
+  const { t } = useRegionalSettings();
   const { isSupplierLocked, openUpgradeModal } = useBuyerPlan();
+  const { following: isFollowing, toggleFollow, pending } = useFollow(manufacturer.id, undefined, manufacturer.followerCount);
 
-  const toggleFollow = (id: string, e: React.MouseEvent) => {
+  const onClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isSupplierLocked) {
       openUpgradeModal();
       return;
     }
-    setFollowedMap((prev) => ({ ...prev, [id]: !prev[id] }));
+    void toggleFollow();
   };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={pending}
+      aria-pressed={isFollowing}
+      className={cn(
+        "shrink-0 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all border shadow-2xs disabled:opacity-70",
+        isFollowing
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+          : "border-slate-200 bg-white text-slate-700 hover:border-brand-blue/40 hover:bg-blue-50/60 hover:text-brand-blue"
+      )}
+    >
+      {isFollowing ? (
+        <>
+          <Check className="h-3 w-3" />
+          <span>{t("widgets.following", "Following")}</span>
+        </>
+      ) : (
+        <span>{t("widgets.follow", "Follow")}</span>
+      )}
+    </button>
+  );
+}
+
+function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
+  const { t, translateCountry } = useRegionalSettings();
+  const { isSupplierLocked, openUpgradeModal } = useBuyerPlan();
+
+  // Show who the viewer already follows (follows made in seeks or on factory pages included)
+  useEffect(() => {
+    void loadFollowedFactories();
+  }, []);
 
   return (
     <Card className="p-4 border-slate-200/90 shadow-2xs">
@@ -79,8 +116,6 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
       <SupplierLockOverlay badgeLabel={t("manufacturers.list.viewManufacturers")}>
         <ul className="space-y-3">
           {manufacturers.slice(0, 4).map((manufacturer) => {
-            const isFollowing = !!followedMap[manufacturer.id];
-
             return (
               <li key={manufacturer.id} className="flex items-center gap-2.5">
                 <Link
@@ -105,27 +140,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                   </div>
                 </Link>
 
-                <button
-                  type="button"
-                  onClick={(e) => toggleFollow(manufacturer.id, e)}
-                  className={cn(
-                    "shrink-0 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all border shadow-2xs",
-                    isFollowing
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-brand-blue/40 hover:bg-blue-50/60 hover:text-brand-blue"
-                  )}
-                >
-                  {isFollowing ? (
-                    <>
-                      <Check className="h-3 w-3" />
-                      <span>{t("widgets.following", "Following")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>{t("widgets.follow", "Follow")}</span>
-                    </>
-                  )}
-                </button>
+                <RailFollowButton manufacturer={manufacturer} />
               </li>
             );
           })}

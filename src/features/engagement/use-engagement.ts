@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getApi } from "@/shared/api";
 import { ApiError } from "@/shared/api/http-api";
+import { setFollowed, useFollowedState } from "@/features/engagement/follow-store";
 import type { Reel } from "@/entities/reel";
 
 /** Sends a guest to sign in and back to the current page. */
@@ -107,27 +108,28 @@ export function useReelEngagement(reel: Reel | undefined) {
  */
 export function useFollow(manufacturerId: string | undefined, initialFollowing: boolean | undefined, initialCount = 0) {
   const requireSignIn = useRequireSignIn();
-  const [following, setFollowing] = useState(Boolean(initialFollowing));
+  // Shared across the page: following a factory in one place updates every other button for it
+  const shared = useFollowedState(manufacturerId);
+  const following = shared ?? Boolean(initialFollowing);
   const [followerCount, setFollowerCount] = useState(initialCount);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    setFollowing(Boolean(initialFollowing));
     setFollowerCount(initialCount);
-  }, [manufacturerId, initialFollowing, initialCount]);
+  }, [manufacturerId, initialCount]);
 
   const toggleFollow = useCallback(async () => {
     if (!manufacturerId) return;
     if (pending) return;
     const next = !following;
     setPending(true);
-    setFollowing(next);
+    setFollowed(manufacturerId, next);
     try {
       const res = await getApi().manufacturers.toggleFollow(manufacturerId);
-      setFollowing(res.following);
+      setFollowed(manufacturerId, res.following);
       setFollowerCount(res.followerCount);
     } catch (err) {
-      setFollowing(!next);
+      setFollowed(manufacturerId, !next);
       if (isUnauthorized(err)) requireSignIn();
     } finally {
       setPending(false);

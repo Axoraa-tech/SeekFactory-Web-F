@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { getApi } from "@/shared/api";
@@ -418,6 +418,41 @@ export function FactoryDashboard({
 
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>(undefined);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Keep the inbox current (unread counts, last messages) while the hub is open. The refresh is
+  // also the presence heartbeat that shows this factory as online to buyers.
+  const activeConversationRef = useRef(activeConversationId);
+  activeConversationRef.current = activeConversationId;
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      getApi()
+        .messages.listRecent(50)
+        .then((list) => {
+          if (!active) return;
+          setConversations((prev) => {
+            const byId = new Map(list.map((c) => [c.id, c]));
+            return prev.map((c) => {
+              const fresh = byId.get(c.id);
+              if (!fresh) return c;
+              const open = c.id === activeConversationRef.current;
+              return {
+                ...c,
+                lastMessage: open ? c.lastMessage : fresh.lastMessage || c.lastMessage,
+                lastMessageTime: fresh.lastMessageAt || c.lastMessageTime,
+                unreadCount: open ? 0 : fresh.unreadCount,
+              };
+            });
+          });
+        })
+        .catch(() => {});
+    };
+    const timer = window.setInterval(refresh, 30_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   // Fetch real messages when opening a conversation
   useEffect(() => {
