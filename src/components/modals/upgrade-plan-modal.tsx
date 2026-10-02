@@ -94,7 +94,7 @@ export function UpgradePlanModal() {
             <X className="h-4 w-4" />
           </button>
 
-          <div className="relative z-10 space-y-2">
+          <div className="relative z-10 space-y-2 pr-10">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-xs border border-white/20">
               <Lock className="h-3.5 w-3.5 text-amber-300 shrink-0" />
               <span>{t("supplier.verifiedSupplierProtected")}</span>
@@ -389,11 +389,10 @@ export function UpgradePlanModal() {
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
             <span>{t("upgrade.n100SatisfactionGuaranteeDirectPlant")}</span>
           </div>
-           <button
+          <button
             type="button"
             onClick={closeUpgradeModal}
-            aria-label={t("common.close")}
-            className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white/90 backdrop-blur-md transition hover:bg-black/40 hover:text-white"
+            className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-200/70 hover:text-slate-900"
           >
             {t("upgrade.dismiss")}
           </button>

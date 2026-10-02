@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -26,6 +26,7 @@ import type { FeedTab } from "@/entities/reel";
 import { getApi } from "@/shared/api";
 import { LandscapeReelSkeleton } from "@/components/skeletons";
 import { feedSourceKey } from "@/features/feed/load-feed";
+import { useViewportLock } from "@/components/reels/use-viewport-lock";
 
 type Props = {
   /** Server-loaded seeks for the initial tab / subcategory / search (see feedSourceKey). */
@@ -420,14 +421,18 @@ export function HomeSeeksInteractiveFeed({
         <SingleSeekShowcase items={filteredItems} settings={showcase} />
       ) : showcase.mode === "SIDEBAR" ? (
         <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" />
-      ) : showcase.mode === "FEED" ? (
-        <FeedListShowcase items={filteredItems} settings={showcase} />
-      ) : showcase.mode === "COMPACT" ? (
-        <CompactListShowcase items={filteredItems} settings={showcase} />
-      ) : showcase.mode === "GRID" ? (
-        <GridTilesShowcase items={filteredItems} settings={showcase} />
-      ) : showcase.mode === "SPOTLIGHT" ? (
-        <SpotlightRailShowcase items={filteredItems} settings={showcase} />
+      ) : LIST_MODES.has(showcase.mode) ? (
+        <ListScroller enabled={filteredItems.length > 0}>
+          {showcase.mode === "FEED" ? (
+            <FeedListShowcase items={filteredItems} settings={showcase} />
+          ) : showcase.mode === "COMPACT" ? (
+            <CompactListShowcase items={filteredItems} settings={showcase} />
+          ) : showcase.mode === "GRID" ? (
+            <GridTilesShowcase items={filteredItems} settings={showcase} />
+          ) : (
+            <SpotlightRailShowcase items={filteredItems} settings={showcase} />
+          )}
+        </ListScroller>
       ) : (
         <ReelsFeed items={filteredItems} />
       )}
@@ -437,4 +442,21 @@ export function HomeSeeksInteractiveFeed({
 
 function initialSubcategoryId(slug: string, all: Category[]) {
   return slug ? all.find((c) => c.slug === slug)?.id ?? "" : "";
+}
+
+/** Showcase layouts that are one long list: on wide screens they scroll inside the page frame. */
+const LIST_MODES = new Set<string>(["FEED", "COMPACT", "GRID", "SPOTLIGHT"]);
+
+function ListScroller({ enabled, children }: { enabled: boolean; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const height = useViewportLock(ref, enabled);
+  return (
+    <div
+      ref={ref}
+      style={height ? { height } : undefined}
+      className={cn(height && "overflow-y-auto rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent")}
+    >
+      {children}
+    </div>
+  );
 }

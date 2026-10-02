@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   User,
-  Edit3,
   FileText,
   MessageSquare,
   Bell,
@@ -20,6 +19,8 @@ import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
 import { getApi } from "@/shared/api";
+import { resetFollowStore } from "@/features/engagement/follow-store";
+import { resetUnreadCounts, useUnreadCounts } from "@/features/inbox/unread-store";
 
 const PLAN_KEYS: Record<BuyerPlanTier, string> = {
   free: "userMenu.plan.free",
@@ -35,10 +36,14 @@ type UserDropdownProps = {
 
 export function UserDropdown({
   user,
-  messageCount = 0,
-  notificationCount = 0,
+  messageCount: initialMessageCount = 0,
+  notificationCount: initialNotificationCount = 0,
 }: UserDropdownProps) {
   const t = useTranslations();
+  const { messages: messageCount, notifications: notificationCount } = useUnreadCounts({
+    messages: initialMessageCount,
+    notifications: initialNotificationCount,
+  });
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -70,6 +75,8 @@ export function UserDropdown({
     try {
       setIsLoggingOut(true);
       await getApi().session.logout();
+      resetFollowStore();
+      resetUnreadCounts();
       setIsOpen(false);
       router.push("/");
       router.refresh();
@@ -139,6 +146,7 @@ export function UserDropdown({
 
           {/* Menu Sections */}
           <div className="space-y-0.5 text-xs font-medium text-ink">
+            {/* One entry: the profile page shows the details and edits them in place */}
             <Link
               href="/profile"
               onClick={() => setIsOpen(false)}
@@ -146,23 +154,8 @@ export function UserDropdown({
             >
               <div className="flex items-center gap-2.5">
                 <User className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>{t("userMenu.viewProfile")}</span>
+                <span>{t("userMenu.myProfile")}</span>
               </div>
-              <span className="text-[10px] text-ink-faint group-hover:text-brand-blue">{t("userMenu.public")}</span>
-            </Link>
-
-            <Link
-              href="/profile"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-canvas hover:text-brand-blue transition-colors group"
-            >
-              <div className="flex items-center gap-2.5">
-                <Edit3 className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
-                <span>{t("userMenu.editProfile")}</span>
-              </div>
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-ink-muted group-hover:bg-blue-100 group-hover:text-brand-blue">
-                {t("common.edit")}
-              </span>
             </Link>
 
             <Link
@@ -236,7 +229,7 @@ export function UserDropdown({
           {/* Account Settings & Sign out */}
           <div className="space-y-0.5 text-xs font-medium">
             <Link
-              href="/profile"
+              href="/profile#account-security"
               onClick={() => setIsOpen(false)}
               className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-ink hover:bg-canvas hover:text-brand-blue transition-colors group"
             >

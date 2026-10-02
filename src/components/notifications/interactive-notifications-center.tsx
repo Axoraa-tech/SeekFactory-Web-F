@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Building2,
   ExternalLink,
-  Check,
   Inbox,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
@@ -21,6 +20,8 @@ import { getApi } from "@/shared/api";
 import { formatRelativeTime } from "@/shared/lib/format";
 import { useLocale } from "next-intl";
 import { notificationHref } from "@/features/notifications/notification-links";
+import { useToast } from "@/components/ui/toast";
+import { refreshUnreadCounts } from "@/features/inbox/unread-store";
 
 type Props = {
   initialNotifications: AppNotification[];
@@ -33,12 +34,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
   const { t } = useRegionalSettings();
   const [notifications, setNotifications] = useState<AppNotification[]>(initialNotifications);
   const [activeTab, setActiveTab] = useState<NotificationCategory>("all");
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2400);
-  };
+  const toast = useToast();
 
   /** Optimistic update that is rolled back if the backend call fails. */
   const optimistic = async (next: AppNotification[], request: () => Promise<unknown>, success?: string) => {
@@ -46,10 +42,13 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
     setNotifications(next);
     try {
       await request();
-      if (success) showToast(success);
+      if (success) toast.success(success);
     } catch (err) {
       setNotifications(previous);
-      showToast(err instanceof Error ? err.message : t("notificationsCenter.couldNotUpdateNotifications"));
+      toast.error(err instanceof Error ? err.message : t("notificationsCenter.couldNotUpdateNotifications"));
+    } finally {
+      // Navbar, menu and tab-bar badges follow the change
+      void refreshUnreadCounts();
     }
   };
 
@@ -112,13 +111,6 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
   return (
     <div className="space-y-4">
       {/* Toast notification banner */}
-      {toastMessage && (
-        <div className="rounded-xl bg-slate-900 text-white px-4 py-2 text-xs font-semibold flex items-center justify-between shadow-lg animate-in fade-in slide-in-from-top-2">
-          <span>{toastMessage}</span>
-          <Check className="h-3.5 w-3.5 text-emerald-400" />
-        </div>
-      )}
-
       {/* Header with Title & Batch Controls */}
       <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -283,6 +275,15 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                   <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
                     <Link
                       href={actionHref}
+                      onClick={() => {
+                        // Opening what the notification is about reads it
+                        if (!isUnread) return;
+                        setNotifications((prev) => prev.map((n) => (n.id === item.id ? { ...n, read: true } : n)));
+                        void getApi()
+                          .notifications.markAsRead(item.id)
+                          .catch(() => {})
+                          .finally(() => void refreshUnreadCounts());
+                      }}
                       className="inline-flex items-center gap-1 font-bold text-brand-blue hover:underline text-[11px]"
                     >
                       <span>{t("notificationsCenter.takeActionViewDetails")}</span>
@@ -290,14 +291,19 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                     </Link>
 
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={(e) => handleToggleRead(item.id, e)}
-                        className="text-[11px] font-semibold text-slate-500 hover:text-brand-blue"
-                      >
-                        {isUnread ? t("notificationsCenter.markAsRead") : t("notificationsCenter.markAsUnread")}
-                      </button>
-                      <span>•</span>
+                      {/* The server has no "mark unread", so read items only offer Delete */}
+                      {isUnread && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={(e) => handleToggleRead(item.id, e)}
+                            className="text-[11px] font-semibold text-slate-500 hover:text-brand-blue"
+                          >
+                            {t("notificationsCenter.markAsRead")}
+                          </button>
+                          <span>•</span>
+                        </>
+                      )}
                       <button
                         type="button"
                         onClick={(e) => handleDelete(item.id, e)}

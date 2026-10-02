@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { LoadingScreen } from "@/components/ui/loading-screen";
+import { ToastProvider } from "@/components/ui/toast";
 import { RegionalSettingsProvider } from "@/shared/i18n/regional-context";
 import { BuyerPlanProvider } from "@/features/subscription";
 import { UpgradePlanModal } from "@/components/modals/upgrade-plan-modal";
@@ -36,12 +37,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className={`${sans.variable} font-sans antialiased`}>
         <NextIntlClientProvider>
         <RegionalSettingsProvider>
-          <LoadingScreen />
-          <BuyerPlanProvider>
-            {children}
-            <Analytics />
-            <UpgradePlanModal />
-          </BuyerPlanProvider>
+          <ToastProvider>
+            <LoadingScreen />
+            <BuyerPlanProvider>
+              {children}
+              <Analytics />
+              <UpgradePlanModal />
+            </BuyerPlanProvider>
+          </ToastProvider>
         </RegionalSettingsProvider>
         </NextIntlClientProvider>
       </body>

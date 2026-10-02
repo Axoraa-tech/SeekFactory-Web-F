@@ -51,6 +51,13 @@ import type { Cart, NewOrderRequest, OrderContact, OrderParty, OrderRequest, Ord
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
 import type { SellerStats } from "@/features/factory/types";
 import {
+  PORTAL_HEADER,
+  cookieNames,
+  parsePortal,
+  portalForUrl,
+  type Portal,
+} from "@/features/auth/auth-tokens";
+import {
   clearBrowserCookie,
   readBrowserCookie,
   writeBrowserCookie,
@@ -284,6 +291,8 @@ interface BackendConversation {
   lastMessage?: string;
   last_message_at?: string;
   lastMessageAt?: string;
+  counterpartOnline?: boolean;
+  counterpartLastSeenAt?: string;
 }
 
 interface BackendMessage {
@@ -425,27 +434,23 @@ export function createHttpApi(baseUrl: string): ApiClient {
    * Helper to get JWT auth header from cookie on client or server
    */
   async function getAuthHeaders(): Promise<Record<string, string>> {
-    let token: string | undefined;
-
-    if (typeof window === "undefined") {
-      try {
-        const { cookies } = await import("next/headers");
-        const jar = await cookies();
-        token = jar.get("sf-access-token")?.value;
-      } catch {
-        // Fallback for non-cookie server contexts
-      }
-    } else {
-      // Client-side requests go to /api/proxy, browser sends HttpOnly cookies automatically
-      token = undefined;
-    }
-
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+    if (typeof window === "undefined") {
+      // Server rendering / server actions: the middleware named this request's section
+      try {
+        const { cookies, headers: requestHeaders } = await import("next/headers");
+        const portal = parsePortal((await requestHeaders()).get(PORTAL_HEADER)) ?? "buyer";
+        const token = (await cookies()).get(cookieNames(portal).access)?.value;
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      } catch {
+        // Fallback for non-cookie server contexts
+      }
+    } else {
+      // Browser calls go through /api/proxy, which picks the section's HttpOnly cookies
+      headers[PORTAL_HEADER] = browserPortal();
     }
 
     return headers;
@@ -459,7 +464,9 @@ export function createHttpApi(baseUrl: string): ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const isGet = !options.method || options.method.toUpperCase() === "GET";
-    const cacheKey = isGet ? endpoint : null;
+    // A call for an explicit section (sign-in) must not reuse another section's in-flight request
+    const explicitPortal = (options.headers as Record<string, string> | undefined)?.[PORTAL_HEADER];
+    const cacheKey = isGet && !explicitPortal ? endpoint : null;
 
     if (cacheKey && pendingRequests.has(cacheKey)) {
       return pendingRequests.get(cacheKey) as Promise<T>;
@@ -523,7 +530,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
   // ── 1. SESSION REPOSITORY ──────────────────────────────────────
   /** Display-only session cookie; the credential itself lives in the HttpOnly sf-access-token cookie. */
-  function rememberSession(res: BackendAuthResponse) {
+  function rememberSession(res: BackendAuthResponse, portal: Portal) {
     const sessionData: SessionPayload = {
       id: res.user?.id || res.userId || res.user_id || "",
       name: res.user?.name || res.name || "",
@@ -531,8 +538,24 @@ export function createHttpApi(baseUrl: string): ApiClient {
       email: res.user?.email || res.email || "",
       companyName: res.user?.companyName || res.user?.company_name || res.companyName || res.company_name || "",
     };
-    writeBrowserCookie(sessionData);
+    writeBrowserCookie(sessionData, portal);
   }
+
+  /** Signed-in user of one section, used right after signing in to that section. */
+  async function currentUserFor(portal: Portal): Promise<BuyerProfile | null> {
+    try {
+      const user = await fetchJson<BackendUser>("/api/v1/auth/me", {
+        cache: "no-store",
+        headers: { [PORTAL_HEADER]: portal },
+      });
+      return user ? toProfile(user) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** The sign-in tab decides the section: Manufacturer signs in to the seller hub, Buyer to the buyer site. */
+  const portalForRole = (role: JoinInput["role"]): Portal => (role === "Supplier" ? "seller" : "buyer");
 
   const session: SessionRepository = {
     async getCurrentUser(): Promise<BuyerProfile | null> {
@@ -547,8 +570,10 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
     async join(input: JoinInput): Promise<SignInResult> {
       if (!input.password) throw new Error("Password is required");
+      const portal = portalForRole(input.role);
       const res = await fetchJson<BackendAuthResponse>("/api/v1/auth/register", {
         method: "POST",
+        headers: { [PORTAL_HEADER]: portal },
         body: JSON.stringify({
           name: input.name || input.email?.split("@")[0],
           email: input.email,
@@ -560,24 +585,27 @@ export function createHttpApi(baseUrl: string): ApiClient {
           phone: input.phone,
         }),
       });
-      rememberSession(res);
-      const profile = (await session.getCurrentUser()) ?? authResponseToProfile(res);
+      rememberSession(res, portal);
+      const profile = (await currentUserFor(portal)) ?? authResponseToProfile(res);
       return { ...profile, firstLogin: res.firstLogin === true };
     },
 
     async login(input: LoginInput): Promise<SignInResult> {
+      const portal = portalForRole(input.role);
       const res =
         input.method === "phone" && input.phone
           ? await fetchJson<BackendAuthResponse>("/api/v1/auth/login/phone", {
               method: "POST",
+              headers: { [PORTAL_HEADER]: portal },
               body: JSON.stringify({ phone: input.phone, otp: input.otp, role: input.role, companyName: input.companyName }),
             })
           : await fetchJson<BackendAuthResponse>("/api/v1/auth/login", {
               method: "POST",
+              headers: { [PORTAL_HEADER]: portal },
               body: JSON.stringify({ email: input.email, password: input.password }),
             });
-      rememberSession(res);
-      const profile = (await session.getCurrentUser()) ?? authResponseToProfile(res);
+      rememberSession(res, portal);
+      const profile = (await currentUserFor(portal)) ?? authResponseToProfile(res);
       return { ...profile, firstLogin: res.firstLogin === true };
     },
 
@@ -587,7 +615,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       } catch {
         // The proxy clears the auth cookies either way
       } finally {
-        clearBrowserCookie();
+        clearBrowserCookie(browserPortal());
       }
     },
 
@@ -598,8 +626,9 @@ export function createHttpApi(baseUrl: string): ApiClient {
       });
       const profile = toProfile(updated);
       if (typeof window !== "undefined") {
-        const current = readBrowserCookie();
-        if (current) writeBrowserCookie({ ...current, name: profile.name, companyName: profile.companyName });
+        const portal = browserPortal();
+        const current = readBrowserCookie(portal);
+        if (current) writeBrowserCookie({ ...current, name: profile.name, companyName: profile.companyName }, portal);
       }
       return profile;
     },
@@ -914,6 +943,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
             lastMessage: lastMsg,
             lastMessageAt: lastAt,
             unreadCount: item.unreadCount ?? item.unread_count ?? 0,
+            counterpartOnline: Boolean(item.counterpartOnline),
+            counterpartLastSeenAt: item.counterpartLastSeenAt || undefined,
             manufacturer: normalizeManufacturer(item.manufacturer || {}),
           };
         });
@@ -996,6 +1027,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
         lastMessage: item.lastMessage || (typeof item.last_message === "string" ? item.last_message : item.last_message?.content || ""),
         lastMessageAt: item.lastMessageAt || item.last_message_at || "",
         unreadCount: item.unreadCount ?? item.unread_count ?? 0,
+        counterpartOnline: Boolean(item.counterpartOnline),
+        counterpartLastSeenAt: item.counterpartLastSeenAt || undefined,
         manufacturer: normalizeManufacturer(item.manufacturer || {}),
       };
     },
@@ -1007,6 +1040,16 @@ export function createHttpApi(baseUrl: string): ApiClient {
         });
       } catch {
         // Safe ignore
+      }
+    },
+
+    async unreadCount(): Promise<number> {
+      try {
+        const res = await fetchJson<{ count: number }>("/api/v1/conversations/unread-count", { cache: "no-store" });
+        return res.count || 0;
+      } catch {
+        // Badge only: never break the page over it (guests get 401)
+        return 0;
       }
     },
 
@@ -1662,6 +1705,11 @@ function normalizeCategory(c: BackendCategory): Category {
   };
 }
 
+/** Section of the page the browser is on (the seller hub or the buyer site). */
+function browserPortal(): Portal {
+  return portalForUrl(window.location.pathname, new URLSearchParams(window.location.search));
+}
+
 function toProfile(user: BackendUser): BuyerProfile {
   return {
     id: user.id,
@@ -1672,6 +1720,7 @@ function toProfile(user: BackendUser): BuyerProfile {
     industry: user.industry || "",
     country: user.country || "",
     email: user.email,
+    emailVerified: user.emailVerified,
     phone: user.phone,
     taxId: user.taxId,
     address: user.address,

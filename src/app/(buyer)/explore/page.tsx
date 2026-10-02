@@ -1,10 +1,11 @@
+import { Price } from "@/components/ui/price";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { ProductImageCarousel } from "@/components/products/product-image-carousel";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { VerifiedManufacturersSection } from "@/features/explore/verified-manufacturers-section";
 import { getApi } from "@/shared/api";
 import { buildCategoryTree } from "@/features/categories/category-tree";
-import { formatPriceInr } from "@/shared/lib/format";
 import { Package, ShieldCheck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -100,14 +101,14 @@ export default async function ExplorePage({ searchParams }: Props) {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleProducts.map((product) => (
+          {visibleProducts.map((product, index) => (
             <Link key={product.id} href={`/products/${product.slug}`} className="group">
               <Card className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white hover:border-brand-orange/40 hover:shadow-md transition-all flex flex-col h-full">
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img loading="lazy" decoding="async" src={product.imageUrl}
+                  <ProductImageCarousel
+                    images={product.imageUrls?.length ? product.imageUrls : [product.imageUrl]}
                     alt={product.name}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    index={index}
                   />
                   <div className="absolute top-2 left-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-emerald-400" />
@@ -123,7 +124,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                   </div>
                   <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
                     <p className="text-xs sm:text-sm font-bold text-brand-orange">
-                      {formatPriceInr(product.priceInr)} <span className="text-[10px] font-normal text-neutral-500">/ {product.unit}</span>
+                      <Price inr={product.priceInr} /> <span className="text-[10px] font-normal text-neutral-500">/ {product.unit}</span>
                     </p>
                     <span className="text-[11px] font-semibold text-brand-blue group-hover:underline">{t("explore.inquire")}</span>
                   </div>

@@ -1,11 +1,13 @@
 "use client";
 
+import { Price } from "@/components/ui/price";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Eye, Heart, ImageOff, MapPin, Pause, Play, Users, Volume2, VolumeX } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
-import { formatCount, formatPriceInr } from "@/shared/lib/format";
+import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { useTranslations } from "next-intl";
@@ -36,6 +38,8 @@ type Props = {
 export function SingleSeekShowcase({ items, settings, variant = "single" }: Props) {
   const t = useTranslations();
   const scrollerRef = useRef<HTMLDivElement>(null);
+  // Side by side from lg: the page stays put and the player fills the window below the Seeks bar
+  const playerHeight = useViewportLock(scrollerRef, items.length > 0, 1024);
   const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const [active, setActive] = useState(0);
   const [muted, setMuted] = useState(true);
@@ -79,7 +83,11 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
   const go = useCallback((index: number) => {
     const root = scrollerRef.current;
     const target = root?.querySelector<HTMLElement>(`[data-index="${Math.max(0, Math.min(items.length - 1, index))}"]`);
-    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Scroll the player only; scrollIntoView would also move the (locked) page
+    if (root && target) {
+      const top = target.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
+      root.scrollTo({ top, behavior: "smooth" });
+    }
   }, [items.length]);
 
   // Arrow keys move between seeks (ignored while typing)
@@ -131,6 +139,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
         <div className="relative">
           <div
             ref={scrollerRef}
+            style={playerHeight ? { height: playerHeight } : undefined}
             className="h-[58vh] min-h-[340px] lg:h-[calc(100vh-240px)] lg:min-h-[480px] overflow-y-auto snap-y snap-mandatory rounded-2xl bg-slate-950 scrollbar-none"
             aria-label={t("common.seeks")}
           >
@@ -316,7 +325,7 @@ function PhotoPanel({ item }: { item: FeedItem }) {
                 )}
               </div>
               <p className="mt-1.5 text-xs font-semibold text-ink line-clamp-2">{p.name}</p>
-              {p.priceInr > 0 && <p className="text-xs text-ink-muted">{formatPriceInr(p.priceInr)}{p.unit ? ` / ${p.unit}` : ""}</p>}
+              {p.priceInr > 0 && <p className="text-xs text-ink-muted"><Price inr={p.priceInr} />{p.unit ? ` / ${p.unit}` : ""}</p>}
             </Link>
           ))}
         </div>

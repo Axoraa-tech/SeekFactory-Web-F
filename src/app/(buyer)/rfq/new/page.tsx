@@ -1,6 +1,7 @@
 import { requireUser } from "@/features/auth/require-user";
 import { RfqForm } from "@/features/rfq/rfq-form";
 import { getApi } from "@/shared/api";
+import { compareCategories } from "@/features/categories/category-tree";
 import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,7 @@ export default async function NewRfqPage({ searchParams }: Props) {
     api.categories.list(),
     product ? api.products.getBySlug(product) : Promise.resolve(null),
   ]);
-  const roots = allCategories.filter((c) => !c.parentId).sort((a, b) => a.name.localeCompare(b.name));
+  const roots = allCategories.filter((c) => !c.parentId).sort(compareCategories);
 
   // RFQs are filed under a top-level category; factories in its subcategories receive them too
   const rootOf = (id?: string) => {

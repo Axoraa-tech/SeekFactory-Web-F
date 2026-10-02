@@ -79,7 +79,12 @@ export function ChatThreadList({
                   alt={thread.manufacturer.name}
                   className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs"
                 />
-                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white" />
+                {thread.counterpartOnline && (
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white"
+                    title={t("chat.online")}
+                  />
+                )}
               </div>
 
               <div className="min-w-0 flex-1">
