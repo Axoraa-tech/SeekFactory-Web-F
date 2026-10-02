@@ -34,7 +34,7 @@ import type {
   UploadKind,
 } from "@/shared/api/contracts";
 import type { CartItem } from "@/entities/order";
-import type { BuyerPlan, ExchangeRates } from "@/entities/plan";
+import type { BuyerPlan, ExchangeRates, PlanPayment, PlanPaymentInput } from "@/entities/plan";
 import type { NotificationType } from "@/entities/notification";
 import type { PriceTier } from "@/entities/product";
 import type { RfqQuote } from "@/entities/rfq";
@@ -639,6 +639,21 @@ export function createHttpApi(baseUrl: string): ApiClient {
         body: JSON.stringify({ plan }),
       });
       return toProfile(updated);
+    },
+
+    async submitPlanPayment(input: PlanPaymentInput): Promise<PlanPayment> {
+      const body = new FormData();
+      body.append("file", input.file);
+      body.append("plan", input.plan);
+      body.append("region", input.region);
+      if (input.reference?.trim()) body.append("reference", input.reference.trim());
+      const created = await fetchJson<BackendPlanPayment>("/api/v1/payments", { method: "POST", body });
+      return toPlanPayment(created);
+    },
+
+    async listMyPlanPayments(): Promise<PlanPayment[]> {
+      const list = await fetchJson<BackendPlanPayment[]>("/api/v1/payments/mine", { cache: "no-store" });
+      return (list ?? []).map(toPlanPayment);
     },
   };
 
@@ -1746,6 +1761,32 @@ function authResponseToProfile(res: BackendAuthResponse): BuyerProfile {
 function normalizePlan(plan: string | undefined): BuyerPlanTier {
   const value = plan?.toLowerCase();
   return value === "pro" || value === "enterprise" ? value : "free";
+}
+
+interface BackendPlanPayment {
+  id: string;
+  planName: string;
+  planCode?: string;
+  currency: string;
+  amount: number;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  rejectionReason?: string | null;
+  createdAt?: string | null;
+  reviewedAt?: string | null;
+}
+
+function toPlanPayment(p: BackendPlanPayment): PlanPayment {
+  return {
+    id: p.id,
+    planName: p.planName,
+    planCode: normalizePlan(p.planCode),
+    currency: p.currency,
+    amount: Number(p.amount),
+    status: p.status,
+    rejectionReason: p.rejectionReason ?? undefined,
+    createdAt: p.createdAt ?? undefined,
+    reviewedAt: p.reviewedAt ?? undefined,
+  };
 }
 
 function normalizeReply(r: BackendCommentReply): ReelCommentReply {

@@ -1551,6 +1551,31 @@
       "packagingDeliveryWindowInspectionRequirements": "包装、交货时间、验货要求…"
     }
   },
+  "payment": {
+    "payTitle": "支付 {plan}",
+    "step1": "使用支付宝扫码付款",
+    "step2": "上传付款凭证",
+    "amountToPay": "应付金额",
+    "qrNote": "此二维码不固定金额，请务必输入 {amount}。",
+    "openScan": "在支付宝中打开“扫一扫”",
+    "proofLabel": "付款截图或发票",
+    "proofHint": "JPG、PNG、WebP 或 PDF，最大 5 MB",
+    "chooseFile": "选择文件",
+    "referenceLabel": "交易单号（选填）",
+    "referencePlaceholder": "支付宝订单号",
+    "submit": "提交付款",
+    "submitting": "提交中…",
+    "back": "返回",
+    "pleaseAttach": "请上传付款截图或发票",
+    "fileTooLarge": "文件过大，最大 5 MB。",
+    "fileType": "仅支持 JPG、PNG、WebP 或 PDF 文件",
+    "underReviewTitle": "付款审核中",
+    "underReviewBody": "我们已收到您 {plan} 的付款凭证，管理员确认后将立即开通方案。",
+    "rejectedTitle": "上次付款未通过审核",
+    "rejectedBody": "原因：{reason}。您可以重新提交凭证。",
+    "couldNotSubmit": "付款提交失败",
+    "submittedThanks": "付款已提交，我们会尽快确认。"
+  },
   "plans": {
     "signInToChangeYour": "请先登录再更换方案",
     "couldNotChangeYourPlan": "方案更换失败",

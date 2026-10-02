@@ -33,7 +33,7 @@ export default function AdminRfqsPage() {
 
   const { data, error, loading, reload, patch } = useAdminList(adminData.rfqs, {
     q: query, status, page, size: PAGE_SIZE,
-  });
+  }, { refreshMs: 15_000 });
 
   const changeStatus = async (rfq: AdminRfq, next: string) => {
     if (next === rfq.status) return;

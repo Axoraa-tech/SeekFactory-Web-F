@@ -8,7 +8,7 @@ import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
 import type { Cart, NewOrderRequest, OrderContact, OrderRequest, OrderStatus } from "@/entities/order";
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
-import type { BuyerPlan, ExchangeRates } from "@/entities/plan";
+import type { BuyerPlan, ExchangeRates, PlanPayment, PlanPaymentInput } from "@/entities/plan";
 import type { JoinInput, LoginInput } from "@/features/auth/session-cookie";
 import type { SellerStats } from "@/features/factory/types";
 
@@ -64,8 +64,12 @@ export interface SessionRepository {
     address?: string;
     avatarUrl?: string;
   }): Promise<BuyerProfile>;
-  /** Switches the buyer's membership tier. No payment is collected yet. */
+  /** Switches the buyer's membership tier. Paid tiers are refused here: they need an approved payment. */
   updatePlan(plan: BuyerPlanTier): Promise<BuyerProfile>;
+  /** Uploads proof of payment for a paid plan; an admin approves it before the plan activates. */
+  submitPlanPayment(input: PlanPaymentInput): Promise<PlanPayment>;
+  /** The signed-in buyer's payment requests, newest first (empty for guests). */
+  listMyPlanPayments(): Promise<PlanPayment[]>;
 }
 
 export interface FeedRepository {

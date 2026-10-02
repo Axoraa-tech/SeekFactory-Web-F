@@ -44,7 +44,7 @@ function ManufacturersView() {
 
   const { data, error, loading, reload, patch } = useAdminList(adminData.manufacturers, {
     q: query, filter, page, size: PAGE_SIZE,
-  });
+  }, { refreshMs: 15_000 });
 
   useEffect(() => {
     adminData.plans().then(setPlans).catch(() => setPlans([]));

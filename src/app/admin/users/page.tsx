@@ -25,7 +25,7 @@ export default function AdminUsersPage() {
 
   const { data, error, loading, reload, patch } = useAdminList(adminData.users, {
     q: query, role, status, page, size: PAGE_SIZE,
-  });
+  }, { refreshMs: 30_000 });
 
   const setActive = async (u: AdminUser, active: boolean) => {
     patch((r) => r.id === u.id, { active });

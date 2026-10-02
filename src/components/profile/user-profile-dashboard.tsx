@@ -146,7 +146,7 @@ export function UserProfileDashboard({
   const handleUpgradeTier = async (next: MembershipTier) => {
     const result = await upgradeTier(next);
     if (!result.ok) {
-      toast.error(result.message);
+      if (!result.redirected) toast.error(result.message);
       return;
     }
     toast.success(
