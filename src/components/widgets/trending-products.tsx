@@ -1,5 +1,6 @@
 "use client";
 
+import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
@@ -31,11 +32,13 @@ export function TrendingProducts({ products }: Props) {
       <div className="grid grid-cols-2 gap-2.5">
         {visible.map((product) => (
           <Link key={product.id} href={`/products/${product.slug}`} className="block">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img loading="lazy" decoding="async" src={product.imageUrl}
-              alt={translateProduct(product.name)}
-              className="h-24 w-full rounded-lg object-cover"
-            />
+            <div className="h-24 w-full overflow-hidden rounded-lg">
+              <SafeImage
+                src={product.imageUrl}
+                alt={translateProduct(product.name)}
+                className="h-full w-full object-cover"
+              />
+            </div>
             <p className="mt-1.5 line-clamp-2 text-xs font-semibold leading-snug">{translateProduct(product.name)}</p>
             <p className="mt-0.5 text-xs font-bold text-brand-blue">
               {formatPrice(product.priceInr)} / {translateUnit(product.unit)}

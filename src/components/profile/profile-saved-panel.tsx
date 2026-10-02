@@ -1,8 +1,9 @@
 "use client";
 
+import { Price } from "@/components/ui/price";
 import Link from "next/link";
 import { Bookmark, Trash2, ShoppingCart, Zap, Eye, Heart } from "lucide-react";
-import { formatCount, formatPriceInr } from "@/shared/lib/format";
+import { formatCount } from "@/shared/lib/format";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import type { Product } from "@/entities/product";
 import type { FeedItem } from "@/shared/api/contracts";
@@ -70,7 +71,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                     {p.priceInr > 0 ? (
                       <>
                         <span className="text-sm sm:text-base font-extrabold text-ink">
-                          {formatPriceInr(p.priceInr)}
+                          <Price inr={p.priceInr} />
                         </span>
                         {p.unit ? <span className="text-[11px] text-ink-faint">/{p.unit}</span> : null}
                       </>

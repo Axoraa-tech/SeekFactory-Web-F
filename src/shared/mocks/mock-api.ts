@@ -298,6 +298,7 @@ const messages: MessageRepository = {
   async markAsRead(conversationId: string) {
     return delay(undefined);
   },
+  unreadCount: () => delay(conversations.reduce((sum, item) => sum + item.unreadCount, 0)),
   onMessageStream(conversationId: string, callback: (message: MessageItem) => void) {
     return () => {};
   },

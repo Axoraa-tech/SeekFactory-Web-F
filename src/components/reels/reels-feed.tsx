@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { ReelCard } from "@/components/reels/reel-card";
 import { ReelPopupProvider } from "@/components/reels/use-reel-popup";
 import { ReelPopupModal } from "@/components/reels/reel-popup-modal";
+import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
 import { useTranslations } from "next-intl";
 
@@ -18,6 +19,9 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
 
   const trackLeftRef = useRef<HTMLDivElement>(null);
   const trackRightRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const trackHeight = useViewportLock(gridRef, items.length > 0);
+  const trackStyle = trackHeight ? { height: trackHeight } : undefined;
 
   // Build left/right columns preserving original feed index for popup navigation
   const leftItems = items
@@ -64,12 +68,13 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
 
       <div className="space-y-4">
         {/* 2 Independent Vertical Scroll Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 items-start">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 items-start">
           {/* COLUMN 1: LEFT TRACK */}
           <div className="space-y-2">
             <div
               ref={trackLeftRef}
-              className="h-[calc(100vh-180px)] sm:h-[calc(100vh-210px)] min-h-[520px] sm:min-h-[680px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+              style={trackStyle}
+              className="h-[calc(100vh-180px)] min-h-[520px] md:h-[calc(100dvh-230px)] md:min-h-[320px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
             >
               {leftItems.map(({ item, originalIndex }) => (
                 <div
@@ -96,7 +101,8 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
           <div className="space-y-2">
             <div
               ref={trackRightRef}
-              className="h-[calc(100vh-180px)] sm:h-[calc(100vh-210px)] min-h-[520px] sm:min-h-[680px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+              style={trackStyle}
+              className="h-[calc(100vh-180px)] min-h-[520px] md:h-[calc(100dvh-230px)] md:min-h-[320px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
             >
               {finalRightItems.map(({ item, originalIndex }) => (
                 <div

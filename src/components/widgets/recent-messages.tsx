@@ -7,14 +7,39 @@ import type { Conversation } from "@/entities/message";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { useLocale } from "next-intl";
 import { formatRelativeTime } from "@/shared/lib/format";
+import { useEffect, useRef, useState } from "react";
+import { getApi } from "@/shared/api";
+import { useUnreadCounts } from "@/features/inbox/unread-store";
 
 type Props = {
   messages: (Conversation & { manufacturer: Manufacturer })[];
 };
 
-export function RecentMessages({ messages }: Props) {
+export function RecentMessages({ messages: initialMessages }: Props) {
   const locale = useLocale();
   const { t } = useRegionalSettings();
+  const [messages, setMessages] = useState(initialMessages);
+
+  // Reload the per-chat counts whenever the total unread count changes (a chat read or a new message)
+  const unreadTotal = useUnreadCounts({
+    messages: initialMessages.reduce((sum, item) => sum + item.unreadCount, 0),
+    notifications: 0,
+  }).messages;
+  const lastTotal = useRef(unreadTotal);
+  useEffect(() => {
+    if (lastTotal.current === unreadTotal) return;
+    lastTotal.current = unreadTotal;
+    let active = true;
+    getApi()
+      .messages.listRecent(initialMessages.length || 3)
+      .then((list) => {
+        if (active) setMessages(list);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [unreadTotal, initialMessages.length]);
 
   return (
     <Card className="p-4">
@@ -27,7 +52,7 @@ export function RecentMessages({ messages }: Props) {
       <ul className="space-y-3">
         {messages.map((message) => (
           <li key={message.id}>
-            <Link href="/messages" className="flex items-start gap-2.5">
+            <Link href={`/messages?conversation=${encodeURIComponent(message.id)}`} className="flex items-start gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img loading="lazy" decoding="async" src={message.manufacturer.logoUrl}
                 alt=""

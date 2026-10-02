@@ -139,6 +139,8 @@ export interface MessageRepository {
   listConversationOrders(conversationId: string): Promise<OrderRequest[]>;
   startConversation(manufacturerId: string, initialMessage?: string): Promise<Conversation & { manufacturer: Manufacturer }>;
   markAsRead(conversationId: string): Promise<void>;
+  /** Unread messages across all of the viewer's conversations (0 for guests). */
+  unreadCount(): Promise<number>;
   onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void;
 }
 

@@ -1,9 +1,10 @@
 "use client";
 
+import { Price } from "@/components/ui/price";
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { EmptyShowcase, FactoryLine, Hashtags, Poster, SeekActions, Stats } from "@/components/reels/showcase-parts";
-import { formatDuration, formatPriceInr } from "@/shared/lib/format";
+import { formatDuration } from "@/shared/lib/format";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 
@@ -55,7 +56,7 @@ export function CompactListShowcase({ items, settings }: Props) {
 
               {product && (
                 <p className="truncate text-xs text-ink-muted">
-                  <span className="font-medium text-ink">{formatPriceInr(product.priceInr)}</span>
+                  <span className="font-medium text-ink"><Price inr={product.priceInr} /></span>
                   {product.unit ? ` / ${product.unit}` : ""}
                   {product.moq ? ` · MOQ ${product.moq}` : ""}
                 </p>

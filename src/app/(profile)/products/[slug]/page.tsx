@@ -1,3 +1,5 @@
+import { Price } from "@/components/ui/price";
+import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -16,7 +18,6 @@ import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { ProductGallery } from "@/components/ui/product-gallery";
 import { TrackProductView } from "@/features/analytics/track-product-view";
 import { getApi } from "@/shared/api";
-import { formatPriceInr } from "@/shared/lib/format";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import type { Product } from "@/entities/product";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -103,12 +104,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 href={`/manufacturers/${manufacturer.slug}`}
                 className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={manufacturer.logoUrl}
-                  alt={manufacturer.name}
-                  className="h-12 w-12 rounded-xl border border-slate-200 object-cover shrink-0 shadow-2xs"
-                />
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-200 shadow-2xs">
+                  <SafeImage src={manufacturer.logoUrl} alt={manufacturer.name} className="h-full w-full object-cover" />
+                </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="font-bold text-sm text-slate-900 truncate">{manufacturer.name}</p>
@@ -230,7 +228,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                             : "mt-1 text-sm sm:text-base font-extrabold text-slate-900"
                         }
                       >
-                        {formatPriceInr(band.priceInr)}
+                        <Price inr={band.priceInr} />
                       </p>
                       {band.savingPercent > 0 ? (
                         <p className="text-[10px] text-emerald-600 font-bold">{t("product.page.save")} {band.savingPercent}%</p>
