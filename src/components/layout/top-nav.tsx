@@ -320,7 +320,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
                 forYouHref="/"
                 sticky={false}
                 collapseOnScroll
-                className="rounded-none border-0 bg-transparent shadow-none"
+                className="rounded-none border-0 bg-transparent shadow-none backdrop-blur-none"
               />
             </div>
           </div>
