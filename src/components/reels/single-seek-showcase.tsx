@@ -102,6 +102,58 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
     return () => window.removeEventListener("keydown", onKey);
   }, [active, go]);
 
+  // Controlled single-seek scroll lock on mouse wheel and trackpad two-finger scroll
+  useEffect(() => {
+    const root = scrollerRef.current;
+    if (!root) return;
+
+    let isLocked = false;
+    let unlockTimer: NodeJS.Timeout | null = null;
+    let accumulatedDelta = 0;
+
+    const onWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-prevent-seek-wheel]")) return;
+
+      e.preventDefault();
+
+      if (isLocked) {
+        if (unlockTimer) clearTimeout(unlockTimer);
+        unlockTimer = setTimeout(() => {
+          isLocked = false;
+          accumulatedDelta = 0;
+        }, 200);
+        return;
+      }
+
+      accumulatedDelta += e.deltaY;
+      if (Math.abs(accumulatedDelta) >= 12) {
+        const direction = accumulatedDelta > 0 ? 1 : -1;
+        accumulatedDelta = 0;
+        isLocked = true;
+
+        setActive((curr) => {
+          const next = Math.max(0, Math.min(items.length - 1, curr + direction));
+          const el = root.querySelector<HTMLElement>(`[data-index="${next}"]`);
+          el?.scrollIntoView({ behavior: "smooth", block: "start" });
+          return next;
+        });
+
+        if (unlockTimer) clearTimeout(unlockTimer);
+        unlockTimer = setTimeout(() => {
+          isLocked = false;
+          accumulatedDelta = 0;
+        }, 550);
+      }
+    };
+
+    root.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      if (unlockTimer) clearTimeout(unlockTimer);
+      root.removeEventListener("wheel", onWheel);
+    };
+  }, [items.length]);
+
   if (items.length === 0) {
     return (
       <div className="rounded-card border border-line bg-surface p-8 text-center text-sm text-ink-muted">
