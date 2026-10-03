@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Monitor, Smartphone, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { RoleToggle } from "@/features/auth/role-toggle";
+import { GoogleSignInButton } from "@/features/auth/google-sign-in-button";
+import { featureFlags } from "@/shared/config/flags";
 
 import { postAuthPath } from "@/features/auth/session-cookie";
 import { useToast } from "@/components/ui/toast";
@@ -125,9 +127,20 @@ export function AuthCard({
 
 
 
-  /** Guests browse without an account; sign-in is only needed to like, save, message or order. */
-  function handleGuestLogin(view: "landscape" | "vertical") {
-    router.push(`/?view=${view}`);
+  /** Google sign-in is buyer-only: the backend signs in, links by verified email, or creates the account. */
+  async function handleGoogleCredential(idToken: string) {
+    setError("");
+    setNotice("");
+    setSaving(true);
+    try {
+      const user = await getApi().session.loginWithGoogle(idToken);
+      // First Google sign-in: name, email and photo come from Google; let them review it and add the rest
+      router.push(user.firstLogin && !next ? "/profile?welcome=1" : postAuthPath("Buyer", next, user.firstLogin));
+      router.refresh();
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : t("auth.card.googleSignInFailed"));
+      setSaving(false);
+    }
   }
 
   //? To Validate Password 
@@ -318,6 +331,12 @@ export function AuthCard({
         >
           {t("auth.card.continueWithWechat")}
         </button>
+      ) : featureFlags.googleOAuth ? (
+        <GoogleSignInButton
+          mode={mode}
+          onCredential={handleGoogleCredential}
+          onError={() => setError(t("auth.card.googleSignInFailed"))}
+        />
       ) : (
         <button
           type="button"
@@ -328,35 +347,6 @@ export function AuthCard({
           {t("auth.card.continueWithGoogle")}
         </button>
       )}
-
-      {/* Instant Guest Demo Buttons */}
-      <div className="my-3.5 flex items-center gap-2 text-[11px] sm:text-xs text-slate-400">
-        <span className="h-px flex-1 bg-slate-200" />
-        <span>{t("auth.card.quickGuestAccess")}</span>
-        <span className="h-px flex-1 bg-slate-200" />
-      </div>
-
-      <div className="space-y-2">
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => handleGuestLogin("landscape")}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:border-brand-blue/30 transition-all active:scale-[0.99] shadow-2xs group"
-        >
-          <Monitor className="h-3.5 w-3.5 text-brand-blue group-hover:scale-110 transition-transform" />
-          <span>{t("auth.card.guestLandscapeB2bFeed")}</span>
-        </button>
-
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => handleGuestLogin("vertical")}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/70 px-3 text-xs font-semibold text-slate-700 hover:bg-orange-100/80 hover:border-orange-300 transition-all active:scale-[0.99] shadow-2xs group"
-        >
-          <Smartphone className="h-3.5 w-3.5 text-[#FF3D00] group-hover:scale-110 transition-transform" />
-          <span>{t("auth.card.guestVerticalSeeksFeed")}</span>
-        </button>
-      </div>
 
       <p className="mt-4 sm:mt-5 text-center text-xs sm:text-sm">
         {mode === "join" ? (

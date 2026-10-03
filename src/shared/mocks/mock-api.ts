@@ -97,6 +97,10 @@ const session: SessionRepository = {
     writeBrowserCookie(payload);
     return delay(payloadToProfile(payload));
   },
+  async loginWithGoogle() {
+    // Google has to verify the token server-side, so there is no mock sign-in
+    throw new Error("Google sign-in needs the live backend.");
+  },
   async logout() {
     clearBrowserCookie();
     return delay(undefined);

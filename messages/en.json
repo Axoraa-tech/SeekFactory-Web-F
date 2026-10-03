@@ -585,6 +585,15 @@
       "loadingProfile": "Loading profile…",
       "nameIsRequired": "Please enter your name.",
       "companyNameIsRequired": "Please enter your company name."
+    },
+    "avatar": {
+      "change": "Change profile photo",
+      "updated": "Profile photo updated",
+      "uploadFailed": "Could not upload the photo. Please try again.",
+      "notAnImage": "Please choose an image file.",
+      "tooLarge": "Photo must be 5 MB or smaller.",
+      "welcomeTitle": "Welcome to SeekFactory!",
+      "welcomeBody": "We filled in your name, email and photo from Google. Add your company details below, and tap the camera to change your photo."
     }
   },
   "membership": {
@@ -830,10 +839,8 @@
       "wechatLoginWillConnectWhen": "WeChat login will connect when the China backend is ready.",
       "continueWithWechat": "Continue with WeChat",
       "googleLoginWillConnectWhen": "Google login will connect when the backend is ready.",
+      "googleSignInFailed": "Google sign-in failed. Please try again or use email.",
       "continueWithGoogle": "Continue with Google",
-      "quickGuestAccess": "⚡ Quick Guest Access",
-      "guestLandscapeB2bFeed": "Guest: Landscape B2B Feed",
-      "guestVerticalSeeksFeed": "Guest: Vertical Seeks Feed",
       "alreadyOnSeekfactory": "Already on SeekFactory?",
       "newToSeekfactory": "New to SeekFactory?",
       "welcomeCheckEmail": "Welcome to SeekFactory! We sent a verification link to {email}."

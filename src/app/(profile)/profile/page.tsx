@@ -3,10 +3,16 @@ import { requireUser } from "@/features/auth/require-user";
 import { AccountSecurityCard } from "@/features/auth/account-security-card";
 import { getApi } from "@/shared/api";
 import { getTranslations } from "next-intl/server";
+import { PartyPopper } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
+  const { welcome } = await searchParams;
   const t = await getTranslations();
   const user = await requireUser("/profile");
   const api = getApi();
@@ -20,6 +26,15 @@ export default async function ProfilePage() {
 
   return (
     <section className="space-y-4">
+      {welcome === "1" && (
+        <div className="glass-panel glass-fade-in flex items-start gap-3 px-4 py-3.5 sm:px-5">
+          <PartyPopper className="mt-0.5 h-5 w-5 shrink-0 text-brand-orange" />
+          <div>
+            <p className="text-sm font-bold text-ink">{t("profile.avatar.welcomeTitle")}</p>
+            <p className="mt-0.5 text-xs sm:text-sm text-ink-muted">{t("profile.avatar.welcomeBody")}</p>
+          </div>
+        </div>
+      )}
       <UserProfileDashboardLazy
         user={user}
         initialSavedProducts={savedProducts}

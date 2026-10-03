@@ -609,6 +609,17 @@ export function createHttpApi(baseUrl: string): ApiClient {
       return { ...profile, firstLogin: res.firstLogin === true };
     },
 
+    async loginWithGoogle(idToken: string): Promise<SignInResult> {
+      const res = await fetchJson<BackendAuthResponse>("/api/v1/auth/google", {
+        method: "POST",
+        headers: { [PORTAL_HEADER]: "buyer" },
+        body: JSON.stringify({ idToken, role: "Buyer" }),
+      });
+      rememberSession(res, "buyer");
+      const profile = (await currentUserFor("buyer")) ?? authResponseToProfile(res);
+      return { ...profile, firstLogin: res.firstLogin === true };
+    },
+
     async logout(): Promise<void> {
       try {
         await fetchJson<void>("/api/v1/auth/logout", { method: "POST" });

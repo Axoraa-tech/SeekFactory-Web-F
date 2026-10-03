@@ -53,6 +53,8 @@ export interface SessionRepository {
   getCurrentUser(): Promise<BuyerProfile | null>;
   join(input: JoinInput): Promise<SignInResult>;
   login(input: LoginInput): Promise<SignInResult>;
+  /** Buyer sign-in (or sign-up) with a Google Identity Services ID token. */
+  loginWithGoogle(idToken: string): Promise<SignInResult>;
   logout(): Promise<void>;
   updateProfile(input: {
     name?: string;

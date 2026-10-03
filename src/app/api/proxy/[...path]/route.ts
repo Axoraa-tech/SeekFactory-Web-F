@@ -26,7 +26,7 @@ const HOP_BY_HOP_HEADERS = [
 ];
 
 /** Endpoints whose response carries a fresh token pair. */
-const TOKEN_ISSUING_PATHS = ["auth/login", "auth/login/phone", "auth/register", "auth/refresh"];
+const TOKEN_ISSUING_PATHS = ["auth/login", "auth/login/phone", "auth/google", "auth/register", "auth/refresh"];
 
 /**
  * Which session (buyer site or seller hub) this call belongs to: the header the web app sends,
