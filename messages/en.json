@@ -188,7 +188,8 @@
     "cart": "Cart",
     "accountSettings": "Account Settings",
     "signingOut": "Signing out...",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "myProfile": "My Profile"
   },
   "layout": {
     "search": {
@@ -519,7 +520,8 @@
       "taxIdGstinBusinessReg": "Tax ID / GSTIN / Business Reg Number",
       "primaryShippingPlantDeliveryAddress": "Primary Shipping / Plant Delivery Address",
       "savingUpdates": "Saving Updates...",
-      "saveProfileChanges": "Save Profile Changes"
+      "saveProfileChanges": "Save Profile Changes",
+      "notVerifiedLoginId": "Not verified"
     },
     "following": {
       "verifiedPartnerFacilities": "Verified Partner Facilities",
@@ -579,7 +581,9 @@
       "membershipChangedToThePlan": "Membership changed to the {next} plan",
       "pro": "Pro",
       "enterprise": "Enterprise",
-      "loadingProfile": "Loading profile…"
+      "loadingProfile": "Loading profile…",
+      "nameIsRequired": "Please enter your name.",
+      "companyNameIsRequired": "Please enter your company name."
     }
   },
   "membership": {
@@ -830,7 +834,8 @@
       "guestLandscapeB2bFeed": "Guest: Landscape B2B Feed",
       "guestVerticalSeeksFeed": "Guest: Vertical Seeks Feed",
       "alreadyOnSeekfactory": "Already on SeekFactory?",
-      "newToSeekfactory": "New to SeekFactory?"
+      "newToSeekfactory": "New to SeekFactory?",
+      "welcomeCheckEmail": "Welcome to SeekFactory! We sent a verification link to {email}."
     },
     "policy": {
       "minLength": "At least 8 characters",
@@ -868,7 +873,13 @@
       "youCanNowSignIn": "You can now sign in with your new password."
     },
     "welcomeToSeekfactory": "Welcome to SeekFactory",
-    "onlineWorkAnimation": "Online Work Animation"
+    "onlineWorkAnimation": "Online Work Animation",
+    "verifyBanner": {
+      "message": "Please verify your email address. We sent a confirmation link to {email}.",
+      "resend": "Resend link",
+      "sent": "Verification link sent to {email}. Check your inbox and spam folder.",
+      "dismiss": "Hide this reminder"
+    }
   },
   "notFound": {
     "pageNotFound": "Page not found",
@@ -1388,7 +1399,10 @@
       "onlyImagesPngJpgWebp": "Only images (PNG, JPG, WEBP, GIF) and PDF files can be attached.",
       "fileIsLargerThan20": "File is larger than 20 MB.",
       "uploadFailedPleaseRetry": "Upload failed. Please retry."
-    }
+    },
+    "online": "Online",
+    "offline": "Offline",
+    "lastSeen": "Last seen {time}"
   },
   "upgrade": {
     "upgradeToUnlockDirectSupplier": "Upgrade to Unlock Direct Supplier Contacts & Audits",
@@ -1556,6 +1570,31 @@
       "adding": "Adding..."
     }
   },
+  "payment": {
+    "payTitle": "Pay for {plan}",
+    "step1": "Scan with Alipay and pay",
+    "step2": "Upload your payment proof",
+    "amountToPay": "Amount to pay",
+    "qrNote": "This QR code has no fixed amount. Please enter exactly {amount} when paying.",
+    "openScan": "Open \"Scan\" inside Alipay",
+    "proofLabel": "Payment screenshot or invoice",
+    "proofHint": "JPG, PNG, WebP or PDF, up to 5 MB",
+    "chooseFile": "Choose file",
+    "referenceLabel": "Transaction ID (optional)",
+    "referencePlaceholder": "Alipay order number",
+    "submit": "Submit payment",
+    "submitting": "Submitting…",
+    "back": "Back",
+    "pleaseAttach": "Please attach your payment screenshot or invoice",
+    "fileTooLarge": "The file is too large. The limit is 5 MB.",
+    "fileType": "Only JPG, PNG, WebP or PDF files are accepted",
+    "underReviewTitle": "Payment under review",
+    "underReviewBody": "We received your payment proof for {plan}. Your plan is activated as soon as an admin confirms it.",
+    "rejectedTitle": "Last payment was not approved",
+    "rejectedBody": "Reason: {reason}. You can submit a new proof.",
+    "couldNotSubmit": "Could not submit your payment",
+    "submittedThanks": "Payment submitted. We will confirm it shortly."
+  },
   "plans": {
     "signInToChangeYour": "Sign in to change your plan",
     "couldNotChangeYourPlan": "Could not change your plan",
@@ -1620,5 +1659,12 @@
     "searchLanguage": "Search language...",
     "noLanguageFound": "No language found",
     "autoSavesPreferences": "Auto-saves preferences"
+  },
+  "products": {
+    "carousel": {
+      "previousPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "showPhoto": "Show photo {index} of {count}"
+    }
   }
 }

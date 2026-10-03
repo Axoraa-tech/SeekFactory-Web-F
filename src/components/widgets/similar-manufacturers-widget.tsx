@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { ShieldCheck, Award, ArrowUpRight, Plus, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -8,11 +8,49 @@ import { VerifiedBadge } from "@/components/ui/verified-badge";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { cn } from "@/shared/lib/cn";
 import { useTranslations } from "next-intl";
+import { useFollow } from "@/features/engagement/use-engagement";
+import { loadFollowedFactories } from "@/features/engagement/follow-store";
 
 type Props = {
   currentManufacturer: Manufacturer;
   allManufacturers: Manufacturer[];
 };
+
+/** Follow button backed by the backend and the page-wide follow state (see follow-store). */
+function SimilarFollowButton({ manufacturer }: { manufacturer: Manufacturer }) {
+  const t = useTranslations();
+  const { following: isFollowing, toggleFollow, pending } = useFollow(manufacturer.id, undefined, manufacturer.followerCount);
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        void toggleFollow();
+      }}
+      disabled={pending}
+      aria-pressed={isFollowing}
+      className={cn(
+        "shrink-0 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold transition-all border disabled:opacity-70",
+        isFollowing
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+          : "border-slate-200 bg-white text-slate-700 hover:border-brand-blue/30 hover:bg-blue-50/60 hover:text-brand-blue"
+      )}
+    >
+      {isFollowing ? (
+        <>
+          <Check className="h-3 w-3" />
+          <span>{t("common.following")}</span>
+        </>
+      ) : (
+        <>
+          <Plus className="h-3 w-3" />
+          <span>{t("common.follow")}</span>
+        </>
+      )}
+    </button>
+  );
+}
 
 export function SimilarManufacturersWidget({ currentManufacturer, allManufacturers }: Props) {
   const t = useTranslations();
@@ -25,13 +63,10 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
 
   const similar = (matched.length >= 3 ? matched : candidates).slice(0, 4);
 
-  const [followedIds, setFollowedIds] = useState<Record<string, boolean>>({});
-
-  const toggleFollow = (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setFollowedIds((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  // Show who the viewer already follows
+  useEffect(() => {
+    void loadFollowedFactories();
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -53,8 +88,6 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
 
         <div className="divide-y divide-slate-100">
           {similar.map((m) => {
-            const isFollowing = !!followedIds[m.id];
-
             return (
               <div key={m.id} className="group py-3 first:pt-0 last:pb-0">
                 <div className="flex items-start justify-between gap-3">
@@ -89,28 +122,7 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
                     </div>
                   </Link>
 
-                  <button
-                    type="button"
-                    onClick={(e) => toggleFollow(m.id, e)}
-                    className={cn(
-                      "shrink-0 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold transition-all border",
-                      isFollowing
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-brand-blue/30 hover:bg-blue-50/60 hover:text-brand-blue"
-                    )}
-                  >
-                    {isFollowing ? (
-                      <>
-                        <Check className="h-3 w-3" />
-                        <span>{t("common.following")}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-3 w-3" />
-                        <span>{t("common.follow")}</span>
-                      </>
-                    )}
-                  </button>
+                  <SimilarFollowButton manufacturer={m} />
                 </div>
               </div>
             );

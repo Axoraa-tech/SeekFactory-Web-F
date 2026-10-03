@@ -188,7 +188,8 @@
     "cart": "购物车",
     "accountSettings": "账户设置",
     "signingOut": "正在退出...",
-    "signOut": "退出登录"
+    "signOut": "退出登录",
+    "myProfile": "我的资料"
   },
   "layout": {
     "search": {
@@ -519,7 +520,8 @@
       "taxIdGstinBusinessReg": "税号 / GSTIN / 营业执照号",
       "primaryShippingPlantDeliveryAddress": "主要收货 / 工厂送货地址",
       "savingUpdates": "正在保存...",
-      "saveProfileChanges": "保存资料修改"
+      "saveProfileChanges": "保存资料修改",
+      "notVerifiedLoginId": "未验证"
     },
     "following": {
       "verifiedPartnerFacilities": "认证合作工厂",
@@ -579,7 +581,9 @@
       "membershipChangedToThePlan": "会员已切换为 {next}",
       "pro": "专业版",
       "enterprise": "企业版",
-      "loadingProfile": "正在加载资料…"
+      "loadingProfile": "正在加载资料…",
+      "nameIsRequired": "请输入您的姓名。",
+      "companyNameIsRequired": "请输入公司名称。"
     }
   },
   "membership": {
@@ -830,7 +834,8 @@
       "guestLandscapeB2bFeed": "访客：横屏 B2B 视频流",
       "guestVerticalSeeksFeed": "访客：竖屏希克视频流",
       "alreadyOnSeekfactory": "已有 SeekFactory 账号？",
-      "newToSeekfactory": "初次使用 SeekFactory？"
+      "newToSeekfactory": "初次使用 SeekFactory？",
+      "welcomeCheckEmail": "欢迎加入 SeekFactory！我们已向 {email} 发送验证链接。"
     },
     "policy": {
       "minLength": "至少 8 个字符",
@@ -868,7 +873,13 @@
       "youCanNowSignIn": "现在可以使用新密码登录了。"
     },
     "welcomeToSeekfactory": "欢迎来到 SeekFactory",
-    "onlineWorkAnimation": "在线办公动画"
+    "onlineWorkAnimation": "在线办公动画",
+    "verifyBanner": {
+      "message": "请验证您的邮箱。我们已向 {email} 发送确认链接。",
+      "resend": "重新发送",
+      "sent": "验证链接已发送至 {email}，请查看收件箱和垃圾邮件。",
+      "dismiss": "隐藏此提醒"
+    }
   },
   "notFound": {
     "pageNotFound": "页面不存在",
@@ -1388,7 +1399,10 @@
       "onlyImagesPngJpgWebp": "仅支持上传图片（PNG、JPG、WEBP、GIF）和 PDF 文件。",
       "fileIsLargerThan20": "文件超过 20 MB。",
       "uploadFailedPleaseRetry": "上传失败，请重试。"
-    }
+    },
+    "online": "在线",
+    "offline": "离线",
+    "lastSeen": "最后在线 {time}"
   },
   "upgrade": {
     "upgradeToUnlockDirectSupplier": "升级解锁供应商直接联系方式与验厂报告",
@@ -1556,6 +1570,31 @@
       "adding": "正在加入..."
     }
   },
+  "payment": {
+    "payTitle": "支付 {plan}",
+    "step1": "使用支付宝扫码付款",
+    "step2": "上传付款凭证",
+    "amountToPay": "应付金额",
+    "qrNote": "此二维码不固定金额，请务必输入 {amount}。",
+    "openScan": "在支付宝中打开“扫一扫”",
+    "proofLabel": "付款截图或发票",
+    "proofHint": "JPG、PNG、WebP 或 PDF，最大 5 MB",
+    "chooseFile": "选择文件",
+    "referenceLabel": "交易单号（选填）",
+    "referencePlaceholder": "支付宝订单号",
+    "submit": "提交付款",
+    "submitting": "提交中…",
+    "back": "返回",
+    "pleaseAttach": "请上传付款截图或发票",
+    "fileTooLarge": "文件过大，最大 5 MB。",
+    "fileType": "仅支持 JPG、PNG、WebP 或 PDF 文件",
+    "underReviewTitle": "付款审核中",
+    "underReviewBody": "我们已收到您 {plan} 的付款凭证，管理员确认后将立即开通方案。",
+    "rejectedTitle": "上次付款未通过审核",
+    "rejectedBody": "原因：{reason}。您可以重新提交凭证。",
+    "couldNotSubmit": "付款提交失败",
+    "submittedThanks": "付款已提交，我们会尽快确认。"
+  },
   "plans": {
     "signInToChangeYour": "请先登录再更换方案",
     "couldNotChangeYourPlan": "方案更换失败",
@@ -1620,5 +1659,12 @@
     "searchLanguage": "搜索语言...",
     "noLanguageFound": "未找到该语言",
     "autoSavesPreferences": "自动保存偏好设置"
+  },
+  "products": {
+    "carousel": {
+      "previousPhoto": "上一张图片",
+      "nextPhoto": "下一张图片",
+      "showPhoto": "查看第 {index} 张，共 {count} 张"
+    }
   }
 }

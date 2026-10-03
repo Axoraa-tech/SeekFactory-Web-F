@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import { formatRelativeTime } from "@/shared/lib/format";
 import { buildCategoryTree } from "@/features/categories/category-tree";
-import { isExpired, readTokenPair } from "@/features/auth/auth-tokens";
+import { cookieNames, isExpired, portalForUrl, readTokenPair } from "@/features/auth/auth-tokens";
+import { postAuthPath } from "@/features/auth/session-cookie";
 import { feedSourceKey } from "@/features/feed/load-feed";
 import type { Category } from "@/entities/category";
 
@@ -61,6 +62,18 @@ describe("buildCategoryTree", () => {
     expect(childrenByRoot["a"]).toBe(childrenByRoot["cat-a"]);
     expect(childrenByRoot["cat-b"]).toEqual([]);
   });
+
+  it("puts the catch-all Other category last at both levels", () => {
+    const { roots, childrenByRoot } = buildCategoryTree([
+      cat("cat-other", "Other", null),
+      cat("cat-woodworking", "Woodworking", null),
+      cat("cat-agriculture", "Agriculture", null),
+      cat("cat-agriculture-other", "Other", "cat-agriculture"),
+      cat("cat-agriculture-tractors", "Tractors", "cat-agriculture"),
+    ]);
+    expect(roots.map((r) => r.name)).toEqual(["Agriculture", "Woodworking", "Other"]);
+    expect(childrenByRoot["cat-agriculture"].map((c) => c.name)).toEqual(["Tractors", "Other"]);
+  });
 });
 
 describe("auth tokens", () => {
@@ -91,5 +104,32 @@ describe("feedSourceKey", () => {
     expect(feedSourceKey("following", "", " ")).toBe("tab:following");
     expect(feedSourceKey("for-you", "cat-x", "")).toBe("search:cat-x:");
     expect(feedSourceKey("for-you", "", " lathe ")).toBe("search::lathe");
+  });
+});
+
+describe("buyer site and seller hub sessions", () => {
+  it("uses the seller session only in the seller hub and the manufacturer sign-in pages", () => {
+    expect(portalForUrl("/factory")).toBe("seller");
+    expect(portalForUrl("/factory/verify")).toBe("seller");
+    expect(portalForUrl("/login", new URLSearchParams("role=manufacturer"))).toBe("seller");
+    expect(portalForUrl("/join", new URLSearchParams("role=manufacturer"))).toBe("seller");
+    expect(portalForUrl("/")).toBe("buyer");
+    expect(portalForUrl("/factoryx")).toBe("buyer");
+    expect(portalForUrl("/login")).toBe("buyer");
+    expect(portalForUrl("/profile", new URLSearchParams("role=manufacturer"))).toBe("buyer");
+  });
+
+  it("gives each section its own cookies", () => {
+    expect(cookieNames("buyer").access).not.toBe(cookieNames("seller").access);
+    expect(cookieNames("buyer").refresh).not.toBe(cookieNames("seller").refresh);
+  });
+
+  it("redirects after sign-in by the tab used, keeping `next` only within that section", () => {
+    expect(postAuthPath("Buyer", "/profile")).toBe("/profile");
+    expect(postAuthPath("Buyer", "/factory")).toBe("/");
+    expect(postAuthPath("Supplier", "/profile")).toBe("/factory");
+    expect(postAuthPath("Supplier", "/factory?tab=rfqs")).toBe("/factory?tab=rfqs");
+    expect(postAuthPath("Supplier", undefined, true)).toBe("/factory?tab=products");
+    expect(postAuthPath("Buyer", "//evil.example")).toBe("/");
   });
 });

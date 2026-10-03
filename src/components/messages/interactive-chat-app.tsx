@@ -12,6 +12,7 @@ import type { MessageItem } from "@/shared/api/contracts";
 import type { OrderRequest } from "@/entities/order";
 import { useChatAttachment } from "@/hooks/use-chat-attachment";
 import { useTranslations } from "next-intl";
+import { refreshUnreadCounts } from "@/features/inbox/unread-store";
 
 function toChatMessage(m: MessageItem): ChatMessage {
   return { id: m.id, sender: m.sender, text: m.text, time: m.time, attachment: m.attachment, order: m.order };
@@ -54,11 +55,15 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
   const [mobileShowChat, setMobileShowChat] = useState(Boolean(withSlug));
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const selectedThreadRef = useRef(selectedThreadId);
+  selectedThreadRef.current = selectedThreadId;
   const activeThread = threads.find((t) => t.id === selectedThreadId) || threads[0];
 
-  // Auto-scroll to bottom of messages
+  // Auto-scroll to the newest message. Only the message list moves: scrollIntoView would also
+  // scroll every ancestor (the page, the clipped chat pane), hiding the chat header and Send button.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const list = messagesEndRef.current?.parentElement;
+    list?.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   }, [activeThread?.messages, isTyping]);
 
   // Load message history when active thread changes
@@ -85,8 +90,13 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
         // Fallback gracefully
       });
 
-    // Mark as read in backend
-    void getApi().messages.markAsRead(selectedThreadId);
+    // Opening a chat reads it: clear its count here and, once the backend has it, every badge
+    setThreads((prev) =>
+      prev.map((t) => (t.id === selectedThreadId && t.unreadCount > 0 ? { ...t, unreadCount: 0 } : t))
+    );
+    void getApi()
+      .messages.markAsRead(selectedThreadId)
+      .then(() => refreshUnreadCounts());
 
     // Subscribe to SSE stream
     const unsubscribe = getApi().messages.onMessageStream(selectedThreadId, (newMsg) => {
@@ -126,6 +136,33 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
       unsubscribe();
     };
   }, [selectedThreadId]);
+
+  // Other chats' unread counts, last messages and who is online change while the inbox is open:
+  // re-read the list every 30s (and when the tab regains focus). The open chat stays read.
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      getApi()
+        .messages.listRecent(50)
+        .then((list) => {
+          if (!active) return;
+          setThreads((prev) => mergeThreads(prev, list, selectedThreadRef.current));
+        })
+        .catch(() => {});
+    };
+    const timer = window.setInterval(refresh, 30_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, []);
 
   // Orders with this factory, for tagging a message with its order
   const clearUpload = upload.clear;
@@ -211,10 +248,9 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
   }, [withSlug, allManufacturers, threads, searchParams]);
 
   const handleSelectThread = (id: string) => {
+    // Marking read happens in the effect that loads the selected chat
     setSelectedThreadId(id);
     setMobileShowChat(true);
-    setThreads((prev) => prev.map((t) => (t.id === id ? { ...t, unreadCount: 0 } : t)));
-    void getApi().messages.markAsRead(id);
   };
 
   const handleSendMessage = async (e?: React.FormEvent, customText?: string) => {
@@ -303,7 +339,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
   );
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden flex h-[calc(100vh-140px)] min-h-[580px] max-h-[820px]">
+    <div className="w-full rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden flex h-[calc(100dvh-162px)] min-h-[520px] max-h-[820px]">
       <ChatThreadList
         threads={threads}
         filteredThreads={filteredThreads}
@@ -342,4 +378,29 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
       )}
     </div>
   );
+}
+
+/**
+ * Fresh conversation list into the current threads: counts, last message and presence come from
+ * the backend; loaded message history stays. The open chat is being read, so it shows no count.
+ */
+function mergeThreads(
+  current: ThreadWithMessages[],
+  fresh: (Conversation & { manufacturer: Manufacturer })[],
+  openId: string,
+): ThreadWithMessages[] {
+  const byId = new Map(current.map((t) => [t.id, t]));
+  const merged = fresh.map((c) => {
+    const existing = byId.get(c.id);
+    return {
+      ...(existing ?? { messages: [] }),
+      ...c,
+      // The live stream may be ahead of the list for the open chat
+      lastMessage: c.id === openId && existing ? existing.lastMessage : c.lastMessage,
+      unreadCount: c.id === openId ? 0 : c.unreadCount,
+    };
+  });
+  // Keep chats the list no longer returns (e.g. just started) at the end
+  const freshIds = new Set(fresh.map((c) => c.id));
+  return [...merged, ...current.filter((t) => !freshIds.has(t.id))];
 }

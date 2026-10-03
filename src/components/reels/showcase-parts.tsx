@@ -2,8 +2,10 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { Eye, Heart, ImageOff, MapPin, Play } from "lucide-react";
+import { Bookmark, Eye, Heart, ImageOff, MapPin, MessageCircle, Play, Repeat2 } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
+import { useReelEngagement } from "@/features/engagement/use-engagement";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import type { FeedItem } from "@/shared/api/contracts";
@@ -101,19 +103,78 @@ export function FactoryLine({ item, size = "md" }: { item: FeedItem; size?: "sm"
   );
 }
 
-/** Views and likes, the two counts shown consistently across every layout. */
+/**
+ * Views plus live like / comment / share / save controls, shown the same way in every list layout.
+ * Counts and the viewer's own state come from the backend through the shared engagement hook:
+ * updates are optimistic, roll back on failure, and a guest is sent to sign in.
+ */
 export function Stats({ item, className }: { item: FeedItem; className?: string }) {
+  const t = useTranslations();
+  const reel = item.reel;
+  const { liked, likes, saved, shares, shared, toggleLike, toggleSave, share } = useReelEngagement(reel);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsAdded, setCommentsAdded] = useState(0);
+
   return (
-    <p className={cn("flex items-center gap-4 text-xs text-ink-muted", className)}>
-      <span className="flex items-center gap-1">
-        <Eye className="h-3.5 w-3.5" />
-        {formatCount(item.reel.views)}
-      </span>
-      <span className="flex items-center gap-1">
-        <Heart className="h-3.5 w-3.5" />
-        {formatCount(item.reel.likes)}
-      </span>
-    </p>
+    <>
+      <div className={cn("flex flex-wrap items-center gap-1 text-xs text-ink-muted", className)}>
+        <span className="mr-2 flex items-center gap-1" title={t("seek.viewCount", { count: formatCount(reel.views) })}>
+          <Eye className="h-3.5 w-3.5" />
+          {formatCount(reel.views)}
+        </span>
+        <StatButton
+          label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
+          active={liked}
+          activeClass="text-rose-600"
+          onClick={toggleLike}
+          count={likes}
+        >
+          <Heart className={cn("h-3.5 w-3.5", liked && "fill-rose-500")} />
+        </StatButton>
+        <StatButton label={t("seek.rail.openComments")} onClick={() => setCommentsOpen(true)} count={reel.comments + commentsAdded}>
+          <MessageCircle className="h-3.5 w-3.5" />
+        </StatButton>
+        <StatButton label={t("seek.shareSeek")} active={shared} activeClass="text-emerald-600" onClick={share} count={shares}>
+          <Repeat2 className="h-3.5 w-3.5" />
+        </StatButton>
+        <StatButton
+          label={saved ? t("seek.removeFromSaved") : t("seek.saveSeek")}
+          active={saved}
+          activeClass="text-brand-blue"
+          onClick={toggleSave}
+        >
+          <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-brand-blue")} />
+        </StatButton>
+      </div>
+
+      <CommentsModalLazy
+        reelId={reel.id}
+        reelTitle={reel.title}
+        isOpen={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+        onCommentAdded={() => setCommentsAdded((n) => n + 1)}
+      />
+    </>
+  );
+}
+
+function StatButton({ label, count, active, activeClass, onClick, children }: {
+  label: string; count?: number; active?: boolean; activeClass?: string; onClick: () => void; children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      aria-pressed={active}
+      className={cn(
+        "flex items-center gap-1 rounded-lg px-2 py-1 transition hover:bg-canvas hover:text-ink active:scale-95",
+        active && activeClass,
+      )}
+    >
+      {children}
+      {count !== undefined && <span className="tabular-nums">{formatCount(count)}</span>}
+    </button>
   );
 }
 

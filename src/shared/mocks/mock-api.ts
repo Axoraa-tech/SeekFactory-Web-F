@@ -131,6 +131,12 @@ const session: SessionRepository = {
     if (!profile) throw new Error("Sign in to change your plan");
     return profile;
   },
+  async submitPlanPayment() {
+    throw new Error("Plan payments need the live backend");
+  },
+  async listMyPlanPayments() {
+    return [];
+  },
 };
 
 const feed: FeedRepository = {
@@ -298,6 +304,7 @@ const messages: MessageRepository = {
   async markAsRead(conversationId: string) {
     return delay(undefined);
   },
+  unreadCount: () => delay(conversations.reduce((sum, item) => sum + item.unreadCount, 0)),
   onMessageStream(conversationId: string, callback: (message: MessageItem) => void) {
     return () => {};
   },

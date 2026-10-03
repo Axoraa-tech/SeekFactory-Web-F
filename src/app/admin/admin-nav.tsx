@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Banknote, Building2, Clapperboard, FileText, LayoutDashboard, Settings, Users } from "lucide-react";
+import { Banknote, Building2, Clapperboard, CreditCard, FileText, LayoutDashboard, Settings, Users } from "lucide-react";
 import { PendingBadge } from "@/features/admin/pending-approvals";
 
 export const ADMIN_NAV = [
@@ -11,6 +11,7 @@ export const ADMIN_NAV = [
   { href: "/admin/manufacturers", label: "Manufacturers", icon: Building2 },
   { href: "/admin/rfqs", label: "RFQs Queue", icon: FileText },
   { href: "/admin/showcase", label: "Seek Showcase", icon: Clapperboard },
+  { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/admin/pricing", label: "Pricing Config", icon: Banknote },
 ];
 
@@ -44,6 +45,9 @@ export function AdminPillNav() {
             <Icon size={18} className="shrink-0" />
             {href === "/admin/manufacturers" && (
               <PendingBadge className="absolute -right-0.5 -top-0.5" />
+            )}
+            {href === "/admin/payments" && (
+              <PendingBadge kind="payments" className="absolute -right-0.5 -top-0.5" />
             )}
             {active ? (
               <span className="whitespace-nowrap text-sm font-medium">{label}</span>

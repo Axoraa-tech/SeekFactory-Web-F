@@ -13,10 +13,11 @@ import { adminData } from "@/shared/api/admin-api";
  * tab regains focus, so an admin returning to it sees a current number.
  */
 
-const POLL_MS = 60_000;
+const POLL_MS = 15_000;
 
-const PendingContext = createContext<{ pending: number; refresh: () => void }>({
+const PendingContext = createContext<{ pending: number; pendingPayments: number; refresh: () => void }>({
   pending: 0,
+  pendingPayments: 0,
   refresh: () => {},
 });
 
@@ -29,6 +30,7 @@ const UNAUTHENTICATED = ["/admin/login", "/admin/setup"];
 
 export function PendingApprovalsProvider({ children }: { children: React.ReactNode }) {
   const [pending, setPending] = useState(0);
+  const [pendingPayments, setPendingPayments] = useState(0);
   const pathname = usePathname();
   const signedOutScreen = UNAUTHENTICATED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
@@ -39,6 +41,9 @@ export function PendingApprovalsProvider({ children }: { children: React.ReactNo
     adminData.manufacturers({ page: 0, size: 1, filter: "unverified" })
       .then((p) => setPending(p.counts?.unverified ?? 0))
       .catch(() => {/* signed out or offline: leave the last known count */});
+    adminData.payments({ page: 0, size: 1, status: "PENDING" })
+      .then((p) => setPendingPayments(p.counts?.pending ?? 0))
+      .catch(() => {/* same as above */});
   }, [signedOutScreen]);
 
   useEffect(() => {
@@ -55,19 +60,20 @@ export function PendingApprovalsProvider({ children }: { children: React.ReactNo
     };
   }, [refresh, signedOutScreen]);
 
-  return <PendingContext.Provider value={{ pending, refresh }}>{children}</PendingContext.Provider>;
+  return <PendingContext.Provider value={{ pending, pendingPayments, refresh }}>{children}</PendingContext.Provider>;
 }
 
 /** Count badge for the nav. Renders nothing at zero so the chrome stays quiet. */
-export function PendingBadge({ className = "" }: { className?: string }) {
-  const { pending } = usePendingApprovals();
-  if (pending === 0) return null;
+export function PendingBadge({ className = "", kind = "manufacturers" }: { className?: string; kind?: "manufacturers" | "payments" }) {
+  const { pending, pendingPayments } = usePendingApprovals();
+  const count = kind === "payments" ? pendingPayments : pending;
+  if (count === 0) return null;
   return (
     <span
       className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-semibold text-white ${className}`}
-      aria-label={`${pending} awaiting review`}
+      aria-label={`${count} awaiting review`}
     >
-      {pending > 99 ? "99+" : pending}
+      {count > 99 ? "99+" : count}
     </span>
   );
 }

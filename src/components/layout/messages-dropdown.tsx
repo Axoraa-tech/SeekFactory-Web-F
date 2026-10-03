@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Conversation } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { getApi } from "@/shared/api";
+import { patchUnreadCounts, refreshUnreadCounts, useUnreadCounts } from "@/features/inbox/unread-store";
 import { formatRelativeTime } from "@/shared/lib/format";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -24,7 +25,8 @@ export function MessagesDropdown({
   const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<(Conversation & { manufacturer: Manufacturer })[]>(initialMessages);
-  const [unreadCount, setUnreadCount] = useState(initialCount);
+  const initialCounts = { messages: initialCount, notifications: 0 };
+  const unreadCount = useUnreadCounts(initialCounts).messages;
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -50,24 +52,31 @@ export function MessagesDropdown({
     };
   }, [isOpen]);
 
-  // Load latest messages when dropdown is opened
+  // Load the latest chats every time the dropdown opens (counts change while the page is open)
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setLoading(true);
-      getApi()
-        .messages.listRecent(5)
-        .then((data) => {
-          setMessages(data);
-          const count = data.reduce((sum, item) => sum + item.unreadCount, 0);
-          setUnreadCount(count);
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [isOpen, messages.length]);
+    if (!isOpen) return;
+    let active = true;
+    setLoading(true);
+    getApi()
+      .messages.listRecent(5)
+      .then((data) => {
+        if (active) setMessages(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    void refreshUnreadCounts();
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
 
   function handleMarkAllRead() {
+    const unread = messages.filter((item) => item.unreadCount > 0);
     setMessages((prev) => prev.map((item) => ({ ...item, unreadCount: 0 })));
-    setUnreadCount(0);
+    patchUnreadCounts({ messages: 0 }, initialCounts);
+    void Promise.all(unread.map((item) => getApi().messages.markAsRead(item.id))).then(() => refreshUnreadCounts());
   }
 
   return (
@@ -124,7 +133,7 @@ export function MessagesDropdown({
               messages.map((item) => (
                 <Link
                   key={item.id}
-                  href="/messages"
+                  href={`/messages?conversation=${encodeURIComponent(item.id)}`}
                   onClick={() => setIsOpen(false)}
                   className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-slate-50 ${
                     item.unreadCount > 0 ? "bg-blue-50/40" : ""

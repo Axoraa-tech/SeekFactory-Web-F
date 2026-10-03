@@ -23,6 +23,7 @@ import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { Conversation } from "@/entities/message";
+import { useUnreadCounts } from "@/features/inbox/unread-store";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
@@ -54,11 +55,11 @@ export function LeftSidebar({
 }: Props) {
   const pathname = usePathname();
   const { t, translateCategory } = useRegionalSettings();
-  const counts = { messages: messageCount, notifications: notificationCount };
+  const counts = useUnreadCounts({ messages: messageCount, notifications: notificationCount });
 
   return (
     <aside className="hidden w-[280px] shrink-0 lg:block">
-      <div className="sticky top-[88px] h-[calc(100vh-104px)] overflow-y-auto space-y-4 pr-1">
+      <div data-lock-fill className="sticky top-[88px] h-[calc(100vh-104px)] overflow-y-auto space-y-4 pr-1">
         <Card className="overflow-hidden p-2">
           <nav className="flex flex-col">
             {navItems.map((item) => {

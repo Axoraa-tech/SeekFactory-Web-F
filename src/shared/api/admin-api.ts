@@ -80,6 +80,28 @@ export interface AdminPlan {
   id: string; name: string; priceUsd: number; featuresJson?: string; manufacturerCount: number; createdAt?: string;
 }
 
+export interface AdminBuyerPlan {
+  /** Lower case: free, pro, enterprise */
+  code: string; name: string; priceInr: number; priceCny: number; features: string[];
+}
+
+export type PaymentStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface AdminPaymentRow {
+  id: string; accountType: "BUYER" | "MANUFACTURER"; planName: string; currency: string; amount: number;
+  status: PaymentStatus; payerName?: string; payerEmail?: string; payerCompany?: string; payerCountry?: string;
+  createdAt?: string;
+}
+
+export interface AdminPaymentDetail {
+  id: string; accountType: "BUYER" | "MANUFACTURER"; planName: string; planCode?: string; region: string;
+  currency: string; amount: number; payerReference?: string; status: PaymentStatus;
+  userId: string; payerName?: string; payerEmail?: string; payerPhone?: string; payerCompany?: string;
+  payerCountry?: string; payerAddress?: string; manufacturerId?: string; manufacturerName?: string;
+  proofContentType: string; proofFilename?: string; proofSize: number;
+  reviewedBy?: string; reviewedAt?: string; rejectionReason?: string; createdAt?: string;
+}
+
 export interface AdminShowcase {
   mode: ShowcaseMode;
   autoplay: boolean;
@@ -138,6 +160,19 @@ export const adminData = {
     adminRequest<AdminPage<AdminRfq>>("rfqs", { query }),
   setRfqStatus: (id: string, status: string) =>
     adminRequest<void>(`rfqs/${id}/status`, { method: "PUT", body: JSON.stringify({ status }) }),
+
+  payments: (query: ListQuery & { status?: string }) =>
+    adminRequest<AdminPage<AdminPaymentRow>>("payments", { query }),
+  payment: (id: string) => adminRequest<AdminPaymentDetail>(`payments/${id}`),
+  approvePayment: (id: string) => adminRequest<void>(`payments/${id}/approve`, { method: "PUT" }),
+  rejectPayment: (id: string, reason: string) =>
+    adminRequest<void>(`payments/${id}/reject`, { method: "PUT", body: JSON.stringify({ reason }) }),
+  /** Same-origin URL that streams the proof through the admin session cookie. */
+  paymentProofUrl: (id: string) => `/api/admin/payments/${id}/proof`,
+
+  buyerPlans: () => adminRequest<AdminBuyerPlan[]>("pricing/buyer-plans"),
+  setBuyerPlanPrice: (code: string, prices: { priceInr: number; priceCny: number }) =>
+    adminRequest<void>(`pricing/buyer-plans/${code}`, { method: "PUT", body: JSON.stringify(prices) }),
 
   plans: () => adminRequest<AdminPlan[]>("pricing/plans"),
   createPlan: (plan: { name: string; priceUsd: number; features: string[] }) =>

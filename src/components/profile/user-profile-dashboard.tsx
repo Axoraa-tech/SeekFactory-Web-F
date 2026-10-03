@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 import { getApi } from "@/shared/api";
+import { resetFollowStore, setFollowed } from "@/features/engagement/follow-store";
 import type { BuyerProfile } from "@/entities/user";
 import type { Product } from "@/entities/product";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -51,7 +52,6 @@ export function UserProfileDashboard({
   );
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<ProfileFormData>({
     name: user.name,
@@ -71,15 +71,20 @@ export function UserProfileDashboard({
 
   const currentTier: MembershipTier = tier;
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2500);
-  };
+  const toast = useToast();
 
   const errorText = (err: unknown, fallback: string) => (err instanceof Error ? err.message : fallback);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim()) {
+      toast.error(t("profile.dashboard.nameIsRequired"));
+      return;
+    }
+    if (!formData.companyName.trim()) {
+      toast.error(t("profile.dashboard.companyNameIsRequired"));
+      return;
+    }
     setIsSaving(true);
     try {
       await getApi().session.updateProfile({
@@ -91,10 +96,10 @@ export function UserProfileDashboard({
         taxId: formData.taxId,
         address: formData.address,
       });
-      showToast(t("profile.dashboard.companyProfileContactDetailsSaved"));
+      toast.success(t("profile.dashboard.companyProfileContactDetailsSaved"));
       router.refresh();
     } catch (err) {
-      showToast(errorText(err, t("profile.dashboard.couldNotSaveYourProfile")));
+      toast.error(errorText(err, t("profile.dashboard.couldNotSaveYourProfile")));
     } finally {
       setIsSaving(false);
     }
@@ -106,10 +111,10 @@ export function UserProfileDashboard({
     setSavedProducts((prev) => prev.filter((p) => p.id !== productId));
     try {
       await getApi().products.toggleSave(productId);
-      showToast(t("profile.dashboard.productRemovedFromSaved"));
+      toast.success(t("profile.dashboard.productRemovedFromSaved"));
     } catch (err) {
       setSavedProducts(previous);
-      showToast(errorText(err, t("profile.dashboard.couldNotRemoveTheProduct")));
+      toast.error(errorText(err, t("profile.dashboard.couldNotRemoveTheProduct")));
     }
   };
 
@@ -118,10 +123,10 @@ export function UserProfileDashboard({
     setSavedSeeks((prev) => prev.filter((item) => item.reel.id !== reelId));
     try {
       await getApi().feed.saveReel(reelId);
-      showToast(t("profile.dashboard.seekRemovedFromSaved"));
+      toast.success(t("profile.dashboard.seekRemovedFromSaved"));
     } catch (err) {
       setSavedSeeks(previous);
-      showToast(errorText(err, t("profile.dashboard.couldNotRemoveTheSeek")));
+      toast.error(errorText(err, t("profile.dashboard.couldNotRemoveTheSeek")));
     }
   };
 
@@ -129,21 +134,22 @@ export function UserProfileDashboard({
     const previous = followedSuppliers;
     setFollowedSuppliers((prev) => prev.filter((m) => m.id !== mId));
     try {
-      await getApi().manufacturers.toggleFollow(mId);
-      showToast(t("profile.dashboard.manufacturerRemovedFromFollowing"));
+      const res = await getApi().manufacturers.toggleFollow(mId);
+      setFollowed(mId, res.following);
+      toast.success(t("profile.dashboard.manufacturerRemovedFromFollowing"));
     } catch (err) {
       setFollowedSuppliers(previous);
-      showToast(errorText(err, t("profile.dashboard.couldNotUnfollow")));
+      toast.error(errorText(err, t("profile.dashboard.couldNotUnfollow")));
     }
   };
 
   const handleUpgradeTier = async (next: MembershipTier) => {
     const result = await upgradeTier(next);
     if (!result.ok) {
-      showToast(result.message);
+      if (!result.redirected) toast.error(result.message);
       return;
     }
-    showToast(
+    toast.success(
       next === "free" ? t("profile.dashboard.membershipChangedToTheFree") : t("profile.dashboard.membershipChangedToThePlan", { next: next === "pro" ? t("profile.dashboard.pro") : t("profile.dashboard.enterprise") })
     );
   };
@@ -152,6 +158,7 @@ export function UserProfileDashboard({
     setIsLoggingOut(true);
     try {
       await getApi().session.logout();
+      resetFollowStore();
       router.push("/");
       router.refresh();
     } catch {
@@ -173,13 +180,6 @@ export function UserProfileDashboard({
             "radial-gradient(ellipse 65% 50% at 12% 18%, rgba(26,115,232,0.28), transparent 58%), radial-gradient(ellipse 50% 42% at 88% 8%, rgba(242,107,33,0.2), transparent 52%), radial-gradient(ellipse 55% 48% at 55% 55%, rgba(120,200,255,0.18), transparent 65%), linear-gradient(180deg, rgba(255,255,255,0.35), transparent 70%)",
         }}
       />
-
-      {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 rounded-full border border-white/60 bg-ink/95 text-white px-4 py-2.5 text-xs font-semibold flex items-center gap-2 shadow-glass backdrop-blur-md glass-fade-in">
-          <Check className="h-4 w-4 text-emerald-400" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-5 items-start">
         <div className="space-y-4 min-w-0">
@@ -209,6 +209,7 @@ export function UserProfileDashboard({
               setFormData={setFormData}
               isSaving={isSaving}
               onSave={handleSaveProfile}
+              emailVerified={user.emailVerified}
             />
           )}
 
@@ -219,7 +220,7 @@ export function UserProfileDashboard({
               categories={categories}
               focusRfqId={searchParams.get("rfq") ?? undefined}
               onChange={(updated) => setRfqs((prev) => prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)))}
-              onToast={showToast}
+              onToast={toast.success}
             />
           )}
 

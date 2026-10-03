@@ -19,4 +19,8 @@ export type Conversation = {
   lastMessage: string;
   lastMessageAt: string;
   unreadCount: number;
+  /** The other side is signed in and active right now (drives the green dot). */
+  counterpartOnline?: boolean;
+  /** When the other side was last active, if the backend knows (ISO-8601). */
+  counterpartLastSeenAt?: string;
 };
