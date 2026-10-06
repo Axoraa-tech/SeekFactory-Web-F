@@ -114,7 +114,7 @@ export function AuthCard({
         return;
       }
 
-      router.push(postAuthPath(role, next, user.firstLogin));
+      router.push(postAuthPath(role, next));
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("auth.card.authenticationFailedPleaseCheckYour"));

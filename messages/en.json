@@ -189,7 +189,8 @@
     "accountSettings": "Account Settings",
     "signingOut": "Signing out...",
     "signOut": "Sign out",
-    "myProfile": "My Profile"
+    "myProfile": "My Profile",
+    "supplierWorkspace": "Supplier workspace"
   },
   "layout": {
     "search": {
@@ -1269,6 +1270,11 @@
       "eGUsd510": "e.g. USD 5–10 Million",
       "companyOverviewOemCapability": "Company Overview & OEM Capability",
       "primaryExportMarkets": "Primary Export Markets",
+      "exportMarketsDescription": "Add countries where your factory exports, including India and China.",
+      "exportCountryPlaceholder": "Enter a country",
+      "addExportMarket": "Add country",
+      "removeExportMarket": "Remove {country}",
+      "noExportMarketsAdded": "No export markets added yet.",
       "factoryProfileChangesSuccessfullySaved": "Factory Profile Changes Successfully Saved!",
       "changesReflectImmediatelyOnYour": "Changes reflect immediately on your live public manufacturer profile."
     },

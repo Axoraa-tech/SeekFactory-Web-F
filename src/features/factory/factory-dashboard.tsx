@@ -52,7 +52,6 @@ import { AddSeekModal } from "./components/add-seek-modal";
 import { EditSeekModal } from "./components/edit-seek-modal";
 import { RfqQuoteModal } from "./components/rfq-quote-modal";
 import { FactoryPricingModal, type FactoryPlanTier } from "./components/factory-pricing-modal";
-import { AccountSecurityCard } from "@/features/auth/account-security-card";
 import Link from "next/link";
 import type { FactoryVerification } from "@/shared/api/contracts";
 
@@ -570,8 +569,6 @@ export function FactoryDashboard({
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         onOpenUpgradeModal={() => setIsPricingModalOpen(true)}
-        verificationStatus={verification?.status}
-        verificationSubmitted={verification?.submitted}
       />
 
       {/* Main Content Area (offset by fixed 256px / w-64 sidebar on desktop) */}
@@ -697,18 +694,14 @@ export function FactoryDashboard({
             </div>
           )}
 
-          {activeTab === "account" && (
-            <div className="pt-5">
-              <AccountSecurityCard email={user.email} emailVerified={user.emailVerified} />
-            </div>
-          )}
-
           {activeTab === "profile" && (
             <div className="pt-5">
               <ProfileTab
                 profile={profile}
                 onUpdateProfile={handleUpdateProfile}
                 onOpenUpgradeModal={() => setIsPricingModalOpen(true)}
+                email={user.email}
+                emailVerified={user.emailVerified}
               />
             </div>
           )}

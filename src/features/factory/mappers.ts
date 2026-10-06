@@ -138,6 +138,7 @@ export function toManufacturerUpdate(profile: Partial<SellerFactoryProfile>): Pa
     productionLines: profile.productionLines,
     description: profile.description,
     certificates: profile.certificates,
+    exportCountries: profile.exportCountries,
   };
   // Partial saves (e.g. certificates only) must not blank out other fields.
   return Object.fromEntries(

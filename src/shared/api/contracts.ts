@@ -53,7 +53,7 @@ export interface SessionRepository {
   getCurrentUser(): Promise<BuyerProfile | null>;
   join(input: JoinInput): Promise<SignInResult>;
   login(input: LoginInput): Promise<SignInResult>;
-  logout(): Promise<void>;
+  logout(role?: BuyerProfile["role"]): Promise<void>;
   updateProfile(input: {
     name?: string;
     companyName?: string;

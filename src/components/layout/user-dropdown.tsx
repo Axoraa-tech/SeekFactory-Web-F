@@ -14,6 +14,7 @@ import {
   Sparkles,
   Package,
   ShoppingCart,
+  Building2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
@@ -74,7 +75,7 @@ export function UserDropdown({
   async function handleLogout() {
     try {
       setIsLoggingOut(true);
-      await getApi().session.logout();
+      await getApi().session.logout(user.role);
       resetFollowStore();
       resetUnreadCounts();
       setIsOpen(false);
@@ -157,6 +158,19 @@ export function UserDropdown({
                 <span>{t("userMenu.myProfile")}</span>
               </div>
             </Link>
+
+            {user.role === "Supplier" && (
+              <Link
+                href="/factory?tab=products"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-canvas hover:text-brand-blue transition-colors group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Building2 className="h-4 w-4 text-ink-muted group-hover:text-brand-blue transition-colors" />
+                  <span>{t("userMenu.supplierWorkspace")}</span>
+                </div>
+              </Link>
+            )}
 
             <Link
               href="/messages"

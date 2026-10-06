@@ -54,4 +54,10 @@ describe("toManufacturerUpdate", () => {
     expect(update).toEqual({ certificates: [] });
     expect("name" in update).toBe(false);
   });
+
+  it("persists updated export countries", () => {
+    expect(toManufacturerUpdate({ exportCountries: ["India", "China"] })).toEqual({
+      exportCountries: ["India", "China"],
+    });
+  });
 });

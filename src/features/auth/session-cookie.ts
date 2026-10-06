@@ -74,18 +74,23 @@ export function displayRole(role: BuyerProfile["role"]) {
 
 /**
  * Where to go after signing in, by the section signed in to (the tab chosen on the sign-in page,
- * not the account's role: a manufacturer may sign in to the buyer site too).
- * A same-origin `next` in that same section wins; otherwise a supplier's first sign-in opens the
- * product catalog (client request), later ones the seller dashboard.
+ * not the account's role: a manufacturer may sign in to the buyer site too). A same-origin `next`
+ * in that same section wins, except a bare seller workspace URL opens the product catalog.
  */
-export function postAuthPath(signedInAs: BuyerProfile["role"], next?: string, firstLogin = false) {
+export function postAuthPath(signedInAs: BuyerProfile["role"], next?: string) {
   const portal: Portal = signedInAs === "Supplier" ? "seller" : "buyer";
   if (next && next.startsWith("/") && !next.startsWith("//")) {
     const target = new URL(next, "http://local");
-    if (portalForUrl(target.pathname, target.searchParams) === portal) return next;
+    if (portalForUrl(target.pathname, target.searchParams) === portal) {
+      if (portal === "seller" && target.pathname === "/factory" && !target.searchParams.get("tab")) {
+        target.searchParams.set("tab", "products");
+        return `${target.pathname}?${target.searchParams.toString()}`;
+      }
+      return next;
+    }
   }
   if (portal === "buyer") return "/";
-  return firstLogin ? "/factory?tab=products" : "/factory";
+  return "/factory?tab=products";
 }
 
 export function buildPayload(input: JoinInput): SessionPayload {

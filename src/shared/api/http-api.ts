@@ -609,13 +609,17 @@ export function createHttpApi(baseUrl: string): ApiClient {
       return { ...profile, firstLogin: res.firstLogin === true };
     },
 
-    async logout(): Promise<void> {
+    async logout(role?: BuyerProfile["role"]): Promise<void> {
+      const logoutPortal = role ? portalForRole(role) : browserPortal();
       try {
-        await fetchJson<void>("/api/v1/auth/logout", { method: "POST" });
+        await fetchJson<void>("/api/v1/auth/logout", {
+          method: "POST",
+          headers: { [PORTAL_HEADER]: logoutPortal },
+        });
       } catch {
         // The proxy clears the auth cookies either way
       } finally {
-        clearBrowserCookie(browserPortal());
+        clearBrowserCookie(logoutPortal);
       }
     },
 

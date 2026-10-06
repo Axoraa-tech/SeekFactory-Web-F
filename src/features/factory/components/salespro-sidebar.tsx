@@ -13,9 +13,6 @@ import {
   Sparkles,
   X,
   ExternalLink,
-  Globe2,
-  ShieldCheck,
-  KeyRound,
 } from "lucide-react";
 import Link from "next/link";
 import { BrandLogo } from "@/components/ui/brand-logo";
@@ -38,9 +35,6 @@ type Props = {
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
   onOpenUpgradeModal?: () => void;
-  /** Admin review state of this factory; undefined when unknown. */
-  verificationStatus?: "PENDING" | "APPROVED" | "REJECTED";
-  verificationSubmitted?: boolean;
 };
 
 export function SalesproSidebar({
@@ -56,8 +50,6 @@ export function SalesproSidebar({
   isMobileOpen = false,
   onCloseMobile,
   onOpenUpgradeModal,
-  verificationStatus,
-  verificationSubmitted,
 }: Props) {
   const t = useTranslations();
   const [productsOpen, setProductsOpen] = useState(true);
@@ -248,79 +240,8 @@ export function SalesproSidebar({
           )}
         </div>
 
-        {/* Section 4: Tools & Verification */}
-        <div className="space-y-0.5">
-          <p className="px-2 text-[10px] font-bold text-[#80868B] uppercase tracking-wider">
-            {t("seller.nav.verificationMarketplace")}
-          </p>
-
-          <button
-            type="button"
-            onClick={() => handleSelectTab("profile")}
-            className={cn(
-              "w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer",
-              activeTab === "profile"
-                ? "bg-[#E8F1FD] text-[#1A73E8] font-bold"
-                : "text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8]"
-            )}
-          >
-            <Building2 className="h-4 w-4" />
-            <span>{t("seller.nav.factoryProfileCerts")}</span>
-          </button>
-
-          <Link
-            href="/factory/verify"
-            className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8] transition font-semibold"
-          >
-            <div className="flex items-center gap-2.5">
-              <ShieldCheck className="h-4 w-4 text-[#1A73E8]" />
-              <span>{t("seller.nav.factoryVerification")}</span>
-            </div>
-            {verificationStatus && (
-              <span
-                className={cn(
-                  "rounded-full px-1.5 py-0.5 text-[9px] font-bold",
-                  verificationStatus === "APPROVED" && "bg-emerald-100 text-emerald-800",
-                  verificationStatus === "REJECTED" && "bg-red-100 text-red-700",
-                  verificationStatus === "PENDING" && "bg-amber-100 text-amber-800",
-                )}
-              >
-                {verificationStatus === "APPROVED"
-                  ? t("common.verified")
-                  : verificationStatus === "REJECTED"
-                    ? t("seller.nav.declined")
-                    : verificationSubmitted
-                      ? t("rfq.status.review")
-                      : t("seller.nav.notStarted")}
-              </span>
-            )}
-          </Link>
-
-          {profile.websiteUrl ? (
-            <a
-              href={profile.websiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#E8F1FD] hover:text-[#1A73E8] transition font-semibold"
-            >
-              <div className="flex items-center gap-2.5">
-                <Globe2 className="h-4 w-4 text-[#1A73E8]" />
-                <span>{t("seller.nav.officialWebsite")}</span>
-              </div>
-              <ExternalLink className="h-3 w-3 text-[#80868B]" />
-            </a>
-          ) : (
-            <button
-              type="button"
-              onClick={() => handleSelectTab("profile")}
-              className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#E8F1FD] hover:text-[#1A73E8] transition font-semibold cursor-pointer"
-              title={t("seller.nav.addYourWebsiteUrlIn")}
-            >
-              <Globe2 className="h-4 w-4 text-[#80868B]" />
-              <span>{t("seller.nav.addOfficialWebsite")}</span>
-            </button>
-          )}
-
+        {/* Marketplace and factory settings */}
+        <div className="space-y-0.5 border-t border-[#E6E8EB] pt-1.5">
           <Link
             href="/explore"
             className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8] transition font-semibold"
@@ -331,30 +252,19 @@ export function SalesproSidebar({
             </div>
             <ExternalLink className="h-3 w-3 text-[#80868B]" />
           </Link>
-        </div>
 
-        {/* Section 5: Settings */}
-        <div className="pt-1.5 border-t border-[#E6E8EB] space-y-0.5">
           <button
             type="button"
             onClick={() => handleSelectTab("profile")}
-            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8] cursor-pointer"
-          >
-            <Settings className="h-4 w-4" />
-            <span>{t("seller.nav.factorySettings")}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSelectTab("account")}
             className={cn(
               "w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer",
-              activeTab === "account"
+              activeTab === "profile"
                 ? "bg-[#E8F1FD] text-[#1A73E8] font-bold"
                 : "text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1A73E8]"
             )}
           >
-            <KeyRound className="h-4 w-4" />
-            <span>{t("profile.page.accountSecurity")}</span>
+            <Settings className="h-4 w-4" />
+            <span>{t("seller.nav.factorySettings")}</span>
           </button>
         </div>
 
@@ -408,4 +318,3 @@ export function SalesproSidebar({
     </>
   );
 }
-

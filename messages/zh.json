@@ -189,7 +189,8 @@
     "accountSettings": "账户设置",
     "signingOut": "正在退出...",
     "signOut": "退出登录",
-    "myProfile": "我的资料"
+    "myProfile": "我的资料",
+    "supplierWorkspace": "供应商工作台"
   },
   "layout": {
     "search": {
@@ -1269,6 +1270,11 @@
       "eGUsd510": "例如：500–1000 万美元",
       "companyOverviewOemCapability": "公司概况与 OEM 能力",
       "primaryExportMarkets": "主要出口市场",
+      "exportMarketsDescription": "添加工厂出口的国家或地区，包括印度和中国。",
+      "exportCountryPlaceholder": "输入国家或地区",
+      "addExportMarket": "添加国家",
+      "removeExportMarket": "移除 {country}",
+      "noExportMarketsAdded": "尚未添加出口市场。",
       "factoryProfileChangesSuccessfullySaved": "工厂资料已保存！",
       "changesReflectImmediatelyOnYour": "修改会立即同步到你的公开制造商主页。"
     },
