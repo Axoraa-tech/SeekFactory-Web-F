@@ -8,8 +8,8 @@ import type { NextResponse } from "next/server";
 import { BACKEND_API_URL, BACKEND_ORIGIN } from "@/features/auth/backend-url";
 
 /**
- * The buyer site and the seller hub (/factory) keep separate sessions, so a manufacturer signed in
- * to the seller hub is a guest on the buyer site until they sign in there too (and vice versa).
+ * Buyer and seller credentials remain in separate cookies. Buyer marketplace requests may use the
+ * seller session when no buyer session exists; buyer credentials are never used for the seller hub.
  */
 export type Portal = "buyer" | "seller";
 
@@ -30,6 +30,17 @@ export function cookieNames(portal: Portal) {
 
 export function parsePortal(value: string | null | undefined): Portal | null {
   return value === "seller" || value === "buyer" ? value : null;
+}
+
+/** Use a manufacturer session on the buyer marketplace only when no buyer session exists. */
+export function resolveSessionPortal(
+  requestedPortal: Portal,
+  hasRequestedSession: boolean,
+  hasSellerSession: boolean,
+): Portal {
+  return requestedPortal === "buyer" && !hasRequestedSession && hasSellerSession
+    ? "seller"
+    : requestedPortal;
 }
 
 /**

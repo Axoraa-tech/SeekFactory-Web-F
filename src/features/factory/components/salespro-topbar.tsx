@@ -49,8 +49,7 @@ export function SalesproTopbar({
     rfqs: t("seller.top.indiaBuyerRfqsInquiries"),
     orders: t("seller.top.buyerOrderRequests"),
     messages: t("seller.nav.tradeMessenger"),
-    profile: t("seller.top.factoryVerificationProfile"),
-    account: t("profile.page.accountSecurity"),
+    profile: t("seller.nav.factorySettings"),
   };
 
   return (

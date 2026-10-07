@@ -1,21 +1,19 @@
 "use client";
 
-import { Price } from "@/components/ui/price";
-import { useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, ShoppingCart, X } from "lucide-react";
-import type { OrderRequest } from "@/entities/order";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { getApi } from "@/shared/api";
 import { ApiError } from "@/shared/api/http-api";
-import { placeOrderAction } from "./actions";
 import { defaultOrderQuantity } from "./order-status";
 import { useTranslations } from "next-intl";
 
 type Props = {
   productSlug: string;
-  /** Enables "Add to cart" as an alternative to sending the request now. */
-  productId?: string;
+  productId: string;
   productName?: string;
   priceInr?: number;
   unit?: string;
@@ -23,40 +21,62 @@ type Props = {
   onClose: () => void;
 };
 
+const subscribeNever = () => () => {};
+
 /**
- * Buyer sends an order request. No payment: the factory is notified, gets the buyer's
- * contact details, and follows up; the buyer tracks progress under /orders.
+ * Picks a quantity and puts the product in the buyer's cart. Order requests are sent from the
+ * cart (one per product, with delivery details and notes); "Buy now" is the one-product shortcut.
+ *
+ * Rendered into document.body: seek cards create their own stacking/containing context, which
+ * would otherwise trap a fixed overlay inside the card.
  */
-export function OrderRequestModal({ productSlug, productId, productName, priceInr, unit = "Unit", moq, onClose }: Props) {
+export function AddToCartModal({ productSlug, productId, productName, priceInr, unit = "Unit", moq, onClose }: Props) {
   const t = useTranslations();
+  // Same currency as the price on the card
+  const { formatPrice } = useRegionalSettings();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const mounted = useSyncExternalStore(subscribeNever, () => true, () => false);
   const [quantity, setQuantity] = useState(() => defaultOrderQuantity(moq));
-  const [note, setNote] = useState("");
   const [status, setStatus] = useState<"idle" | "sending">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [placed, setPlaced] = useState<OrderRequest | null>(null);
-  const [addedToCart, setAddedToCart] = useState(false);
+  const [added, setAdded] = useState(false);
 
   const minQuantity = defaultOrderQuantity(moq);
   const estimate = priceInr !== undefined && quantity > 0 ? priceInr * quantity : undefined;
+  const moqLabel = moq === undefined || moq === "" ? null : typeof moq === "number" ? `${moq} ${unit}` : moq;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && status !== "sending") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+    };
+  }, [onClose, status]);
 
   function goToLogin() {
-    // Come back to this product with the order form open after signing in
+    // Come back to this product with the dialog open after signing in
     const params = new URLSearchParams(searchParams.toString());
     params.set("order", "1");
     const next = pathname.startsWith("/products/") ? `${pathname}?${params}` : `/products/${productSlug}?order=1`;
     router.push(`/login?next=${encodeURIComponent(next)}`);
   }
 
-  async function handleAddToCart() {
-    if (!productId || status === "sending") return;
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (status === "sending" || quantity < 1) return;
     setStatus("sending");
     setError(null);
     try {
       await getApi().orders.addToCart(productId, quantity);
-      setAddedToCart(true);
+      setAdded(true);
+      router.refresh();
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) return goToLogin();
       setError(err instanceof Error ? err.message : t("orders.request.couldNotAddToCart"));
@@ -64,46 +84,33 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
     setStatus("idle");
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (status === "sending") return;
-    setStatus("sending");
-    setError(null);
-    const result = await placeOrderAction({ productSlug, quantity, note });
-    if (result.ok) {
-      setPlaced(result.data);
-    } else if (result.needsLogin) {
-      goToLogin();
-      return;
-    } else {
-      setError(result.error);
-    }
-    setStatus("idle");
-  }
+  if (!mounted) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
       onClick={(e) => {
         e.stopPropagation();
         if (status !== "sending") onClose();
       }}
       role="dialog"
       aria-modal="true"
-      aria-label={t("orders.sendOrderRequest")}
+      aria-label={t("orders.addToCart.title")}
     >
       <div
-        className="relative w-full max-w-md rounded-2xl border border-line bg-white shadow-2xl"
+        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-line px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white">
               <ShoppingCart className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-neutral-900">{placed ? t("orders.request.orderRequestSent") : t("orders.sendOrderRequest")}</h2>
-              <p className="text-xs text-ink-muted">{t("orders.request.noPaymentNowTheFactory")}</p>
+              <h2 className="text-base font-bold text-neutral-900">
+                {added ? t("orders.addToCart.added") : t("orders.addToCart.title")}
+              </h2>
+              <p className="text-xs text-ink-muted">{t("orders.addToCart.subtitle")}</p>
             </div>
           </div>
           <button
@@ -117,17 +124,17 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
           </button>
         </div>
 
-        {placed ? (
-          <div className="space-y-4 p-5">
+        {added ? (
+          <div className="space-y-4 overflow-y-auto p-5">
             <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-              <div className="text-sm text-emerald-900">
-                <p className="font-bold">{t("orders.request.reference")} {placed.referenceNumber}</p>
-                <p className="mt-1 text-xs leading-relaxed">
-                  {placed.manufacturer.name || t("orders.request.theFactory")} {t("orders.request.hasBeenNotifiedAbout")} {placed.quantity.toLocaleString("en-IN")}{" "}
-                  {t("orders.request.unitOfProduct", { unit: placed.unit ?? unit, product: placed.productName })}{t("orders.request.theyWillContactYouTo")}
-                </p>
-              </div>
+              <p className="text-xs leading-relaxed text-emerald-900">
+                {t("orders.addToCart.addedDetail", {
+                  quantity: quantity.toLocaleString("en-IN"),
+                  unit,
+                  product: productName ?? t("orders.request.selectedProduct"),
+                })}
+              </p>
             </div>
             <div className="flex items-center justify-end gap-2">
               <button
@@ -135,31 +142,33 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
                 onClick={onClose}
                 className="rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas"
               >
-                {t("common.close")}
+                {t("orders.addToCart.continueBrowsing")}
               </button>
               <Link
-                href="/orders"
-                className="rounded-xl bg-brand-blue px-4 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark"
+                href="/cart"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-brand-blue px-4 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark"
               >
-                {t("orders.request.viewMyOrders")}
+                <ShoppingCart className="h-4 w-4" />
+                {t("orders.addToCart.viewCart")}
               </Link>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 p-5">
+          <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto p-5">
             <div className="rounded-xl border border-line bg-canvas p-3 text-xs">
               <p className="font-bold text-neutral-900">{productName ?? t("orders.request.selectedProduct")}</p>
-              {priceInr !== undefined && (
+              {(priceInr !== undefined || moqLabel) && (
                 <p className="mt-0.5 text-ink-muted">
-                  {t("orders.request.listedAt")} <strong className="text-neutral-900"><Price inr={priceInr} /></strong> / {unit}
-                  {moq !== undefined && <> {t("orders.request.moq")} {typeof moq === "number" ? `${moq} ${unit}` : moq}</>}
+                  {priceInr !== undefined && t("orders.addToCart.listed", { price: formatPrice(priceInr), unit })}
+                  {priceInr !== undefined && moqLabel && " · "}
+                  {moqLabel && t("orders.addToCart.moq", { moq: moqLabel })}
                 </p>
               )}
             </div>
 
             <label className="block">
               <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-neutral-700">
-                {t("orders.request.quantity")}{unit}) <span className="text-red-500">*</span>
+                {t("orders.addToCart.quantity", { unit })} <span className="text-red-500">*</span>
               </span>
               <input
                 type="number"
@@ -178,28 +187,12 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
               )}
             </label>
 
-            <label className="block">
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-neutral-700">
-                {t("orders.request.noteToTheFactoryOptional")}
-              </span>
-              <textarea
-                rows={3}
-                maxLength={2000}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder={t("orders.request.specsDeliveryPortTimelineCustomization")}
-                className="w-full rounded-xl border border-neutral-300 px-3.5 py-2 text-sm text-neutral-900 focus:border-brand-blue focus:outline-hidden"
-              />
-            </label>
-
             {estimate !== undefined && (
               <p className="text-xs text-ink-muted">
-                {t("orders.request.estimatedValue")} <strong className="text-neutral-900"><Price inr={estimate} /></strong> {t("orders.request.atListingPriceTheFinal")}
+                {t("orders.request.estimatedValue")} <strong className="text-neutral-900">{formatPrice(estimate)}</strong>{" "}
+                {t("orders.request.atListingPriceTheFinal")}
               </p>
             )}
-            <p className="text-[11px] text-ink-muted">
-              {t("orders.request.yourNameCompanyEmailAnd")}
-            </p>
 
             {error && (
               <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
@@ -207,26 +200,7 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
               </p>
             )}
 
-            {addedToCart && (
-              <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
-                {t("orders.request.addedToYourCart")}{" "}
-                <Link href="/cart" className="underline">
-                  {t("orders.request.viewCart")}
-                </Link>
-              </p>
-            )}
-
             <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
-              {productId && (
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={status === "sending" || quantity < 1}
-                  className="mr-auto rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas disabled:opacity-50"
-                >
-                  {t("common.addToCart")}
-                </button>
-              )}
               <button
                 type="button"
                 onClick={onClose}
@@ -241,12 +215,13 @@ export function OrderRequestModal({ productSlug, productId, productName, priceIn
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-amber-600 hover:to-orange-600 disabled:opacity-60"
               >
                 {status === "sending" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}
-                <span>{status === "sending" ? t("common.sending") : t("orders.sendOrderRequest")}</span>
+                <span>{status === "sending" ? t("orders.addToCart.adding") : t("orders.addToCart.title")}</span>
               </button>
             </div>
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

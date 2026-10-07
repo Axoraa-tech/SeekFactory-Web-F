@@ -26,7 +26,7 @@ import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { cn } from "@/shared/lib/cn";
-import { SeekTrustStrip } from "@/components/reels/seek-trust-strip";
+import { SeekTrustBadge } from "@/components/reels/seek-trust-strip";
 import { formatCount } from "@/shared/lib/format";
 import { getApi } from "@/shared/api";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -427,7 +427,6 @@ export function VariantInstagramProductReel({
   return (
     <>
       <article className="rounded-2xl border border-neutral-200/90 bg-white shadow-xs transition-all hover:shadow-md overflow-hidden">
-        <SeekTrustStrip manufacturer={manufacturer} />
 
         <div className="p-3.5 sm:p-4 pb-2 sm:pb-2.5 space-y-2.5">
           {/* 2. Manufacturer Header */}
@@ -446,7 +445,7 @@ export function VariantInstagramProductReel({
                   <p className="text-sm font-bold text-ink hover:text-brand-blue transition">
                     {manufacturer.name}
                   </p>
-                  {manufacturer.verified ? <VerifiedBadge className="h-4 w-4" /> : null}
+                  <SeekTrustBadge manufacturer={manufacturer} />
                 </div>
                 <p className="text-xs text-ink-muted mt-0.5">
                   {translateCountry(manufacturer.country)} • {formatCount(reel.views)} {t("feed.views", "views")}
@@ -476,6 +475,9 @@ export function VariantInstagramProductReel({
               </Link>
             </div>
           </div>
+
+          {/* Hairline between the manufacturer row and the seek's title */}
+          <div aria-hidden="true" className="h-px bg-gradient-to-r from-slate-200 via-slate-200/70 to-transparent" />
 
           {/* 3. Title and Description */}
           <div>
@@ -654,6 +656,8 @@ export function VariantInstagramProductReel({
               priceInr={primaryProduct?.priceInr || 450}
               unit={primaryProduct?.unit || "piece"}
               moq={100}
+              productId={primaryProduct?.id}
+              productName={primaryProduct?.name}
               productSlug={primaryProduct?.slug || productSlug}
               manufacturerSlug={manufacturer.slug}
               size="sm"

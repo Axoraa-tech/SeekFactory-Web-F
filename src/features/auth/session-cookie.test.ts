@@ -9,21 +9,22 @@ describe("postAuthPath", () => {
 
   it("blocks open redirects", () => {
     expect(postAuthPath("Buyer", "//evil.example")).toBe("/");
-    expect(postAuthPath("Supplier", "https://evil.example")).toBe("/factory");
+    expect(postAuthPath("Supplier", "https://evil.example")).toBe("/factory?tab=products");
     expect(postAuthPath("Buyer", "javascript:alert(1)")).toBe("/");
   });
 
   it("defaults by role when next is missing", () => {
     expect(postAuthPath("Buyer")).toBe("/");
-    expect(postAuthPath("Supplier")).toBe("/factory");
+    expect(postAuthPath("Supplier")).toBe("/factory?tab=products");
+    expect(postAuthPath("Supplier", "/factory")).toBe("/factory?tab=products");
+    expect(postAuthPath("Supplier", "/factory?tab=orders")).toBe("/factory?tab=orders");
   });
 
-  it("opens the product catalog on a supplier's first sign-in", () => {
-    expect(postAuthPath("Supplier", undefined, true)).toBe("/factory?tab=products");
-    expect(postAuthPath("Supplier", undefined, false)).toBe("/factory");
-    expect(postAuthPath("Buyer", undefined, true)).toBe("/");
+  it("opens the product catalog on supplier sign-in", () => {
+    expect(postAuthPath("Supplier")).toBe("/factory?tab=products");
+    expect(postAuthPath("Buyer")).toBe("/");
     // An explicit destination still wins
-    expect(postAuthPath("Supplier", "/factory?tab=orders", true)).toBe("/factory?tab=orders");
+    expect(postAuthPath("Supplier", "/factory?tab=orders")).toBe("/factory?tab=orders");
   });
 });
 

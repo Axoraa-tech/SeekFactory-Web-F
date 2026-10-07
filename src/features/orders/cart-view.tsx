@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Minus, Plus, ShoppingCart, Trash2, Info } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2, Info, MessageSquarePlus } from "lucide-react";
 import { getApi } from "@/shared/api";
-import type { Cart, CartItem, OrderContact } from "@/entities/order";
+import { cn } from "@/shared/lib/cn";
+import type { Cart, CartItem, CheckoutLine, OrderContact } from "@/entities/order";
 import type { BuyerProfile } from "@/entities/user";
 import { ShippingForm } from "@/features/orders/shipping-form";
 import { PAYMENT_NOTE, formatMoney } from "@/features/orders/order-status";
@@ -24,6 +25,25 @@ export function CartView({ user, initialCart }: Props) {
   const [lineError, setLineError] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  // Every line starts selected; unselected lines stay in the cart after checkout
+  const [deselected, setDeselected] = useState<Set<string>>(() => new Set());
+  // One note per product, sent only to that product's factory
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [openNotes, setOpenNotes] = useState<Set<string>>(() => new Set());
+
+  const selectedItems = cart.items.filter((item) => !deselected.has(item.id));
+  const allSelected = selectedItems.length === cart.items.length;
+  const selectedTotal = selectedItems.reduce((sum, item) => sum + (item.lineTotal ?? 0), 0);
+
+  const toggleLine = (id: string) =>
+    setDeselected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const toggleAll = () => setDeselected(allSelected ? new Set(cart.items.map((item) => item.id)) : new Set());
+  const openNote = (id: string) => setOpenNotes((prev) => new Set(prev).add(id));
 
   // Grouped by factory for reading; checkout sends one order request per product
   const groups = useMemo(() => {
@@ -47,10 +67,15 @@ export function CartView({ user, initialCart }: Props) {
   };
 
   const placeOrder = async (contact: OrderContact) => {
+    if (selectedItems.length === 0) return;
     setPlacing(true);
     setCheckoutError(null);
+    const lines: CheckoutLine[] = selectedItems.map((item) => ({
+      cartItemId: item.id,
+      note: notes[item.id]?.trim() || undefined,
+    }));
     try {
-      const orders = await getApi().orders.checkout(contact);
+      const orders = await getApi().orders.checkout(contact, lines);
       router.push(`/orders?placed=${encodeURIComponent(orders.map((o) => o.referenceNumber).join(","))}`);
       router.refresh();
     } catch (err) {
@@ -84,6 +109,19 @@ export function CartView({ user, initialCart }: Props) {
           </p>
         )}
 
+        <label className="flex w-fit cursor-pointer items-center gap-2 px-1 text-xs font-semibold text-ink">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            ref={(el) => {
+              if (el) el.indeterminate = !allSelected && selectedItems.length > 0;
+            }}
+            onChange={toggleAll}
+            className="h-4 w-4 rounded accent-brand-blue"
+          />
+          {t("orders.cart.selectAll", { count: cart.items.length })}
+        </label>
+
         {groups.map((items) => (
           <section key={items[0].manufacturer.id} className="rounded-2xl border border-line bg-white shadow-2xs overflow-hidden">
             <header className="flex items-center justify-between gap-3 border-b border-line bg-canvas/60 px-4 py-2.5">
@@ -99,8 +137,17 @@ export function CartView({ user, initialCart }: Props) {
             <ul className="divide-y divide-line">
               {items.map((item) => {
                 const busy = busyLine === item.id;
+                const selected = !deselected.has(item.id);
+                const noteOpen = openNotes.has(item.id) || Boolean(notes[item.id]);
                 return (
-                  <li key={item.id} className="flex gap-3 p-4">
+                  <li key={item.id} className={cn("flex gap-3 p-4 transition-opacity", !selected && "opacity-60")}>
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleLine(item.id)}
+                      aria-label={t("orders.cart.selectItem", { product: item.product.name })}
+                      className="mt-8 h-4 w-4 shrink-0 cursor-pointer rounded accent-brand-blue"
+                    />
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.product.imageUrl}
@@ -155,6 +202,28 @@ export function CartView({ user, initialCart }: Props) {
                           </button>
                         </div>
                       </div>
+                      {noteOpen ? (
+                        <label className="block space-y-1 pt-1">
+                          <span className="text-[11px] font-semibold text-ink-muted">{t("orders.cart.noteForFactory")}</span>
+                          <textarea
+                            rows={2}
+                            maxLength={2000}
+                            value={notes[item.id] ?? ""}
+                            onChange={(e) => setNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                            placeholder={t("orders.shipping.packagingDeliveryWindowInspectionRequirements")}
+                            className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-xs text-ink placeholder:text-ink-faint focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
+                          />
+                        </label>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => openNote(item.id)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline"
+                        >
+                          <MessageSquarePlus className="h-3.5 w-3.5" />
+                          {t("orders.cart.addNote")}
+                        </button>
+                      )}
                     </div>
                   </li>
                 );
@@ -166,20 +235,29 @@ export function CartView({ user, initialCart }: Props) {
 
       <aside className="rounded-2xl border border-line bg-white p-5 shadow-2xs space-y-4 lg:sticky lg:top-24">
         <div className="flex items-baseline justify-between">
-          <span className="text-sm font-bold text-ink">{t("orders.estimatedTotal")}</span>
-          <span className="text-xl font-extrabold text-ink tabular-nums">{formatMoney(cart.totalAmount, cart.currency)}</span>
+          <span className="text-sm font-bold text-ink">{allSelected ? t("orders.estimatedTotal") : t("orders.cart.selectedTotal")}</span>
+          <span className="text-xl font-extrabold text-ink tabular-nums">{formatMoney(selectedTotal, cart.currency)}</span>
         </div>
         <p className="flex gap-2 rounded-lg bg-blue-50/70 px-3 py-2 text-[11px] text-slate-700">
           <Info className="h-3.5 w-3.5 shrink-0 text-brand-blue mt-0.5" />
           <span>
-            {cart.items.length > 1 ? t("orders.cart.sendsOrderRequestsOnePer", { length: cart.items.length }) : ""}
+            {!allSelected
+              ? `${t("orders.cart.selectionSummary", { selected: selectedItems.length, total: cart.items.length })} `
+              : cart.items.length > 1
+                ? t("orders.cart.sendsOrderRequestsOnePer", { length: cart.items.length })
+                : ""}
             {t(PAYMENT_NOTE)}
           </span>
         </p>
+        {selectedItems.length === 0 && (
+          <p className="text-[11px] font-semibold text-amber-700">{t("orders.cart.selectToSend")}</p>
+        )}
         <ShippingForm
           user={user}
-          submitLabel={cart.items.length > 1 ? t("orders.cart.sendOrderRequests") : t("orders.sendOrderRequest")}
+          submitLabel={t("orders.cart.sendCount", { count: selectedItems.length })}
           submitting={placing}
+          disabled={selectedItems.length === 0}
+          showNote={false}
           error={checkoutError}
           onSubmit={placeOrder}
         />
