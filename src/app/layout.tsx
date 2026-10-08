@@ -20,13 +20,13 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
   return {
     title: {
-      default: "SeekFactory",
+      default: "SeekFactory · Connect with Verified Chinese Machinery Manufacturers",
       template: "%s · SeekFactory",
     },
-    description: t("brand.tagline"),
+    description:
+      "India's premium cross-border B2B marketplace for manufacturing machineries. Find quality machineries, connect with trusted manufacturers, and grow your business.",
   };
 }
 

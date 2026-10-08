@@ -157,7 +157,7 @@ export function UserProfileDashboard({
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await getApi().session.logout();
+      await getApi().session.logout(user.role);
       resetFollowStore();
       router.push("/");
       router.refresh();

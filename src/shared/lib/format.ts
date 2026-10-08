@@ -74,5 +74,12 @@ export function formatRelativeTime(value: string | undefined, locale: string = "
   if (hours < 24) return zh ? `${hours} 小时前` : `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return zh ? `${days} 天前` : `${days}d ago`;
-  return new Date(time).toLocaleDateString(zh ? "zh-CN" : undefined, { day: "numeric", month: "short", year: "numeric" });
+  // Fixed locale and time zone: the server and the browser must render the same text, otherwise
+  // React's hydration fails and the surrounding tree is rebuilt
+  return new Date(time).toLocaleDateString(zh ? "zh-CN" : "en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }

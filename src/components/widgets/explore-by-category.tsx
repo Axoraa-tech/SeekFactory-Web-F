@@ -30,7 +30,7 @@ export function ExploreByCategory({ categories }: Props) {
         ))}
         <Link
           href="/explore"
-          className="flex flex-col items-center justify-center rounded-xl border border-line px-2 py-3 text-center text-xs font-semibold text-brand-blue hover:bg-canvas"
+          className="flex flex-col items-center justify-center rounded-xl border border-line px-2 py-3 text-center text-xs font-semibold text-brand-orange hover:bg-canvas hover:border-brand-orange/40 transition-colors"
         >
           {t("widgets.viewAll", "More")}
         </Link>

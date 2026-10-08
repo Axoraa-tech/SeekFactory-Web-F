@@ -81,38 +81,27 @@ export function TimedAuthPrompt({ user }: { user: unknown }) {
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative flex max-h-[calc(100vh-2rem)] w-full max-w-[440px] flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl transition-all duration-300 animate-in zoom-in-95">
-        {/* Top Header Banner */}
-        <div className="flex shrink-0 items-center justify-between bg-gradient-to-r from-blue-600 via-brand-blue to-indigo-600 px-4 py-3 text-white sm:px-5">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 shrink-0 text-amber-300" />
-            <p className="text-xs font-semibold tracking-wide">
-              {t("auth.welcomeToSeekfactory")}
-            </p>
-          </div>
-          <button
-            onClick={handleClose}
-            type="button"
-            aria-label={t("common.closeModal")}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
-          >
-            <X className="h-4 w-4" />
-          </button>
+      <div className="relative flex w-full max-w-[410px] flex-col rounded-2xl border border-slate-200/90 bg-white shadow-2xl p-5 sm:p-6 transition-all duration-300 animate-in zoom-in-95 overflow-hidden">
+        {/* Floating Close Button */}
+        <button
+          onClick={handleClose}
+          type="button"
+          aria-label={t("common.closeModal")}
+          className="absolute top-3.5 right-3.5 z-20 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+        >
+          <X className="h-4.5 w-4.5" />
+        </button>
+
+        {/* Brand Logo */}
+        <div className="mb-2 text-center pt-1">
+          <BrandLogo
+            priority
+            className="mx-auto h-8 sm:h-9 w-auto max-w-[210px] object-contain"
+          />
         </div>
 
-        {/* Scrollable Modal Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-7">
-          {/* Prominent Brand Logo */}
-          <div className="mb-4 text-center">
-            <BrandLogo
-              priority
-              className="mx-auto h-12 w-auto max-w-[260px] object-contain sm:h-16 sm:max-w-[300px]"
-            />
-          </div>
-
-          {/* Standard Auth Card (Embedded mode without extra outer card borders) */}
-          <AuthCard mode="login" embedded />
-        </div>
+        {/* Standard Auth Card (Embedded mode without extra outer card borders) */}
+        <AuthCard mode="login" embedded onClose={handleClose} />
       </div>
     </div>
   );

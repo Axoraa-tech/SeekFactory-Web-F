@@ -793,18 +793,25 @@ const ordersRepo: OrderRepository = {
     mockCart = mockCart.filter((l) => l.id !== cartItemId);
     return delay(buildCart());
   },
-  async checkout(contact) {
+  async checkout(contact, lines) {
     const placed: OrderRequest[] = [];
-    for (const line of mockCart) {
+    const selected = lines
+      ? lines.flatMap((sel) => {
+          const line = mockCart.find((l) => l.id === sel.cartItemId);
+          return line ? [{ line, note: sel.note?.trim() || contact.note }] : [];
+        })
+      : mockCart.map((line) => ({ line, note: contact.note }));
+    for (const { line, note } of selected) {
       const product = products.find((p) => p.id === line.productId);
       if (!product) continue;
-      const order = await ordersRepo.place({ productSlug: product.slug, quantity: line.quantity, note: contact.note,
+      const order = await ordersRepo.place({ productSlug: product.slug, quantity: line.quantity, note,
         contactName: contact.contactName, contactPhone: contact.contactPhone, deliveryAddress: contact.deliveryAddress });
       const stored = orderRequests.find((item) => item.id === order.id);
       if (stored) stored.source = "CART";
       placed.push({ ...order, source: "CART" });
     }
-    mockCart = [];
+    const sent = new Set(selected.map(({ line }) => line.id));
+    mockCart = mockCart.filter((l) => !sent.has(l.id));
     return placed;
   },
   async listMine() {

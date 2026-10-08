@@ -96,7 +96,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
     if (title.toLowerCase().includes("rfq")) return <Eye className="h-4 w-4 text-blue-600" />;
     if (title.toLowerCase().includes("follow")) return <UserCheck className="h-4 w-4 text-amber-600" />;
     if (title.toLowerCase().includes("price") || title.toLowerCase().includes("update")) return <TrendingUp className="h-4 w-4 text-indigo-600" />;
-    return <Sparkles className="h-4 w-4 text-brand-blue" />;
+    return <Sparkles className="h-4 w-4 text-brand-orange" />;
   }
 
   return (
@@ -107,9 +107,9 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label={t("nav.notifications")}
         aria-expanded={isOpen}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-blue/30 ${
+        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange/30 ${
           isOpen
-            ? "bg-blue-50 text-brand-blue"
+            ? "bg-brand-orange-soft text-brand-orange"
             : "text-ink-muted hover:bg-canvas hover:text-ink"
         }`}
       >
@@ -123,7 +123,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 px-1">
             <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-brand-blue" />
+              <Bell className="h-4 w-4 text-brand-orange" />
               <h3 className="text-sm font-bold text-ink">{t("nav.notifications")}</h3>
               {unreadCount > 0 && (
                 <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600">
@@ -135,7 +135,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
               <button
                 type="button"
                 onClick={handleMarkAllRead}
-                className="flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline"
+                className="flex items-center gap-1 text-[11px] font-semibold text-brand-orange hover:underline"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 {t("layout.notifications.markAllRead")}
@@ -156,7 +156,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
                   href={notificationHref(item)}
                   onClick={() => handleOpenNotification(item)}
                   className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-slate-50 ${
-                    !item.read ? "bg-blue-50/30" : ""
+                    !item.read ? "bg-brand-orange-soft/30" : ""
                   }`}
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 mt-0.5">
@@ -176,7 +176,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
                     </p>
                   </div>
                   {!item.read && (
-                    <span className="h-2 w-2 shrink-0 rounded-full bg-blue-600 mt-1.5" />
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-brand-orange mt-1.5" />
                   )}
                 </Link>
               ))
@@ -188,7 +188,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline py-1"
+              className="inline-flex items-center gap-1 text-xs font-bold text-brand-orange hover:underline py-1"
             >
               {t("layout.notifications.viewAllNotifications")}
               <ChevronRight className="h-3.5 w-3.5" />

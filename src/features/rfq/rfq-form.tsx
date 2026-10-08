@@ -147,7 +147,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/profile?tab=rfqs"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-orange px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-xs"
           >
             <span>{t("rfq.form.trackInMyRfqsProfile")}</span>
             <ArrowRight className="h-4 w-4" />
@@ -377,7 +377,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
           <Button
             type="submit"
             disabled={status === "saving" || uploading}
-            className="h-11 px-6 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm hover:bg-brand-blue-dark shadow-md active:scale-95 transition-all"
+            className="h-11 px-6 rounded-xl bg-brand-orange text-white font-bold text-xs sm:text-sm hover:bg-[#d85b17] shadow-md active:scale-95 transition-all"
           >
             {status === "saving" ? t("rfq.form.publishingToVerifiedPlants") : t("rfq.form.postBuyingRequestToVerified")}
           </Button>

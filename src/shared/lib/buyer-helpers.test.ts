@@ -127,9 +127,9 @@ describe("buyer site and seller hub sessions", () => {
   it("redirects after sign-in by the tab used, keeping `next` only within that section", () => {
     expect(postAuthPath("Buyer", "/profile")).toBe("/profile");
     expect(postAuthPath("Buyer", "/factory")).toBe("/");
-    expect(postAuthPath("Supplier", "/profile")).toBe("/factory");
+    expect(postAuthPath("Supplier", "/profile")).toBe("/factory?tab=products");
     expect(postAuthPath("Supplier", "/factory?tab=rfqs")).toBe("/factory?tab=rfqs");
-    expect(postAuthPath("Supplier", undefined, true)).toBe("/factory?tab=products");
+    expect(postAuthPath("Supplier")).toBe("/factory?tab=products");
     expect(postAuthPath("Buyer", "//evil.example")).toBe("/");
   });
 });

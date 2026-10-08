@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Monitor, Smartphone, Eye, EyeOff } from "lucide-react";
 import { RoleToggle } from "@/features/auth/role-toggle";
 import { GoogleSignInButton } from "@/features/auth/google-sign-in-button";
 import { featureFlags } from "@/shared/config/flags";
+import { cn } from "@/shared/lib/cn";
 
 import { postAuthPath } from "@/features/auth/session-cookie";
 import { useToast } from "@/components/ui/toast";
@@ -25,7 +26,8 @@ interface AuthCardProps {
   hideHeader?: boolean;
   initialEmail?: string;
   initialPassword?: string;
-  initialPhone?:string;
+  initialPhone?: string;
+  onClose?: () => void;
 }
 
 export function AuthCard({
@@ -35,6 +37,7 @@ export function AuthCard({
   initialEmail = "",
   initialPassword = "",
   initialPhone = "",
+  onClose,
 }: AuthCardProps) {
   const t = useTranslations();
   const router = useRouter();
@@ -116,7 +119,7 @@ export function AuthCard({
         return;
       }
 
-      router.push(postAuthPath(role, next, user.firstLogin));
+      router.push(postAuthPath(role, next));
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("auth.card.authenticationFailedPleaseCheckYour"));
@@ -135,12 +138,17 @@ export function AuthCard({
     try {
       const user = await getApi().session.loginWithGoogle(idToken);
       // First Google sign-in: name, email and photo come from Google; let them review it and add the rest
-      router.push(user.firstLogin && !next ? "/profile?welcome=1" : postAuthPath("Buyer", next, user.firstLogin));
+      router.push(user.firstLogin && !next ? "/profile?welcome=1" : postAuthPath("Buyer", next));
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error && err.message ? err.message : t("auth.card.googleSignInFailed"));
       setSaving(false);
     }
+  }
+
+  /** Guests browse without an account; sign-in is only needed to like, save, message or order. */
+  function handleGuestLogin(view: "landscape" | "vertical") {
+    router.push(`/?view=${view}`);
   }
 
   //? To Validate Password 
@@ -163,31 +171,43 @@ export function AuthCard({
     <div className={containerClasses}>
       {!hideHeader && (
         <>
-          <h1 className="mb-1 text-center text-2xl sm:text-[30px] font-light tracking-tight text-ink">
+          <h1
+            className={cn(
+              "text-center tracking-tight text-ink font-bold",
+              embedded
+                ? "mb-0.5 text-xl sm:text-2xl"
+                : "mb-1 text-2xl sm:text-[30px]"
+            )}
+          >
             {mode === "join" ? t("auth.card.joinSeekfactory") : t("nav.signIn")}
           </h1>
-          <p className="mb-4 sm:mb-5 text-center text-xs sm:text-sm text-ink-muted">
+          <p
+            className={cn(
+              "text-center text-ink-muted",
+              embedded ? "mb-3 text-xs" : "mb-4 sm:mb-5 text-xs sm:text-sm"
+            )}
+          >
             {isManufacturer ? t("auth.card.forVerifiedFactoriesAndManufacturers") : t("auth.card.forIndustrialBuyersWorldwide")}
           </p>
         </>
       )}
 
-      <RoleToggle />
+      <RoleToggle compact={embedded} />
 
-      <form onSubmit={onSubmit} className="space-y-3">
+      <form onSubmit={onSubmit} className="space-y-2.5">
         {mode === "join" ? (
           <>
             <input
               name="name"
               required
               placeholder={t("auth.card.contactPersonFullName")}
-              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="h-10 sm:h-10.5 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none transition focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 placeholder:text-slate-400"
             />
             <input
               name="companyName"
               required
               placeholder={isManufacturer ? t("auth.card.factoryManufacturerName") : t("auth.card.companyEnterpriseName")}
-              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="h-10 sm:h-10.5 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none transition focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 placeholder:text-slate-400"
             />
           </>
         ) : null}
@@ -201,7 +221,7 @@ export function AuthCard({
               value={email || ""}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("common.email")}
-              className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+              className="h-10 sm:h-10.5 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none transition focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 placeholder:text-slate-400"
             />
             <div className="relative">
               <input
@@ -212,18 +232,19 @@ export function AuthCard({
                 value={password || ""}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t("auth.card.password8Characters")}
-                className={`h-11 sm:h-12 w-full rounded-lg border px-3 pr-10 text-sm outline-none transition-colors ${
-                  password && passwordErrors.length > 0 
-                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" 
-                    : "border-[#8c8c8c] focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-                }`}
+                className={cn(
+                  "h-10 sm:h-10.5 w-full rounded-xl border px-3.5 pr-10 text-sm outline-none transition placeholder:text-slate-400",
+                  password && passwordErrors.length > 0
+                    ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                    : "border-slate-300 focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20"
+                )}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8c8c8c] hover:text-ink focus:outline-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-ink focus:outline-none"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
               </button>
             </div>
 
@@ -238,7 +259,7 @@ export function AuthCard({
             {mode === "login" && (
               <Link
                 href="/forgot-password"
-                className="block text-right text-xs font-semibold text-brand-blue hover:underline"
+                className="block text-right text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline"
               >
                 {t("auth.forgotPassword")}
               </Link>
@@ -251,9 +272,9 @@ export function AuthCard({
               value={phone}
               onChange={setPhone}
               className="w-full"
-              inputClassName="!h-11 sm:!h-12 !w-full !rounded-l-none !rounded-r-lg !border-[#8c8c8c] !text-sm !outline-none focus:!border-brand-blue focus:!ring-1 focus:!ring-brand-blue"
+              inputClassName="!h-10 sm:!h-10.5 !w-full !rounded-l-none !rounded-r-xl !border-slate-300 !text-sm !outline-none focus:!border-brand-orange focus:!ring-2 focus:!ring-brand-orange/20"
               countrySelectorStyleProps={{
-                buttonClassName: "!h-11 sm:!h-12 !rounded-l-lg !rounded-r-none !border-[#8c8c8c] ",
+                buttonClassName: "!h-10 sm:!h-10.5 !rounded-l-xl !rounded-r-none !border-slate-300",
               }}
             />
 
@@ -262,7 +283,7 @@ export function AuthCard({
                 name="otp"
                 required
                 placeholder={t("auth.card.otp123456")}
-                className="h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                className="h-10 sm:h-10.5 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none transition focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20 placeholder:text-slate-400"
               />
             ) : null}
           </>
@@ -271,28 +292,28 @@ export function AuthCard({
         {mode === "join" ? (
           <p className="pt-1 text-center text-xs leading-relaxed text-ink-muted">
             {t("auth.card.byClickingAgreeJoinYou")}{" "}
-            <Link href="/legal/terms" className="font-semibold text-brand-blue">
+            <Link href="/legal/terms" className="font-semibold text-brand-orange hover:underline">
               {t("layout.footer.userAgreement")}
             </Link>
             ,{" "}
-            <Link href="/legal/privacy" className="font-semibold text-brand-blue">
+            <Link href="/legal/privacy" className="font-semibold text-brand-orange hover:underline">
               {t("layout.footer.privacyPolicy")}
             </Link>
             {t("auth.card.and")}{" "}
-            <Link href="/legal/cookies" className="font-semibold text-brand-blue">
+            <Link href="/legal/cookies" className="font-semibold text-brand-orange hover:underline">
               {t("layout.footer.cookiePolicy")}
             </Link>
             .
           </p>
         ) : null}
 
-        {error ? <p className="text-center text-sm font-medium text-red-600">{error}</p> : null}
-        {notice ? <p className="text-center text-sm font-medium text-brand-blue">{notice}</p> : null}
+        {error ? <p className="text-center text-xs sm:text-sm font-medium text-red-600">{error}</p> : null}
+        {notice ? <p className="text-center text-xs sm:text-sm font-medium text-brand-orange">{notice}</p> : null}
 
         <button
           type="submit"
           disabled={saving}
-          className="h-11 sm:h-12 w-full rounded-full bg-brand-blue text-sm sm:text-base font-semibold text-white hover:bg-brand-blue-dark disabled:opacity-60 transition-colors"
+          className="h-10 sm:h-10.5 w-full rounded-full bg-brand-orange font-bold text-white hover:bg-[#d85b17] disabled:opacity-60 transition-all shadow-xs active:scale-[0.99] cursor-pointer text-sm"
         >
           {saving
             ? t("auth.card.pleaseWait")
@@ -306,7 +327,7 @@ export function AuthCard({
 
       <button
         type="button"
-        className="mt-2.5 w-full text-xs sm:text-sm font-semibold text-brand-blue hover:underline"
+        className="mt-2 w-full text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline text-center"
         onClick={() => {
           setMethod((value) => (value === "email" ? "phone" : "email"));
           setOtpSent(false);
@@ -317,17 +338,17 @@ export function AuthCard({
         {method === "email" ? t("auth.card.usePhoneInstead") : t("auth.card.useEmailInstead")}
       </button>
 
-      <div className="my-4 flex items-center gap-3 text-xs sm:text-sm text-ink-faint">
-        <span className="h-px flex-1 bg-line" />
+      <div className="my-3 flex items-center gap-3 text-xs text-slate-400">
+        <span className="h-px flex-1 bg-slate-200" />
         {t("common.or")}
-        <span className="h-px flex-1 bg-line" />
+        <span className="h-px flex-1 bg-slate-200" />
       </div>
 
       {isManufacturer ? (
         <button
           type="button"
           onClick={() => setNotice(t("auth.card.wechatLoginWillConnectWhen"))}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#8c8c8c] text-xs sm:text-sm font-semibold hover:bg-canvas transition-colors"
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-300 font-semibold hover:bg-slate-50 transition-colors text-xs sm:text-sm cursor-pointer"
         >
           {t("auth.card.continueWithWechat")}
         </button>
@@ -341,20 +362,53 @@ export function AuthCard({
         <button
           type="button"
           onClick={() => setNotice(t("auth.card.googleLoginWillConnectWhen"))}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#8c8c8c] text-xs sm:text-sm font-semibold hover:bg-canvas transition-colors"
+          className="flex h-10 w-full items-center justify-center gap-2.5 rounded-full border border-slate-300 font-semibold hover:bg-slate-50 transition-colors text-xs sm:text-sm text-slate-700 shadow-2xs cursor-pointer"
         >
           <GoogleMark />
           {t("auth.card.continueWithGoogle")}
         </button>
       )}
 
-      <p className="mt-4 sm:mt-5 text-center text-xs sm:text-sm">
+      {/* Instant Guest Demo Buttons (shown on standalone /login page) */}
+      {!embedded && (
+        <>
+          <div className="my-3.5 flex items-center gap-2 text-xs text-slate-400">
+            <span className="h-px flex-1 bg-slate-200" />
+            <span>{t("auth.card.quickGuestAccess")}</span>
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          <div className="space-y-2">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleGuestLogin("landscape")}
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:border-brand-orange/30 transition-all active:scale-[0.99] shadow-2xs group"
+            >
+              <Monitor className="h-3.5 w-3.5 text-brand-orange group-hover:scale-110 transition-transform" />
+              <span>{t("auth.card.guestLandscapeB2bFeed")}</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleGuestLogin("vertical")}
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/70 px-3 text-xs font-semibold text-slate-700 hover:bg-orange-100/80 hover:border-orange-300 transition-all active:scale-[0.99] shadow-2xs group"
+            >
+              <Smartphone className="h-3.5 w-3.5 text-[#FF3D00] group-hover:scale-110 transition-transform" />
+              <span>{t("auth.card.guestVerticalSeeksFeed")}</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      <p className="mt-3 text-center text-xs text-slate-600">
         {mode === "join" ? (
           <>
             {t("auth.card.alreadyOnSeekfactory")}{" "}
             <Link
               href={`/login?role=${isManufacturer ? "manufacturer" : "buyer"}`}
-              className="font-semibold text-brand-blue hover:underline"
+              className="font-bold text-brand-orange hover:text-[#d85b17] hover:underline"
             >
               {t("nav.signIn")}
             </Link>
@@ -364,13 +418,25 @@ export function AuthCard({
             {t("auth.card.newToSeekfactory")}{" "}
             <Link
               href={`/join?role=${isManufacturer ? "manufacturer" : "buyer"}`}
-              className="font-semibold text-brand-blue hover:underline"
+              className="font-bold text-brand-orange hover:text-[#d85b17] hover:underline"
             >
               {t("nav.joinNow")}
             </Link>
           </>
         )}
       </p>
+
+      {embedded && onClose && (
+        <div className="mt-2 text-center">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-xs font-medium text-slate-400 hover:text-slate-700 transition-colors cursor-pointer hover:underline"
+          >
+            {t("auth.card.continueAsGuest")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -205,7 +205,7 @@ export function SeekActions({ item }: { item: FeedItem }) {
       )}
       <Link
         href={`/manufacturers/${item.manufacturer.slug}`}
-        className="rounded-full border border-line px-3.5 py-1.5 text-xs font-medium text-ink hover:bg-canvas"
+        className="rounded-full border border-line px-3.5 py-1.5 text-xs font-medium text-ink hover:border-brand-orange hover:text-brand-orange transition-colors"
       >
         {t("showcase.viewManufacturer")}
       </Link>

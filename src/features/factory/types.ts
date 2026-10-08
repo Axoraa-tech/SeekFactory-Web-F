@@ -1,9 +1,10 @@
-export const SELLER_TABS = ["overview", "products", "seeks", "rfqs", "orders", "messages", "profile", "account"] as const;
+export const SELLER_TABS = ["overview", "products", "seeks", "rfqs", "orders", "messages", "profile"] as const;
 
 export type SellerTab = (typeof SELLER_TABS)[number];
 
 /** `?tab=` value → a known seller hub tab (anything else opens the overview). */
 export function parseSellerTab(value: string | null | undefined): SellerTab {
+  if (value === "account") return "profile";
   return SELLER_TABS.includes(value as SellerTab) ? (value as SellerTab) : "overview";
 }
 

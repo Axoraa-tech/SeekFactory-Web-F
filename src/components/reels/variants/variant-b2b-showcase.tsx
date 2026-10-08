@@ -20,10 +20,9 @@ import {
 } from "lucide-react";
 import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
-import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
-import { SeekTrustStrip } from "@/components/reels/seek-trust-strip";
+import { SeekTrustBadge } from "@/components/reels/seek-trust-strip";
 import { formatCount, formatDuration } from "@/shared/lib/format";
 
 import { cn } from "@/shared/lib/cn";
@@ -154,7 +153,6 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
         ref={containerRef}
         className="seek-stage group/card relative overflow-hidden rounded-card border border-[rgba(28,22,22,0.07)] shadow-[0_1px_1px_rgba(28,22,22,0.03),0_18px_40px_-26px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_1px_1px_rgba(28,22,22,0.03),0_24px_48px_-26px_rgba(15,23,42,0.45)]"
       >
-        <SeekTrustStrip manufacturer={manufacturer} />
 
         <div className="p-3.5 sm:p-4 pb-2 sm:pb-2.5 space-y-2.5">
           {/* Header with SupplierLockOverlay */}
@@ -172,10 +170,10 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="text-sm font-bold text-ink hover:text-brand-blue transition">
+                    <p className="text-sm font-bold text-ink hover:text-brand-orange transition">
                       {manufacturer.name}
                     </p>
-                    {manufacturer.verified ? <VerifiedBadge className="h-4 w-4" /> : null}
+                    <SeekTrustBadge manufacturer={manufacturer} />
                   </div>
                   <p className="text-xs text-ink-muted mt-0.5">
                     {manufacturer.country} • {t("seek.viewCount", { count: formatCount(reel.views) })}
@@ -206,6 +204,9 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               </div>
             </div>
           </SupplierLockOverlay>
+
+          {/* Hairline between the manufacturer row and the seek's title */}
+          <div aria-hidden="true" className="h-px bg-gradient-to-r from-slate-200 via-slate-200/70 to-transparent" />
 
           {/* Title & Description */}
           <div>
@@ -343,6 +344,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
           <div className="glass-tile rounded-2xl px-3 py-2.5">
             <ProductActionBar
               productId={product?.id}
+              productName={product?.name}
               priceInr={product?.priceInr}
               unit={product?.unit}
               moq={product?.moq}

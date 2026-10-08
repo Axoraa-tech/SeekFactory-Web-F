@@ -7,6 +7,7 @@ import {
   parsePortal,
   portalForUrl,
   readTokenPair,
+  resolveSessionPortal,
   refreshTokens,
   setTokenCookies,
   type Portal,
@@ -74,7 +75,20 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     headers.delete(PORTAL_HEADER);
 
     const portal = requestPortal(req);
-    const names = cookieNames(portal);
+    const isAuthEntry = TOKEN_ISSUING_PATHS.some((entry) => path.endsWith(entry)) || path.endsWith("auth/logout");
+    const requestedNames = cookieNames(portal);
+    const sellerNames = cookieNames("seller");
+    const hasRequestedSession = Boolean(
+      req.cookies.get(requestedNames.access)?.value || req.cookies.get(requestedNames.refresh)?.value,
+    );
+    const hasSellerSession = Boolean(
+      req.cookies.get(sellerNames.access)?.value || req.cookies.get(sellerNames.refresh)?.value,
+    );
+    const sessionPortal =
+      portal === "buyer" && !isAuthEntry
+        ? resolveSessionPortal(portal, hasRequestedSession, hasSellerSession)
+        : portal;
+    const names = cookieNames(sessionPortal);
 
     const hasBody = req.method !== "GET" && req.method !== "HEAD" && req.body !== null;
     const isMultipart = (req.headers.get("content-type") || "").startsWith("multipart/");
@@ -91,6 +105,9 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
         // Abort the upstream call when the browser goes away (e.g. a closed chat's SSE stream),
         // otherwise long-lived backend streams would leak.
         signal: req.signal,
+        // Pass redirects to the browser (e.g. a chat attachment's short-lived signed link to the
+        // bucket) instead of downloading the file through this server
+        redirect: "manual",
       };
       if (bufferedBody) {
         init.body = bufferedBody;
@@ -147,9 +164,9 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
       }
     } else if (path.endsWith("auth/logout") || sessionEnded) {
       // Signs out of this section only; the other section keeps its session
-      clearTokenCookies(response, portal);
+      clearTokenCookies(response, sessionPortal);
     } else if (refreshed) {
-      setTokenCookies(response, refreshed, portal);
+      setTokenCookies(response, refreshed, sessionPortal);
     }
 
     return response;

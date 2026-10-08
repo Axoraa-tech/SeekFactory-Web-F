@@ -7,6 +7,7 @@ import {
   isExpired,
   portalForUrl,
   refreshTokens,
+  resolveSessionPortal,
   setTokenCookies,
   type TokenPair,
 } from "@/features/auth/auth-tokens";
@@ -40,9 +41,26 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Buyer site and seller hub have separate sessions; server components and server actions of
-  // this request read the session named by this header (see http-api getAuthHeaders)
-  const portal = portalForUrl(pathname, request.nextUrl.searchParams);
+  // Keep sign-in, admin, and API routes in their own auth context. On buyer pages, a
+  // manufacturer can browse with the seller session when no buyer session is active.
+  const requestedPortal = portalForUrl(pathname, request.nextUrl.searchParams);
+  const isAuthEntry = pathname === "/login" || pathname === "/join";
+  const canUseSellerSession =
+    requestedPortal === "buyer" &&
+    !isAuthEntry &&
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/api/");
+  const buyerCookies = cookieNames("buyer");
+  const sellerCookies = cookieNames("seller");
+  const hasRequestedSession = Boolean(
+    request.cookies.get(buyerCookies.access)?.value || request.cookies.get(buyerCookies.refresh)?.value,
+  );
+  const hasSellerSession = Boolean(
+    request.cookies.get(sellerCookies.access)?.value || request.cookies.get(sellerCookies.refresh)?.value,
+  );
+  const portal = canUseSellerSession
+    ? resolveSessionPortal(requestedPortal, hasRequestedSession, hasSellerSession)
+    : requestedPortal;
   const names = cookieNames(portal);
   request.headers.set(PORTAL_HEADER, portal);
 

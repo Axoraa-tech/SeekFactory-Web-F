@@ -100,10 +100,10 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
       return <FileSpreadsheet className="h-4 w-4 text-brand-orange" />;
     }
     if (n.type === "message") {
-      return <MessageSquare className="h-4 w-4 text-brand-blue" />;
+      return <MessageSquare className="h-4 w-4 text-brand-orange" />;
     }
     if (n.type === "follow") {
-      return <Building2 className="h-4 w-4 text-emerald-600" />;
+      return <Building2 className="h-4 w-4 text-brand-orange" />;
     }
     return <ShieldCheck className="h-4 w-4 text-purple-600" />;
   };
@@ -115,7 +115,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
       <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-            <Bell className="h-5 w-5 text-brand-blue" />
+            <Bell className="h-5 w-5 text-brand-orange" />
             <span>{t("notifications.title", "Notifications Center")}</span>
             {unreadCount > 0 && (
               <span className="rounded-full bg-brand-orange px-2.5 py-0.5 text-xs font-bold text-white">
@@ -134,9 +134,9 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
             <button
               type="button"
               onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-brand-blue/30 hover:text-brand-blue transition-all active:scale-95 shadow-2xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-brand-orange/40 hover:text-brand-orange transition-all active:scale-95 shadow-2xs"
             >
-              <CheckCheck className="h-3.5 w-3.5 text-brand-blue" />
+              <CheckCheck className="h-3.5 w-3.5 text-brand-orange" />
               <span>{t("notifications.markAllAsRead", "Mark all read")}</span>
             </button>
           )}
@@ -162,12 +162,19 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
           className={cn(
             "inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
             activeTab === "all"
-              ? "border-brand-blue text-brand-blue"
+              ? "border-brand-orange text-brand-orange"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
           <span>{t("notifications.all", "All")}</span>
-          <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[10px] text-slate-600 font-semibold">
+          <span
+            className={cn(
+              "rounded-full px-1.5 py-0.2 text-[10px] font-semibold transition-colors",
+              activeTab === "all"
+                ? "bg-brand-orange-soft text-brand-orange"
+                : "bg-slate-100 text-slate-600"
+            )}
+          >
             {notifications.length}
           </span>
         </button>
@@ -178,7 +185,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
           className={cn(
             "inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
             activeTab === "unread"
-              ? "border-brand-blue text-brand-blue"
+              ? "border-brand-orange text-brand-orange"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
@@ -196,7 +203,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
           className={cn(
             "inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
             activeTab === "quotes"
-              ? "border-brand-blue text-brand-blue"
+              ? "border-brand-orange text-brand-orange"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
@@ -209,7 +216,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
           className={cn(
             "inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
             activeTab === "system"
-              ? "border-brand-blue text-brand-blue"
+              ? "border-brand-orange text-brand-orange"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
@@ -242,7 +249,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                 className={cn(
                   "group relative rounded-2xl border p-4 transition-all shadow-2xs flex items-start gap-3.5",
                   isUnread
-                    ? "bg-blue-50/40 border-blue-200/80 hover:bg-blue-50/70"
+                    ? "bg-brand-orange-soft/30 border-orange-200/80 hover:bg-brand-orange-soft/50"
                     : "bg-white border-slate-200/80 hover:border-slate-300"
                 )}
               >
@@ -250,7 +257,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                 <div
                   className={cn(
                     "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border shadow-2xs mt-0.5",
-                    isUnread ? "bg-white border-blue-200" : "bg-slate-50 border-slate-200"
+                    isUnread ? "bg-white border-orange-200" : "bg-slate-50 border-slate-200"
                   )}
                 >
                   {getNotificationIcon(item)}
@@ -264,7 +271,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                         {item.title}
                       </h3>
                       {isUnread && (
-                        <span className="h-2 w-2 rounded-full bg-brand-blue shrink-0" />
+                        <span className="h-2 w-2 rounded-full bg-brand-orange shrink-0" />
                       )}
                     </div>
                     <span className="text-[10px] text-slate-400 shrink-0 font-medium">{formatRelativeTime(item.createdAt, locale)}</span>
@@ -284,7 +291,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                           .catch(() => {})
                           .finally(() => void refreshUnreadCounts());
                       }}
-                      className="inline-flex items-center gap-1 font-bold text-brand-blue hover:underline text-[11px]"
+                      className="inline-flex items-center gap-1 font-bold text-brand-orange hover:text-[#d85b17] hover:underline text-[11px]"
                     >
                       <span>{t("notificationsCenter.takeActionViewDetails")}</span>
                       <ExternalLink className="h-3 w-3" />
@@ -297,7 +304,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                           <button
                             type="button"
                             onClick={(e) => handleToggleRead(item.id, e)}
-                            className="text-[11px] font-semibold text-slate-500 hover:text-brand-blue"
+                            className="text-[11px] font-semibold text-slate-500 hover:text-brand-orange"
                           >
                             {t("notificationsCenter.markAsRead")}
                           </button>

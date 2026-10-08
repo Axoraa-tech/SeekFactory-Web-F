@@ -189,7 +189,8 @@
     "accountSettings": "账户设置",
     "signingOut": "正在退出...",
     "signOut": "退出登录",
-    "myProfile": "我的资料"
+    "myProfile": "我的资料",
+    "supplierWorkspace": "供应商工作台"
   },
   "layout": {
     "search": {
@@ -247,9 +248,8 @@
     "removeFromSaved": "取消收藏",
     "saveSeek": "收藏希克",
     "trust": {
-      "verifiedOemManufacturer": "认证 OEM 制造商",
-      "oemManufacturer": "OEM 制造商",
-      "verifiedFactory": "认证工厂",
+      "verifiedOem": "认证 OEM",
+      "oem": "OEM",
       "since": "成立于 {year} 年"
     },
     "rail": {
@@ -841,6 +841,10 @@
       "googleLoginWillConnectWhen": "后端上线后即可使用 Google 登录。",
       "googleSignInFailed": "Google 登录失败，请重试或使用邮箱登录。",
       "continueWithGoogle": "使用 Google 继续",
+      "quickGuestAccess": "⚡ 访客快速体验",
+      "guestLandscapeB2bFeed": "访客：横屏 B2B 视频流",
+      "guestVerticalSeeksFeed": "访客：竖屏希克视频流",
+      "continueAsGuest": "以访客身份继续浏览",
       "alreadyOnSeekfactory": "已有 SeekFactory 账号？",
       "newToSeekfactory": "初次使用 SeekFactory？",
       "welcomeCheckEmail": "欢迎加入 SeekFactory！我们已向 {email} 发送验证链接。"
@@ -1277,6 +1281,11 @@
       "eGUsd510": "例如：500–1000 万美元",
       "companyOverviewOemCapability": "公司概况与 OEM 能力",
       "primaryExportMarkets": "主要出口市场",
+      "exportMarketsDescription": "添加工厂出口的国家或地区，包括印度和中国。",
+      "exportCountryPlaceholder": "输入国家或地区",
+      "addExportMarket": "添加国家",
+      "removeExportMarket": "移除 {country}",
+      "noExportMarketsAdded": "尚未添加出口市场。",
       "factoryProfileChangesSuccessfullySaved": "工厂资料已保存！",
       "changesReflectImmediatelyOnYour": "修改会立即同步到你的公开制造商主页。"
     },
@@ -1477,7 +1486,15 @@
       "addProductsFromAFactory": "在工厂主页或希克中添加产品，即可在这里下单。",
       "sentToThisFactory": "将发送给该工厂",
       "sendsOrderRequestsOnePer": "将发送 {length} 个订单请求，每个产品一个。",
-      "sendOrderRequests": "发送订单请求"
+      "sendOrderRequests": "发送订单请求",
+      "selectAll": "全选（{count}）",
+      "selectItem": "发送 {product}",
+      "noteForFactory": "给该工厂的备注（选填）",
+      "addNote": "添加备注",
+      "sendCount": "发送 {count} 个订单请求",
+      "selectToSend": "请至少选择一个产品。",
+      "selectionSummary": "已选 {selected} / {total}，未选的产品会留在购物车中。",
+      "selectedTotal": "预估总额（已选）"
     },
     "exploreProducts": "浏览产品",
     "decreaseQuantity": "减少数量",
@@ -1556,6 +1573,18 @@
       "deliveryAddress": "收货地址",
       "notesForTheFactoryOptional": "给工厂的备注（选填）",
       "packagingDeliveryWindowInspectionRequirements": "包装、交货时间、验货要求…"
+    },
+    "addToCart": {
+      "title": "加入购物车",
+      "subtitle": "先挑选商品，再从购物车统一发送订单请求",
+      "added": "已加入购物车",
+      "addedDetail": "{product}，{quantity} {unit}。准备好后从购物车发送订单请求，现在无需付款。",
+      "continueBrowsing": "继续浏览",
+      "viewCart": "查看购物车",
+      "quantity": "数量（{unit}）",
+      "listed": "标价 {price} / {unit}",
+      "moq": "起订量 {moq}",
+      "adding": "正在加入..."
     }
   },
   "payment": {

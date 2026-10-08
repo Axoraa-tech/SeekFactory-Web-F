@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -21,6 +21,7 @@ import type { FactoryCertificate } from "@/entities/factory-certificate";
 import { UploadCertificateModal } from "../components/upload-certificate-modal";
 import { CertificateLightboxModal } from "@/components/profile/certificate-lightbox-modal";
 import { AlibabaCertSection } from "@/components/profile/alibaba-cert-section";
+import { AccountSecurityCard } from "@/features/auth/account-security-card";
 import { useTranslations } from "next-intl";
 
 type Props = {
@@ -28,13 +29,18 @@ type Props = {
   /** Persists changes; rejects with a user-facing message on failure. */
   onUpdateProfile: (updated: Partial<SellerFactoryProfile>) => Promise<void>;
   onOpenUpgradeModal?: () => void;
+  email?: string;
+  emailVerified?: boolean;
 };
 
-export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Props) {
+export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal, email, emailVerified }: Props) {
   const t = useTranslations();
   const [name, setName] = useState(profile.name);
   const [location, setLocation] = useState(profile.location);
   const [websiteUrl, setWebsiteUrl] = useState(profile.websiteUrl || "");
+  const [exportCountries, setExportCountries] = useState(profile.exportCountries);
+  const [newExportCountry, setNewExportCountry] = useState("");
+  const websiteInputRef = useRef<HTMLInputElement>(null);
   const [yearsEstablished, setYearsEstablished] = useState(profile.yearsEstablished);
   const [factorySize, setFactorySize] = useState(profile.factorySize);
   const [employees, setEmployees] = useState(profile.employees);
@@ -71,6 +77,18 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
     void persistCertificates(certificates.filter((c) => c.id !== certId));
   }
 
+  function focusWebsiteInput() {
+    websiteInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    websiteInputRef.current?.focus({ preventScroll: true });
+  }
+
+  function addExportCountry() {
+    const country = newExportCountry.trim();
+    if (!country || exportCountries.some((item) => item.toLocaleLowerCase() === country.toLocaleLowerCase())) return;
+    setExportCountries((current) => [...current, country]);
+    setNewExportCountry("");
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (isSaving) return;
@@ -90,6 +108,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
         name: name.trim(),
         location: location.trim(),
         websiteUrl: websiteUrl.trim(),
+        exportCountries,
         yearsEstablished: Number(yearsEstablished),
         factorySize,
         employees,
@@ -135,7 +154,6 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
         </div>
 
         <div className="flex items-center gap-2">
-          {/* View Official Website Button */}
           {liveWebsite && (
             <a
               href={liveWebsite}
@@ -149,6 +167,16 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
               <ExternalLink className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
             </a>
           )}
+          {!liveWebsite && (
+            <button
+              type="button"
+              onClick={focusWebsiteInput}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#1A73E8]/30 bg-[#E8F1FD] px-3.5 py-2 text-xs font-bold text-[#1A73E8] transition hover:bg-[#1A73E8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
+            >
+              <Globe2 className="h-3.5 w-3.5" />
+              <span>{t("seller.nav.addOfficialWebsite")}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -161,7 +189,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
           name: name || profile.name,
           yearsEstablished: Number(yearsEstablished),
           factorySize: factorySize,
-          exportCountries: profile.exportCountries,
+          exportCountries,
           verified: profile.verified,
         }}
         isOwner={true}
@@ -210,6 +238,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
             <div className="relative">
               <Globe2 className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
               <input
+                ref={websiteInputRef}
                 type="text"
                 inputMode="url"
                 value={websiteUrl}
@@ -309,15 +338,49 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
             <Globe2 className="h-4 w-4 text-brand-blue" />
             <span>{t("seller.profile.primaryExportMarkets")}</span>
           </h2>
+          <p className="text-xs text-ink-muted">{t("seller.profile.exportMarketsDescription")}</p>
           <div className="flex flex-wrap gap-2">
-            {profile.exportCountries.map((country, i) => (
-              <span
-                key={i}
-                className="rounded-xl bg-blue-50 border border-blue-200 px-2.5 py-1 text-xs font-semibold text-blue-900"
-              >
+            {exportCountries.map((country) => (
+              <span key={country} className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-900">
                 {country}
+                <button
+                  type="button"
+                  onClick={() => setExportCountries((current) => current.filter((item) => item !== country))}
+                  className="rounded-sm px-0.5 text-blue-700 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                  aria-label={t("seller.profile.removeExportMarket", { country })}
+                >
+                  ×
+                </button>
               </span>
             ))}
+            {exportCountries.length === 0 && (
+              <span className="text-xs text-ink-muted">{t("seller.profile.noExportMarketsAdded")}</span>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              type="text"
+              value={newExportCountry}
+              onChange={(event) => setNewExportCountry(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  addExportCountry();
+                }
+              }}
+              maxLength={80}
+              placeholder={t("seller.profile.exportCountryPlaceholder")}
+              aria-label={t("seller.profile.addExportMarket")}
+              className="min-w-0 flex-1 rounded-xl border border-neutral-300 px-3.5 py-2 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
+            />
+            <button
+              type="button"
+              onClick={addExportCountry}
+              disabled={!newExportCountry.trim() || exportCountries.some((item) => item.toLocaleLowerCase() === newExportCountry.trim().toLocaleLowerCase())}
+              className="rounded-xl border border-brand-blue px-4 py-2 text-xs font-bold text-brand-blue transition hover:bg-brand-blue-soft disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {t("seller.profile.addExportMarket")}
+            </button>
           </div>
         </div>
 
@@ -348,6 +411,11 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal }: Pro
           </button>
         </div>
       </form>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-bold text-neutral-900">{t("profile.page.accountSecurity")}</h2>
+        <AccountSecurityCard email={email} emailVerified={emailVerified} />
+      </section>
 
       {/* Upload Certificate Modal */}
       <UploadCertificateModal
