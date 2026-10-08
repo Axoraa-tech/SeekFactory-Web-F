@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Crown, FileText, LogOut, MapPin, ShieldCheck, Sparkles, ChevronLeft } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
+import { ProfileAvatarEditor } from "./profile-avatar-editor";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
 import type { BuyerProfile } from "@/entities/user";
@@ -71,15 +71,12 @@ export function ProfileHero({
       <div className="relative px-4 sm:px-6 pb-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-end gap-3 sm:gap-4 min-w-0 -mt-10 sm:-mt-12">
-            <div className="relative shrink-0">
-              <Avatar
-                src={user.avatarUrl}
-                alt={formData.name}
-                size={104}
-                className="ring-4 ring-white shadow-glass object-cover"
-              />
-              <span className="absolute bottom-1.5 right-1.5 h-4 w-4 rounded-full bg-emerald-500 ring-2 ring-white" />
-            </div>
+            <ProfileAvatarEditor
+              avatarUrl={user.avatarUrl}
+              name={formData.name}
+              size={104}
+              className="ring-4 ring-white shadow-glass object-cover"
+            />
 
             <div className="min-w-0 pb-1 space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">

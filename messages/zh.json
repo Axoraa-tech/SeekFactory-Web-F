@@ -585,6 +585,15 @@
       "loadingProfile": "正在加载资料…",
       "nameIsRequired": "请输入您的姓名。",
       "companyNameIsRequired": "请输入公司名称。"
+    },
+    "avatar": {
+      "change": "更换头像",
+      "updated": "头像已更新",
+      "uploadFailed": "头像上传失败，请重试。",
+      "notAnImage": "请选择图片文件。",
+      "tooLarge": "图片大小不能超过 5 MB。",
+      "welcomeTitle": "欢迎加入 SeekFactory！",
+      "welcomeBody": "我们已从 Google 获取您的姓名、邮箱和头像。请在下方补充公司信息，点击相机图标可更换头像。"
     }
   },
   "membership": {
@@ -830,6 +839,7 @@
       "wechatLoginWillConnectWhen": "中国区后端上线后即可使用微信登录。",
       "continueWithWechat": "使用微信继续",
       "googleLoginWillConnectWhen": "后端上线后即可使用 Google 登录。",
+      "googleSignInFailed": "Google 登录失败，请重试或使用邮箱登录。",
       "continueWithGoogle": "使用 Google 继续",
       "quickGuestAccess": "⚡ 访客快速体验",
       "guestLandscapeB2bFeed": "访客：横屏 B2B 视频流",

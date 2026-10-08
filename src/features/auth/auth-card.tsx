@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Monitor, Smartphone, Eye, EyeOff } from "lucide-react";
 import { RoleToggle } from "@/features/auth/role-toggle";
+import { GoogleSignInButton } from "@/features/auth/google-sign-in-button";
+import { featureFlags } from "@/shared/config/flags";
 import { cn } from "@/shared/lib/cn";
 
 import { postAuthPath } from "@/features/auth/session-cookie";
@@ -121,6 +123,25 @@ export function AuthCard({
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("auth.card.authenticationFailedPleaseCheckYour"));
+      setSaving(false);
+    }
+  }
+
+
+
+
+  /** Google sign-in is buyer-only: the backend signs in, links by verified email, or creates the account. */
+  async function handleGoogleCredential(idToken: string) {
+    setError("");
+    setNotice("");
+    setSaving(true);
+    try {
+      const user = await getApi().session.loginWithGoogle(idToken);
+      // First Google sign-in: name, email and photo come from Google; let them review it and add the rest
+      router.push(user.firstLogin && !next ? "/profile?welcome=1" : postAuthPath("Buyer", next));
+      router.refresh();
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : t("auth.card.googleSignInFailed"));
       setSaving(false);
     }
   }
@@ -331,6 +352,12 @@ export function AuthCard({
         >
           {t("auth.card.continueWithWechat")}
         </button>
+      ) : featureFlags.googleOAuth ? (
+        <GoogleSignInButton
+          mode={mode}
+          onCredential={handleGoogleCredential}
+          onError={() => setError(t("auth.card.googleSignInFailed"))}
+        />
       ) : (
         <button
           type="button"

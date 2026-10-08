@@ -31,7 +31,7 @@ export function Avatar({ src, alt, size = 36, className }: Props) {
   }
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img loading="lazy" decoding="async" src={src}
+    <img loading="lazy" decoding="async" referrerPolicy="no-referrer" src={src}
       alt={alt}
       width={size}
       height={size}
