@@ -257,7 +257,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
                 <LanguageCurrencyDropdown />
                 <Link
                   href="/rfq/new"
-                  className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl bg-brand-blue px-3 sm:px-3.5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] transition hover:bg-brand-blue-dark active:scale-95"
+                  className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl bg-brand-orange px-3 sm:px-3.5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition hover:bg-[#d85b17] active:scale-95"
                 >
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">{t("nav.postRfq", "Post RFQ")}</span>
@@ -284,7 +284,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
 
                 <Link
                   href="/rfq/new"
-                  className="hidden sm:inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl border border-brand-blue/30 bg-blue-500/10 backdrop-blur-md px-3 sm:px-3.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue hover:text-white transition-all shadow-2xs active:scale-95"
+                  className="hidden sm:inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl border border-brand-orange/30 bg-orange-500/10 backdrop-blur-md px-3 sm:px-3.5 text-xs font-semibold text-brand-orange hover:bg-brand-orange hover:text-white transition-all shadow-2xs active:scale-95"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>{t("nav.postRfq", "Post RFQ")}</span>

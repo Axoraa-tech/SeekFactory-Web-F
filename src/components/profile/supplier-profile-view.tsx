@@ -356,7 +356,7 @@ export function SupplierProfileView({
 
               <Link
                 href="/rfq/new"
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-4 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-xs"
               >
                 <Send className="h-3.5 w-3.5" />
                 <span>{t("feed.sendRfq")}</span>

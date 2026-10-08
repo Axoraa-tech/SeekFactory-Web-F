@@ -22,7 +22,7 @@ export default async function OrdersPage({ searchParams }: Props) {
 
   return (
     <section className="w-full space-y-4">
-      <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{t("userMenu.myOrders")}</h1>
+      <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">{t("userMenu.myOrders")}</h1>
       <OrdersList initialOrders={orders} placed={placed ? placed.split(",").filter(Boolean) : []} />
     </section>
   );

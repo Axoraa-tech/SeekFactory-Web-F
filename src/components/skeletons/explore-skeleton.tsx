@@ -9,7 +9,7 @@ import { CategoryNavSkeleton } from "@/components/skeletons/feed-skeleton";
  */
 export function VerifiedManufacturersSectionSkeleton() {
   return (
-    <section className="w-full rounded-2xl border border-blue-200/80 bg-[#EEF4FF] p-4 sm:p-5 shadow-xs space-y-4">
+    <section className="w-full rounded-2xl border border-orange-200/80 bg-brand-orange-soft/40 p-4 sm:p-5 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Skeleton className="h-7 w-7 rounded-lg" />
@@ -24,7 +24,7 @@ export function VerifiedManufacturersSectionSkeleton() {
       {/* 4 Manufacturer Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex flex-col justify-between overflow-hidden rounded-xl border border-blue-100 bg-white p-3 shadow-xs space-y-2.5">
+          <div key={i} className="flex flex-col justify-between overflow-hidden rounded-xl border border-orange-100 bg-white p-3 shadow-xs space-y-2.5">
             <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden bg-slate-100">
               <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
               <Skeleton className="absolute top-1.5 left-1.5 h-4 w-12 rounded" />

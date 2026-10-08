@@ -79,7 +79,7 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
           </div>
           <Link
             href="/explore"
-            className="inline-flex items-center gap-0.5 text-xs font-semibold text-brand-blue hover:underline"
+            className="inline-flex items-center gap-0.5 text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors"
           >
             <span>{t("widgets.viewAll")}</span>
             <ArrowUpRight className="h-3 w-3" />
@@ -102,7 +102,7 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <p className="truncate text-xs font-bold text-slate-900 group-hover:text-brand-blue transition-colors">
+                        <p className="truncate text-xs font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
                           {m.name}
                         </p>
                         {m.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
@@ -148,7 +148,7 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
           <div className="mt-3.5 flex items-center gap-2">
             <Link
               href={`/messages?with=${currentManufacturer.slug}`}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue py-2 px-3 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-sm"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-orange py-2 px-3 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-sm"
             >
               {t("widgets.similar.startChat")}
             </Link>

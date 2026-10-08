@@ -3,12 +3,13 @@ import type { Category, CategoryIconKey } from "@/entities/category";
 
 /**
  * SeekFactory category icons, one family on a 32px grid.
- * Ink outline at a single stroke weight; a flat brand-blue fill sits under the part that
+ * Ink outline at a single stroke weight; a flat logo brand-orange fill sits under the part that
  * defines each object; red is rationed to one small detail (indicator, tip, beacon).
  * Source of truth for the shapes: generated from a script, so keep edits consistent.
  */
 const INK = "#1C1C1C";
-const BLUE = "#1A73E8";
+const BRAND_ORANGE = "#F26B21";
+const BLUE = BRAND_ORANGE;
 const RED = "#D6362B";
 const PAPER = "#FFFFFF";
 

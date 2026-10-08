@@ -40,12 +40,12 @@ export default async function ExplorePage({ searchParams }: Props) {
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-ink flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-brand-blue" />
+              <span className="h-2 w-2 rounded-full bg-brand-orange" />
               <span>{selectedRoot.name} {t("common.subcategories")}</span>
             </h2>
             <Link
               href={`/explore?category=${selectedRoot.slug}`}
-              className="text-xs font-semibold text-brand-blue hover:underline"
+              className="text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline"
             >
               {t("feed.showAll")}
             </Link>
@@ -56,7 +56,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               href={`/explore?category=${selectedRoot.slug}`}
               className={
                 !selectedSub
-                  ? "rounded-full bg-brand-blue px-3.5 py-1 text-xs font-bold text-white shadow-xs"
+                  ? "rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
                   : "rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
               }
             >
@@ -71,7 +71,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                   href={href}
                   className={
                     active
-                      ? "flex items-center gap-1.5 rounded-full bg-brand-blue px-3.5 py-1 text-xs font-bold text-white shadow-xs"
+                      ? "flex items-center gap-1.5 rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
                       : "flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
                   }
                 >
@@ -84,7 +84,7 @@ export default async function ExplorePage({ searchParams }: Props) {
         </div>
       ) : null}
 
-      {/* 3. Verified Manufacturers Section (Light Blue Container with Expand Button) */}
+      {/* 3. Verified Manufacturers Section (Light Orange Container with Expand Button) */}
       <VerifiedManufacturersSection manufacturers={visibleManufacturers} />
 
       {/* 4. Machinery Products Section */}
@@ -117,7 +117,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                 </div>
                 <div className="p-3 flex flex-col flex-1 justify-between gap-2">
                   <div>
-                    <p className="font-bold text-xs sm:text-sm text-ink group-hover:text-brand-blue transition line-clamp-1">
+                    <p className="font-bold text-xs sm:text-sm text-ink group-hover:text-brand-orange transition line-clamp-1">
                       {product.name}
                     </p>
                     {product.moq ? <p className="text-[11px] text-neutral-500 mt-0.5">{t("common.moqLabel")} {product.moq}</p> : null}
@@ -126,7 +126,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                     <p className="text-xs sm:text-sm font-bold text-brand-orange">
                       <Price inr={product.priceInr} /> <span className="text-[10px] font-normal text-neutral-500">/ {product.unit}</span>
                     </p>
-                    <span className="text-[11px] font-semibold text-brand-blue group-hover:underline">{t("explore.inquire")}</span>
+                    <span className="text-[11px] font-semibold text-brand-orange group-hover:underline">{t("explore.inquire")}</span>
                   </div>
                 </div>
               </Card>
@@ -141,7 +141,7 @@ export default async function ExplorePage({ searchParams }: Props) {
           <p className="text-xs text-neutral-500">{t("explore.tryBrowsingAllCategoriesOr")}</p>
           <Link
             href="/explore"
-            className="inline-flex h-8 items-center rounded-full bg-brand-blue px-4 text-xs font-bold text-white hover:bg-brand-blue-dark mt-2"
+            className="inline-flex h-8 items-center rounded-full bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors mt-2"
           >
             {t("explore.exploreAllCategories")}
           </Link>

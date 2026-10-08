@@ -63,13 +63,13 @@ export function OrdersList({ initialOrders, placed }: Props) {
       )}
 
       {orders.length === 0 ? (
-        <div className="rounded-2xl border border-line bg-white p-10 text-center space-y-3 shadow-2xs">
-          <Package className="mx-auto h-8 w-8 text-ink-faint" />
-          <p className="text-sm font-bold text-ink">{t("orders.list.noOrdersYet")}</p>
-          <p className="text-xs text-ink-muted">{t("orders.list.orderRequestsYouSendOr")}</p>
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-10 text-center space-y-3 shadow-2xs">
+          <Package className="mx-auto h-8 w-8 text-slate-400" />
+          <p className="text-sm font-bold text-slate-900">{t("orders.list.noOrdersYet")}</p>
+          <p className="text-xs text-slate-500">{t("orders.list.orderRequestsYouSendOr")}</p>
           <Link
             href="/explore"
-            className="inline-flex h-9 items-center rounded-full bg-brand-blue px-5 text-xs font-bold text-white hover:bg-brand-blue-dark"
+            className="inline-flex h-9 items-center rounded-xl bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-sm"
           >
             {t("orders.exploreProducts")}
           </Link>
@@ -79,83 +79,91 @@ export function OrdersList({ initialOrders, placed }: Props) {
           const status = ORDER_STATUS_META[order.status] ?? ORDER_STATUS_META.PENDING;
           const step = ORDER_STEPS.indexOf(order.status);
           return (
-            <article key={order.id} id={order.id} className="rounded-2xl border border-line bg-white shadow-2xs overflow-hidden">
-              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-canvas/60 px-4 py-3">
+            <article key={order.id} id={order.id} className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden transition-all hover:shadow-md hover:border-slate-300">
+              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/70 px-4 py-3 sm:px-5">
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-ink font-mono">{order.referenceNumber}</p>
-                  <p className="text-[11px] text-ink-muted">
+                  <p className="text-xs font-bold text-slate-900 font-mono tracking-tight">{order.referenceNumber}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
                     {formatRelativeTime(order.createdAt, locale)} •{" "}
-                    <Link href={`/manufacturers/${order.manufacturer.slug}`} className="font-semibold text-brand-blue hover:underline">
+                    <Link href={`/manufacturers/${order.manufacturer.slug}`} className="font-bold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
                       {order.manufacturer.name}
                     </Link>
-                    {order.source === "RFQ_QUOTE" ? t("orders.list.fromAnAcceptedRfqQuote") : ""}
+                    {order.source === "RFQ_QUOTE" ? ` • ${t("orders.list.fromAnAcceptedRfqQuote")}` : ""}
                   </p>
                 </div>
-                <span title={t(status.hint)} className={cn("rounded-full border px-2.5 py-0.5 text-[11px] font-bold", status.className)}>
+                <span title={t(status.hint)} className={cn("rounded-full border px-2.5 py-0.5 text-[11px] font-bold shadow-2xs", status.className)}>
                   {t(status.label)}
                 </span>
               </header>
 
-              <div className="flex items-center gap-3 px-4 py-3">
+              <div className="flex items-center gap-3.5 px-4 py-3.5 sm:px-5">
                 {order.productImageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={order.productImageUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg border border-line object-cover" />
+                  <img src={order.productImageUrl} alt="" className="h-14 w-14 shrink-0 rounded-xl border border-slate-200/90 object-cover shadow-2xs bg-slate-50" />
                 ) : (
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-line bg-canvas">
-                    <Package className="h-5 w-5 text-ink-faint" />
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200/90 bg-slate-50">
+                    <Package className="h-6 w-6 text-slate-400" />
                   </span>
                 )}
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 space-y-1">
                   {order.productSlug ? (
-                    <Link href={`/products/${order.productSlug}`} className="block text-xs font-bold text-ink hover:text-brand-blue line-clamp-1">
+                    <Link href={`/products/${order.productSlug}`} className="block text-sm font-bold text-slate-900 hover:text-brand-orange transition-colors line-clamp-1">
                       {order.productName}
                     </Link>
                   ) : (
-                    <p className="text-xs font-bold text-ink line-clamp-1">{order.productName}</p>
+                    <p className="text-sm font-bold text-slate-900 line-clamp-1">{order.productName}</p>
                   )}
-                  <p className="text-[11px] text-ink-muted">
-                    {order.quantity} {order.unit}
-                    {order.unitPriceInr != null && order.quotedTotal == null ? ` × ${formatMoney(order.unitPriceInr, "INR")}` : ""}
+                  <p className="text-xs text-slate-500">
+                    <span className="font-semibold text-slate-700">{order.quantity} {order.unit}</span>
+                    {order.unitPriceInr != null && order.quotedTotal == null ? (
+                      <span> × <strong className="text-brand-orange font-bold">{formatMoney(order.unitPriceInr, "INR")}</strong></span>
+                    ) : ""}
                   </p>
                 </div>
               </div>
 
               {order.sellerNote && (
-                <p className="mx-4 mb-1 rounded-lg bg-blue-50/70 px-3 py-2 text-[11px] text-slate-700">
-                  <span className="font-bold text-ink">{order.manufacturer.name}:</span> {order.sellerNote}
-                </p>
+                <div className="mx-4 mb-2 sm:mx-5 rounded-xl bg-orange-50/60 border border-orange-100/90 px-3.5 py-2 text-xs text-slate-700">
+                  <span className="font-bold text-slate-900">{order.manufacturer.name}:</span> {order.sellerNote}
+                </div>
               )}
 
               {order.status !== "CANCELLED" && (
-                <ol className="flex items-center gap-1 px-4 pt-3" aria-label={t("orders.list.orderProgress")}>
-                  {ORDER_STEPS.map((s, i) => (
-                    <li
-                      key={s}
-                      className={cn("h-1.5 flex-1 rounded-full", i <= step ? "bg-brand-blue" : "bg-slate-200")}
-                      title={t(ORDER_STATUS_META[s].label)}
-                    />
-                  ))}
-                </ol>
+                <div className="px-4 pt-1 sm:px-5">
+                  <ol className="flex items-center gap-1.5" aria-label={t("orders.list.orderProgress")}>
+                    {ORDER_STEPS.map((s, i) => (
+                      <li
+                        key={s}
+                        className={cn("h-1.5 flex-1 rounded-full transition-all", i <= step ? "bg-brand-orange" : "bg-slate-200")}
+                        title={t(ORDER_STATUS_META[s].label)}
+                      />
+                    ))}
+                  </ol>
+                </div>
               )}
 
-              <footer className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs">
-                <div className="min-w-0 text-ink-muted">
+              <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/40 px-4 py-3 sm:px-5 text-xs">
+                <div className="min-w-0 text-slate-500 text-[11px] sm:text-xs">
                   {order.deliveryAddress && (
                     <p className="line-clamp-1">
-                      {t("orders.list.deliverTo")} <span className="font-semibold text-ink">{order.contactName}</span>, {order.deliveryAddress}
+                      {t("orders.list.deliverTo")} <span className="font-semibold text-slate-800">{order.contactName}</span>, {order.deliveryAddress}
                     </p>
                   )}
                   {order.status === "CANCELLED" && order.cancelReason && (
-                    <p className="flex items-center gap-1 text-rose-600">
-                      <XCircle className="h-3.5 w-3.5" /> {order.cancelReason}
+                    <p className="flex items-center gap-1 text-rose-600 font-medium">
+                      <XCircle className="h-3.5 w-3.5 shrink-0" /> {order.cancelReason}
                     </p>
                   )}
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-sm font-extrabold text-ink tabular-nums">{orderTotal(order)}</span>
+                <div className="flex items-center gap-3 shrink-0 ml-auto">
+                  <div className="text-right">
+                    <span className="text-base sm:text-lg font-black text-brand-orange tabular-nums tracking-tight">
+                      {orderTotal(order)}
+                    </span>
+                  </div>
                   <Link
                     href={`/messages?with=${order.manufacturer.slug}`}
-                    className="rounded-lg border border-line px-3 py-1.5 font-semibold text-ink hover:border-brand-blue/40 hover:text-brand-blue"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:border-brand-orange hover:text-brand-orange hover:bg-orange-50/50 transition-all active:scale-95 shadow-2xs"
                   >
                     {t("common.chat")}
                   </Link>
@@ -164,7 +172,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                       type="button"
                       disabled={cancelling === order.id}
                       onClick={() => cancel(order)}
-                      className="rounded-lg border border-rose-200 px-3 py-1.5 font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                      className="rounded-xl border border-rose-200 bg-white px-3.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                     >
                       {cancelling === order.id ? t("orders.list.cancelling") : t("common.cancel")}
                     </button>
