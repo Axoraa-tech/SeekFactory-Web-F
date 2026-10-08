@@ -133,7 +133,7 @@ export function LoadingScreen() {
 
         {/* Subtitle */}
         <p className="mt-6 text-base sm:text-lg md:text-xl text-white/95 font-medium leading-relaxed max-w-2xl drop-shadow-xs">
-          India's premium cross-border B2B marketplace for manufacturing machineries. Find quality
+          India&apos;s premium cross-border B2B marketplace for manufacturing machineries. Find quality
           machineries, connect with trusted manufacturers, and grow your business.
         </p>
 
