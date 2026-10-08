@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Monitor, Smartphone, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { RoleToggle } from "@/features/auth/role-toggle";
 import { GoogleSignInButton } from "@/features/auth/google-sign-in-button";
 import { featureFlags } from "@/shared/config/flags";
@@ -144,11 +144,6 @@ export function AuthCard({
       setError(err instanceof Error && err.message ? err.message : t("auth.card.googleSignInFailed"));
       setSaving(false);
     }
-  }
-
-  /** Guests browse without an account; sign-in is only needed to like, save, message or order. */
-  function handleGuestLogin(view: "landscape" | "vertical") {
-    router.push(`/?view=${view}`);
   }
 
   //? To Validate Password 
@@ -367,39 +362,6 @@ export function AuthCard({
           <GoogleMark />
           {t("auth.card.continueWithGoogle")}
         </button>
-      )}
-
-      {/* Instant Guest Demo Buttons (shown on standalone /login page) */}
-      {!embedded && (
-        <>
-          <div className="my-3.5 flex items-center gap-2 text-xs text-slate-400">
-            <span className="h-px flex-1 bg-slate-200" />
-            <span>{t("auth.card.quickGuestAccess")}</span>
-            <span className="h-px flex-1 bg-slate-200" />
-          </div>
-
-          <div className="space-y-2">
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => handleGuestLogin("landscape")}
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:border-brand-orange/30 transition-all active:scale-[0.99] shadow-2xs group"
-            >
-              <Monitor className="h-3.5 w-3.5 text-brand-orange group-hover:scale-110 transition-transform" />
-              <span>{t("auth.card.guestLandscapeB2bFeed")}</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => handleGuestLogin("vertical")}
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50/70 px-3 text-xs font-semibold text-slate-700 hover:bg-orange-100/80 hover:border-orange-300 transition-all active:scale-[0.99] shadow-2xs group"
-            >
-              <Smartphone className="h-3.5 w-3.5 text-[#FF3D00] group-hover:scale-110 transition-transform" />
-              <span>{t("auth.card.guestVerticalSeeksFeed")}</span>
-            </button>
-          </div>
-        </>
       )}
 
       <p className="mt-3 text-center text-xs text-slate-600">

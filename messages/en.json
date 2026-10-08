@@ -1371,7 +1371,11 @@
       "Processing": "Processing"
     },
     "lastDays": "Last {count} days",
-    "lastWeeks": "Last {count} weeks"
+    "lastWeeks": "Last {count} weeks",
+    "preview": {
+      "backToSellerHub": "Back to Seller Hub",
+      "buyerView": "You're viewing your listing as buyers see it"
+    }
   },
   "hallOfFame": {
     "noAccreditationsPublishedYet": "No Accreditations Published Yet",

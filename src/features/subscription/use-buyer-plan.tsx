@@ -92,8 +92,8 @@ interface BuyerPlanContextValue {
   setRegion: (region: SubscriptionRegion) => void;
   /** Saves the plan on the account (no payment is collected yet). Guests are sent to sign in. */
   upgradeTier: (tier: BuyerPlanTier) => Promise<UpgradeResult>;
-  /** Called by the shell with the signed-in user's plan (null for guests). */
-  syncPlan: (tier: BuyerPlanTier | null) => void;
+  /** Called by the shell with the signed-in user's plan (null for guests). Manufacturers are never locked. */
+  syncPlan: (tier: BuyerPlanTier | null, isManufacturer?: boolean) => void;
   openUpgradeModal: () => void;
   closeUpgradeModal: () => void;
 }
@@ -109,6 +109,7 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
   const { selectedCurrency, setCurrency } = useRegionalSettings();
   const [tier, setTier] = useState<BuyerPlanTier>("free");
   const [signedIn, setSignedIn] = useState(false);
+  const [isManufacturer, setIsManufacturer] = useState(false);
   const [plans, setPlans] = useState<BuyerPlan[]>([]);
   const [region, setRegionState] = useState<SubscriptionRegion>("india");
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
@@ -135,8 +136,9 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
     }
   }, [selectedCurrency?.code]);
 
-  const syncPlan = useCallback((next: BuyerPlanTier | null) => {
+  const syncPlan = useCallback((next: BuyerPlanTier | null, manufacturer = false) => {
     setSignedIn(next !== null);
+    setIsManufacturer(next !== null && manufacturer);
     setTier(next ?? "free");
   }, []);
 
@@ -187,7 +189,7 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const pricing = useMemo(() => buildPricing(plans, region), [plans, region]);
-  const isSupplierLocked = tier === "free";
+  const isSupplierLocked = tier === "free" && !isManufacturer;
 
   return (
     <BuyerPlanContext.Provider

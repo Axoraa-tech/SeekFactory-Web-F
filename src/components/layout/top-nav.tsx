@@ -203,7 +203,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
   // Live badge counts; the periodic refresh is also the "I'm online" heartbeat
   useUnreadCountsRefresh(Boolean(user));
   useEffect(() => {
-    syncPlan(user ? user.plan ?? "free" : null);
+    syncPlan(user ? user.plan ?? "free" : null, user?.role === "Supplier");
   }, [user, syncPlan]);
 
   const childrenByParentId = useMemo(() => {
@@ -232,7 +232,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
         {/* Tier 1: Logo, Search, Actions */}
         <div
           data-header-content
-          className="mx-auto flex h-[66px] sm:h-[70px] max-w-[1440px] items-center gap-3 sm:gap-4 lg:gap-5 px-3 sm:px-6"
+          className="mx-auto flex h-[66px] sm:h-[70px] max-w-[1440px] items-center gap-2 sm:gap-4 lg:gap-5 px-3 sm:px-6"
         >
           {/* Brand Logo */}
           <Link
@@ -243,7 +243,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
           >
             <BrandLogo
               priority
-              className="h-11 sm:h-13 md:h-14 w-auto max-w-[190px] sm:max-w-[240px] md:max-w-[280px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
+              className="h-9 sm:h-12 md:h-14 w-auto max-w-[140px] sm:max-w-[220px] md:max-w-[280px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
             />
           </Link>
 
@@ -251,7 +251,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
           <SearchBar categories={categories} />
 
           {/* Right Actions */}
-          <div data-actions className="ml-auto flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <div data-actions className="ml-auto flex min-w-0 items-center gap-1 sm:gap-2.5 shrink-0">
             {user ? (
               <>
                 <LanguageCurrencyDropdown />
@@ -262,8 +262,11 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">{t("nav.postRfq", "Post RFQ")}</span>
                 </Link>
-                <MessagesDropdown initialCount={messageCount} />
-                <NotificationsDropdown initialCount={notificationCount} />
+                {/* Below lg these live in the bottom MobileNav */}
+                <div className="hidden lg:flex items-center gap-2.5">
+                  <MessagesDropdown initialCount={messageCount} />
+                  <NotificationsDropdown initialCount={notificationCount} />
+                </div>
                 <UserDropdown
                   user={user}
                   messageCount={messageCount}
@@ -292,14 +295,14 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
 
                 <Link
                   href="/login"
-                  className="h-9 sm:h-10 inline-flex items-center px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-slate-800 hover:text-brand-blue transition-all rounded-xl hover:bg-white/60 hover:backdrop-blur-sm"
+                  className="hidden min-[380px]:inline-flex h-9 sm:h-10 items-center px-2 sm:px-3 text-xs sm:text-sm font-semibold text-slate-800 hover:text-brand-blue transition-all rounded-xl hover:bg-white/60 hover:backdrop-blur-sm"
                 >
                   {t("nav.signIn", "Sign in")}
                 </Link>
 
                 <Link
                   href="/join"
-                  className="inline-flex h-9 sm:h-10 items-center justify-center rounded-full bg-gradient-to-r from-brand-blue via-blue-600 to-indigo-600 px-3.5 sm:px-5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] transition-all hover:shadow-[0_6px_20px_rgba(37,99,235,0.45)] hover:brightness-105 active:scale-95"
+                  className="inline-flex h-9 sm:h-10 items-center justify-center whitespace-nowrap rounded-full bg-gradient-to-r from-brand-blue via-blue-600 to-indigo-600 px-3 sm:px-5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] transition-all hover:shadow-[0_6px_20px_rgba(37,99,235,0.45)] hover:brightness-105 active:scale-95"
                 >
                   {t("nav.joinNow", "Join now")}
                 </Link>
@@ -311,7 +314,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
         {/* Tier 2: Categories */}
         {categories && categories.length > 0 && (
           <div className="mx-auto max-w-[1440px] px-3 sm:px-6">
-            <div className="pl-11 sm:pl-14 pr-14 sm:pr-18">
+            <div className="pl-6 sm:pl-14 pr-6 sm:pr-18">
               <DynamicCategoryNav
                 categories={categories}
                 allCategories={allCategories}
