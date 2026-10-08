@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Search, Package, FileText, Sparkles, Paperclip, Loader2, X, MessageSquare } from "lucide-react";
+import { ArrowLeft, Send, Search, Package, FileText, Sparkles, Paperclip, Loader2, X, MessageSquare } from "lucide-react";
 import type { OrderRequest } from "@/entities/order";
 import type { MessageAttachment } from "@/shared/api/contracts";
 import { useChatAttachment } from "@/hooks/use-chat-attachment";
@@ -65,6 +65,11 @@ export function MessagesTab({
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Phones show the list or the open chat, never both; arriving with context opens the chat directly
+  const [mobileThreadOpen, setMobileThreadOpen] = useState(Boolean(initialContext));
+  useEffect(() => {
+    if (initialContext) setMobileThreadOpen(true);
+  }, [initialContext]);
 
   useEffect(() => {
     if (!activeConversationId && conversations.length > 0) {
@@ -126,9 +131,9 @@ export function MessagesTab({
   const canSend = (inputText.trim().length > 0 || upload.attachment !== null) && !upload.uploading && !sending;
 
   return (
-    <div className="rounded-2xl border border-line bg-white shadow-xs overflow-hidden flex flex-col md:flex-row h-[750px]">
+    <div className="rounded-2xl border border-line bg-white shadow-xs overflow-hidden flex flex-col md:flex-row h-[calc(100dvh-140px)] min-h-[460px] md:h-[750px]">
       {/* Left Pane: Conversation List */}
-      <div className="w-full md:w-80 border-r border-line flex flex-col shrink-0 bg-canvas/60">
+      <div className={`${mobileThreadOpen ? "hidden md:flex" : "flex"} w-full md:w-80 min-h-0 flex-1 md:flex-none border-r border-line flex-col shrink-0 bg-canvas/60`}>
         {/* Search header */}
         <div className="p-3.5 border-b border-line bg-white">
           <div className="flex items-center justify-between mb-2">
@@ -157,7 +162,10 @@ export function MessagesTab({
               <button
                 key={conv.id}
                 type="button"
-                onClick={() => onSelectConversation(conv.id)}
+                onClick={() => {
+                  onSelectConversation(conv.id);
+                  setMobileThreadOpen(true);
+                }}
                 className={`w-full text-left p-3.5 flex items-start gap-3 transition ${
                   isSelected ? "bg-white border-l-4 border-l-brand-blue shadow-2xs" : "hover:bg-neutral-200/50"
                 }`}
@@ -197,10 +205,18 @@ export function MessagesTab({
 
       {/* Right Pane: Chat Thread */}
       {activeConv ? (
-        <div className="flex-1 flex flex-col bg-white min-w-0">
+        <div className={`${mobileThreadOpen ? "flex" : "hidden md:flex"} flex-1 min-h-0 flex-col bg-white min-w-0`}>
           {/* Top Chat Header */}
           <div className="p-3.5 border-b border-line flex items-center justify-between bg-white">
             <div className="flex items-center gap-3 min-w-0">
+              <button
+                type="button"
+                onClick={() => setMobileThreadOpen(false)}
+                className="md:hidden -ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-neutral-600 hover:bg-canvas"
+                aria-label={t("seller.messages.backToConversations")}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
               <Avatar url={activeConv.buyerAvatarUrl} name={activeConv.buyerName} size="sm" />
               <div className="min-w-0">
                 <h3 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
@@ -366,7 +382,7 @@ export function MessagesTab({
               maxLength={5000}
               onChange={(e) => setInputText(e.target.value)}
               placeholder={t("seller.messages.typeYourMessageFobTerms")}
-              className="flex-1 min-w-0 rounded-xl border border-line px-3.5 py-2.5 text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
+              className="flex-1 min-w-0 rounded-xl border border-line px-3.5 py-2.5 text-base sm:text-xs text-neutral-900 focus:border-brand-blue focus:outline-hidden"
             />
             <button
               type="submit"
@@ -380,7 +396,7 @@ export function MessagesTab({
           </form>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center p-8 text-neutral-400 text-xs">
+        <div className="hidden md:flex flex-1 items-center justify-center p-8 text-neutral-400 text-xs">
           {t("seller.messages.selectAConversationFromThe")}
         </div>
       )}
