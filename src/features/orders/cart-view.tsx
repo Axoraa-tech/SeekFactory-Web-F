@@ -92,7 +92,7 @@ export function CartView({ user, initialCart }: Props) {
         <p className="text-xs text-ink-muted">{t("orders.cart.addProductsFromAFactory")}</p>
         <Link
           href="/explore"
-          className="inline-flex h-9 items-center rounded-full bg-brand-blue px-5 text-xs font-bold text-white hover:bg-brand-blue-dark"
+          className="inline-flex h-9 items-center rounded-full bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors"
         >
           {t("orders.exploreProducts")}
         </Link>
@@ -127,7 +127,7 @@ export function CartView({ user, initialCart }: Props) {
             <header className="flex items-center justify-between gap-3 border-b border-line bg-canvas/60 px-4 py-2.5">
               <Link
                 href={`/manufacturers/${items[0].manufacturer.slug}`}
-                className="text-xs font-bold text-ink hover:text-brand-blue truncate"
+                className="text-xs font-bold text-ink hover:text-brand-orange transition-colors truncate"
               >
                 {items[0].manufacturer.name}
               </Link>
@@ -146,7 +146,7 @@ export function CartView({ user, initialCart }: Props) {
                       checked={selected}
                       onChange={() => toggleLine(item.id)}
                       aria-label={t("orders.cart.selectItem", { product: item.product.name })}
-                      className="mt-8 h-4 w-4 shrink-0 cursor-pointer rounded accent-brand-blue"
+                      className="mt-8 h-4 w-4 shrink-0 cursor-pointer rounded accent-brand-orange"
                     />
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -157,7 +157,7 @@ export function CartView({ user, initialCart }: Props) {
                     <div className="min-w-0 flex-1 space-y-1.5">
                       <Link
                         href={`/products/${item.product.slug}`}
-                        className="block text-sm font-bold text-ink hover:text-brand-blue line-clamp-1"
+                        className="block text-sm font-bold text-ink hover:text-brand-orange transition-colors line-clamp-1"
                       >
                         {item.product.name}
                       </Link>
@@ -211,14 +211,14 @@ export function CartView({ user, initialCart }: Props) {
                             value={notes[item.id] ?? ""}
                             onChange={(e) => setNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
                             placeholder={t("orders.shipping.packagingDeliveryWindowInspectionRequirements")}
-                            className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-xs text-ink placeholder:text-ink-faint focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
+                            className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-xs text-ink placeholder:text-ink-faint focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange"
                           />
                         </label>
                       ) : (
                         <button
                           type="button"
                           onClick={() => openNote(item.id)}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-orange hover:underline transition-colors"
                         >
                           <MessageSquarePlus className="h-3.5 w-3.5" />
                           {t("orders.cart.addNote")}
@@ -236,10 +236,10 @@ export function CartView({ user, initialCart }: Props) {
       <aside className="rounded-2xl border border-line bg-white p-5 shadow-2xs space-y-4 lg:sticky lg:top-24">
         <div className="flex items-baseline justify-between">
           <span className="text-sm font-bold text-ink">{allSelected ? t("orders.estimatedTotal") : t("orders.cart.selectedTotal")}</span>
-          <span className="text-xl font-extrabold text-ink tabular-nums">{formatMoney(selectedTotal, cart.currency)}</span>
+          <span className="text-xl sm:text-2xl font-black text-brand-orange tabular-nums">{formatMoney(selectedTotal, cart.currency)}</span>
         </div>
-        <p className="flex gap-2 rounded-lg bg-blue-50/70 px-3 py-2 text-[11px] text-slate-700">
-          <Info className="h-3.5 w-3.5 shrink-0 text-brand-blue mt-0.5" />
+        <p className="flex gap-2 rounded-lg bg-orange-50/70 border border-orange-100/90 px-3 py-2 text-[11px] text-slate-700">
+          <Info className="h-3.5 w-3.5 shrink-0 text-brand-orange mt-0.5" />
           <span>
             {!allSelected
               ? `${t("orders.cart.selectionSummary", { selected: selectedItems.length, total: cart.items.length })} `

@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 
 type Role = "buyer" | "manufacturer";
 
-export function RoleToggle() {
+export function RoleToggle({ compact = false }: { compact?: boolean }) {
   const t = useTranslations();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -20,12 +20,13 @@ export function RoleToggle() {
   }
 
   return (
-    <div className="mb-5 grid grid-cols-2 rounded-full border border-line p-1">
+    <div className={cn("grid grid-cols-2 rounded-full border border-line", compact ? "mb-2.5 p-0.5" : "mb-5 p-1")}>
       <Link
         href={hrefFor("buyer")}
         className={cn(
-          "rounded-full py-1.5 text-center text-sm font-semibold",
-          role === "buyer" ? "bg-brand-blue text-white" : "text-ink-muted",
+          "rounded-full text-center font-semibold transition-colors",
+          compact ? "py-1 text-xs" : "py-1.5 text-sm",
+          role === "buyer" ? "bg-brand-orange text-white" : "text-ink-muted hover:text-ink",
         )}
       >
         {t("userMenu.plan.free")}
@@ -33,8 +34,9 @@ export function RoleToggle() {
       <Link
         href={hrefFor("manufacturer")}
         className={cn(
-          "rounded-full py-1.5 text-center text-sm font-semibold",
-          role === "manufacturer" ? "bg-brand-blue text-white" : "text-ink-muted",
+          "rounded-full text-center font-semibold transition-colors",
+          compact ? "py-1 text-xs" : "py-1.5 text-sm",
+          role === "manufacturer" ? "bg-brand-orange text-white" : "text-ink-muted hover:text-ink",
         )}
       >
         {t("userMenu.manufacturer")}

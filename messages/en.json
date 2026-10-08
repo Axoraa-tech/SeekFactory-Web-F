@@ -834,6 +834,7 @@
       "quickGuestAccess": "⚡ Quick Guest Access",
       "guestLandscapeB2bFeed": "Guest: Landscape B2B Feed",
       "guestVerticalSeeksFeed": "Guest: Vertical Seeks Feed",
+      "continueAsGuest": "Continue browsing as guest",
       "alreadyOnSeekfactory": "Already on SeekFactory?",
       "newToSeekfactory": "New to SeekFactory?",
       "welcomeCheckEmail": "Welcome to SeekFactory! We sent a verification link to {email}."

@@ -59,14 +59,16 @@ export function SupplierLockOverlay({
       </div>
 
       {/* Frosted Glass Lock Overlay */}
-      <div className="absolute inset-0 z-20 flex items-center justify-center p-1.5 bg-slate-900/10 backdrop-blur-[1px] transition-all group-hover/lock:bg-blue-900/15">
+      <div className="absolute inset-0 z-20 flex items-center justify-center p-1.5 bg-slate-900/10 backdrop-blur-[1px] transition-all group-hover/lock:bg-orange-950/15">
         <div
           className={cn(
-            "flex items-center gap-2 rounded-full border border-white/80 bg-white/95 px-3 py-1 text-slate-800 shadow-md backdrop-blur-md transition-all duration-200 group-hover/lock:scale-105 group-hover/lock:border-brand-blue/50 group-hover/lock:text-brand-blue group-hover/lock:shadow-lg",
+            "group/pill flex items-center gap-2 rounded-full border border-white/80 bg-white/95 px-3 py-1 text-slate-800 shadow-md backdrop-blur-md transition-all duration-200",
+            "group-hover/lock:scale-105 group-hover/lock:border-brand-orange group-hover/lock:text-brand-orange group-hover/lock:shadow-[0_4px_16px_rgba(242,107,33,0.3)]",
+            "hover:!bg-brand-orange hover:!text-white hover:!border-brand-orange",
             compact ? "text-[10px] px-2.5 py-0.5" : "text-xs"
           )}
         >
-          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-blue text-white shrink-0 transition-colors">
+          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-orange text-white shrink-0 transition-all duration-200 group-hover/lock:scale-110 group-hover/pill:bg-white group-hover/pill:text-brand-orange shadow-2xs">
             <Eye className="h-2.5 w-2.5" />
           </div>
           <span className="font-extrabold tracking-tight truncate">{badgeLabel ?? t("seek.viewManufacturer")}</span>

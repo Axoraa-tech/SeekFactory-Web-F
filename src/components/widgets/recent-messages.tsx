@@ -45,7 +45,7 @@ export function RecentMessages({ messages: initialMessages }: Props) {
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-bold">{t("widgets.recentMessages", "Recent Messages")}</h2>
-        <Link href="/messages" className="text-xs font-semibold text-brand-blue">
+        <Link href="/messages" className="text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
           {t("widgets.viewAll", "View all")}
         </Link>
       </div>
@@ -66,7 +66,7 @@ export function RecentMessages({ messages: initialMessages }: Props) {
                 <p className="truncate text-xs text-ink-muted">{message.lastMessage}</p>
               </div>
               {message.unreadCount > 0 ? (
-                <span className="mt-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-blue px-1 text-[10px] font-bold text-white">
+                <span className="mt-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1 text-[10px] font-bold text-white">
                   {message.unreadCount}
                 </span>
               ) : null}

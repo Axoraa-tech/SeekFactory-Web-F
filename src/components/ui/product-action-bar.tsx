@@ -157,7 +157,7 @@ export function ProductActionBar({
             href={productSlug ? `/rfq/new?product=${productSlug}` : "/rfq/new"}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-blue hover:bg-brand-blue-dark",
+              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-orange hover:bg-[#d85b17]",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
           >

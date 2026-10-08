@@ -235,7 +235,7 @@ export function VariantInstagramProductReel({
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-1">
-                      <p className="font-bold text-xs text-slate-900 truncate group-hover:text-brand-blue transition-colors">
+                      <p className="font-bold text-xs text-slate-900 truncate group-hover:text-brand-orange transition-colors">
                         {manufacturer.name}
                       </p>
                       {manufacturer.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}

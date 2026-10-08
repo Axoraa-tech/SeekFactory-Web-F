@@ -834,6 +834,7 @@
       "quickGuestAccess": "⚡ 访客快速体验",
       "guestLandscapeB2bFeed": "访客：横屏 B2B 视频流",
       "guestVerticalSeeksFeed": "访客：竖屏希克视频流",
+      "continueAsGuest": "以访客身份继续浏览",
       "alreadyOnSeekfactory": "已有 SeekFactory 账号？",
       "newToSeekfactory": "初次使用 SeekFactory？",
       "welcomeCheckEmail": "欢迎加入 SeekFactory！我们已向 {email} 发送验证链接。"

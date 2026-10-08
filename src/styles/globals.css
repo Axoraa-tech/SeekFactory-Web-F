@@ -622,14 +622,35 @@ html[data-sf-intro="skip"] #sf-intro {
 }
 
 #sf-intro {
-  animation: sf-intro-out 300ms ease-out 2200ms forwards;
+  animation: sf-intro-out 400ms ease-out 3000ms forwards;
 }
 
 @keyframes sf-intro-out {
   to {
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
   }
+}
+
+/* ─── Global Button Color: Logo Color (#f26b21) ──────────────────────────────
+   Ensures all buttons and action links across the entire application use the 
+   signature SeekFactory logo orange color. */
+button.bg-brand-blue,
+a.bg-brand-blue,
+input[type="submit"].bg-brand-blue,
+input[type="button"].bg-brand-blue,
+.btn-primary {
+  background-color: var(--brand-orange) !important;
+  border-color: transparent !important;
+}
+
+button.hover\:bg-brand-blue-dark:hover,
+a.hover\:bg-brand-blue-dark:hover,
+button.hover\:bg-brand-blue:hover,
+a.hover\:bg-brand-blue:hover,
+.btn-primary:hover {
+  background-color: #d85b17 !important;
 }
 
 

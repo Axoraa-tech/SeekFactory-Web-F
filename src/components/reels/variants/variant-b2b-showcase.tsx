@@ -170,7 +170,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="text-sm font-bold text-ink hover:text-brand-blue transition">
+                    <p className="text-sm font-bold text-ink hover:text-brand-orange transition">
                       {manufacturer.name}
                     </p>
                     <SeekTrustBadge manufacturer={manufacturer} />

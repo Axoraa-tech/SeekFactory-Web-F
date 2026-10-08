@@ -72,10 +72,10 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
             className="h-28 w-28 shrink-0 rounded-xl border border-line object-cover bg-canvas"
           />
           <div className="min-w-0 space-y-1">
-            <Link href={`/products/${product.slug}`} className="block text-base font-bold text-ink hover:text-brand-blue">
+            <Link href={`/products/${product.slug}`} className="block text-base font-bold text-ink hover:text-brand-orange transition-colors">
               {product.name}
             </Link>
-            <Link href={`/manufacturers/${manufacturer.slug}`} className="block text-xs font-semibold text-brand-blue hover:underline">
+            <Link href={`/manufacturers/${manufacturer.slug}`} className="block text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
               {manufacturer.name}
             </Link>
             <p className="text-xs text-ink-muted">
@@ -93,7 +93,7 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
               aria-label={tr("orders.decreaseQuantity")}
               disabled={quantity <= minQty}
               onClick={() => setQuantity((q) => Math.max(minQty, q - 1))}
-              className="flex h-9 w-9 items-center justify-center text-ink-muted hover:text-brand-blue disabled:opacity-40"
+              className="flex h-9 w-9 items-center justify-center text-ink-muted hover:text-brand-orange disabled:opacity-40 transition-colors"
             >
               <Minus className="h-3.5 w-3.5" />
             </button>
@@ -109,7 +109,7 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
               type="button"
               aria-label={tr("orders.increaseQuantity")}
               onClick={() => setQuantity((q) => q + 1)}
-              className="flex h-9 w-9 items-center justify-center text-ink-muted hover:text-brand-blue"
+              className="flex h-9 w-9 items-center justify-center text-ink-muted hover:text-brand-orange transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
             </button>
@@ -127,10 +127,10 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
       <aside className="rounded-2xl border border-line bg-white p-5 shadow-2xs space-y-4 lg:sticky lg:top-24">
         <div className="flex items-baseline justify-between">
           <span className="text-sm font-bold text-ink">{tr("orders.estimatedTotal")}</span>
-          <span className="text-xl font-extrabold text-ink tabular-nums">{total !== null ? formatMoney(total, "INR") : tr("orders.checkout.onRequest")}</span>
+          <span className="text-xl sm:text-2xl font-black text-brand-orange tabular-nums">{total !== null ? formatMoney(total, "INR") : tr("orders.checkout.onRequest")}</span>
         </div>
-        <p className="flex gap-2 rounded-lg bg-blue-50/70 px-3 py-2 text-[11px] text-slate-700">
-          <Info className="h-3.5 w-3.5 shrink-0 text-brand-blue mt-0.5" />
+        <p className="flex gap-2 rounded-lg bg-orange-50/70 border border-orange-100/90 px-3 py-2 text-[11px] text-slate-700">
+          <Info className="h-3.5 w-3.5 shrink-0 text-brand-orange mt-0.5" />
           <span>{tr(PAYMENT_NOTE)}</span>
         </p>
         <ShippingForm user={user} submitLabel={tx("orders.sendOrderRequest")} submitting={placing} error={error} onSubmit={placeOrder} />

@@ -291,7 +291,7 @@ export function DynamicCategoryNav({
                 onPointerLeave={stopHoverScroll}
                 onPointerCancel={stopHoverScroll}
                 aria-label={t("categoryNav.scrollCategoriesToTheLeft")}
-                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
+                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-orange hover:text-white hover:border-brand-orange hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-hidden"
               >
                 <ChevronLeft className="h-4 w-4 pointer-events-none" />
               </button>
@@ -322,13 +322,13 @@ export function DynamicCategoryNav({
                 }}
                 title={`${t("feed.forYou", "For You")} - ${t("sidebar.allCategories", "All Categories")}`}
                 aria-current={!currentCategory ? "page" : undefined}
-                className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"}
+                className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-hidden"}
               >
                 <span
                   className={cn(
                     "flex h-8 w-8 items-center justify-center rounded-[10px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
                     !currentCategory
-                      ? "bg-brand-blue-soft"
+                      ? "bg-brand-orange-soft"
                       : activePopover?.type === "for-you"
                         ? "bg-neutral-100"
                         : "group-hover:bg-neutral-100"
@@ -350,7 +350,7 @@ export function DynamicCategoryNav({
                 </span>
 
                 {!currentCategory && (
-                  <span className="absolute bottom-0 inset-x-6 h-[2.5px] rounded-full bg-brand-blue" />
+                  <span className="absolute bottom-0 inset-x-6 h-[2.5px] rounded-full bg-brand-orange" />
                 )}
               </Link>
             </div>
@@ -394,13 +394,13 @@ export function DynamicCategoryNav({
                     }}
                     title={translatedName}
                     aria-current={isActive ? "page" : undefined}
-                    className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"}
+                    className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-hidden"}
                   >
                     <span
                       className={cn(
                         "flex h-8 w-8 items-center justify-center rounded-[10px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
                         isActive
-                          ? "bg-brand-blue-soft"
+                          ? "bg-brand-orange-soft"
                           : isHovered
                             ? "bg-neutral-100"
                             : "group-hover:bg-neutral-100"
@@ -422,7 +422,7 @@ export function DynamicCategoryNav({
                     </span>
 
                     {isActive && (
-                      <span className="absolute bottom-0 inset-x-6 h-[2.5px] rounded-full bg-brand-blue" />
+                      <span className="absolute bottom-0 inset-x-6 h-[2.5px] rounded-full bg-brand-orange" />
                     )}
                   </Link>
                 </div>
@@ -443,7 +443,7 @@ export function DynamicCategoryNav({
                 onPointerLeave={stopHoverScroll}
                 onPointerCancel={stopHoverScroll}
                 aria-label={t("categoryNav.scrollCategoriesToTheRight")}
-                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-blue hover:text-white hover:border-brand-blue hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:outline-hidden"
+                className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-xs transition-all duration-150 hover:bg-brand-orange hover:text-white hover:border-brand-orange hover:scale-110 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-hidden"
               >
                 <ChevronRight className="h-4 w-4 pointer-events-none" />
               </button>
@@ -478,7 +478,7 @@ export function DynamicCategoryNav({
                 {/* Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-blue font-bold text-xs">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-orange/10 text-brand-orange font-bold text-xs">
                       <Sparkles className="h-4 w-4" />
                     </div>
                     <div>
@@ -493,7 +493,7 @@ export function DynamicCategoryNav({
                   <Link
                     href="/explore"
                     onClick={() => setActivePopover(null)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-brand-orange hover:underline"
                   >
                     <span>{t("categoryNav.exploreAll")}</span>
                     <ArrowRight className="h-3 w-3" />
@@ -522,16 +522,16 @@ export function DynamicCategoryNav({
                         className={cn(
                           "group flex items-center justify-between gap-2.5 rounded-xl px-2.5 py-2 text-xs transition-all",
                           isSelected
-                            ? "bg-brand-blue/10 text-brand-blue font-bold"
-                            : "text-slate-700 hover:bg-slate-50 hover:text-brand-blue"
+                            ? "bg-brand-orange/10 text-brand-orange font-bold"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-brand-orange"
                         )}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100/90 group-hover:bg-blue-50 text-slate-700 transition-colors">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100/90 group-hover:bg-brand-orange-soft text-slate-700 transition-colors">
                             <CategoryIcon icon={cat.icon} size={18} />
                           </span>
                           <div className="min-w-0">
-                            <span className="block truncate font-medium group-hover:text-brand-blue">
+                            <span className="block truncate font-medium group-hover:text-brand-orange">
                               {catName}
                             </span>
                             {subs.length > 0 && (
@@ -541,7 +541,7 @@ export function DynamicCategoryNav({
                             )}
                           </div>
                         </div>
-                        <span className="shrink-0 text-[10px] font-semibold text-slate-400 group-hover:text-brand-blue">
+                        <span className="shrink-0 text-[10px] font-semibold text-slate-400 group-hover:text-brand-orange">
                           {cat.listingCount > 0 ? `${(cat.listingCount / 1000).toFixed(0)}k+` : ""}
                         </span>
                       </Link>
@@ -555,7 +555,7 @@ export function DynamicCategoryNav({
                   <Link
                     href="/explore"
                     onClick={() => setActivePopover(null)}
-                    className="font-semibold text-brand-blue hover:text-blue-700 hover:underline"
+                    className="font-semibold text-brand-orange hover:text-[#d85b17] hover:underline"
                   >
                     {t("categoryNav.fullDirectory")}
                   </Link>
@@ -586,7 +586,7 @@ export function DynamicCategoryNav({
                     {/* Category Header */}
                     <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-100">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-brand-blue">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-orange-soft text-brand-orange">
                           <CategoryIcon icon={category.icon} size={18} />
                         </span>
                         <div className="min-w-0">
@@ -611,7 +611,7 @@ export function DynamicCategoryNav({
                           }
                           setActivePopover(null);
                         }}
-                        className="shrink-0 text-[11px] font-semibold text-brand-blue hover:underline ml-2"
+                        className="shrink-0 text-[11px] font-semibold text-brand-orange hover:underline ml-2"
                       >
                         {t("categoryNav.viewAll")}
                       </Link>
@@ -640,11 +640,11 @@ export function DynamicCategoryNav({
                               }
                               setActivePopover(null);
                             }}
-                            className="group flex items-center justify-between gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-blue-50 hover:text-brand-blue transition-colors"
+                            className="group flex items-center justify-between gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-brand-orange-soft hover:text-brand-orange transition-colors"
                           >
                             <span className="truncate group-hover:font-medium">{subName}</span>
                             {sub.listingCount > 0 && (
-                              <span className="shrink-0 text-[10px] font-semibold text-slate-400 group-hover:text-brand-blue">
+                              <span className="shrink-0 text-[10px] font-semibold text-slate-400 group-hover:text-brand-orange">
                                 {sub.listingCount > 999
                                   ? `${(sub.listingCount / 1000).toFixed(0)}k`
                                   : sub.listingCount}

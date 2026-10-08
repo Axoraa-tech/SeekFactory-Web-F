@@ -5,8 +5,8 @@ type Variant = "primary" | "orange" | "outline" | "ghost" | "follow" | "white";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-brand-blue text-white hover:bg-brand-blue-dark shadow-sm",
-  orange: "bg-brand-orange text-white hover:brightness-95 shadow-sm",
+    "bg-brand-orange text-white hover:bg-[#d85b17] shadow-sm active:scale-[0.98]",
+  orange: "bg-brand-orange text-white hover:bg-[#d85b17] shadow-sm active:scale-[0.98]",
   outline: "border border-line bg-white text-ink hover:bg-canvas",
   ghost: "text-ink-muted hover:bg-canvas hover:text-ink",
   follow:
