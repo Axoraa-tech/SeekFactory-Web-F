@@ -217,7 +217,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
             </div>
 
             {/* Right: Stats & Action Buttons */}
-            <div className="flex items-center justify-between md:justify-end gap-5 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-line">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between md:justify-end gap-3 sm:gap-5 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-line">
               <div className="flex items-center gap-4 text-center">
                 <div>
                   <p className="text-xs font-extrabold text-neutral-900 tabular-nums">{product.viewsCount}</p>
@@ -229,11 +229,11 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex w-full sm:w-auto items-center gap-2">
                 {product.status === "Active" && (
                   <Link
                     href={`/products/${product.slug}`}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
+                    className="flex-1 sm:flex-none justify-center inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
                     title={t("seller.products.viewPublicMarketplaceListing")}
                   >
                     <Eye className="h-3.5 w-3.5" />
@@ -244,7 +244,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                 <button
                   type="button"
                   onClick={() => onEditProduct(product)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs cursor-pointer"
+                  className="flex-1 sm:flex-none justify-center inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs cursor-pointer"
                   title={t("seller.products.editProduct")}
                 >
                   <Pencil className="h-3.5 w-3.5" />
@@ -255,7 +255,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                   type="button"
                   onClick={() => void toggleListed(product)}
                   disabled={togglingId === product.id}
-                  className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition shadow-2xs cursor-pointer disabled:opacity-60 ${
+                  className={`flex-1 sm:flex-none justify-center inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition shadow-2xs cursor-pointer disabled:opacity-60 ${
                     product.status === "Paused"
                       ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                       : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"

@@ -1371,7 +1371,11 @@
       "Processing": "处理中"
     },
     "lastDays": "近 {count} 天",
-    "lastWeeks": "近 {count} 周"
+    "lastWeeks": "近 {count} 周",
+    "preview": {
+      "backToSellerHub": "返回卖家中心",
+      "buyerView": "您正在以买家视角查看您的商品"
+    }
   },
   "hallOfFame": {
     "noAccreditationsPublishedYet": "尚未发布任何资质",
