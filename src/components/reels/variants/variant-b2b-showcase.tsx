@@ -157,10 +157,11 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
         <div className="p-3.5 sm:p-4 pb-2 sm:pb-2.5 space-y-2.5">
           {/* Header with SupplierLockOverlay */}
           <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
-            <div className="flex items-center justify-between">
+            {/* On narrow phones the actions wrap under the name instead of squeezing it */}
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
               <Link
                 href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
-                className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
+                className="flex flex-1 basis-[200px] items-center gap-3 hover:opacity-90 transition min-w-0"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img loading="lazy" decoding="async"
@@ -170,7 +171,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="text-sm font-bold text-ink hover:text-brand-orange transition">
+                    <p className="min-w-0 line-clamp-2 break-words text-sm font-bold text-ink hover:text-brand-orange transition">
                       {manufacturer.name}
                     </p>
                     <SeekTrustBadge manufacturer={manufacturer} />

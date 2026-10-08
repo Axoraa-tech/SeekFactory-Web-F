@@ -16,6 +16,27 @@ const TOTAL_MS = VISIBLE_MS + FADE_MS;
 
 const SKIP_PREFIXES = ["/admin", "/login", "/join", "/legal"];
 
+/** The intro plays at most once per browser in this window, not on every page load. */
+const LAST_SHOWN_KEY = "sf-intro-last-shown";
+const REPEAT_AFTER_MS = 5 * 60 * 60 * 1000;
+
+function shownRecently(): boolean {
+  try {
+    const last = Number(localStorage.getItem(LAST_SHOWN_KEY));
+    return Number.isFinite(last) && last > 0 && Date.now() - last < REPEAT_AFTER_MS;
+  } catch {
+    return false;
+  }
+}
+
+function markShown() {
+  try {
+    localStorage.setItem(LAST_SHOWN_KEY, String(Date.now()));
+  } catch {
+    // Storage blocked: the intro may show again next load
+  }
+}
+
 function shouldSkipIntro(pathname: string): boolean {
   if (SKIP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return true;
   try {
@@ -23,7 +44,7 @@ function shouldSkipIntro(pathname: string): boolean {
   } catch {
     return true;
   }
-  return false;
+  return shownRecently();
 }
 
 export function LoadingScreen() {
@@ -43,6 +64,7 @@ export function LoadingScreen() {
       return;
     }
 
+    markShown();
     startRef.current = Date.now();
 
     const interval = window.setInterval(() => {

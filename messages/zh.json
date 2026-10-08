@@ -1188,7 +1188,8 @@
       "typeYourMessageFobTerms": "输入消息、FOB 条款或给采购商的技术答复...",
       "sendMessage": "发送消息",
       "sendMessage2": "发送消息",
-      "selectAConversationFromThe": "从左侧选择一个会话开始聊天"
+      "selectAConversationFromThe": "从左侧选择一个会话开始聊天",
+      "backToConversations": "返回会话列表"
     },
     "chatWithBuyer": "与采购商沟通",
     "orders": {

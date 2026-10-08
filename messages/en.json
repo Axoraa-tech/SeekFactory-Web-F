@@ -1188,7 +1188,8 @@
       "typeYourMessageFobTerms": "Type your message, FOB terms, or technical reply to buyer...",
       "sendMessage": "Send Message",
       "sendMessage2": "Send message",
-      "selectAConversationFromThe": "Select a conversation from the left to start chatting"
+      "selectAConversationFromThe": "Select a conversation from the left to start chatting",
+      "backToConversations": "Back to conversations"
     },
     "chatWithBuyer": "Chat with buyer",
     "orders": {
