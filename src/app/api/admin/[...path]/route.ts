@@ -14,6 +14,11 @@ async function forward(req: NextRequest, path: string[]) {
     return NextResponse.json({ success: false, message: "Unauthorized: No token found" }, { status: 401 });
   }
 
+  // Decoded ".." segments would let fetch() normalise the URL out of /admin/ with the admin token
+  if (path.some((segment) => !segment || segment === "." || segment === "..")) {
+    return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
+  }
+
   const target = `${BACKEND_API_URL}/admin/${path.map(encodeURIComponent).join("/")}${req.nextUrl.search}`;
   const hasBody = req.method !== "GET" && req.method !== "HEAD";
 

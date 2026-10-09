@@ -122,8 +122,25 @@ export function isExpired(token: string | undefined): boolean {
   }
 }
 
+/**
+ * In-flight and just-finished refreshes by refresh token. A page fires several API calls at once;
+ * each would otherwise spend the same (rotating) refresh token, and the losers would sign the user
+ * out. Per server instance only, which covers the common burst from one browser.
+ */
+const recentRefreshes = new Map<string, Promise<TokenPair | null>>();
+const REFRESH_REUSE_MS = 10_000;
+
 /** Exchanges a refresh token for a new pair; null when the session is over. */
-export async function refreshTokens(refreshToken: string): Promise<TokenPair | null> {
+export function refreshTokens(refreshToken: string): Promise<TokenPair | null> {
+  const existing = recentRefreshes.get(refreshToken);
+  if (existing) return existing;
+  const pending = requestRefresh(refreshToken);
+  recentRefreshes.set(refreshToken, pending);
+  void pending.then(() => setTimeout(() => recentRefreshes.delete(refreshToken), REFRESH_REUSE_MS));
+  return pending;
+}
+
+async function requestRefresh(refreshToken: string): Promise<TokenPair | null> {
   try {
     const res = await fetch(`${BACKEND_API_URL}/auth/refresh`, {
       method: "POST",

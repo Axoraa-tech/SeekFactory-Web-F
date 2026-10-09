@@ -54,7 +54,8 @@ export function EngagementRail({
   const handleToggleLike = () => {
     setLiked((prev) => !prev);
     if (reelId) {
-      getApi().feed.likeReel(reelId).catch(() => {});
+      // Roll back the optimistic toggle if the request fails.
+      getApi().feed.likeReel(reelId).catch(() => setLiked((prev) => !prev));
     }
   };
 
@@ -65,7 +66,7 @@ export function EngagementRail({
   const handleToggleSave = () => {
     setSaved((prev) => !prev);
     if (reelId) {
-      getApi().feed.saveReel(reelId).catch(() => {});
+      getApi().feed.saveReel(reelId).catch(() => setSaved((prev) => !prev));
     }
   };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, Pencil, Loader2, Save, Image as ImageIcon, Check } from "lucide-react";
 import { getApi } from "@/shared/api";
 import type { FactorySeekUpdate } from "@/shared/api/contracts";
@@ -31,6 +31,11 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
   const [error, setError] = useState<string | null>(null);
   const busy = status !== "idle";
 
+  // Revoke the local cover preview when it is replaced or the modal closes.
+  useEffect(() => () => {
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+  }, [coverPreview]);
+
   function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -39,7 +44,6 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
       setError(t("seller.seek.coverImageIsLargerThan"));
       return;
     }
-    if (coverPreview) URL.revokeObjectURL(coverPreview);
     setError(null);
     setCoverFile(file);
     setCoverPreview(URL.createObjectURL(file));
@@ -71,7 +75,6 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
         productIds,
         posterUrl,
       });
-      if (coverPreview) URL.revokeObjectURL(coverPreview);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("seller.seek.couldNotSaveChangesPlease"));

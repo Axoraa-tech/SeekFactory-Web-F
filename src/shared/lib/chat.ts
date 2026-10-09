@@ -11,7 +11,8 @@ export const CHAT_ATTACHMENT_MAX_BYTES = 20 * 1024 * 1024;
 export function attachmentHref(url: string | undefined): string | undefined {
   if (!url) return undefined;
   if (url.startsWith("/api/v1/")) return `/api/proxy${url}`;
-  return url;
+  // Used as an href: refuse javascript:/data: and other schemes from message data
+  return /^https?:\/\//i.test(url) || (url.startsWith("/") && !url.startsWith("//")) ? url : undefined;
 }
 
 export function isImageAttachment(attachment: MessageAttachment): boolean {

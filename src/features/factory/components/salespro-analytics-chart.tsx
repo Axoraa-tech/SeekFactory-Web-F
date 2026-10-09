@@ -86,15 +86,15 @@ export function SalesproAnalyticsChart({ trend }: Props) {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold">
             <span className="flex items-center gap-1.5 text-[#1A73E8]">
               <span className="h-2 w-2 rounded-full bg-[#1A73E8]" />
-              <span>{t("seller.chart.seekViews")} ({totals.seekViews.toLocaleString()})</span>
+              <span>{t("seller.chart.seekViews")} ({totals.seekViews.toLocaleString("en-IN")})</span>
             </span>
             <span className="flex items-center gap-1.5 text-[#5F6368]">
               <span className="h-2 w-2 rounded-full bg-[#5F6368]" />
-              <span>{t("seller.chart.productViews")} ({totals.productViews.toLocaleString()})</span>
+              <span>{t("seller.chart.productViews")} ({totals.productViews.toLocaleString("en-IN")})</span>
             </span>
             <span className="flex items-center gap-1.5 text-[#F26B21]">
               <span className="h-2 w-2 rounded-sm bg-[#F26B21]" />
-              <span>{t("seller.chart.rfqs")} ({totals.rfqs.toLocaleString()})</span>
+              <span>{t("seller.chart.rfqs")} ({totals.rfqs.toLocaleString("en-IN")})</span>
             </span>
           </div>
 

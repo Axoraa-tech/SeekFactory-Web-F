@@ -198,7 +198,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                 </Link>
 
                 <p className="text-xs font-semibold text-neutral-800">
-                  ₹{(product.priceInr ?? 0).toLocaleString()} / {product.unit} •{" "}
+                  ₹{(product.priceInr ?? 0).toLocaleString("en-IN")} / {product.unit} •{" "}
                   <span className="text-ink-muted font-normal">{t("common.moqLabel")} {product.moq}</span>
                 </p>
 
@@ -274,7 +274,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
 
                 <button
                   type="button"
-                  onClick={() => onDeleteProduct(product.id)}
+                  onClick={() => window.confirm(t("seller.products.confirmDelete")) && onDeleteProduct(product.id)}
                   aria-label={t("seller.products.deleteProduct")}
                   className="rounded-xl border border-line p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                   title={t("seller.products.deleteProduct2")}

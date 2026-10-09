@@ -453,7 +453,7 @@ function Skeleton({ className = "" }: { className?: string }) {
 
 /* ---------- formatting ---------- */
 
-const fmt = (n: number) => n.toLocaleString();
+const fmt = (n: number) => n.toLocaleString("en-IN");
 
 function periodLabel(p: AnalyticsPeriod) {
   return p === 365 ? "12 months" : `${p} days`;
@@ -461,8 +461,8 @@ function periodLabel(p: AnalyticsPeriod) {
 
 function formatBucket(iso: string, bucket: AdminAnalytics["bucket"]) {
   const d = new Date(iso);
-  if (bucket === "month") return d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  if (bucket === "month") return d.toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
 function relativeTime(iso: string) {

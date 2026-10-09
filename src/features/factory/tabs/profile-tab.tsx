@@ -417,12 +417,14 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal, email
         <AccountSecurityCard email={email} emailVerified={emailVerified} />
       </section>
 
-      {/* Upload Certificate Modal */}
-      <UploadCertificateModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        onAddCertificate={handleAddCertificate}
-      />
+      {/* Upload Certificate Modal — mounted only while open so each upload starts from a blank form */}
+      {isUploadModalOpen && (
+        <UploadCertificateModal
+          isOpen
+          onClose={() => setIsUploadModalOpen(false)}
+          onAddCertificate={handleAddCertificate}
+        />
+      )}
 
       {/* Certificate Lightbox Inspector */}
       <CertificateLightboxModal

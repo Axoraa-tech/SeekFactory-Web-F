@@ -70,7 +70,7 @@ export function AddToCartModal({ productSlug, productId, productName, priceInr, 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (status === "sending" || quantity < 1) return;
+    if (status === "sending" || !(quantity >= 1)) return;
     setStatus("sending");
     setError(null);
     try {
@@ -211,7 +211,7 @@ export function AddToCartModal({ productSlug, productId, productName, priceInr, 
               </button>
               <button
                 type="submit"
-                disabled={status === "sending" || quantity < 1}
+                disabled={status === "sending" || !(quantity >= 1)}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-amber-600 hover:to-orange-600 disabled:opacity-60"
               >
                 {status === "sending" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}

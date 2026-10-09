@@ -300,7 +300,7 @@ export function SupplierProfileView({
                   <span>•</span>
                   <span className="inline-flex items-center gap-1 text-slate-700 font-semibold">
                     <Users className="h-3.5 w-3.5 text-slate-400" />
-                    {followerCount.toLocaleString()} {followerCount === 1 ? "follower" : "followers"}
+                    {followerCount.toLocaleString("en-IN")} {followerCount === 1 ? "follower" : "followers"}
                   </span>
                 </p>
               </div>

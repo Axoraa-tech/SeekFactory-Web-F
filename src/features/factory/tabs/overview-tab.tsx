@@ -101,7 +101,7 @@ export function OverviewTab({
             </div>
           </div>
           <p className="text-xl font-extrabold text-ink">
-            {(stats?.totalProductViews ?? 0).toLocaleString()}
+            {(stats?.totalProductViews ?? 0).toLocaleString("en-IN")}
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-brand-blue">
             <TrendingUp className="h-3 w-3" />
@@ -120,7 +120,7 @@ export function OverviewTab({
             </div>
           </div>
           <p className="text-xl font-extrabold text-ink">
-            {(stats?.videoSeekPlays ?? 0).toLocaleString()}
+            {(stats?.videoSeekPlays ?? 0).toLocaleString("en-IN")}
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-brand-blue">
             <TrendingUp className="h-3 w-3" />
@@ -139,7 +139,7 @@ export function OverviewTab({
             </div>
           </div>
           <p className="text-xl font-extrabold text-ink">
-            {(stats?.factoryProfileVisits ?? 0).toLocaleString()}
+            {(stats?.factoryProfileVisits ?? 0).toLocaleString("en-IN")}
           </p>
           <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-amber-700">
             <TrendingUp className="h-3 w-3" />
@@ -194,7 +194,7 @@ export function OverviewTab({
             </div>
           </div>
           <p className="text-xl font-extrabold text-ink">
-            {(stats?.followerCount ?? 0).toLocaleString()}
+            {(stats?.followerCount ?? 0).toLocaleString("en-IN")}
           </p>
           <p className="mt-1 text-[11px] text-ink-muted font-medium">{t("seller.home.verifiedBuyers")}</p>
         </Card>
@@ -292,7 +292,7 @@ export function OverviewTab({
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-ink truncate">{prod.name}</p>
                   <p className="text-[11px] text-ink-muted">
-                    ₹{(prod.priceInr ?? 0).toLocaleString()} / {prod.unit} {t("orders.request.moq")} {prod.moq}
+                    ₹{(prod.priceInr ?? 0).toLocaleString("en-IN")} / {prod.unit} {t("orders.request.moq")} {prod.moq}
                   </p>
                   <div className="flex items-center gap-3 text-[10px] text-ink-muted mt-1">
                     <span className="font-semibold text-brand-blue">{prod.viewsCount} {t("seller.seekDetail.views")}</span>
@@ -331,7 +331,7 @@ export function OverviewTab({
                   <p className="text-xs font-bold text-ink truncate">{seek.title}</p>
                   <p className="text-[11px] text-ink-muted">{translateCategory(seek.category)} • {seek.durationSeconds}s</p>
                   <div className="flex items-center gap-3 text-[10px] text-ink-muted mt-1">
-                    <span className="font-semibold text-brand-blue">{(seek.viewsCount ?? 0).toLocaleString()} {t("seller.home.plays2")}</span>
+                    <span className="font-semibold text-brand-blue">{(seek.viewsCount ?? 0).toLocaleString("en-IN")} {t("seller.home.plays2")}</span>
                     <span>•</span>
                     <span className="font-bold text-red-600">
                       {seek.inquiriesGenerated} {t("seller.home.leadsGenerated")}

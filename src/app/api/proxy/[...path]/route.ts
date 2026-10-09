@@ -58,7 +58,16 @@ function isSupplierAuthResponse(body: unknown): boolean {
 async function handleProxy(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
     const resolvedParams = await params;
-    const path = resolvedParams.path.join("/");
+    // Params arrive decoded: "%2E%2E" and "%2F" would otherwise let fetch() normalise the URL out of
+    // /api/ to any backend path (actuator, internal routes). Only plain /api/... segments are forwarded.
+    const segments = resolvedParams.path;
+    if (
+      segments[0] !== "api" ||
+      segments.some((s) => !s || s === "." || s === ".." || s.includes("/") || s.includes("\\"))
+    ) {
+      return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
+    }
+    const path = segments.map(encodeURIComponent).join("/");
     const searchParams = req.nextUrl.searchParams.toString();
     const url = `${BACKEND_URL}/${path}${searchParams ? `?${searchParams}` : ""}`;
 
@@ -141,6 +150,8 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     responseHeaders.delete("content-encoding");
     responseHeaders.delete("content-length");
     responseHeaders.delete("transfer-encoding");
+    // Session cookies are set by this route only; never pass backend cookies through to our origin
+    responseHeaders.delete("set-cookie");
 
     const response = new NextResponse(backendRes.body, {
       status: backendRes.status,
@@ -158,7 +169,14 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
           );
         }
         const tokens = readTokenPair(body);
-        if (tokens) setTokenCookies(response, tokens, portal);
+        if (tokens) {
+          // Tokens live only in HttpOnly cookies: strip them from the body so page scripts never see them
+          const data = { ...(body as { data: Record<string, unknown> }).data };
+          for (const key of ["accessToken", "access_token", "refreshToken", "refresh_token"]) delete data[key];
+          const scrubbed = NextResponse.json({ ...(body as object), data }, { status: backendRes.status, headers: responseHeaders });
+          setTokenCookies(scrubbed, tokens, portal);
+          return scrubbed;
+        }
       } catch (e) {
         console.error("Failed to parse auth response in proxy", e);
       }

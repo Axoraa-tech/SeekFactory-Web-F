@@ -85,6 +85,8 @@ export async function middleware(request: NextRequest) {
   // SAMEORIGIN (not DENY) so the admin Seek Showcase page can preview the home page in an iframe;
   // other sites still cannot frame SeekFactory
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
+  // Modern equivalent of the above (X-Frame-Options is obsolete in CSP-aware browsers)
+  response.headers.set("Content-Security-Policy", "frame-ancestors 'self'");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");

@@ -83,8 +83,8 @@ export function SeeksTab({ seeks, onOpenAddSeek, onEditSeek, onSetListed, onDele
       {/* Aggregate video performance: one accent, the numbers carry the weight */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sf-stagger">
         {[
-          { icon: Play, label: t("seller.seeks.totalVideoImpressions"), value: `${(totalViews ?? 0).toLocaleString()} Plays` },
-          { icon: TrendingUp, label: t("seller.seeks.savedByBuyers"), value: `${totalSaves.toLocaleString()} Saves` },
+          { icon: Play, label: t("seller.seeks.totalVideoImpressions"), value: `${(totalViews ?? 0).toLocaleString("en-IN")} Plays` },
+          { icon: TrendingUp, label: t("seller.seeks.savedByBuyers"), value: `${totalSaves.toLocaleString("en-IN")} Saves` },
           { icon: Film, label: t("seller.seeks.seeksFeedDiscovery"), value: `${liveCount} of ${seeks.length} on Buyer Feed` },
         ].map(({ icon: Icon, label, value }) => (
           <div key={label} className="rounded-xl border border-line bg-white p-3.5 shadow-xs flex items-center gap-3">
@@ -158,7 +158,7 @@ export function SeeksTab({ seeks, onOpenAddSeek, onEditSeek, onSetListed, onDele
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1 font-semibold text-neutral-900">
                     <Eye className="h-3.5 w-3.5 text-neutral-400" />
-                    {(seek.viewsCount ?? 0).toLocaleString()}
+                    {(seek.viewsCount ?? 0).toLocaleString("en-IN")}
                   </span>
                   <span className="flex items-center gap-1 font-bold text-red-600" title={t("seller.seeks.savedByBuyers2")}>
                     <Bookmark className="h-3.5 w-3.5" />
@@ -194,7 +194,7 @@ export function SeeksTab({ seeks, onOpenAddSeek, onEditSeek, onSetListed, onDele
                 </button>
                 <button
                   type="button"
-                  onClick={() => onDeleteSeek(seek.id)}
+                  onClick={() => window.confirm(t("seller.seeks.confirmDelete")) && onDeleteSeek(seek.id)}
                   aria-label={t("seller.seeks.deleteVideo")}
                   className="rounded-lg p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition"
                   title={t("seller.seeks.deleteVideo2")}

@@ -164,7 +164,7 @@ export function ProfileHero({
           </div>
           <div className="glass-liquid-item px-3 py-2">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">{t("profile.hero.escrow")}</p>
-            <p className="mt-0.5 text-sm font-extrabold text-emerald-600">{t("profile.hero.n100Active")}</p>
+            <p className="mt-0.5 text-sm font-extrabold text-ink-faint">{t("profile.hero.n100Active")}</p>
           </div>
         </div>
       </div>

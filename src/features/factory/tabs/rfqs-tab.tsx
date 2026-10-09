@@ -172,7 +172,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
                 </div>
                 {rfq.targetBudgetInr && (
                   <div>
-                    <span>{t("seller.rfqs.targetBudget")} <strong>₹{(rfq.targetBudgetInr ?? 0).toLocaleString()}</strong></span>
+                    <span>{t("seller.rfqs.targetBudget")} <strong>₹{(rfq.targetBudgetInr ?? 0).toLocaleString("en-IN")}</strong></span>
                   </div>
                 )}
               </div>
