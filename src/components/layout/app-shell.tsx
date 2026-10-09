@@ -69,7 +69,7 @@ export function AppShell({
           </div>
         ) : null}
       </div>
-      <MobileNav messageCount={messageCount} notificationCount={notificationCount} />
+      <MobileNav messageCount={messageCount} notificationCount={notificationCount} isManufacturer={user?.role === "Supplier"} />
       <TimedAuthPrompt user={user} />
       <BackToTop />
     </div>

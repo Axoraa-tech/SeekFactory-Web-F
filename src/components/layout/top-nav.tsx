@@ -72,7 +72,7 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
         x_right = actionsEl ? actionsEl.getBoundingClientRect().right - headerRect.left : cRect.right - headerRect.left;
       }
 
-      const H_tot = hasCategories ? Math.max(headerRect.height, H1 + 54) : H1;
+      const H_tot = hasCategories ? Math.max(headerRect.height, H1 + (W < 640 ? 46 : 54)) : H1;
 
       setLayout({
         viewportWidth: W,
@@ -232,7 +232,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
         {/* Tier 1: Logo, Search, Actions */}
         <div
           data-header-content
-          className="mx-auto flex h-[66px] sm:h-[70px] max-w-[1440px] items-center gap-2 sm:gap-4 lg:gap-5 px-3 sm:px-6"
+          className="mx-auto flex h-14 sm:h-[70px] max-w-[1440px] items-center gap-2 sm:gap-4 lg:gap-5 px-3 sm:px-6"
         >
           {/* Brand Logo */}
           <Link
@@ -243,7 +243,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
           >
             <BrandLogo
               priority
-              className="h-9 sm:h-12 md:h-14 w-auto max-w-[140px] sm:max-w-[220px] md:max-w-[280px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
+              className="h-8 sm:h-12 md:h-14 w-auto max-w-[130px] sm:max-w-[220px] md:max-w-[280px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
             />
           </Link>
 

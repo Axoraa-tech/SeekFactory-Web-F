@@ -33,14 +33,6 @@ type Props = {
   onSubmit: (product: NewFactoryProduct) => Promise<void>;
 };
 
-const SAMPLE_IMAGES = [
-  "https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?auto=format&fit=crop&w=900&q=80",
-];
-
 const MAX_IMAGES = 8;
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 const MAX_PDF_BYTES = 20 * 1024 * 1024;
@@ -70,6 +62,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
 
   const initialCategory = categories.find((c) => c.id === product?.categoryId);
   const [name, setName] = useState(product?.name ?? "");
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const [rootCategoryId, setRootCategoryId] = useState(
     initialCategory ? initialCategory.parentId ?? initialCategory.id : roots[0]?.id ?? "",
   );
@@ -80,7 +73,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
   const [gallery, setGallery] = useState<GalleryItem[]>(() =>
     product
       ? product.imageUrls.map((url) => ({ key: nextKey(), url }))
-      : [{ key: nextKey(), url: SAMPLE_IMAGES[0] }],
+      : [],
   );
   const [datasheet, setDatasheet] = useState<Datasheet>(
     product?.datasheetUrl ? { url: product.datasheetUrl, name: product.datasheetName || "Datasheet.pdf" } : null,
@@ -125,15 +118,6 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
       ...prev,
       ...files.slice(0, room).map((file) => ({ key: nextKey(), url: URL.createObjectURL(file), file })),
     ]);
-  }
-
-  function addPreset(url: string) {
-    if (gallery.some((item) => item.url === url)) return;
-    if (gallery.length >= MAX_IMAGES) {
-      setError(t("seller.product.aProductCanHaveAt", { MAX_IMAGES }));
-      return;
-    }
-    setGallery((prev) => [...prev, { key: nextKey(), url }]);
   }
 
   function removeImage(key: string) {
@@ -181,7 +165,19 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || busy) return;
+    if (busy) return;
+    // Our own messages instead of the browser's "Please fill in this field", which points at a
+    // field that is often scrolled out of view on phones
+    if (!name.trim()) {
+      setError(t("seller.product.enterProductName"));
+      nameInputRef.current?.focus();
+      nameInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (!priceInr || !moq.trim()) {
+      setError(t("seller.product.enterPriceAndMoq"));
+      return;
+    }
     const categoryId = subCategoryId || rootCategoryId;
     if (!categoryId) {
       setError(t("seller.product.chooseACategoryForThis"));
@@ -261,13 +257,14 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="p-6 space-y-5">
           {/* Product Name */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
               {t("seller.product.productTitleModelName")} <span className="text-red-500">*</span>
             </label>
             <input
+              ref={nameInputRef}
               type="text"
               required
               value={name}
@@ -428,30 +425,6 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
             />
             <p className="text-[11px] text-ink-muted">{t("seller.product.pngJpgWebpUpTo")}</p>
 
-            <div className="pt-1">
-              <p className="text-[11px] font-semibold text-ink-muted mb-2">{t("seller.product.orAddACatalogPreset")}</p>
-              <div className="grid grid-cols-5 gap-2.5">
-                {SAMPLE_IMAGES.map((imgSrc) => {
-                  const added = gallery.some((item) => item.url === imgSrc);
-                  return (
-                    <button
-                      key={imgSrc}
-                      type="button"
-                      onClick={() => addPreset(imgSrc)}
-                      disabled={added}
-                      className={`relative aspect-4/3 rounded-lg overflow-hidden border-2 transition ${
-                        added
-                          ? "border-brand-blue opacity-50"
-                          : "border-line hover:border-neutral-400 opacity-70 hover:opacity-100"
-                      }`}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imgSrc} alt="" className="h-full w-full object-cover" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
           </div>
 
           {/* Datasheet PDF */}

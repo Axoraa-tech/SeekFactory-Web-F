@@ -28,7 +28,7 @@ export function FactoryHeader({
       <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between gap-3 sm:gap-4 lg:gap-5 px-4 sm:px-6">
         {/* Left: Brand Logo & Seller Hub Badge */}
         <div className="flex items-center gap-3">
-          <Link href="/factory" aria-label={t("layout.topNav.seekfactoryHome")} className="flex shrink-0 items-center py-1 group">
+          <Link href="/" aria-label={t("layout.topNav.seekfactoryHome")} className="flex shrink-0 items-center py-1 group">
             <BrandLogo
               priority
               className="h-11 sm:h-14 md:h-16 w-auto max-w-[200px] sm:max-w-[280px] md:max-w-[320px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"

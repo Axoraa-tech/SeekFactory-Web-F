@@ -218,6 +218,10 @@ export function VariantVerticalSplitStudio({ reel, manufacturer, productSlug }: 
             }}
             onWaiting={() => setIsBuffering(true)}
             onPlaying={() => setIsBuffering(false)}
+            // A video paused mid-buffer (e.g. another seek took over playback) never fires "playing"
+            onPause={() => setIsBuffering(false)}
+            onCanPlay={() => setIsBuffering(false)}
+            onError={() => setIsBuffering(false)}
             className="h-full w-full object-cover"
           />
         ) : (

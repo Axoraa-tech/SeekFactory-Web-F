@@ -40,6 +40,8 @@ type Props = {
   initialSubcategorySlug?: string;
   initialQuery?: string;
   showcase?: FeedShowcase;
+  /** Manufacturers' "Start a post" card, shown above the Seeks bar. */
+  composer?: React.ReactNode;
 };
 
 export function HomeSeeksInteractiveFeed({
@@ -53,6 +55,7 @@ export function HomeSeeksInteractiveFeed({
   initialSubcategorySlug = "",
   initialQuery = "",
   showcase = DEFAULT_SHOWCASE,
+  composer,
 }: Props) {
   const searchParams = useSearchParams();
   const { t, translateCategory } = useRegionalSettings();
@@ -306,8 +309,10 @@ export function HomeSeeksInteractiveFeed({
         </div>
       )}
 
+      {composer}
+
       {/* 3. Seeks Header with Controls */}
-      <div className="sticky top-[76px] z-30 -mx-1 px-3 py-2.5 bg-canvas/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs rounded-xl flex items-center justify-between gap-3">
+      <div className="md:sticky md:top-[76px] z-30 -mx-1 px-3 py-2.5 bg-canvas/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs rounded-xl flex items-center justify-between gap-3">
         {/* Left: Heading + For You / Following Tabs */}
         <div className="flex items-center gap-4 shrink-0">
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-1.5">

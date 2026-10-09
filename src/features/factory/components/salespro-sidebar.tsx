@@ -81,7 +81,7 @@ export function SalesproSidebar({
       >
         {/* Top Brand Logo */}
         <div className="h-20 flex items-center justify-between px-5 border-b border-[#E6E8EB]">
-          <Link href="/factory" className="flex items-center gap-2 group py-1">
+          <Link href="/" className="flex items-center gap-2 group py-1">
             <BrandLogo className="h-11 sm:h-12 w-auto max-w-[210px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]" />
           </Link>
           <button

@@ -6,6 +6,20 @@ import { AuthCard } from "@/features/auth/auth-card";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { useTranslations } from "next-intl";
 
+/** Guests watch seeks freely; the sign-in nudge comes late and, once dismissed, stays away for a day. */
+const PROMPT_DELAY_MS = 90_000;
+const DISMISSED_KEY = "sf_auth_prompt_dismissed_at";
+const DISMISS_FOR_MS = 24 * 60 * 60 * 1000;
+
+function dismissedRecently(): boolean {
+  try {
+    const at = Number(localStorage.getItem(DISMISSED_KEY));
+    return Number.isFinite(at) && at > 0 && Date.now() - at < DISMISS_FOR_MS;
+  } catch {
+    return false;
+  }
+}
+
 export function TimedAuthPrompt({ user }: { user: unknown }) {
   const t = useTranslations();
   const [showModal, setShowModal] = useState(false);
@@ -14,13 +28,11 @@ export function TimedAuthPrompt({ user }: { user: unknown }) {
   useEffect(() => {
     if (user) return;
 
-    const dismissed = sessionStorage.getItem("sf_auth_prompt_dismissed");
-    if (dismissed) return;
+    if (dismissedRecently()) return;
 
-    // Trigger sign in pop-up after ~10 seconds on the dashboard
     const timer = setTimeout(() => {
       setShowModal(true);
-    }, 10000);
+    }, PROMPT_DELAY_MS);
 
     return () => clearTimeout(timer);
   }, [user]);
@@ -68,7 +80,11 @@ export function TimedAuthPrompt({ user }: { user: unknown }) {
 
   function handleClose() {
     setShowModal(false);
-    sessionStorage.setItem("sf_auth_prompt_dismissed", "true");
+    try {
+      localStorage.setItem(DISMISSED_KEY, String(Date.now()));
+    } catch {
+      // Storage blocked: the prompt may come back next visit
+    }
   }
 
   return (
@@ -77,7 +93,7 @@ export function TimedAuthPrompt({ user }: { user: unknown }) {
       onClick={(e) => {
         if (e.target === overlayRef.current) handleClose();
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-4 transition-all duration-300 animate-in fade-in"
       role="dialog"
       aria-modal="true"
     >

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Eye } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { SupplierPlanSync } from "./supplier-plan-sync";
 
 /** Replaces the buyer TopNav when a manufacturer previews a public page from the Seller Hub. */
 export async function SellerPreviewBar() {
@@ -9,8 +10,9 @@ export async function SellerPreviewBar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/95 shadow-nav backdrop-blur-md">
+      <SupplierPlanSync />
       <div className="mx-auto flex h-14 sm:h-16 max-w-[1440px] items-center justify-between gap-3 px-4 sm:px-6">
-        <Link href="/factory" className="flex shrink-0 items-center" aria-label={t("seller.preview.backToSellerHub")}>
+        <Link href="/" className="flex shrink-0 items-center" aria-label={t("layout.topNav.seekfactoryHome")}>
           <BrandLogo className="h-8 sm:h-11 w-auto max-w-[130px] sm:max-w-[220px] object-contain object-left" />
         </Link>
 

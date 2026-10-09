@@ -13,6 +13,7 @@ import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { useTranslations } from "next-intl";
+import { createWheelStepper } from "@/hooks/wheel-stepper";
 
 type Props = {
   items: FeedItem[];
@@ -109,49 +110,25 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
     const root = scrollerRef.current;
     if (!root) return;
 
-    let isLocked = false;
-    let unlockTimer: NodeJS.Timeout | null = null;
-    let accumulatedDelta = 0;
+    const stepper = createWheelStepper((direction) => {
+      setActive((curr) => {
+        const next = Math.max(0, Math.min(items.length - 1, curr + direction));
+        const el = root.querySelector<HTMLElement>(`[data-index="${next}"]`);
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return next;
+      });
+    });
 
     const onWheel = (e: WheelEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest("[data-prevent-seek-wheel]")) return;
-
       e.preventDefault();
-
-      if (isLocked) {
-        if (unlockTimer) clearTimeout(unlockTimer);
-        unlockTimer = setTimeout(() => {
-          isLocked = false;
-          accumulatedDelta = 0;
-        }, 200);
-        return;
-      }
-
-      accumulatedDelta += e.deltaY;
-      if (Math.abs(accumulatedDelta) >= 12) {
-        const direction = accumulatedDelta > 0 ? 1 : -1;
-        accumulatedDelta = 0;
-        isLocked = true;
-
-        setActive((curr) => {
-          const next = Math.max(0, Math.min(items.length - 1, curr + direction));
-          const el = root.querySelector<HTMLElement>(`[data-index="${next}"]`);
-          el?.scrollIntoView({ behavior: "smooth", block: "start" });
-          return next;
-        });
-
-        if (unlockTimer) clearTimeout(unlockTimer);
-        unlockTimer = setTimeout(() => {
-          isLocked = false;
-          accumulatedDelta = 0;
-        }, 550);
-      }
+      stepper.handle(e.deltaY);
     };
 
     root.addEventListener("wheel", onWheel, { passive: false });
     return () => {
-      if (unlockTimer) clearTimeout(unlockTimer);
+      stepper.dispose();
       root.removeEventListener("wheel", onWheel);
     };
   }, [items.length]);
