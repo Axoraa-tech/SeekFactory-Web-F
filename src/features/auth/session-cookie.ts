@@ -79,18 +79,28 @@ export function displayRole(role: BuyerProfile["role"]) {
  */
 export function postAuthPath(signedInAs: BuyerProfile["role"], next?: string) {
   const portal: Portal = signedInAs === "Supplier" ? "seller" : "buyer";
-  if (next && next.startsWith("/") && !next.startsWith("//")) {
-    const target = new URL(next, "http://local");
+  // Browsers read "/\evil.com" or "/<tab>/evil.com" as protocol-relative: only accept a `next` that
+  // resolves to our own origin, and return the normalised path (never "//..."), not the raw input.
+  const target = next && next.startsWith("/") ? safeUrl(next) : null;
+  if (target && target.origin === "http://local" && !/^\/[/\\]/.test(target.pathname) && !/^\/[/\\]/.test(next!)) {
     if (portalForUrl(target.pathname, target.searchParams) === portal) {
       if (portal === "seller" && target.pathname === "/factory" && !target.searchParams.get("tab")) {
         target.searchParams.set("tab", "products");
         return `${target.pathname}?${target.searchParams.toString()}`;
       }
-      return next;
+      return `${target.pathname}${target.search}${target.hash}`;
     }
   }
   if (portal === "buyer") return "/";
   return "/factory?tab=products";
+}
+
+function safeUrl(path: string): URL | null {
+  try {
+    return new URL(path, "http://local");
+  } catch {
+    return null;
+  }
 }
 
 export function buildPayload(input: JoinInput): SessionPayload {

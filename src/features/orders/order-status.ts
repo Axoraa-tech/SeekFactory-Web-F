@@ -60,12 +60,12 @@ export const PAYMENT_NOTE =
 
 export function formatMoney(amount: number, currency: string) {
   try {
-    return new Intl.NumberFormat(currency === "INR" ? "en-IN" : undefined, {
+    return new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
       style: "currency",
       currency,
       maximumFractionDigits: 2,
     }).format(amount);
   } catch {
-    return `${currency} ${amount.toLocaleString()}`;
+    return `${currency} ${amount.toLocaleString("en-US")}`;
   }
 }

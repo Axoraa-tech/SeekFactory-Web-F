@@ -8,8 +8,8 @@ import { getApi } from "@/shared/api";
  * menu, left menu, mobile tab bar), so reading a chat or a notification clears them all at once.
  *
  * The page's server-rendered counts are used until the first refresh; after that the store keeps
- * them current: every 30s, when the tab regains focus, and right after anything is marked read.
- * The 30s refresh doubles as the presence heartbeat that keeps the user "online" in chats.
+ * them current: every 30s while the tab is visible, when it regains focus, and right after anything
+ * is marked read. The 30s refresh doubles as the presence heartbeat that keeps the user "online".
  */
 export type UnreadCounts = { messages: number; notifications: number };
 
@@ -72,8 +72,10 @@ export function useUnreadCountsRefresh(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     void refreshUnreadCounts();
-    // Also while the tab is in the background: an open site still counts as online
-    const timer = window.setInterval(() => void refreshUnreadCounts(), REFRESH_MS);
+    // Paused while the tab is hidden (no point polling a background tab); refreshed on return
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refreshUnreadCounts();
+    }, REFRESH_MS);
     const onVisible = () => {
       if (document.visibilityState === "visible") void refreshUnreadCounts();
     };

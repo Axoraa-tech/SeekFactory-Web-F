@@ -53,6 +53,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (status === "saving" || uploading) return;
     setStatus("saving");
     setError(null);
 

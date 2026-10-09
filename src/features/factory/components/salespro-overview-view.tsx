@@ -94,7 +94,7 @@ export function SalesproOverviewView({
         <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">{t("seller.overview.videoSeekImpressions")}</p>
           <p className="text-xl sm:text-2xl font-extrabold tabular-nums text-[#1A73E8]">
-            {(stats?.videoSeekPlays ?? 0).toLocaleString()}
+            {(stats?.videoSeekPlays ?? 0).toLocaleString("en-IN")}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
             <span>{t("seller.lastDays", { count: periodDays })}</span>
@@ -126,7 +126,7 @@ export function SalesproOverviewView({
         <div className="sf-lift rounded-2xl border border-[#E6E8EB] bg-white p-4 sm:p-5 shadow-xs space-y-2">
           <p className="text-xs font-semibold text-[#5F6368]">{t("seller.overview.catalogProductViews")}</p>
           <p className="text-xl sm:text-2xl font-extrabold tabular-nums text-[#1C1C1C]">
-            {(stats?.totalProductViews ?? 0).toLocaleString()}
+            {(stats?.totalProductViews ?? 0).toLocaleString("en-IN")}
           </p>
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#5F6368]">
             <span>{t("seller.lastDays", { count: periodDays })}</span>

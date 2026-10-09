@@ -241,7 +241,7 @@ export function Pagination({ page, size, total, onPage }: { page: number; size: 
   const to = Math.min(total, (page + 1) * size);
   return (
     <div className="mt-4 flex items-center justify-between text-sm text-slate-500">
-      <span>{from}–{to} of {total.toLocaleString()}</span>
+      <span>{from}–{to} of {total.toLocaleString("en-IN")}</span>
       <div className="flex items-center gap-1">
         <button disabled={page === 0} onClick={() => onPage(page - 1)} className="rounded-lg border border-slate-200 bg-white p-1.5 disabled:opacity-40" aria-label="Previous page">
           <ChevronLeft className="w-4 h-4" />
@@ -322,7 +322,7 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
 
 export function formatDate(iso?: string) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 export function initials(name?: string) {

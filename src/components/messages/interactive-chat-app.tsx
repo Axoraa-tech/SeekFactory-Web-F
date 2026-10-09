@@ -241,11 +241,11 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
           setMobileShowChat(true);
           void sendBuyRequest(newConv.id);
         })
-        .catch(() => {
-          // Handled
+        .catch((err) => {
+          setSendError(err instanceof Error ? err.message : tr("seller.couldNotOpenChat"));
         });
     }
-  }, [withSlug, allManufacturers, threads, searchParams]);
+  }, [withSlug, allManufacturers, threads, searchParams, tr]);
 
   const handleSelectThread = (id: string) => {
     // Marking read happens in the effect that loads the selected chat

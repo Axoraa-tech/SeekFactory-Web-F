@@ -45,8 +45,8 @@
       "seekfactoryGuarantee": "SeekFactory Guarantee",
       "onSiteAuditedFacility": "On-Site Audited Facility",
       "businessLicensePlantSizeAnd": "Business license, plant size, and machinery verified by third-party inspection.",
-      "tradeAssuranceEscrow": "Trade Assurance & Escrow",
-      "paymentsProtectedUntilProductsAre": "Payments protected until products are produced, inspected, and shipped.",
+      "tradeAssuranceEscrow": "Trade Assurance & Escrow (coming soon)",
+      "paymentsProtectedUntilProductsAre": "Escrow-backed payment protection is coming soon. Payments are not currently held in escrow.",
       "staffCount": "{count} staff"
     },
     "trending": {
@@ -356,8 +356,8 @@
       "needCustomSpecsOrCif": "Need custom specs or CIF shipping rates?",
       "requestCustomRfq": "Request Custom RFQ →",
       "buyerProtectionGuarantees": "Buyer Protection & Guarantees",
-      "tradeAssuranceCovered": "Trade Assurance Covered",
-      "yourPaymentIsHeldIn": "Your payment is held in escrow until goods are delivered and confirmed to specification.",
+      "tradeAssuranceCovered": "Trade Assurance (coming soon)",
+      "yourPaymentIsHeldIn": "Escrow payment protection is coming soon. Payments are not currently held in escrow.",
       "onTimeShipmentGuarantee": "On-Time Shipment Guarantee",
       "compensationPaidIfShippingDispatch": "Compensation paid if shipping dispatch exceeds agreed contractual lead times.",
       "preShipmentQualityInspection": "Pre-Shipment Quality Inspection",
@@ -506,9 +506,9 @@
       "postANewRfq": "Post a new RFQ",
       "exploreVerifiedPlants": "Explore verified plants",
       "upgradeMembership": "Upgrade membership",
-      "tradeAssurance": "Trade Assurance",
-      "escrowBackedPaymentsMilestoneReleases": "Escrow-backed payments, milestone releases, and dispute protection on every SeekFactory RFQ with verified OEM partners.",
-      "escrowProtectionIsActiveOn": "Escrow protection is active on your account"
+      "tradeAssurance": "Trade Assurance (coming soon)",
+      "escrowBackedPaymentsMilestoneReleases": "Escrow-backed payments, milestone releases, and dispute protection are coming soon.",
+      "escrowProtectionIsActiveOn": "Escrow protection is not yet available"
     },
     "details": {
       "corporateContactInformation": "Corporate & Contact Information",
@@ -535,7 +535,7 @@
       "count": "{count} following"
     },
     "hero": {
-      "tradeAssuranceBuyer": "Trade Assurance Buyer",
+      "tradeAssuranceBuyer": "Trade Assurance (coming soon)",
       "memberSince": "Member since",
       "membership": "Membership",
       "activeRfqs": "Active RFQs",
@@ -545,8 +545,8 @@
       "items": "Items",
       "followingPlants": "Following Plants",
       "factories": "Factories",
-      "escrow": "Escrow",
-      "n100Active": "100% Active",
+      "escrow": "Escrow (soon)",
+      "n100Active": "Coming soon",
       "tier": {
         "enterprise": "Enterprise VIP",
         "pro": "Pro Buyer Member",
@@ -607,7 +607,7 @@
     "active": "Active",
     "browse500VerifiedPlants": "Browse 500+ Verified Plants",
     "upTo5ActiveRfqs": "Up to 5 Active RFQs / Month",
-    "standardTradeAssuranceEscrow": "Standard Trade Assurance Escrow",
+    "standardTradeAssuranceEscrow": "Trade Assurance Escrow (coming soon)",
     "currentPlan": "Current Plan",
     "switchToFree": "Switch to Free",
     "mostPopular": "Most Popular",
@@ -622,7 +622,7 @@
     "enterpriseVip": "Enterprise VIP",
     "allProBuyerFeaturesIncluded": "All Pro Buyer Features Included",
     "thirdPartyOnSitePlant": "Third-Party On-Site Plant Inspection",
-    "customEscrowMilestoneContracts": "Custom Escrow Milestone Contracts",
+    "customEscrowMilestoneContracts": "Custom Escrow Milestone Contracts (coming soon)",
     "n247PrioritySourcingHotline": "24/7 Priority Sourcing Hotline",
     "upgradeToEnterprise": "Upgrade to Enterprise ({planPriceLabel})"
   },
@@ -1266,7 +1266,8 @@
       "noProductsMatchYourSearch": "No products match your search",
       "tryAdjustingYourCategoryFilter": "Try adjusting your category filter or post a new product listing.",
       "statusAll": "Status: All ({count})",
-      "photoCount": "{count} photos"
+      "photoCount": "{count} photos",
+      "confirmDelete": "Delete this product? This cannot be undone."
     },
     "profile": {
       "couldNotUpdateCertificates": "Could not update certificates.",
@@ -1328,7 +1329,8 @@
       "showOnTheBuyerFeed": "Show on the buyer feed again",
       "hideFromTheBuyerFeed": "Hide from the buyer feed",
       "deleteVideo": "Delete video",
-      "deleteVideo2": "Delete Video"
+      "deleteVideo2": "Delete Video",
+      "confirmDelete": "Delete this video seek? This cannot be undone."
     },
     "verify": {
       "pleaseSelectYourCountry": "Please select your country.",

@@ -16,7 +16,7 @@ const S2 = "var(--sky-s2)";
 const INK_MUTED = "var(--sky-ink-muted)";
 const GRID = "var(--sky-grid)";
 
-const fmt = (n: number) => n.toLocaleString();
+const fmt = (n: number) => n.toLocaleString("en-IN");
 
 function useWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);

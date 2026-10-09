@@ -466,7 +466,8 @@ export function createHttpApi(baseUrl: string): ApiClient {
     const isGet = !options.method || options.method.toUpperCase() === "GET";
     // A call for an explicit section (sign-in) must not reuse another section's in-flight request
     const explicitPortal = (options.headers as Record<string, string> | undefined)?.[PORTAL_HEADER];
-    const cacheKey = isGet && !explicitPortal ? endpoint : null;
+    // Browser only: on the server a shared client would hand one user's in-flight response to another
+    const cacheKey = isGet && !explicitPortal && typeof window !== "undefined" ? endpoint : null;
 
     if (cacheKey && pendingRequests.has(cacheKey)) {
       return pendingRequests.get(cacheKey) as Promise<T>;
@@ -512,7 +513,13 @@ export function createHttpApi(baseUrl: string): ApiClient {
 
       const text = await res.text();
       if (!text) return undefined as T;
-      const json = JSON.parse(text) as BackendResponse<T>;
+      let json: BackendResponse<T>;
+      try {
+        json = JSON.parse(text) as BackendResponse<T>;
+      } catch {
+        // e.g. an HTML page from a proxy/CDN in front of the backend
+        throw new ApiError(`Unreadable response on ${endpoint}`, res.status);
+      }
       return json.data;
     })();
 

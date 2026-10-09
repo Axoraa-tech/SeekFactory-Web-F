@@ -19,7 +19,7 @@ const STATUS_META: Record<PaymentStatus, { label: string; tone: "amber" | "green
 };
 
 const money = (currency: string, amount: number) =>
-  `${currency === "CNY" ? "¥" : currency === "INR" ? "₹" : `${currency} `}${Number(amount).toLocaleString()}`;
+  `${currency === "CNY" ? "¥" : currency === "INR" ? "₹" : `${currency} `}${Number(amount).toLocaleString("en-IN")}`;
 
 export default function AdminPaymentsPage() {
   const toast = useToast();

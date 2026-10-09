@@ -35,7 +35,7 @@ function niceMax(v: number) {
   return step * pow;
 }
 
-const fmt = (n: number) => n.toLocaleString();
+const fmt = (n: number) => n.toLocaleString("en-IN");
 
 export interface LineSeries {
   key: string;

@@ -174,7 +174,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
       nameInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    if (!priceInr || !moq.trim()) {
+    if (!(priceInr > 0) || !moq.trim()) {
       setError(t("seller.product.enterPriceAndMoq"));
       return;
     }
@@ -209,7 +209,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
         imageUrl: imageUrls[0],
         imageUrls,
         categoryId,
-        priceInr: Number(priceInr) || 100000,
+        priceInr,
         unit,
         moq,
         specs: specsRecord,

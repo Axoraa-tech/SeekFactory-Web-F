@@ -45,8 +45,8 @@
       "seekfactoryGuarantee": "SeekFactory 保障",
       "onSiteAuditedFacility": "实地审核工厂",
       "businessLicensePlantSizeAnd": "营业执照、厂房面积和设备均经第三方检验核实。",
-      "tradeAssuranceEscrow": "交易保障与资金托管",
-      "paymentsProtectedUntilProductsAre": "货款受保护，直至产品完成生产、检验并发货。",
+      "tradeAssuranceEscrow": "贸易保障与托管（即将推出）",
+      "paymentsProtectedUntilProductsAre": "托管付款保障即将推出，目前付款不会被托管。",
       "staffCount": "{count} 名员工"
     },
     "trending": {
@@ -356,8 +356,8 @@
       "needCustomSpecsOrCif": "需要定制规格或 CIF 运费报价？",
       "requestCustomRfq": "发起定制询价 →",
       "buyerProtectionGuarantees": "采购商保障",
-      "tradeAssuranceCovered": "受交易保障保护",
-      "yourPaymentIsHeldIn": "货款由第三方托管，直至货物送达并确认符合规格。",
+      "tradeAssuranceCovered": "贸易保障（即将推出）",
+      "yourPaymentIsHeldIn": "托管付款保障即将推出，目前付款不会被托管。",
       "onTimeShipmentGuarantee": "准时发货保障",
       "compensationPaidIfShippingDispatch": "若发货超过合同约定的交货期，将获得赔偿。",
       "preShipmentQualityInspection": "发货前质检",
@@ -506,9 +506,9 @@
       "postANewRfq": "发布新询价",
       "exploreVerifiedPlants": "浏览认证工厂",
       "upgradeMembership": "升级会员",
-      "tradeAssurance": "交易保障",
-      "escrowBackedPaymentsMilestoneReleases": "与认证 OEM 合作伙伴的每一笔 SeekFactory 询价，都享有资金托管、分阶段放款和争议保护。",
-      "escrowProtectionIsActiveOn": "你的账户已开启资金托管保护"
+      "tradeAssurance": "贸易保障（即将推出）",
+      "escrowBackedPaymentsMilestoneReleases": "托管付款、分阶段放款及争议保障即将推出。",
+      "escrowProtectionIsActiveOn": "托管保障尚未开通"
     },
     "details": {
       "corporateContactInformation": "企业与联系信息",
@@ -535,7 +535,7 @@
       "count": "已关注 {count} 家"
     },
     "hero": {
-      "tradeAssuranceBuyer": "交易保障采购商",
+      "tradeAssuranceBuyer": "贸易保障（即将推出）",
       "memberSince": "注册于",
       "membership": "会员",
       "activeRfqs": "进行中的询价",
@@ -545,8 +545,8 @@
       "items": "件",
       "followingPlants": "关注的工厂",
       "factories": "家工厂",
-      "escrow": "资金托管",
-      "n100Active": "100% 生效",
+      "escrow": "托管（即将推出）",
+      "n100Active": "即将推出",
       "tier": {
         "enterprise": "企业 VIP",
         "pro": "专业版采购会员",
@@ -607,7 +607,7 @@
     "active": "当前方案",
     "browse500VerifiedPlants": "浏览 500+ 家认证工厂",
     "upTo5ActiveRfqs": "每月最多 5 个进行中的询价",
-    "standardTradeAssuranceEscrow": "标准交易保障托管",
+    "standardTradeAssuranceEscrow": "贸易保障托管（即将推出）",
     "currentPlan": "当前方案",
     "switchToFree": "切换到免费版",
     "mostPopular": "最受欢迎",
@@ -622,7 +622,7 @@
     "enterpriseVip": "企业 VIP",
     "allProBuyerFeaturesIncluded": "包含全部专业版采购商权益",
     "thirdPartyOnSitePlant": "第三方工厂实地验厂",
-    "customEscrowMilestoneContracts": "定制分阶段托管合同",
+    "customEscrowMilestoneContracts": "定制托管分阶段合同（即将推出）",
     "n247PrioritySourcingHotline": "7×24 小时优先采购热线",
     "upgradeToEnterprise": "升级到企业版（{planPriceLabel}）"
   },
@@ -1266,7 +1266,8 @@
       "noProductsMatchYourSearch": "没有符合搜索条件的产品",
       "tryAdjustingYourCategoryFilter": "试试调整类目筛选，或发布新的产品。",
       "statusAll": "状态：全部（{count}）",
-      "photoCount": "{count} 张图片"
+      "photoCount": "{count} 张图片",
+      "confirmDelete": "确定删除此产品？此操作无法撤销。"
     },
     "profile": {
       "couldNotUpdateCertificates": "证书更新失败。",
@@ -1328,7 +1329,8 @@
       "showOnTheBuyerFeed": "重新在采购商视频流中展示",
       "hideFromTheBuyerFeed": "从采购商视频流中隐藏",
       "deleteVideo": "删除视频",
-      "deleteVideo2": "删除视频"
+      "deleteVideo2": "删除视频",
+      "confirmDelete": "确定删除此视频？此操作无法撤销。"
     },
     "verify": {
       "pleaseSelectYourCountry": "请选择国家。",

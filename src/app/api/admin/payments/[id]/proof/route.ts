@@ -22,11 +22,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!backendRes.ok) {
       return NextResponse.json({ success: false, message: "Proof not available" }, { status: backendRes.status });
     }
+    const contentType = backendRes.headers.get("content-type") ?? "application/octet-stream";
+    // Only images and PDFs render inline; anything else (an uploaded HTML/SVG "proof") would run
+    // script on our origin with the admin session, so it downloads instead
+    const inline = /^(image\/(png|jpeg|gif|webp)|application\/pdf)/i.test(contentType);
     return new NextResponse(await backendRes.arrayBuffer(), {
       status: 200,
       headers: {
-        "Content-Type": backendRes.headers.get("content-type") ?? "application/octet-stream",
-        "Content-Disposition": "inline",
+        "Content-Type": contentType,
+        "Content-Disposition": inline ? "inline" : "attachment",
         "Cache-Control": "private, no-store",
         "X-Content-Type-Options": "nosniff",
       },
