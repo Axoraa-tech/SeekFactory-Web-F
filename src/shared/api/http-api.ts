@@ -535,6 +535,26 @@ export function createHttpApi(baseUrl: string): ApiClient {
     return requestPromise;
   }
 
+  /**
+   * Media uploads skip /api/proxy: Vercel functions reject request bodies over 4.5 MB (HTTP 413).
+   * The browser gets a 5-minute upload-only pass through the proxy, then sends the file straight
+   * to the API with it. The normal session token never reaches page scripts.
+   */
+  async function uploadDirect<T>(endpoint: string, body: FormData): Promise<T> {
+    if (typeof window === "undefined") return fetchJson<T>(endpoint, { method: "POST", body });
+    const pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", { method: "POST" });
+    const res = await fetch(`${cleanBaseUrl}${endpoint}`, {
+      method: "POST",
+      body,
+      headers: { Authorization: `Bearer ${pass.token}` },
+    });
+    const json = (await res.json().catch(() => null)) as { data?: T; message?: string; error?: string } | null;
+    if (!res.ok || !json) {
+      throw new ApiError(json?.message || json?.error || `HTTP ${res.status} on ${endpoint}`, res.status);
+    }
+    return json.data as T;
+  }
+
   // ── 1. SESSION REPOSITORY ──────────────────────────────────────
   /** Display-only session cookie; the credential itself lives in the HttpOnly sf-access-token cookie. */
   function rememberSession(res: BackendAuthResponse, portal: Portal) {
@@ -1170,10 +1190,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       const body = new FormData();
       body.append("file", file);
       body.append("kind", kind);
-      const res = await fetchJson<{ url?: string; contentType?: string; size?: number }>("/api/v1/media", {
-        method: "POST",
-        body,
-      });
+      const res = await uploadDirect<{ url?: string; contentType?: string; size?: number }>("/api/v1/media", body);
       if (!res?.url) throw new Error("Upload succeeded but no file URL was returned");
       return {
         url: resolveMediaUrl(res.url) || res.url,
@@ -1245,9 +1262,9 @@ export function createHttpApi(baseUrl: string): ApiClient {
       const body = new FormData();
       body.append("file", file);
       body.append("kind", kind);
-      const res = await fetchJson<{ url?: string; contentType?: string; content_type?: string; size?: number }>(
+      const res = await uploadDirect<{ url?: string; contentType?: string; content_type?: string; size?: number }>(
         "/api/v1/factory/media",
-        { method: "POST", body },
+        body,
       );
       if (!res?.url) throw new Error("Upload succeeded but no media URL was returned");
       return {
