@@ -3,6 +3,7 @@ import { loadFeed, parseFeedTab } from "@/features/feed/load-feed";
 import { loadShowcase } from "@/features/feed/load-showcase";
 import { getApi } from "@/shared/api";
 import { buildCategoryTree } from "@/features/categories/category-tree";
+import { FeedPostComposer } from "@/features/factory/post-composer/feed-post-composer";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,11 @@ export default async function HomePage({ searchParams }: Props) {
   const sub = params.sub || "";
   const q = params.q || "";
 
-  const [allCategories, showcase] = await Promise.all([getApi().categories.list(), loadShowcase(params.layout)]);
+  const [allCategories, showcase, user] = await Promise.all([
+    getApi().categories.list(),
+    loadShowcase(params.layout),
+    getApi().session.getCurrentUser(),
+  ]);
   const { roots, childrenByRoot } = buildCategoryTree(allCategories);
   const subcategoryId = sub ? allCategories.find((c) => c.slug === sub)?.id ?? "" : "";
   const items = await loadFeed(tab, subcategoryId, q);
@@ -42,6 +47,11 @@ export default async function HomePage({ searchParams }: Props) {
       initialSubcategorySlug={sub}
       initialQuery={q}
       showcase={showcase}
+      composer={
+        user?.role === "Supplier" ? (
+          <FeedPostComposer key="post-composer" author={{ name: user.name, avatarUrl: user.avatarUrl }} categories={allCategories} />
+        ) : undefined
+      }
     />
   );
 }

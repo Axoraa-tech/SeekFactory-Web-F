@@ -220,7 +220,9 @@
     },
     "mobileNav": {
       "chats": "聊天",
-      "alerts": "提醒"
+      "alerts": "提醒",
+      "post": "发布",
+      "whatToPost": "您想发布什么？"
     },
     "messages": {
       "messagesChats": "消息与聊天",
@@ -969,7 +971,9 @@
       "highlightMachineryFeaturesPrecisionTolerances": "突出机械特点、精度公差、质保和 OEM 定制选项...",
       "yourListingWillBeIndexed": "你的商品将收录到工厂目录中，并直接展示给工业采购商。",
       "uploadingFiles": "正在上传文件…",
-      "publishProduct": "发布产品"
+      "publishProduct": "发布产品",
+      "enterProductName": "请在表单顶部填写产品标题/型号。",
+      "enterPriceAndMoq": "请填写价格和起订量。"
     },
     "seek": {
       "status": {
@@ -1376,6 +1380,11 @@
     "preview": {
       "backToSellerHub": "返回卖家中心",
       "buyerView": "您正在以买家视角查看您的商品"
+    },
+    "composer": {
+      "startAPost": "开始发布",
+      "video": "视频",
+      "photo": "产品图片"
     }
   },
   "hallOfFame": {
@@ -1687,6 +1696,30 @@
       "previousPhoto": "上一张图片",
       "nextPhoto": "下一张图片",
       "showPhoto": "查看第 {index} 张，共 {count} 张"
+    }
+  },
+  "composer": {
+    "category": "类别",
+    "chooseCategory": "选择类别",
+    "titlePlaceholder": "标题，例如：五轴CNC铣削铝合金外壳",
+    "captionPlaceholder": "分享您工厂车间的最新动态…",
+    "addVideo": "添加视频",
+    "videoHint": "MP4、WebM 或 MOV · 最大 100 MB · 短视频效果最佳",
+    "removeVideo": "移除视频",
+    "addCover": "添加封面图",
+    "changeCover": "更换封面",
+    "coverAuto": "可选，否则将使用视频中的一帧",
+    "linkProduct": "关联产品",
+    "unlink": "取消关联 {name}",
+    "searchProducts": "搜索您的产品",
+    "noProducts": "没有匹配的产品",
+    "createProduct": "创建新产品",
+    "post": "发布",
+    "errors": {
+      "addVideo": "请添加视频。",
+      "addTitle": "请添加标题。",
+      "pickCategory": "请选择类别，以便合适的买家看到。",
+      "addCover": "请添加封面图，或关联一个带图片的产品。"
     }
   }
 }

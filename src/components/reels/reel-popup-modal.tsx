@@ -34,6 +34,7 @@ import type { FeedItem } from "@/shared/api/contracts";
 import { useReelImpression } from "@/hooks/use-reel-impression";
 import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
 import { useTranslations } from "next-intl";
+import { createWheelStepper } from "@/hooks/wheel-stepper";
 
 interface Props {
   items: FeedItem[];
@@ -124,46 +125,18 @@ export function ReelPopupModal({ items }: Props) {
   // Controlled single-seek mouse wheel and trackpad navigation inside the popup modal
   useEffect(() => {
     if (!isOpen) return;
-    let isLocked = false;
-    let unlockTimer: NodeJS.Timeout | null = null;
-    let accumulatedDelta = 0;
+    const stepper = createWheelStepper((direction) => (direction > 0 ? goNext() : goPrev()));
 
     const onWheel = (e: WheelEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest("[data-prevent-seek-wheel]") || target.closest(".overflow-y-auto")) return;
-
       e.preventDefault();
-
-      if (isLocked) {
-        if (unlockTimer) clearTimeout(unlockTimer);
-        unlockTimer = setTimeout(() => {
-          isLocked = false;
-          accumulatedDelta = 0;
-        }, 200);
-        return;
-      }
-
-      accumulatedDelta += e.deltaY;
-      if (Math.abs(accumulatedDelta) >= 12) {
-        if (accumulatedDelta > 0) {
-          goNext();
-        } else {
-          goPrev();
-        }
-        accumulatedDelta = 0;
-        isLocked = true;
-
-        if (unlockTimer) clearTimeout(unlockTimer);
-        unlockTimer = setTimeout(() => {
-          isLocked = false;
-          accumulatedDelta = 0;
-        }, 550);
-      }
+      stepper.handle(e.deltaY);
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
     return () => {
-      if (unlockTimer) clearTimeout(unlockTimer);
+      stepper.dispose();
       window.removeEventListener("wheel", onWheel);
     };
   }, [isOpen, goNext, goPrev]);

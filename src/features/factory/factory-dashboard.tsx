@@ -48,7 +48,7 @@ import { MessagesTab } from "./tabs/messages-tab";
 import { ProfileTab } from "./tabs/profile-tab";
 import { OrdersTab } from "./tabs/orders-tab";
 import { AddProductModal } from "./components/add-product-modal";
-import { AddSeekModal } from "./components/add-seek-modal";
+import { SeekComposerModal } from "./post-composer/seek-composer-modal";
 import { EditSeekModal } from "./components/edit-seek-modal";
 import { RfqQuoteModal } from "./components/rfq-quote-modal";
 import { FactoryPricingModal, type FactoryPlanTier } from "./components/factory-pricing-modal";
@@ -153,6 +153,19 @@ export function FactoryDashboard({
   // Modals state
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddSeekOpen, setIsAddSeekOpen] = useState(false);
+  // A product created from inside the seek composer is linked there automatically
+  const [composerProductId, setComposerProductId] = useState<string | null>(null);
+  // Deep link from the marketplace "Post" button: open the form once, then drop the param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const open = params.get("new");
+    if (open !== "seek" && open !== "product") return;
+    if (open === "seek") setIsAddSeekOpen(true);
+    else setIsAddProductOpen(true);
+    params.delete("new");
+    const query = params.toString();
+    window.history.replaceState(null, "", query ? `/factory?${query}` : "/factory");
+  }, []);
   const [editingProduct, setEditingProduct] = useState<SellerProduct | null>(null);
   const [editingSeek, setEditingSeek] = useState<SellerSeek | null>(null);
   const [quotingRfq, setQuotingRfq] = useState<SellerRfq | null>(null);
@@ -208,6 +221,7 @@ export function FactoryDashboard({
     const created = toSellerProduct(result.data, allCategories);
     setProducts((prev) => [created, ...prev.filter((p) => p.id !== created.id)]);
     setStats((prev) => ({ ...prev, totalProductsCount: prev.totalProductsCount + 1 }));
+    if (isAddSeekOpen) setComposerProductId(created.id);
   }
 
   async function handleUpdateProduct(id: string, input: NewFactoryProduct) {
@@ -735,12 +749,18 @@ export function FactoryDashboard({
       )}
 
       {isAddSeekOpen && (
-        <AddSeekModal
-          isOpen
-          onClose={() => setIsAddSeekOpen(false)}
+        <SeekComposerModal
+          author={{ name: profile.name, avatarUrl: profile.logoUrl }}
           products={products}
           categories={allCategories}
-          onAddSeek={handleAddSeek}
+          onClose={() => {
+            setIsAddSeekOpen(false);
+            setComposerProductId(null);
+          }}
+          onPublish={handleAddSeek}
+          onCreateProduct={() => setIsAddProductOpen(true)}
+          newlyCreatedProductId={composerProductId}
+          suspended={isAddProductOpen}
         />
       )}
 

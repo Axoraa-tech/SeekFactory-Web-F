@@ -47,7 +47,7 @@ export function FeedTabs({ tab, viewMode = "landscape" }: Props) {
       <div ref={sentinelRef} className="h-px w-full" aria-hidden />
       <div
         className={cn(
-          "sticky top-[76px] z-30 mb-4 flex flex-wrap items-center justify-between gap-3 px-3 py-2.5",
+          "md:sticky md:top-[76px] z-30 mb-4 flex flex-wrap items-center justify-between gap-3 px-3 py-2.5",
           "border bg-white/70 backdrop-blur-xl transition-[border-radius,box-shadow,margin] duration-300 ease-out",
           stuck
             ? "mx-0 rounded-b-2xl rounded-t-none border-white/70 shadow-glass"

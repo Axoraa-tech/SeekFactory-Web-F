@@ -7,6 +7,7 @@ import { ReelPopupModal } from "@/components/reels/reel-popup-modal";
 import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
 import { useTranslations } from "next-intl";
+import { createWheelStepper } from "@/hooks/wheel-stepper";
 
 type Props = {
   items: FeedItem[];
@@ -58,68 +59,35 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
   useEffect(() => {
     const attachWheelLock = (container: HTMLDivElement | null) => {
       if (!container) return () => {};
-      let isLocked = false;
-      let unlockTimer: NodeJS.Timeout | null = null;
-      let accumulatedDelta = 0;
+      const stepper = createWheelStepper((direction) => {
+        const cards = Array.from(container.querySelectorAll<HTMLElement>("[data-feed-reel-id]"));
+        if (cards.length === 0) return;
+        const containerTop = container.getBoundingClientRect().top;
+        let closestIdx = 0;
+        let minDistance = Infinity;
+        cards.forEach((card, idx) => {
+          const dist = Math.abs(card.getBoundingClientRect().top - containerTop);
+          if (dist < minDistance) {
+            minDistance = dist;
+            closestIdx = idx;
+          }
+        });
+        const nextIdx = Math.max(0, Math.min(cards.length - 1, closestIdx + direction));
+        const next = cards[nextIdx];
+        // Scroll only this track; scrollIntoView would also scroll the page around it
+        if (next) container.scrollTo({ top: container.scrollTop + next.getBoundingClientRect().top - containerTop, behavior: "smooth" });
+      });
 
       const onWheel = (e: WheelEvent) => {
         const target = e.target as HTMLElement;
         if (target.closest("[data-prevent-seek-wheel]")) return;
-
-        // Always prevent native browser momentum fling
         e.preventDefault();
-
-        // If currently locked in an active seek transition, absorb and debounce all trailing inertia ticks
-        if (isLocked) {
-          if (unlockTimer) clearTimeout(unlockTimer);
-          unlockTimer = setTimeout(() => {
-            isLocked = false;
-            accumulatedDelta = 0;
-          }, 200);
-          return;
-        }
-
-        accumulatedDelta += e.deltaY;
-
-        // Trigger on meaningful intentional gesture
-        if (Math.abs(accumulatedDelta) >= 12) {
-          const direction = accumulatedDelta > 0 ? 1 : -1;
-          accumulatedDelta = 0;
-          isLocked = true;
-
-          const cards = Array.from(
-            container.querySelectorAll<HTMLElement>("[data-feed-reel-id]")
-          );
-          if (cards.length > 0) {
-            const containerTop = container.getBoundingClientRect().top;
-            let closestIdx = 0;
-            let minDistance = Infinity;
-
-            cards.forEach((card, idx) => {
-              const cardTop = card.getBoundingClientRect().top;
-              const dist = Math.abs(cardTop - containerTop);
-              if (dist < minDistance) {
-                minDistance = dist;
-                closestIdx = idx;
-              }
-            });
-
-            const nextIdx = Math.max(0, Math.min(cards.length - 1, closestIdx + direction));
-            cards[nextIdx]?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-
-          if (unlockTimer) clearTimeout(unlockTimer);
-          // Lock for minimum animation duration (550ms) plus any trailing inertia
-          unlockTimer = setTimeout(() => {
-            isLocked = false;
-            accumulatedDelta = 0;
-          }, 550);
-        }
+        stepper.handle(e.deltaY);
       };
 
       container.addEventListener("wheel", onWheel, { passive: false });
       return () => {
-        if (unlockTimer) clearTimeout(unlockTimer);
+        stepper.dispose();
         container.removeEventListener("wheel", onWheel);
       };
     };
@@ -147,14 +115,14 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
       <ReelPopupModal items={items} />
 
       <div className="space-y-4">
-        {/* 2 Independent Vertical Scroll Columns */}
+        {/* 2 independent scroll columns on desktop; on phones the page itself scrolls (nested scroll boxes made swipes stall) */}
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 items-start">
           {/* COLUMN 1: LEFT TRACK */}
           <div className="space-y-2">
             <div
               ref={trackLeftRef}
               style={trackStyle}
-              className="h-[calc(100vh-180px)] min-h-[520px] md:h-[calc(100dvh-230px)] md:min-h-[320px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+              className="space-y-4 rounded-2xl md:h-[calc(100dvh-230px)] md:min-h-[320px] md:overflow-y-auto md:overscroll-contain md:snap-y md:snap-mandatory md:pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
             >
               {leftItems.map(({ item, originalIndex }) => (
                 <div
@@ -182,7 +150,7 @@ export function ReelsFeed({ items, viewMode = "landscape" }: Props) {
             <div
               ref={trackRightRef}
               style={trackStyle}
-              className="h-[calc(100vh-180px)] min-h-[520px] md:h-[calc(100dvh-230px)] md:min-h-[320px] overflow-y-auto snap-y snap-mandatory space-y-4 rounded-2xl pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+              className="space-y-4 rounded-2xl md:h-[calc(100dvh-230px)] md:min-h-[320px] md:overflow-y-auto md:overscroll-contain md:snap-y md:snap-mandatory md:pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
             >
               {finalRightItems.map(({ item, originalIndex }) => (
                 <div
