@@ -4,9 +4,7 @@ import { useState, useMemo, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  Search,
   X,
-  Check,
   SlidersHorizontal,
 } from "lucide-react";
 import { ReelsFeed } from "@/components/reels/reels-feed";
@@ -16,7 +14,6 @@ import { CompactListShowcase } from "@/components/reels/compact-list-showcase";
 import { GridTilesShowcase } from "@/components/reels/grid-tiles-showcase";
 import { SpotlightRailShowcase } from "@/components/reels/spotlight-rail-showcase";
 import { DEFAULT_SHOWCASE, type FeedShowcase } from "@/features/feed/load-showcase";
-import { ReelCard } from "@/components/reels/reel-card";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
@@ -145,30 +142,6 @@ export function HomeSeeksInteractiveFeed({
       null
     );
   }, [selectedSubcategorySlug, subcategories, allCategories]);
-
-  // Handle Root Category Click (Expand / Collapse)
-  const handleCategorySelect = (slug: string) => {
-    if (expandedCategorySlug === slug && !selectedSubcategorySlug) {
-      // Toggle collapse if clicking the same category
-      setExpandedCategorySlug("");
-      setSelectedSubcategorySlug("");
-      updateUrl("", "", tab, viewMode, searchQuery);
-    } else {
-      // Expand category: subcategories appear, but existing Seeks remain visible!
-      setExpandedCategorySlug(slug);
-      setSelectedSubcategorySlug(""); // Keep Seeks visible until subcategory is chosen!
-      updateUrl(slug, "", tab, viewMode, searchQuery);
-    }
-  };
-
-  // Handle "For You" click
-  const handleForYouClick = () => {
-    setExpandedCategorySlug("");
-    setSelectedSubcategorySlug("");
-    setSearchQuery("");
-    setTab("for-you");
-    updateUrl("", "", "for-you", viewMode, "");
-  };
 
   // Handle Subcategory Click (Filters the Seeks)
   const handleSubcategoryClick = (subSlug: string) => {

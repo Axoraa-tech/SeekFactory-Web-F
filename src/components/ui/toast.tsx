@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { CheckCircle2, Info, X, XCircle } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 
-export type ToastKind = "success" | "error" | "info";
+type ToastKind = "success" | "error" | "info";
 
 type ToastItem = { id: number; kind: ToastKind; message: string };
 

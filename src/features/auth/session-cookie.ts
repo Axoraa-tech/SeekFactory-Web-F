@@ -68,10 +68,6 @@ export function clearBrowserCookie(portal: Portal = "buyer") {
   document.cookie = `${cookieNames(portal).session}=; Path=/; Max-Age=0; SameSite=Lax`;
 }
 
-export function displayRole(role: BuyerProfile["role"]) {
-  return role === "Supplier" ? "Manufacturer" : "Buyer";
-}
-
 /**
  * Where to go after signing in, by the section signed in to (the tab chosen on the sign-in page,
  * not the account's role: a manufacturer may sign in to the buyer site too). A same-origin `next`

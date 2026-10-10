@@ -1,6 +1,6 @@
 import type { Category } from "@/entities/category";
 
-export type CategoryTree = {
+type CategoryTree = {
   /** Top-level categories, A→Z with "Other" last. */
   roots: Category[];
   /** Children of each root, keyed by both the root's id and its slug. */

@@ -9,11 +9,9 @@ import {
   Bell,
   UserRound,
   Crown,
-  Settings2,
   ShoppingBag,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { CategoryIcon } from "@/components/ui/category-icon";
 import { VerifiedManufacturers } from "@/components/widgets/verified-manufacturers";
 import { TrendingProducts } from "@/components/widgets/trending-products";
 import { RecentMessages } from "@/components/widgets/recent-messages";
@@ -54,7 +52,7 @@ export function LeftSidebar({
   categories = [],
 }: Props) {
   const pathname = usePathname();
-  const { t, translateCategory } = useRegionalSettings();
+  const { t } = useRegionalSettings();
   const counts = useUnreadCounts({ messages: messageCount, notifications: notificationCount });
 
   return (

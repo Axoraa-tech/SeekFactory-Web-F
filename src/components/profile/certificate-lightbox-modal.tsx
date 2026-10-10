@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   X,
   ExternalLink,
   ShieldCheck,
   CheckCircle2,
-  Calendar,
   Award,
-  Maximize2,
-  Download,
-  Building,
   FileCheck,
 } from "lucide-react";
 import type { FactoryCertificate } from "@/entities/factory-certificate";

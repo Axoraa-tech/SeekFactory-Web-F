@@ -64,10 +64,7 @@ function ChangeBadge({ change, current }: { change: number | null; current: numb
 
 export function SalesproOverviewView({
   stats,
-  products: _products,
-  seeks: _seeks,
   rfqs,
-  profile: _profile,
   onOpenQuoteModal,
   onViewAllRfqs,
 }: Props) {

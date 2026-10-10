@@ -1,14 +1,14 @@
 import en from "../../../messages/en.json";
 import zh from "../../../messages/zh.json";
 
-export type AppLocale = "en" | "zh";
+type AppLocale = "en" | "zh";
 
 const catalogs = {
   en,
   zh,
 } as const;
 
-export type MessageCatalog = typeof en;
+type MessageCatalog = typeof en;
 
 /** Light i18n helper — EN default until next-intl (or similar) is wired. */
 export function getMessages(locale: AppLocale = "en"): MessageCatalog {

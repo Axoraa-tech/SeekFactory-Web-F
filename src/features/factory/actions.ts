@@ -26,7 +26,7 @@ import { getTranslations } from "next-intl/server";
  *
  * Errors come back as values: Next.js masks thrown messages from server actions in production.
  */
-export type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
+type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
 
 async function run<T>(mutate: () => Promise<T>): Promise<ActionResult<T>> {
   const t = await getTranslations();

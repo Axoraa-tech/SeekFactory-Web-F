@@ -285,7 +285,7 @@ export function PillBarList({
 /* ── Area trend ─────────────────────────────────────────────────────────────
    The reference's headline chart: gradient fill under a 2px line, a crosshair
    tooltip, and a recessive grid. One y-axis only — never a second scale. */
-export interface TrendSeries {
+interface TrendSeries {
   key: string;
   label: string;
   values: number[];

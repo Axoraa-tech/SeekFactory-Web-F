@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Banknote, Building2, Clapperboard, CreditCard, FileText, LayoutDashboard, Settings, Users } from "lucide-react";
 import { PendingBadge } from "@/features/admin/pending-approvals";
 
-export const ADMIN_NAV = [
+const ADMIN_NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/manufacturers", label: "Manufacturers", icon: Building2 },
@@ -15,7 +15,7 @@ export const ADMIN_NAV = [
   { href: "/admin/pricing", label: "Pricing Config", icon: Banknote },
 ];
 
-export const ADMIN_SETTINGS = { href: "/admin/settings", label: "Settings", icon: Settings };
+const ADMIN_SETTINGS = { href: "/admin/settings", label: "Settings", icon: Settings };
 
 /**
  * Floating pill navigation: the active destination shows as a filled chip with its
@@ -67,35 +67,6 @@ export function AdminPillNav() {
         );
       })}
     </nav>
-  );
-}
-
-/** Sidebar links; rendered client-side because icons are components and active state needs the pathname. */
-export function AdminSidebarNav() {
-  return (
-    <>
-      <nav className="flex-1 space-y-1">
-        {ADMIN_NAV.map((item) => <AdminNavItem key={item.href} {...item} />)}
-      </nav>
-      <div className="pt-6 border-t border-slate-200">
-        <AdminNavItem {...ADMIN_SETTINGS} />
-      </div>
-    </>
-  );
-}
-
-function AdminNavItem({ href, label, icon: Icon }: (typeof ADMIN_NAV)[number]) {
-  const pathname = usePathname();
-  const active = pathname === href || pathname.startsWith(`${href}/`);
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${active ? "bg-orange-50 text-orange-700" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
-    >
-      <Icon size={20} className={active ? "text-orange-500" : "group-hover:text-orange-400 transition-colors"} />
-      <span className="font-medium text-sm">{label}</span>
-    </Link>
   );
 }
 

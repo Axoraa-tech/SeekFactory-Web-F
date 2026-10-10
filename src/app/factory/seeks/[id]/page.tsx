@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Eye, TrendingUp, Package, Clock } from "lucide-react";
+import { ArrowLeft, Eye, TrendingUp, Clock } from "lucide-react";
 import { getApi } from "@/shared/api";
 import { requireSupplier } from "@/features/auth/require-user";
 import { getTranslations } from "next-intl/server";

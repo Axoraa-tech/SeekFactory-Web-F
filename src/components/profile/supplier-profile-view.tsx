@@ -26,7 +26,6 @@ import {
   PhoneCall,
   FileCheck2,
   ExternalLink,
-  Maximize2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -42,7 +41,6 @@ import { CertificateLightboxModal } from "@/components/profile/certificate-light
 import { AlibabaCertSection } from "@/components/profile/alibaba-cert-section";
 import { cn } from "@/shared/lib/cn";
 import { useFollow } from "@/features/engagement/use-engagement";
-import { PLACEHOLDER_IMAGE } from "@/shared/api/http-api";
 import { useTranslations } from "next-intl";
 
 
@@ -64,7 +62,6 @@ export function SupplierProfileView({
   products,
   reels,
   allManufacturers,
-  certifications,
   responseRatePercent,
   avgResponseTimeHours,
   followedByMe,

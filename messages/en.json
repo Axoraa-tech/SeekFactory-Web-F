@@ -32,7 +32,6 @@
     "viewAll": "View all",
     "follow": "+ Follow",
     "following": "Following",
-    "repliesFast": "Replies < 2h",
     "similar": {
       "exploreSimilarProfiles": "Explore Similar Profiles",
       "verifiedOemMachineryManufacturers": "Verified OEM & machinery manufacturers",
@@ -56,8 +55,6 @@
   "common": {
     "order": "Order",
     "buyNow": "Buy Now",
-    "visitPlant": "Visit Plant",
-    "online": "Online",
     "send": "Send",
     "chat": "Chat",
     "edit": "Edit",
@@ -77,11 +74,7 @@
     "pause": "Pause",
     "play": "Play",
     "moqLabel": "MOQ:",
-    "added": "Added",
     "addToCart": "Add to Cart",
-    "processing": "Processing...",
-    "favorite": "Favorite",
-    "justNow": "Just now",
     "all": "All",
     "products": "Products",
     "verified": "Verified",
@@ -105,10 +98,7 @@
     "saving": "Saving…",
     "saveChanges": "Save Changes",
     "paused": "Paused",
-    "viewAll": "View All",
     "status": "Status",
-    "published": "Published",
-    "processingStatus": "Processing",
     "or": "or",
     "done": "Done"
   },
@@ -116,29 +106,11 @@
     "forYou": "For You",
     "following": "Following",
     "viewProducts": "View Products",
-    "viewManufacturer": "View Manufacturer",
-    "landscape": "Landscape",
-    "vertical": "Vertical",
     "verifiedOem": "Verified OEM Manufacturer",
-    "iso9001": "ISO 9001 Audited",
-    "verifiedFactory": "Verified Factory",
     "sendRfq": "Send RFQ",
-    "views": "views",
-    "leadTime": "LEAD TIME",
-    "leadTimeVal": "15-20 Days",
-    "customization": "CUSTOMIZATION",
-    "customizationVal": "OEM & ODM",
-    "save": "Save",
-    "saved": "Saved",
-    "searchSeeks": "Search Seeks (e.g. Harvester, CNC, Laser, Robots...)",
-    "subcategories": "Subcategories",
-    "clickSubcategoryToFilter": "Click a subcategory to filter Seeks",
-    "allSeeksVisible": "All Seeks visible • Click a subcategory to filter",
     "filteredBy": "Filtered by",
     "clearFilter": "Clear filter",
     "all": "All",
-    "noSeeksFound": "No Seeks match this filter",
-    "showAllSeeks": "Show All Seeks",
     "home": {
       "couldNotLoadSeeks": "Could not load seeks",
       "liveVideoMarketplace": "Live Video Marketplace",
@@ -157,7 +129,6 @@
   },
   "currency": {
     "label": "Currency",
-    "title": "Display prices in",
     "search": "Search currency...",
     "noResults": "No currency found",
     "names": {
@@ -180,9 +151,6 @@
       "pro": "Pro Buyer",
       "enterprise": "Enterprise Buyer"
     },
-    "viewProfile": "View Profile",
-    "public": "Public",
-    "editProfile": "Edit Profile & Company",
     "myRfqs": "My RFQs & Quotes",
     "myOrders": "My Orders",
     "cart": "Cart",
@@ -255,13 +223,7 @@
       "since": "Since {year}"
     },
     "rail": {
-      "openComments": "Open comments",
-      "undoShare": "Undo share",
-      "shareReel": "Share reel",
-      "unlikeReel": "Unlike reel",
-      "likeReel": "Like reel",
-      "removeBookmark": "Remove bookmark",
-      "bookmarkReel": "Bookmark reel"
+      "openComments": "Open comments"
     },
     "lock": {
       "clickToViewSupplierDetails": "Click to view supplier details"
@@ -276,61 +238,6 @@
       "noMoreSeeks": "No more seeks",
       "nextSeek": "Next Seek ↓"
     },
-    "variant": {
-      "directOemVerified": "Direct OEM Verified",
-      "product": "Product",
-      "previousProduct": "Previous product",
-      "nextProduct": "Next product",
-      "browseTaggedProducts": "Browse Tagged Products (",
-      "tapToSwitch": "Tap to switch",
-      "est": "· Est.",
-      "productSpecifications": "Product Specifications",
-      "onSiteAudited": "On-site Audited",
-      "material": "Material",
-      "leadTime": "Lead Time",
-      "n1015Days": "10 - 15 Days",
-      "tolerance": "Tolerance",
-      "compliance": "Compliance",
-      "sourcingManagerOnline": "Sourcing Manager Online",
-      "avgResponse2Hours": "Avg. Response < 2 Hours",
-      "viewFullSpecs": "View Full Specs →",
-      "requestCustomRfq": "Request Custom RFQ",
-      "directOem": "Direct OEM",
-      "previousProducts": "Previous products",
-      "nextProducts": "Next products",
-      "catalog": "CATALOG",
-      "taggedProducts": "Tagged Products",
-      "minOrder": "MIN. ORDER",
-      "n1SetMoq": "1 Set / MOQ",
-      "leadTime2": "LEAD TIME",
-      "n1015Days2": "10–15 Days",
-      "customization": "CUSTOMIZATION",
-      "oemOdm": "OEM & ODM",
-      "toggleMute": "Toggle mute",
-      "toggleFullscreen": "Toggle fullscreen",
-      "moq100Pcs": "MOQ: 100 pcs",
-      "heavyDutyForgedDriveShafts": "Heavy-Duty Forged Drive Shafts",
-      "manufacturingCapabilities": "Manufacturing Capabilities",
-      "capacity": "Capacity",
-      "n25000PcsMo": "25,000 pcs / mo",
-      "n1520Days": "15 - 20 Days",
-      "customization2": "Customization",
-      "logoMold": "Logo & Mold",
-      "catalogPricing": "Catalog & Pricing →",
-      "precisionCncMachinedIndustrialComponents": "Precision CNC Machined Industrial Components",
-      "relatedSearchOemCapabilities": "Related Search · {name} OEM Capabilities",
-      "verifiedSupplier": "Verified Supplier",
-      "directOem10Off": "Direct OEM · 10% OFF",
-      "moq50Pcs": "MOQ: 50 pcs",
-      "details": "Details >",
-      "youGuestBuyer": "You (Guest Buyer)",
-      "liveInquiries": "Live Inquiries (",
-      "verifiedFactory": "★ (Verified Factory)",
-      "askFactoryAboutSpecsMoq": "Ask factory about specs, MOQ...",
-      "sendInquiry": "Send Inquiry",
-      "chatSourcingManager": "Chat Sourcing Manager",
-      "productOf": "Product {index} of {total}"
-    },
     "viewCount": "{count} views"
   },
   "product": {
@@ -338,7 +245,6 @@
       "priceOnRequest": "Price on request",
       "minOrder": "Min. order:",
       "chatWithFactory": "Chat with factory",
-      "sendAnOrderRequestTo": "Send an order request to the factory",
       "requestQuote": "Request Quote"
     },
     "page": {
@@ -363,22 +269,6 @@
       "preShipmentQualityInspection": "Pre-Shipment Quality Inspection",
       "factoryProvidesProductionInspectionReport": "Factory provides production inspection report and high-resolution video run-tests prior to dispatch."
     }
-  },
-  "player": {
-    "pauseVideo": "Pause video",
-    "playVideo": "Play video",
-    "skipBackward5Seconds": "Skip backward 5 seconds",
-    "rewind5sLeftArrow": "Rewind 5s (Left Arrow)",
-    "skipForward5Seconds": "Skip forward 5 seconds",
-    "forward5sRightArrow": "Forward 5s (Right Arrow)",
-    "unmuteVideo": "Unmute video",
-    "muteVideo": "Mute video",
-    "unmuteM": "Unmute (M)",
-    "muteM": "Mute (M)",
-    "exitFullscreen": "Exit fullscreen",
-    "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen2": "Exit Fullscreen",
-    "fullscreen": "Fullscreen"
   },
   "comments": {
     "couldNotLoadComments": "Could not load comments",
@@ -817,7 +707,6 @@
       "updatePassword": "Update Password"
     },
     "card": {
-      "supplier": "Supplier",
       "invalidPassword": "Invalid Password",
       "enterAValidPhoneNumber": "Enter a Valid Phone Number",
       "mockCodeSentUse123456": "Mock code sent. Use 123456.",
@@ -843,9 +732,6 @@
       "googleLoginWillConnectWhen": "Google login will connect when the backend is ready.",
       "googleSignInFailed": "Google sign-in failed. Please try again or use email.",
       "continueWithGoogle": "Continue with Google",
-      "quickGuestAccess": "⚡ Quick Guest Access",
-      "guestLandscapeB2bFeed": "Guest: Landscape B2B Feed",
-      "guestVerticalSeeksFeed": "Guest: Vertical Seeks Feed",
       "continueAsGuest": "Continue browsing as guest",
       "alreadyOnSeekfactory": "Already on SeekFactory?",
       "newToSeekfactory": "New to SeekFactory?",
@@ -886,7 +772,6 @@
       "thisLinkIsIncompleteRequest": "This link is incomplete. Request a new one.",
       "youCanNowSignIn": "You can now sign in with your new password."
     },
-    "welcomeToSeekfactory": "Welcome to SeekFactory",
     "onlineWorkAnimation": "Online Work Animation",
     "verifyBanner": {
       "message": "Please verify your email address. We sent a confirmation link to {email}.",
@@ -954,7 +839,6 @@
       "removePhoto": "Remove photo",
       "addPhotos": "Add photos",
       "pngJpgWebpUpTo": "PNG, JPG, WEBP up to 20MB each.",
-      "orAddACatalogPreset": "Or add a catalog preset photo:",
       "technicalDatasheetPdfOptional": "Technical Datasheet (PDF, optional)",
       "uploadsOnSave": "(uploads on save)",
       "replace": "Replace",
@@ -977,7 +861,6 @@
     },
     "seek": {
       "status": {
-        "idle": "Publish Seek Reel",
         "uploadingVideo": "Uploading video…",
         "uploadingCover": "Uploading cover…",
         "saving": "Publishing…"
@@ -985,24 +868,6 @@
       "videoIsLargerThan100mb": "Video is larger than 100MB. Please trim or compress it first.",
       "coverImageIsLargerThan": "Cover image is larger than 20MB.",
       "couldNotPublishSeekPlease": "Could not publish seek. Please retry.",
-      "uploadVideoSeekShortReel": "Upload Video Seek (Short Reel)",
-      "showcaseFactoryOperationsMachineryDemonstrations": "Showcase factory operations, machinery demonstrations & quality checks",
-      "videoTitleHook": "Video Title / Hook",
-      "eG5AxisCnc": "e.g. 5-Axis CNC Precision Machining Live Cutting Demonstration",
-      "selectFactoryFootageVideoFile": "Select Factory Footage / Video File",
-      "clickToSelectAnother": "Click to select another",
-      "clickTo": "Click to",
-      "selectVideoFromYourDevice": "select video from your device",
-      "mp4WebmMovUpTo": "MP4, WEBM, MOV up to 100MB",
-      "orSelectPresetDemonstrationFootage": "Or select preset demonstration footage:",
-      "tagLinkedProduct": "Tag Linked Product",
-      "noProductTagged": "-- No Product Tagged --",
-      "customCoverThumbnailOptional": "Custom Cover Thumbnail (Optional)",
-      "uploadCover": "Upload cover",
-      "orPasteAnImageUrl": "or paste an image URL (https://...)",
-      "ifLeftEmptyTheTagged": "If left empty, the tagged product photo is used as the cover.",
-      "captionDescription": "Caption / Description",
-      "describeMachineParametersMaterialsHandled": "Describe machine parameters, materials handled, and invitation for buyer inquiries...",
       "couldNotSaveChangesPlease": "Could not save changes. Please retry.",
       "editVideoSeek": "Edit Video Seek",
       "updateTheTitleCaptionCover": "Update the title, caption, cover and tagged products",
@@ -1037,17 +902,9 @@
       "seekViews": "Seek views (",
       "productViews": "Product views (",
       "rfqs": "RFQs (",
-      "last": "Last",
       "lastWeeksSeekViewsProduct": "Last {weeks} weeks: {seekViews} seek views, {productViews} product views, {rfqs} RFQs",
       "weekOfSeekViewsProduct": "Week of {weekLabel} Seek views: {seekViews} Product views: {productViews} RFQs: {rfqs}",
       "noActivityYetViewsAnd": "No activity yet. Views and RFQs appear here as buyers discover your seeks and products."
-    },
-    "map": {
-      "customersCountries": "Customers Countries",
-      "totalCustomers": "Total Customers",
-      "totalCountries": "Total Countries",
-      "n8Active": "8 Active",
-      "indiaBuyers": "India Buyers"
     },
     "table": {
       "indiaBuyerEquipmentRfqLeads": "India Buyer Equipment RFQ Leads",
@@ -1094,13 +951,6 @@
       "indiaBuyerLeads": "India Buyer Leads",
       "orderRequests": "Order Requests",
       "tradeMessenger": "Trade Messenger",
-      "verificationMarketplace": "Verification & Marketplace",
-      "factoryProfileCerts": "Factory Profile & Certs",
-      "factoryVerification": "Factory Verification",
-      "declined": "Declined",
-      "notStarted": "Not started",
-      "officialWebsite": "Official Website",
-      "addYourWebsiteUrlIn": "Add your website URL in Factory Profile",
       "addOfficialWebsite": "Add Official Website",
       "buyerMarketplace": "Buyer Marketplace",
       "factorySettings": "Factory Settings",
@@ -1108,18 +958,12 @@
       "getDirectRfqMatchmakingWith": "Get direct RFQ matchmaking with Indian industrial importers and OEM buyers.",
       "upgradeTier": "Upgrade Tier"
     },
-    "donut": {
-      "machineryLeadTarget": "Machinery Lead Target",
-      "compareFromLastMonthIs": "Compare from last month is",
-      "buyerImpressions": "buyer impressions"
-    },
     "top": {
       "manufacturerHubDashboard": "Manufacturer Hub Dashboard",
       "machineryProductCatalog": "Machinery Product Catalog",
       "videoSeeksShortReels": "Video Seeks (Short Reels)",
       "indiaBuyerRfqsInquiries": "India Buyer RFQs & Inquiries",
       "buyerOrderRequests": "Buyer Order Requests",
-      "factoryVerificationProfile": "Factory Verification & Profile",
       "openSidebarNavigation": "Open sidebar navigation",
       "indiaChinaIndustrialMachineryDiscovery": "India–China Industrial Machinery Discovery & Inquiries",
       "openOfficialCompanyWebsiteIn": "Open official company website in new tab",
@@ -1162,16 +1006,8 @@
       "resubmitDetails": "Resubmit details",
       "verifyFactory": "Verify factory"
     },
-    "header": {
-      "sellerHub": "Seller Hub",
-      "buyerMessages": "Buyer Messages"
-    },
     "sidebar": {
-      "supplierCenter": "Supplier Center",
-      "uploadVideoSeek": "Upload Video Seek",
-      "verifiedOemShowroom": "Verified OEM Showroom",
-      "tier1Manufacturer": "Tier-1 Manufacturer",
-      "yourFactoryShowroomIsLive": "Your factory showroom is live and active for enterprise buyers searching globally."
+      "uploadVideoSeek": "Upload Video Seek"
     },
     "messages": {
       "buyer": "Buyer",
@@ -1217,36 +1053,7 @@
     },
     "couldNotOpenChat": "Could not open the chat.",
     "home": {
-      "manufacturingCockpitInquiriesVideoSeeks": "Manufacturing Cockpit • Inquiries, Video Seeks & Product Catalog Management",
-      "productViews": "Product Views",
-      "thisMo": "% this mo",
-      "videoPlays": "Video Plays",
-      "plays": "% plays",
-      "showroomVisits": "Showroom Visits",
-      "visits": "% visits",
-      "awaitingQuotes": "awaiting quotes",
-      "avg": "Avg",
-      "verifiedBuyers": "Verified buyers",
-      "incomingBuyerRfqsInquiries": "Incoming Buyer RFQs & Inquiries",
-      "newLeads": "New Leads",
-      "highIntentPurchaseInquiriesFrom": "High-intent purchase inquiries from verified industrial buyers",
-      "viewAllRfqs": "View All RFQs (",
-      "qty": "Qty:",
-      "port": "• Port:",
-      "updateQuote": "Update Quote",
-      "sendQuote": "Send Quote",
-      "topViewedCatalogProducts": "Top Viewed Catalog Products",
-      "manage": "Manage (",
-      "inquiries": "Inquiries",
-      "factoryVideoSeeksReels": "Factory Video Seeks (Reels)",
-      "plays2": "Plays",
-      "leadsGenerated": "Leads Generated",
-      "buyerTrafficGeography": "Buyer Traffic Geography",
-      "yourFactoryShowroomIsCurrently": "Your factory showroom is currently attracting buyers primarily from:",
-      "india": "🇮🇳 India",
-      "uaeMiddleEast": "🇦🇪 UAE / Middle East",
-      "europe": "🇩🇪 Europe",
-      "usaGlobal": "🇺🇸 USA / Global"
+      "inquiries": "Inquiries"
     },
     "products": {
       "productCatalogMachineryInventory": "Product Catalog & Machinery Inventory",
@@ -1389,26 +1196,6 @@
       "photo": "Product photos"
     }
   },
-  "hallOfFame": {
-    "noAccreditationsPublishedYet": "No Accreditations Published Yet",
-    "uploadCertificatesToActivateThe": "Upload certificates to activate the holographic AI hall of fame showcase.",
-    "uploadFirstCertificate": "Upload First Certificate",
-    "aiVerifiedEnterpriseHallOf": "AI-Verified Enterprise Hall of Fame",
-    "liveCredential": "Live Credential",
-    "accreditationsHonorChamber": "Accreditations & Honor Chamber",
-    "mintUploadCertificate": "Mint / Upload Certificate",
-    "previousCertificate": "Previous Certificate",
-    "nextCertificate": "Next Certificate",
-    "aiTrust998": "AI-Trust: 99.8%",
-    "verifiedPlaque": "Verified Plaque",
-    "clickToInspectHighResolution": "Click to Inspect High-Resolution Artifact",
-    "qualitySystem": "Quality System",
-    "auditedBy": "Audited by",
-    "certificateNo": "Certificate No:",
-    "removePlaque": "Remove Plaque",
-    "artifactDock": "Artifact Dock [",
-    "selectCredential": "Select Credential:"
-  },
   "chat": {
     "backToThreads": "Back to threads",
     "visitPlant": "Visit Plant",
@@ -1473,8 +1260,7 @@
     "youHaveCaughtUpWith": "You have caught up with all updates!",
     "youWillReceiveUpdatesHere": "You will receive updates here as manufacturers reply to RFQs.",
     "takeActionViewDetails": "Take Action / View Details",
-    "markAsRead": "Mark as read",
-    "markAsUnread": "Mark as unread"
+    "markAsRead": "Mark as read"
   },
   "ui": {
     "scrollToTopOfPage": "Scroll to top of page",
@@ -1489,11 +1275,7 @@
   },
   "orders": {
     "errors": {
-      "signInToSendAn": "Sign in to send an order request.",
-      "productIsMissing": "Product is missing.",
-      "enterAWholeQuantityBetween": "Enter a whole quantity between 1 and 1,000,000.",
-      "noteMustBeAtMost": "Note must be at most 2000 characters.",
-      "couldNotSendTheOrder": "Could not send the order request."
+      "noteMustBeAtMost": "Note must be at most 2000 characters."
     },
     "cart": {
       "couldNotUpdateYourCart": "Could not update your cart",
@@ -1502,7 +1284,6 @@
       "addProductsFromAFactory": "Add products from a factory page or a seek to order them here.",
       "sentToThisFactory": "Sent to this factory",
       "sendsOrderRequestsOnePer": "Sends {length} order requests, one per product.",
-      "sendOrderRequests": "Send order requests",
       "selectAll": "Select all ({count})",
       "selectItem": "Send {product}",
       "noteForFactory": "Note for this factory (optional)",
@@ -1524,26 +1305,11 @@
     },
     "request": {
       "couldNotAddToCart": "Could not add to cart",
-      "orderRequestSent": "Order request sent",
-      "noPaymentNowTheFactory": "No payment now: the factory contacts you to confirm",
       "reference": "Reference",
-      "theFactory": "The factory",
-      "hasBeenNotifiedAbout": "has been notified about",
-      "theyWillContactYouTo": ". They will contact you to confirm price, specs and delivery. You’ll get a notification whenever the status changes.",
-      "viewMyOrders": "View my orders",
       "selectedProduct": "Selected product",
-      "listedAt": "Listed at",
-      "moq": "• MOQ",
-      "quantity": "Quantity (",
       "belowTheListedMoqThe": "Below the listed MOQ; the factory may still accept it.",
-      "noteToTheFactoryOptional": "Note to the factory (optional)",
-      "specsDeliveryPortTimelineCustomization": "Specs, delivery port, timeline, customization...",
       "estimatedValue": "Estimated value",
-      "atListingPriceTheFinal": "at listing price; the final price is agreed with the factory.",
-      "yourNameCompanyEmailAnd": "Your name, company, email and phone are shared with this factory so they can contact you.",
-      "addedToYourCart": "Added to your cart.",
-      "viewCart": "View cart",
-      "unitOfProduct": "{unit} of {product}"
+      "atListingPriceTheFinal": "at listing price; the final price is agreed with the factory."
     },
     "status": {
       "pending": {

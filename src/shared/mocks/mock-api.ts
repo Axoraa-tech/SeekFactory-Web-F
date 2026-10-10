@@ -11,7 +11,6 @@ import type {
   SessionRepository,
   FactoryRepository,
   OrderRepository,
-  MessageItem,
   AccountRepository,
   SearchRepository,
   MediaRepository,
@@ -305,11 +304,11 @@ const messages: MessageRepository = {
     const conversation = conversations.find((item) => item.id === conversationId);
     return delay(orderRequests.filter((item) => item.manufacturer.id === conversation?.manufacturerId));
   },
-  async markAsRead(conversationId: string) {
+  async markAsRead() {
     return delay(undefined);
   },
   unreadCount: () => delay(conversations.reduce((sum, item) => sum + item.unreadCount, 0)),
-  onMessageStream(conversationId: string, callback: (message: MessageItem) => void) {
+  onMessageStream() {
     return () => {};
   },
   async startConversation(manufacturerId: string, initialMessage?: string) {

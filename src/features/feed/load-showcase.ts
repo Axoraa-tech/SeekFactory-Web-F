@@ -4,10 +4,10 @@
  */
 export type ShowcaseMode = "DUAL" | "SINGLE" | "FEED" | "COMPACT" | "GRID" | "SPOTLIGHT" | "SIDEBAR";
 
-export const SHOWCASE_MODES: ShowcaseMode[] = ["DUAL", "SINGLE", "FEED", "COMPACT", "GRID", "SPOTLIGHT", "SIDEBAR"];
+const SHOWCASE_MODES: ShowcaseMode[] = ["DUAL", "SINGLE", "FEED", "COMPACT", "GRID", "SPOTLIGHT", "SIDEBAR"];
 
 /** Anything unrecognised (older or newer backend) falls back to the dual layout. */
-export function parseShowcaseMode(value: unknown): ShowcaseMode {
+function parseShowcaseMode(value: unknown): ShowcaseMode {
   return SHOWCASE_MODES.includes(value as ShowcaseMode) ? (value as ShowcaseMode) : "DUAL";
 }
 

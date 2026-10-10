@@ -1,19 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
 import {
-  ShieldCheck,
   Globe2,
-  Award,
   ExternalLink,
   Save,
   CheckCircle2,
-  Plus,
-  Trash2,
-  Maximize2,
-  Sparkles,
-  Check,
   Loader2,
 } from "lucide-react";
 import type { SellerFactoryProfile } from "../types";

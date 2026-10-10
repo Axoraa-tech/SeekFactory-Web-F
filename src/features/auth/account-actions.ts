@@ -9,7 +9,7 @@ import { getTranslations } from "next-intl/server";
  * HttpOnly sf-access-token cookie. Errors come back as values: Next.js masks thrown messages
  * from server actions in production.
  */
-export type AccountResult = { ok: true } | { ok: false; error: string };
+type AccountResult = { ok: true } | { ok: false; error: string };
 
 async function run(action: () => Promise<void>): Promise<AccountResult> {
   const t = await getTranslations();

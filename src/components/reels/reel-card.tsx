@@ -6,7 +6,7 @@ import type { Product } from "@/entities/product";
 import { VariantB2bShowcase } from "@/components/reels/variants/variant-b2b-showcase";
 import { useReelPopup } from "@/components/reels/use-reel-popup";
 
-export type ReelCardProps = {
+type ReelCardProps = {
   reel: Reel;
   manufacturer: Manufacturer;
   productSlug?: string;
@@ -28,8 +28,6 @@ export function ReelCard({
   manufacturer,
   productSlug,
   products = [],
-  variantIndex = 0,
-  viewMode = "landscape",
   itemIndex = 0,
   followingManufacturer,
 }: ReelCardProps) {

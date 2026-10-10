@@ -29,7 +29,7 @@ const ACTIVITY_META: Record<string, { label: string; icon: React.ReactNode }> = 
   PRODUCT_ADDED: { label: "Product added", icon: <ShoppingBag className="h-4 w-4" /> },
 };
 
-export type DashboardViewProps = {
+type DashboardViewProps = {
   data: AdminAnalytics | null;
   error?: string | null;
   refreshing?: boolean;
