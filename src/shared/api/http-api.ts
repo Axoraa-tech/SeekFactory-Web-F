@@ -564,36 +564,41 @@ export function createHttpApi(baseUrl: string): ApiClient {
     const isMixedContent =
       window.location.protocol === "https:" && cleanBaseUrl.startsWith("http://");
 
-    // If no absolute URL or mixed content (HTTPS site calling HTTP backend), proxy the upload
-    if (!hasAbsoluteBaseUrl || isMixedContent) {
-      return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
-    }
-
-    let pass: { token: string };
-    try {
-      pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", {
-        method: "POST",
-        headers: { [PORTAL_HEADER]: portal },
-      });
-    } catch {
-      return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
-    }
-
-    try {
-      const res = await fetch(`${cleanBaseUrl}${endpoint}`, {
-        method: "POST",
-        body,
-        headers: { Authorization: `Bearer ${pass.token}` },
-      });
-      const json = (await res.json().catch(() => null)) as { data?: T; message?: string; error?: string } | null;
-      if (!res.ok || !json) {
-        throw new ApiError(json?.message || json?.error || `HTTP ${res.status} on ${endpoint}`, res.status);
+    // Direct upload attempt when absolute URL is configured and matches scheme
+    if (hasAbsoluteBaseUrl && !isMixedContent) {
+      let pass: { token: string } | null = null;
+      try {
+        pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", {
+          method: "POST",
+          headers: { [PORTAL_HEADER]: portal },
+        });
+      } catch {
+        // upload-token failed, fall through to proxy upload
       }
-      return json.data as T;
-    } catch (err) {
-      if (err instanceof ApiError) throw err;
-      return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
+
+      if (pass?.token) {
+        try {
+          const res = await fetch(`${cleanBaseUrl}${endpoint}`, {
+            method: "POST",
+            body,
+            headers: { Authorization: `Bearer ${pass.token}` },
+          });
+          const json = (await res.json().catch(() => null)) as { data?: T; message?: string; error?: string } | null;
+          if (res.ok && json?.data) {
+            return json.data as T;
+          }
+          // Client errors (4xx) should be reported; server gateway errors (5xx) try proxy
+          if (res.status >= 400 && res.status < 500) {
+            throw new ApiError(json?.message || json?.error || `HTTP ${res.status} on ${endpoint}`, res.status);
+          }
+        } catch (err) {
+          if (err instanceof ApiError) throw err;
+        }
+      }
     }
+
+    // Proxy upload fallback with buffered body
+    return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
   }
 
   // ── 1. SESSION REPOSITORY ──────────────────────────────────────
