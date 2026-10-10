@@ -14,15 +14,18 @@ export default async function ProfilePage({
 }) {
   const { welcome } = await searchParams;
   const t = await getTranslations();
-  const user = await requireUser("/profile");
   const api = getApi();
-  const [savedProducts, savedSeeks, following, myRfqs, categories] = await Promise.all([
+  // Started alongside the session check rather than after it (a guest is redirected anyway)
+  const data = Promise.all([
     api.products.listSaved(),
     api.feed.listSaved(),
     api.manufacturers.listFollowing(),
     api.rfq.listMyRfqs(),
     api.categories.list(),
   ]);
+  data.catch(() => {}); // a guest's 401s are dropped when requireUser redirects
+  const user = await requireUser("/profile");
+  const [savedProducts, savedSeeks, following, myRfqs, categories] = await data;
 
   return (
     <section className="space-y-4">

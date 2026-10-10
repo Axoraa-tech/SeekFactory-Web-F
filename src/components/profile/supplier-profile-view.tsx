@@ -489,6 +489,8 @@ export function SupplierProfileView({
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={product.imageUrl}
                           alt={product.name}
+                          loading="lazy"
+                          decoding="async"
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                         <span className="absolute top-2.5 left-2.5 rounded-md bg-black/60 backdrop-blur-md px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
