@@ -32,7 +32,7 @@ async function run<T>(mutate: () => Promise<T>): Promise<ActionResult<T>> {
   const t = await getTranslations();
   // Mock mode: role comes from the client-writable demo cookie (see AGENTS.md §7).
   // HTTP mode: the backend is the real authority; this is an early, friendlier rejection.
-  const user = await getApi().session.getCurrentUser();
+  const user = (await getApi().session.getCurrentUser("seller")) ?? (await getApi().session.getCurrentUser());
   if (user?.role !== "Supplier") {
     return { ok: false, error: t("seller.errors.signInWithAManufacturer") };
   }
