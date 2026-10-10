@@ -4,7 +4,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { Analytics } from '@vercel/analytics/react';
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { ToastProvider } from "@/components/ui/toast";

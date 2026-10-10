@@ -1,7 +1,7 @@
 /** The two UI languages. User-entered content (product and seek text, names, chats) is never translated. */
 export const LOCALES = ["en", "zh"] as const;
 export type Locale = (typeof LOCALES)[number];
-export const DEFAULT_LOCALE: Locale = "en";
+const DEFAULT_LOCALE: Locale = "en";
 
 /** Remembers the chosen language for a year; read on the server so pages render in it (no flash). */
 export const LOCALE_COOKIE = "seek_lang";

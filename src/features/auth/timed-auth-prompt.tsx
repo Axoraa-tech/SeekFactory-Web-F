@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, Sparkles } from "lucide-react";
+import { X } from "lucide-react";
 import { AuthCard } from "@/features/auth/auth-card";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { useTranslations } from "next-intl";

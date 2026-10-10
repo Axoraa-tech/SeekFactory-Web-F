@@ -51,7 +51,7 @@ const languageFor = (locale: Locale) => (locale === "zh" ? LANGUAGES[1] : LANGUA
  * Remembers the language for a year. The server reads the cookie, so every page is rendered in
  * the chosen language from the first byte (no English flash after a reload).
  */
-export function persistLocale(locale: Locale) {
+function persistLocale(locale: Locale) {
   const code = locale === "zh" ? "ZH" : "EN";
   document.cookie = `${LOCALE_COOKIE}=${code}; path=/; max-age=31536000; SameSite=Lax`;
   try {

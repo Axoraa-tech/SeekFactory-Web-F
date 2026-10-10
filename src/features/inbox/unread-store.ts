@@ -11,7 +11,7 @@ import { getApi } from "@/shared/api";
  * them current: every 30s while the tab is visible, when it regains focus, and right after anything
  * is marked read. The 30s refresh doubles as the presence heartbeat that keeps the user "online".
  */
-export type UnreadCounts = { messages: number; notifications: number };
+type UnreadCounts = { messages: number; notifications: number };
 
 const REFRESH_MS = 30_000;
 

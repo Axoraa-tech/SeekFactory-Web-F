@@ -6,9 +6,6 @@ import {
   UploadCloud,
   CheckCircle2,
   Award,
-  ShieldCheck,
-  Calendar,
-  AlertCircle,
 } from "lucide-react";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
 import { getApi } from "@/shared/api";

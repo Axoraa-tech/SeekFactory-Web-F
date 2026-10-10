@@ -21,9 +21,6 @@ const COOKIE_NAMES: Record<Portal, { access: string; refresh: string; session: s
   seller: { access: "sf-seller-access-token", refresh: "sf-seller-refresh-token", session: "sf-seller-session" },
 };
 
-export const ACCESS_COOKIE = COOKIE_NAMES.buyer.access;
-export const REFRESH_COOKIE = COOKIE_NAMES.buyer.refresh;
-
 export function cookieNames(portal: Portal) {
   return COOKIE_NAMES[portal];
 }

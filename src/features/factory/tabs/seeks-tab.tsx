@@ -207,25 +207,6 @@ export function SeeksTab({ seeks, onOpenAddSeek, onEditSeek, onSetListed, onDele
           </div>
         ))}
       </div>
-
-      {/* Video Playback Modal */}
-      {/* {playingSeek && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-2xl rounded-2xl bg-neutral-900 overflow-hidden shadow-2xl border border-neutral-800">
-            <div className="flex items-center justify-between p-3.5 bg-neutral-900 text-white border-b border-neutral-800">
-              <p className="text-xs font-bold truncate">{playingSeek.title}</p>
-              <button
-                onClick={() => setPlayingSeek(null)}
-                className="rounded-lg p-1 text-neutral-400 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="aspect-video w-full bg-black flex items-center justify-center">
-              <video src={playingSeek.videoUrl} className="h-full w-full object-contain" autoPlay controls />
-            </div>
-          </div> */}
-       
     </div>
   );
 }

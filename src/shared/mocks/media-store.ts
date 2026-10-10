@@ -8,7 +8,7 @@ import type { MediaKind } from "@/shared/api/contracts";
  * Pinned to globalThis so route handlers and server actions share one store.
  */
 
-export type StoredMedia = {
+type StoredMedia = {
   bytes: Uint8Array;
   contentType: string;
   kind: MediaKind | "document";

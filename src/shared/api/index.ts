@@ -25,4 +25,3 @@ export function getApi(): ApiClient {
   return mockApi;
 }
 
-export type { ApiClient } from "@/shared/api/contracts";

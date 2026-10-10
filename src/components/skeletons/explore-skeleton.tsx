@@ -7,7 +7,7 @@ import { CategoryNavSkeleton } from "@/components/skeletons/feed-skeleton";
 /**
  * Verified Manufacturers Section Skeleton (Matching #EEF4FF blue box)
  */
-export function VerifiedManufacturersSectionSkeleton() {
+function VerifiedManufacturersSectionSkeleton() {
   return (
     <section className="w-full rounded-2xl border border-orange-200/80 bg-brand-orange-soft/40 p-4 sm:p-5 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
@@ -49,7 +49,7 @@ export function VerifiedManufacturersSectionSkeleton() {
 /**
  * Products Grid Skeleton
  */
-export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
+function ProductGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="space-y-3 pt-2">
       <div className="flex items-center justify-between">

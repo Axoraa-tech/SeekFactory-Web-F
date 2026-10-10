@@ -11,7 +11,7 @@ import { useTranslations } from "next-intl";
 export type { BuyerPlanTier } from "@/entities/user";
 export type SubscriptionRegion = "india" | "china";
 
-export interface SubscriptionPricing {
+interface SubscriptionPricing {
   freePrice: string;
   proPrice: string;          // "1 Rs" or "10 Yuan"
   proPriceFormatted: string; // "₹1" or "10 Yuan"

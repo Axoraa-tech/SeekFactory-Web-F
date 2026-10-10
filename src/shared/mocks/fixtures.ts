@@ -7,7 +7,6 @@ import type { Reel } from "@/entities/reel";
 import type { RfqItem } from "@/entities/rfq";
 import type { OrderRequest } from "@/entities/order";
 import type { ReelComment } from "@/entities/comment";
-import type { BuyerProfile } from "@/entities/user";
 import { categories } from "@/shared/mocks/machinery-taxonomy";
 
 export { categories };
@@ -52,16 +51,6 @@ const img = {
     "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=900&q=80",
   tillage:
     "https://images.unsplash.com/photo-1533062618053-d51e617307ec?auto=format&fit=crop&w=900&q=80",
-};
-
-export const currentUser: BuyerProfile = {
-  id: "user-arjun",
-  name: "Arjun Mehta",
-  role: "Buyer",
-  avatarUrl: img.avatar,
-  companyName: "Mehta Industrial Sourcing",
-  industry: "Automotive components",
-  country: "India",
 };
 
 export const manufacturers = shared<Manufacturer[]>("manufacturers", [

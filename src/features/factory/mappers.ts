@@ -8,7 +8,7 @@ import type { SellerFactoryProfile, SellerProduct, SellerRfq, SellerSeek } from 
 
 /** Domain entities → seller hub view models. One place, so initial render and refreshes agree. */
 
-export function categoryName(categories: Category[], id: string | undefined, fallback: string) {
+function categoryName(categories: Category[], id: string | undefined, fallback: string) {
   return (id && categories.find((item) => item.id === id)?.name) || fallback;
 }
 
@@ -63,7 +63,7 @@ const CLOSED_RFQ_STATUSES = new Set(["ACCEPTED", "IN_PRODUCTION", "COMPLETED", "
  * Seller-facing status: RFQs are broadcast to many factories, so "Quoted" means
  * *this* factory has quoted (the backend sends its own quote), not that anyone did.
  */
-export function sellerRfqStatus(rfq: RfqItem): SellerRfq["status"] {
+function sellerRfqStatus(rfq: RfqItem): SellerRfq["status"] {
   if (CLOSED_RFQ_STATUSES.has(rfq.status.toUpperCase())) return "Closed";
   return rfq.quotedPriceInr !== undefined && rfq.quotedPriceInr !== null ? "Quoted" : "New";
 }

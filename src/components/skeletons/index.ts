@@ -7,4 +7,3 @@ export * from "./rfq-skeleton";
 export * from "./product-detail-skeleton";
 export * from "./supplier-profile-skeleton";
 export * from "./factory-dashboard-skeleton";
-export * from "./sidebar-widgets-skeleton";

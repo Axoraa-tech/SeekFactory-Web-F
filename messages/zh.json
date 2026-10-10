@@ -32,7 +32,6 @@
     "viewAll": "查看全部",
     "follow": "+ 关注",
     "following": "已关注",
-    "repliesFast": "2小时内快速响应",
     "similar": {
       "exploreSimilarProfiles": "发现相似工厂",
       "verifiedOemMachineryManufacturers": "认证 OEM 与机械制造商",
@@ -56,8 +55,6 @@
   "common": {
     "order": "订购",
     "buyNow": "立即采购",
-    "visitPlant": "参观工厂",
-    "online": "在线",
     "send": "发送",
     "chat": "在线洽谈",
     "edit": "编辑",
@@ -77,11 +74,7 @@
     "pause": "暂停",
     "play": "播放",
     "moqLabel": "起订量：",
-    "added": "已加入",
     "addToCart": "加入购物车",
-    "processing": "处理中...",
-    "favorite": "收藏",
-    "justNow": "刚刚",
     "all": "全部",
     "products": "产品",
     "verified": "已认证",
@@ -105,10 +98,7 @@
     "saving": "保存中…",
     "saveChanges": "保存修改",
     "paused": "已暂停",
-    "viewAll": "查看全部",
     "status": "状态",
-    "published": "已发布",
-    "processingStatus": "处理中",
     "or": "或",
     "done": "完成"
   },
@@ -116,29 +106,11 @@
     "forYou": "精选推荐",
     "following": "已关注厂家",
     "viewProducts": "查看产品",
-    "viewManufacturer": "查看工厂",
-    "landscape": "横屏展示",
-    "vertical": "竖屏专区",
     "verifiedOem": "认证OEM制造商",
-    "iso9001": "ISO 9001 深度验厂",
-    "verifiedFactory": "实地验厂",
     "sendRfq": "发送询盘",
-    "views": "次浏览",
-    "leadTime": "交货周期",
-    "leadTimeVal": "15-20 天",
-    "customization": "定制服务",
-    "customizationVal": "支持 OEM & ODM",
-    "save": "收藏",
-    "saved": "已收藏",
-    "searchSeeks": "搜索Seeks短视频 (如收割机、数控机床、激光、机器人...)",
-    "subcategories": "子分类",
-    "clickSubcategoryToFilter": "点击子分类即可精准筛选下方Seeks视频",
-    "allSeeksVisible": "当前显示全部Seeks • 点击下方任一子分类即可过滤",
     "filteredBy": "已按子分类筛选",
     "clearFilter": "清除筛选",
     "all": "全部",
-    "noSeeksFound": "暂无匹配该条件的Seeks视频",
-    "showAllSeeks": "查看全部Seeks",
     "home": {
       "couldNotLoadSeeks": "希克加载失败",
       "liveVideoMarketplace": "实时视频交易市场",
@@ -157,7 +129,6 @@
   },
   "currency": {
     "label": "货币",
-    "title": "价格显示币种",
     "search": "搜索币种...",
     "noResults": "未找到该币种",
     "names": {
@@ -180,9 +151,6 @@
       "pro": "专业版采购商",
       "enterprise": "企业版采购商"
     },
-    "viewProfile": "查看主页",
-    "public": "公开",
-    "editProfile": "编辑资料与公司信息",
     "myRfqs": "我的询价与报价",
     "myOrders": "我的订单",
     "cart": "购物车",
@@ -255,13 +223,7 @@
       "since": "成立于 {year} 年"
     },
     "rail": {
-      "openComments": "打开评论",
-      "undoShare": "撤销分享",
-      "shareReel": "分享希克",
-      "unlikeReel": "取消点赞",
-      "likeReel": "点赞",
-      "removeBookmark": "取消收藏",
-      "bookmarkReel": "收藏希克"
+      "openComments": "打开评论"
     },
     "lock": {
       "clickToViewSupplierDetails": "点击查看供应商详情"
@@ -276,61 +238,6 @@
       "noMoreSeeks": "没有更多希克了",
       "nextSeek": "下一个希克 ↓"
     },
-    "variant": {
-      "directOemVerified": "OEM 直供认证",
-      "product": "产品",
-      "previousProduct": "上一个产品",
-      "nextProduct": "下一个产品",
-      "browseTaggedProducts": "浏览关联产品（",
-      "tapToSwitch": "点击切换",
-      "est": "· 成立于",
-      "productSpecifications": "产品规格",
-      "onSiteAudited": "实地审核",
-      "material": "材质",
-      "leadTime": "交货期",
-      "n1015Days": "10 - 15 天",
-      "tolerance": "公差",
-      "compliance": "合规认证",
-      "sourcingManagerOnline": "采购经理在线",
-      "avgResponse2Hours": "平均 2 小时内回复",
-      "viewFullSpecs": "查看完整规格 →",
-      "requestCustomRfq": "发起定制询价",
-      "directOem": "OEM 直供",
-      "previousProducts": "上一组产品",
-      "nextProducts": "下一组产品",
-      "catalog": "目录",
-      "taggedProducts": "关联产品",
-      "minOrder": "起订量",
-      "n1SetMoq": "1 套起订",
-      "leadTime2": "交货期",
-      "n1015Days2": "10–15 天",
-      "customization": "定制",
-      "oemOdm": "OEM 与 ODM",
-      "toggleMute": "切换静音",
-      "toggleFullscreen": "切换全屏",
-      "moq100Pcs": "起订量：100 件",
-      "heavyDutyForgedDriveShafts": "重型锻造传动轴",
-      "manufacturingCapabilities": "制造能力",
-      "capacity": "产能",
-      "n25000PcsMo": "每月 25,000 件",
-      "n1520Days": "15 - 20 天",
-      "customization2": "定制",
-      "logoMold": "Logo 与模具",
-      "catalogPricing": "目录与价格 →",
-      "precisionCncMachinedIndustrialComponents": "精密数控加工工业零部件",
-      "relatedSearchOemCapabilities": "相关搜索 · {name} OEM 能力",
-      "verifiedSupplier": "认证供应商",
-      "directOem10Off": "OEM 直供 · 9 折",
-      "moq50Pcs": "起订量：50 件",
-      "details": "详情 >",
-      "youGuestBuyer": "你（访客采购商）",
-      "liveInquiries": "实时询盘（",
-      "verifiedFactory": "★（认证工厂）",
-      "askFactoryAboutSpecsMoq": "向工厂咨询规格、起订量...",
-      "sendInquiry": "发送询盘",
-      "chatSourcingManager": "联系采购经理",
-      "productOf": "第 {index} / {total} 个产品"
-    },
     "viewCount": "{count} 次浏览"
   },
   "product": {
@@ -338,7 +245,6 @@
       "priceOnRequest": "价格面议",
       "minOrder": "起订量：",
       "chatWithFactory": "与工厂沟通",
-      "sendAnOrderRequestTo": "向工厂发送订单请求",
       "requestQuote": "索取报价"
     },
     "page": {
@@ -363,22 +269,6 @@
       "preShipmentQualityInspection": "发货前质检",
       "factoryProvidesProductionInspectionReport": "工厂在发货前提供生产检验报告和高清试机视频。"
     }
-  },
-  "player": {
-    "pauseVideo": "暂停视频",
-    "playVideo": "播放视频",
-    "skipBackward5Seconds": "后退 5 秒",
-    "rewind5sLeftArrow": "后退 5 秒（左方向键）",
-    "skipForward5Seconds": "前进 5 秒",
-    "forward5sRightArrow": "前进 5 秒（右方向键）",
-    "unmuteVideo": "取消静音",
-    "muteVideo": "静音",
-    "unmuteM": "取消静音 (M)",
-    "muteM": "静音 (M)",
-    "exitFullscreen": "退出全屏",
-    "enterFullscreen": "进入全屏",
-    "exitFullscreen2": "退出全屏",
-    "fullscreen": "全屏"
   },
   "comments": {
     "couldNotLoadComments": "评论加载失败",
@@ -817,7 +707,6 @@
       "updatePassword": "更新密码"
     },
     "card": {
-      "supplier": "供应商",
       "invalidPassword": "密码不符合要求",
       "enterAValidPhoneNumber": "请输入有效的手机号码",
       "mockCodeSentUse123456": "验证码已发送（演示：123456）。",
@@ -843,9 +732,6 @@
       "googleLoginWillConnectWhen": "后端上线后即可使用 Google 登录。",
       "googleSignInFailed": "Google 登录失败，请重试或使用邮箱登录。",
       "continueWithGoogle": "使用 Google 继续",
-      "quickGuestAccess": "⚡ 访客快速体验",
-      "guestLandscapeB2bFeed": "访客：横屏 B2B 视频流",
-      "guestVerticalSeeksFeed": "访客：竖屏希克视频流",
       "continueAsGuest": "以访客身份继续浏览",
       "alreadyOnSeekfactory": "已有 SeekFactory 账号？",
       "newToSeekfactory": "初次使用 SeekFactory？",
@@ -886,7 +772,6 @@
       "thisLinkIsIncompleteRequest": "链接不完整，请重新申请。",
       "youCanNowSignIn": "现在可以使用新密码登录了。"
     },
-    "welcomeToSeekfactory": "欢迎来到 SeekFactory",
     "onlineWorkAnimation": "在线办公动画",
     "verifyBanner": {
       "message": "请验证您的邮箱。我们已向 {email} 发送确认链接。",
@@ -954,7 +839,6 @@
       "removePhoto": "删除图片",
       "addPhotos": "添加图片",
       "pngJpgWebpUpTo": "支持 PNG、JPG、WEBP，每张最大 20MB。",
-      "orAddACatalogPreset": "或添加目录预设图片：",
       "technicalDatasheetPdfOptional": "技术规格书（PDF，选填）",
       "uploadsOnSave": "（保存时上传）",
       "replace": "替换",
@@ -977,7 +861,6 @@
     },
     "seek": {
       "status": {
-        "idle": "发布希克视频",
         "uploadingVideo": "正在上传视频…",
         "uploadingCover": "正在上传封面…",
         "saving": "发布中…"
@@ -985,24 +868,6 @@
       "videoIsLargerThan100mb": "视频超过 100MB，请先剪辑或压缩。",
       "coverImageIsLargerThan": "封面图片超过 20MB。",
       "couldNotPublishSeekPlease": "希克发布失败，请重试。",
-      "uploadVideoSeekShortReel": "上传视频希克（短视频）",
-      "showcaseFactoryOperationsMachineryDemonstrations": "展示工厂生产、机械演示与质检过程",
-      "videoTitleHook": "视频标题 / 看点",
-      "eG5AxisCnc": "例如：五轴数控精密加工现场切削演示",
-      "selectFactoryFootageVideoFile": "选择工厂视频文件",
-      "clickToSelectAnother": "点击重新选择",
-      "clickTo": "点击",
-      "selectVideoFromYourDevice": "从设备中选择视频",
-      "mp4WebmMovUpTo": "支持 MP4、WEBM、MOV，最大 100MB",
-      "orSelectPresetDemonstrationFootage": "或选择预设演示视频：",
-      "tagLinkedProduct": "关联产品",
-      "noProductTagged": "-- 不关联产品 --",
-      "customCoverThumbnailOptional": "自定义封面（选填）",
-      "uploadCover": "上传封面",
-      "orPasteAnImageUrl": "或粘贴图片网址 (https://...)",
-      "ifLeftEmptyTheTagged": "留空则使用关联产品的图片作为封面。",
-      "captionDescription": "文案 / 描述",
-      "describeMachineParametersMaterialsHandled": "描述机器参数、可加工材料，并邀请采购商咨询...",
       "couldNotSaveChangesPlease": "保存失败，请重试。",
       "editVideoSeek": "编辑视频希克",
       "updateTheTitleCaptionCover": "更新标题、文案、封面和关联产品",
@@ -1037,17 +902,9 @@
       "seekViews": "希克浏览（",
       "productViews": "产品浏览（",
       "rfqs": "询价（",
-      "last": "近",
       "lastWeeksSeekViewsProduct": "近 {weeks} 周：希克浏览 {seekViews} 次，产品浏览 {productViews} 次，询价 {rfqs} 个",
       "weekOfSeekViewsProduct": "{weekLabel} 当周 希克浏览：{seekViews} 产品浏览：{productViews} 询价：{rfqs}",
       "noActivityYetViewsAnd": "暂无数据。采购商浏览你的希克和产品后，浏览量和询价会显示在这里。"
-    },
-    "map": {
-      "customersCountries": "客户国家",
-      "totalCustomers": "客户总数",
-      "totalCountries": "国家总数",
-      "n8Active": "8 个活跃",
-      "indiaBuyers": "印度采购商"
     },
     "table": {
       "indiaBuyerEquipmentRfqLeads": "印度采购商设备询价线索",
@@ -1094,13 +951,6 @@
       "indiaBuyerLeads": "印度采购商线索",
       "orderRequests": "订单请求",
       "tradeMessenger": "贸易消息",
-      "verificationMarketplace": "认证与市场",
-      "factoryProfileCerts": "工厂资料与证书",
-      "factoryVerification": "工厂认证",
-      "declined": "未通过",
-      "notStarted": "未开始",
-      "officialWebsite": "官方网站",
-      "addYourWebsiteUrlIn": "请在工厂资料中填写网站地址",
       "addOfficialWebsite": "添加官方网站",
       "buyerMarketplace": "采购市场",
       "factorySettings": "工厂设置",
@@ -1108,18 +958,12 @@
       "getDirectRfqMatchmakingWith": "与印度工业进口商和 OEM 采购商直接匹配询价。",
       "upgradeTier": "升级会员"
     },
-    "donut": {
-      "machineryLeadTarget": "机械线索目标",
-      "compareFromLastMonthIs": "与上月相比",
-      "buyerImpressions": "次采购商曝光"
-    },
     "top": {
       "manufacturerHubDashboard": "制造商中心控制台",
       "machineryProductCatalog": "机械产品目录",
       "videoSeeksShortReels": "视频希克（短视频）",
       "indiaBuyerRfqsInquiries": "印度采购商询价",
       "buyerOrderRequests": "采购商订单请求",
-      "factoryVerificationProfile": "工厂认证与资料",
       "openSidebarNavigation": "打开侧边导航",
       "indiaChinaIndustrialMachineryDiscovery": "中印工业机械发现与询价",
       "openOfficialCompanyWebsiteIn": "在新标签页打开公司官网",
@@ -1162,16 +1006,8 @@
       "resubmitDetails": "重新提交资料",
       "verifyFactory": "认证工厂"
     },
-    "header": {
-      "sellerHub": "卖家中心",
-      "buyerMessages": "采购商消息"
-    },
     "sidebar": {
-      "supplierCenter": "供应商中心",
-      "uploadVideoSeek": "上传视频希克",
-      "verifiedOemShowroom": "认证 OEM 展厅",
-      "tier1Manufacturer": "一级制造商",
-      "yourFactoryShowroomIsLive": "你的工厂展厅已上线，全球企业采购商均可搜索到。"
+      "uploadVideoSeek": "上传视频希克"
     },
     "messages": {
       "buyer": "位采购商",
@@ -1217,36 +1053,7 @@
     },
     "couldNotOpenChat": "无法打开聊天。",
     "home": {
-      "manufacturingCockpitInquiriesVideoSeeks": "制造管理中心 • 询价、视频希克与产品目录管理",
-      "productViews": "产品浏览量",
-      "thisMo": "% 本月",
-      "videoPlays": "视频播放量",
-      "plays": "% 播放",
-      "showroomVisits": "展厅访问量",
-      "visits": "% 访问",
-      "awaitingQuotes": "待报价",
-      "avg": "平均",
-      "verifiedBuyers": "认证采购商",
-      "incomingBuyerRfqsInquiries": "收到的采购询价",
-      "newLeads": "新线索",
-      "highIntentPurchaseInquiriesFrom": "来自认证工业采购商的高意向采购询价",
-      "viewAllRfqs": "查看全部询价（",
-      "qty": "数量：",
-      "port": "• 港口：",
-      "updateQuote": "更新报价",
-      "sendQuote": "发送报价",
-      "topViewedCatalogProducts": "浏览量最高的产品",
-      "manage": "管理（",
-      "inquiries": "询价",
-      "factoryVideoSeeksReels": "工厂视频希克",
-      "plays2": "播放",
-      "leadsGenerated": "产生线索",
-      "buyerTrafficGeography": "采购商来源地区",
-      "yourFactoryShowroomIsCurrently": "你的工厂展厅目前的采购商主要来自：",
-      "india": "🇮🇳 印度",
-      "uaeMiddleEast": "🇦🇪 阿联酋 / 中东",
-      "europe": "🇩🇪 欧洲",
-      "usaGlobal": "🇺🇸 美国 / 全球"
+      "inquiries": "询价"
     },
     "products": {
       "productCatalogMachineryInventory": "产品目录与机械库存",
@@ -1389,26 +1196,6 @@
       "photo": "产品图片"
     }
   },
-  "hallOfFame": {
-    "noAccreditationsPublishedYet": "尚未发布任何资质",
-    "uploadCertificatesToActivateThe": "上传证书即可开启全息 AI 荣誉墙展示。",
-    "uploadFirstCertificate": "上传第一份证书",
-    "aiVerifiedEnterpriseHallOf": "AI 认证企业荣誉墙",
-    "liveCredential": "有效资质",
-    "accreditationsHonorChamber": "资质与荣誉展厅",
-    "mintUploadCertificate": "上传证书",
-    "previousCertificate": "上一份证书",
-    "nextCertificate": "下一份证书",
-    "aiTrust998": "AI 可信度：99.8%",
-    "verifiedPlaque": "认证铭牌",
-    "clickToInspectHighResolution": "点击查看高清原图",
-    "qualitySystem": "质量体系",
-    "auditedBy": "审核机构",
-    "certificateNo": "证书编号：",
-    "removePlaque": "移除铭牌",
-    "artifactDock": "证书栏 [",
-    "selectCredential": "选择资质："
-  },
   "chat": {
     "backToThreads": "返回会话列表",
     "visitPlant": "访问工厂",
@@ -1473,8 +1260,7 @@
     "youHaveCaughtUpWith": "你已查看全部更新！",
     "youWillReceiveUpdatesHere": "制造商回复询价后，你会在这里收到通知。",
     "takeActionViewDetails": "处理 / 查看详情",
-    "markAsRead": "标为已读",
-    "markAsUnread": "标为未读"
+    "markAsRead": "标为已读"
   },
   "ui": {
     "scrollToTopOfPage": "回到页面顶部",
@@ -1489,11 +1275,7 @@
   },
   "orders": {
     "errors": {
-      "signInToSendAn": "请先登录再发送订单请求。",
-      "productIsMissing": "缺少产品信息。",
-      "enterAWholeQuantityBetween": "请输入 1 到 1,000,000 之间的整数数量。",
-      "noteMustBeAtMost": "备注最多 2000 个字符。",
-      "couldNotSendTheOrder": "订单请求发送失败。"
+      "noteMustBeAtMost": "备注最多 2000 个字符。"
     },
     "cart": {
       "couldNotUpdateYourCart": "购物车更新失败",
@@ -1502,7 +1284,6 @@
       "addProductsFromAFactory": "在工厂主页或希克中添加产品，即可在这里下单。",
       "sentToThisFactory": "将发送给该工厂",
       "sendsOrderRequestsOnePer": "将发送 {length} 个订单请求，每个产品一个。",
-      "sendOrderRequests": "发送订单请求",
       "selectAll": "全选（{count}）",
       "selectItem": "发送 {product}",
       "noteForFactory": "给该工厂的备注（选填）",
@@ -1524,26 +1305,11 @@
     },
     "request": {
       "couldNotAddToCart": "加入购物车失败",
-      "orderRequestSent": "订单请求已发送",
-      "noPaymentNowTheFactory": "现在无需付款：工厂会联系你确认",
       "reference": "参考编号",
-      "theFactory": "该工厂",
-      "hasBeenNotifiedAbout": "已收到关于以下产品的通知：",
-      "theyWillContactYouTo": "。工厂将联系你确认价格、规格和交期，状态有变化时你会收到通知。",
-      "viewMyOrders": "查看我的订单",
       "selectedProduct": "已选产品",
-      "listedAt": "标价",
-      "moq": "• 起订量",
-      "quantity": "数量（",
       "belowTheListedMoqThe": "低于标注的起订量，工厂仍可能接受。",
-      "noteToTheFactoryOptional": "给工厂的备注（选填）",
-      "specsDeliveryPortTimelineCustomization": "规格、交货港口、时间要求、定制需求...",
       "estimatedValue": "预估金额",
-      "atListingPriceTheFinal": "按标价计算，最终价格与工厂协商确定。",
-      "yourNameCompanyEmailAnd": "你的姓名、公司、邮箱和电话将提供给该工厂，以便其与你联系。",
-      "addedToYourCart": "已加入购物车。",
-      "viewCart": "查看购物车",
-      "unitOfProduct": "{unit}「{product}」"
+      "atListingPriceTheFinal": "按标价计算，最终价格与工厂协商确定。"
     },
     "status": {
       "pending": {

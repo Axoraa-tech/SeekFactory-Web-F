@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Globe } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import type { MembershipTier } from "./profile-types";
 import { useBuyerPlan, planPriceLabel } from "@/features/subscription";

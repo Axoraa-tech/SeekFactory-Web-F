@@ -10,7 +10,6 @@ import {
   Settings,
   ChevronDown,
   ChevronUp,
-  Sparkles,
   X,
   ExternalLink,
 } from "lucide-react";
