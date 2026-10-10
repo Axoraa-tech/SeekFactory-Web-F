@@ -568,7 +568,13 @@ export function createHttpApi(
     onProgress?: (percent: number) => void
   ): Promise<T> {
     if (typeof window === "undefined") return fetchJson<T>(endpoint, { method: "POST", body });
-    const pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", { method: "POST" });
+    let pass: { token: string };
+    try {
+      pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", { method: "POST" });
+    } catch {
+      // No upload pass (e.g. an older backend): the proxy still handles files under Vercel's 4.5 MB limit
+      return fetchJson<T>(endpoint, { method: "POST", body });
+    }
     // XMLHttpRequest (not fetch) so the browser reports upload progress
     const { status, text } = await new Promise<{ status: number; text: string }>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -593,9 +599,7 @@ export function createHttpApi(
     if (status < 200 || status >= 300 || !json) {
       throw new ApiError(json?.message || json?.error || `HTTP ${status} on ${endpoint}`, status);
     }
-
-    // Proxy upload fallback with buffered body
-    return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
+    return json.data as T;
   }
 
   // ── 1. SESSION REPOSITORY ──────────────────────────────────────
