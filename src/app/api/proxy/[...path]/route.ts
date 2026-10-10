@@ -100,15 +100,13 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     const names = cookieNames(sessionPortal);
 
     const hasBody = req.method !== "GET" && req.method !== "HEAD" && req.body !== null;
-    const isMultipart = (req.headers.get("content-type") || "").startsWith("multipart/");
-    // JSON bodies are small: buffer them so the request can be replayed after a token refresh.
-    // Uploads are streamed so 100MB seek videos don't sit in Next.js memory, and are not replayed.
-    const bufferedBody = hasBody && !isMultipart ? await req.arrayBuffer() : undefined;
+    // Buffer body so Node fetch sends an accurate Content-Length and avoids chunked transfer 502s
+    const bufferedBody = hasBody ? await req.arrayBuffer() : undefined;
 
     const send = (token: string | undefined) => {
       const outgoing = new Headers(headers);
       if (token) outgoing.set("Authorization", `Bearer ${token}`);
-      const init: RequestInit & { duplex?: "half" } = {
+      const init: RequestInit = {
         method: req.method,
         headers: outgoing,
         // Abort the upstream call when the browser goes away (e.g. a closed chat's SSE stream),
@@ -117,13 +115,8 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
         // Pass redirects to the browser (e.g. a chat attachment's short-lived signed link to the
         // bucket) instead of downloading the file through this server
         redirect: "manual",
+        body: bufferedBody,
       };
-      if (bufferedBody) {
-        init.body = bufferedBody;
-      } else if (hasBody) {
-        init.body = req.body;
-        init.duplex = "half";
-      }
       return fetch(url, init);
     };
 
