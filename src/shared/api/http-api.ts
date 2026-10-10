@@ -433,24 +433,34 @@ export function createHttpApi(baseUrl: string): ApiClient {
   /**
    * Helper to get JWT auth header from cookie on client or server
    */
-  async function getAuthHeaders(): Promise<Record<string, string>> {
+  async function getAuthHeaders(targetPortal?: Portal, endpoint?: string): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
+
+    const isFactoryEndpoint = endpoint?.startsWith("/api/v1/factory/") || endpoint?.startsWith("/api/v1/seller/");
+    const effectivePortal = targetPortal ?? (isFactoryEndpoint ? "seller" : undefined);
 
     if (typeof window === "undefined") {
       // Server rendering / server actions: the middleware named this request's section
       try {
         const { cookies, headers: requestHeaders } = await import("next/headers");
-        const portal = parsePortal((await requestHeaders()).get(PORTAL_HEADER)) ?? "buyer";
-        const token = (await cookies()).get(cookieNames(portal).access)?.value;
+        const cookieStore = await cookies();
+        const headerPortal = parsePortal((await requestHeaders()).get(PORTAL_HEADER));
+        const portal = effectivePortal ?? headerPortal ?? "buyer";
+        let token = cookieStore.get(cookieNames(portal).access)?.value;
+        if (!token && (isFactoryEndpoint || portal === "seller")) {
+          token = cookieStore.get(cookieNames("seller").access)?.value;
+        } else if (!token && portal === "buyer") {
+          token = cookieStore.get(cookieNames("seller").access)?.value;
+        }
         if (token) headers["Authorization"] = `Bearer ${token}`;
       } catch {
         // Fallback for non-cookie server contexts
       }
     } else {
       // Browser calls go through /api/proxy, which picks the section's HttpOnly cookies
-      headers[PORTAL_HEADER] = browserPortal();
+      headers[PORTAL_HEADER] = effectivePortal ?? browserPortal();
     }
 
     return headers;
@@ -465,7 +475,9 @@ export function createHttpApi(baseUrl: string): ApiClient {
   ): Promise<T> {
     const isGet = !options.method || options.method.toUpperCase() === "GET";
     // A call for an explicit section (sign-in) must not reuse another section's in-flight request
-    const explicitPortal = (options.headers as Record<string, string> | undefined)?.[PORTAL_HEADER];
+    const explicitPortal = parsePortal(
+      (options.headers as Record<string, string> | undefined)?.[PORTAL_HEADER]
+    );
     // Browser only: on the server a shared client would hand one user's in-flight response to another
     const cacheKey = isGet && !explicitPortal && typeof window !== "undefined" ? endpoint : null;
 
@@ -474,7 +486,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
     }
 
     const requestPromise = (async () => {
-      const defaultHeaders = await getAuthHeaders();
+      const defaultHeaders = await getAuthHeaders(explicitPortal ?? undefined, endpoint);
       // Route browser requests through our secure proxy, server requests go direct
       let url = typeof window !== "undefined" ? `/api/proxy${endpoint}` : `${cleanBaseUrl}${endpoint}`;
       
@@ -541,18 +553,47 @@ export function createHttpApi(baseUrl: string): ApiClient {
    * to the API with it. The normal session token never reaches page scripts.
    */
   async function uploadDirect<T>(endpoint: string, body: FormData): Promise<T> {
-    if (typeof window === "undefined") return fetchJson<T>(endpoint, { method: "POST", body });
-    const pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", { method: "POST" });
-    const res = await fetch(`${cleanBaseUrl}${endpoint}`, {
-      method: "POST",
-      body,
-      headers: { Authorization: `Bearer ${pass.token}` },
-    });
-    const json = (await res.json().catch(() => null)) as { data?: T; message?: string; error?: string } | null;
-    if (!res.ok || !json) {
-      throw new ApiError(json?.message || json?.error || `HTTP ${res.status} on ${endpoint}`, res.status);
+    const isFactory = endpoint.startsWith("/api/v1/factory/") || endpoint.startsWith("/api/v1/seller/");
+    const portal: Portal = isFactory ? "seller" : browserPortal();
+
+    if (typeof window === "undefined") {
+      return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
     }
-    return json.data as T;
+
+    const hasAbsoluteBaseUrl = /^https?:\/\//i.test(cleanBaseUrl);
+    const isMixedContent =
+      window.location.protocol === "https:" && cleanBaseUrl.startsWith("http://");
+
+    // If no absolute URL or mixed content (HTTPS site calling HTTP backend), proxy the upload
+    if (!hasAbsoluteBaseUrl || isMixedContent) {
+      return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
+    }
+
+    let pass: { token: string };
+    try {
+      pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", {
+        method: "POST",
+        headers: { [PORTAL_HEADER]: portal },
+      });
+    } catch {
+      return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
+    }
+
+    try {
+      const res = await fetch(`${cleanBaseUrl}${endpoint}`, {
+        method: "POST",
+        body,
+        headers: { Authorization: `Bearer ${pass.token}` },
+      });
+      const json = (await res.json().catch(() => null)) as { data?: T; message?: string; error?: string } | null;
+      if (!res.ok || !json) {
+        throw new ApiError(json?.message || json?.error || `HTTP ${res.status} on ${endpoint}`, res.status);
+      }
+      return json.data as T;
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
+    }
   }
 
   // ── 1. SESSION REPOSITORY ──────────────────────────────────────
@@ -585,9 +626,16 @@ export function createHttpApi(baseUrl: string): ApiClient {
   const portalForRole = (role: JoinInput["role"]): Portal => (role === "Supplier" ? "seller" : "buyer");
 
   const session: SessionRepository = {
-    async getCurrentUser(): Promise<BuyerProfile | null> {
+    async getCurrentUser(portal?: Portal): Promise<BuyerProfile | null> {
       try {
-        const user = await fetchJson<BackendUser>("/api/v1/auth/me", { cache: "no-store" });
+        const headers: Record<string, string> = {};
+        if (portal) {
+          headers[PORTAL_HEADER] = portal;
+        }
+        const user = await fetchJson<BackendUser>("/api/v1/auth/me", {
+          cache: "no-store",
+          ...(portal ? { headers } : {}),
+        });
         return user ? toProfile(user) : null;
       } catch {
         // Signed out, or the access token expired and could not be refreshed
@@ -1615,6 +1663,9 @@ const CDN_MEDIA_PREFIX = MEDIA_CDN ? `${MEDIA_CDN}/media/` : "";
 export function resolveMediaUrl(url: string | undefined): string | undefined {
   if (!url || !url.startsWith(BACKEND_MEDIA_PREFIX)) return url;
   if (CDN_MEDIA_PREFIX) return CDN_MEDIA_PREFIX + url.slice(BACKEND_MEDIA_PREFIX.length);
+  if (typeof window !== "undefined" && window.location.protocol === "https:" && MEDIA_ORIGIN.startsWith("http://")) {
+    return `/api/proxy${url}`;
+  }
   if (MEDIA_ORIGIN) return MEDIA_ORIGIN + url;
   return url;
 }
@@ -1623,11 +1674,16 @@ export function resolveMediaUrl(url: string | undefined): string | undefined {
 export function toStoredMediaUrl(url: string): string;
 export function toStoredMediaUrl(url: string | undefined): string | undefined;
 export function toStoredMediaUrl(url: string | undefined) {
-  if (url && CDN_MEDIA_PREFIX && url.startsWith(CDN_MEDIA_PREFIX)) {
+  if (!url) return url;
+  if (CDN_MEDIA_PREFIX && url.startsWith(CDN_MEDIA_PREFIX)) {
     return BACKEND_MEDIA_PREFIX + url.slice(CDN_MEDIA_PREFIX.length);
   }
-  if (url && MEDIA_ORIGIN && url.startsWith(MEDIA_ORIGIN + BACKEND_MEDIA_PREFIX)) {
+  if (MEDIA_ORIGIN && url.startsWith(MEDIA_ORIGIN + BACKEND_MEDIA_PREFIX)) {
     return url.slice(MEDIA_ORIGIN.length);
+  }
+  const match = url.match(/^(?:https?:\/\/[^/]+)?(\/api\/v1\/media\/[a-zA-Z0-9_\-\.]+)$/);
+  if (match) {
+    return match[1];
   }
   return url;
 }
