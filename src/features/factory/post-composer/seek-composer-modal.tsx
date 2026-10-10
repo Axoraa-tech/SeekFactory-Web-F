@@ -81,27 +81,46 @@ async function downscaleImage(file: File, maxEdge = 1600): Promise<File> {
 
 function captureFrame(src: string): Promise<Blob | null> {
   return new Promise((resolve) => {
+    let settled = false;
+    const finish = (result: Blob | null) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(result);
+    };
+    const timer = setTimeout(() => finish(null), 3000);
     const video = document.createElement("video");
+    const cleanup = () => {
+      clearTimeout(timer);
+      video.onerror = null;
+      video.onloadedmetadata = null;
+      video.onseeked = null;
+      video.src = "";
+    };
     video.muted = true;
     video.playsInline = true;
     video.preload = "auto";
-    video.src = src;
-    const fail = () => resolve(null);
-    video.onerror = fail;
+    video.onerror = () => finish(null);
     video.onloadedmetadata = () => {
-      video.currentTime = Math.min(1, (video.duration || 2) / 2);
+      const dur = isFinite(video.duration) && video.duration > 0 ? video.duration : 2;
+      video.currentTime = Math.min(1, dur / 2);
     };
     video.onseeked = () => {
       try {
+        if (!video.videoWidth || !video.videoHeight) {
+          finish(null);
+          return;
+        }
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext("2d")?.drawImage(video, 0, 0);
-        canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.85);
+        canvas.toBlob((blob) => finish(blob), "image/jpeg", 0.85);
       } catch {
-        fail();
+        finish(null);
       }
     };
+    video.src = src;
   });
 }
 
@@ -273,8 +292,10 @@ export function SeekComposerModal({
         const frame = await captureFrame(video.url);
         if (frame) coverFile = new File([frame], "cover.jpg", { type: "image/jpeg" });
       }
-      const posterUrl = coverFile ? await upload(coverFile, "image") : linked[0]?.imageUrl ?? "";
-      if (!posterUrl) throw new Error(t("composer.errors.addCover"));
+      let posterUrl = coverFile ? await upload(coverFile, "image") : linked[0]?.imageUrl ?? "";
+      if (!posterUrl) {
+        posterUrl = author.avatarUrl || "/placeholders/image.svg";
+      }
 
       setStatus("saving");
       await onPublish({

@@ -10,6 +10,7 @@ import type { Cart, CheckoutLine, NewOrderRequest, OrderContact, OrderRequest, O
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
 import type { BuyerPlan, ExchangeRates, PlanPayment, PlanPaymentInput } from "@/entities/plan";
 import type { JoinInput, LoginInput } from "@/features/auth/session-cookie";
+import type { Portal } from "@/features/auth/auth-tokens";
 import type { SellerStats } from "@/features/factory/types";
 
 export type FeedItem = {
@@ -50,7 +51,7 @@ export type SearchResult = {
 export type SignInResult = BuyerProfile & { firstLogin?: boolean };
 
 export interface SessionRepository {
-  getCurrentUser(): Promise<BuyerProfile | null>;
+  getCurrentUser(portal?: Portal): Promise<BuyerProfile | null>;
   join(input: JoinInput): Promise<SignInResult>;
   login(input: LoginInput): Promise<SignInResult>;
   /** Buyer sign-in (or sign-up) with a Google Identity Services ID token. */

@@ -77,7 +77,7 @@ function toFeedItem(reel: (typeof reels)[number]): FeedItem {
 }
 
 const session: SessionRepository = {
-  async getCurrentUser() {
+  async getCurrentUser(_portal?: unknown) {
     if (typeof window === "undefined") {
       const { cookies } = await import("next/headers");
       const jar = await cookies();
