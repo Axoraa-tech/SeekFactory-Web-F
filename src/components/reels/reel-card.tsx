@@ -43,6 +43,8 @@ export function ReelCard({
       onExpand={() => openAt(itemIndex)}
       followingManufacturer={followingManufacturer}
       product={products[0]}
+      // The first card of each column is above the fold
+      eager={itemIndex < 2}
     />
   );
 }

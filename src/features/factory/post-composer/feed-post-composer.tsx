@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { ImageIcon, Video } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
@@ -9,10 +10,14 @@ import { getApi } from "@/shared/api";
 import type { Category } from "@/entities/category";
 import type { NewFactoryProduct, NewFactorySeek } from "@/shared/api/contracts";
 import { createProductAction, createSeekAction } from "../actions";
-import { AddProductModal } from "../components/add-product-modal";
-import { SeekComposerModal, type LinkableProduct } from "./seek-composer-modal";
+import type { LinkableProduct } from "./seek-composer-modal";
 import { OPEN_COMPOSER_EVENT, type ComposerMode } from "./events";
 
+// Only opened on demand: keep the modals' code out of the home feed's first load
+const SeekComposerModal = dynamic(() => import("./seek-composer-modal").then((m) => m.SeekComposerModal), { ssr: false });
+const AddProductModal = dynamic(() => import("../components/add-product-modal").then((m) => m.AddProductModal), {
+  ssr: false,
+});
 
 type Props = {
   author: { name: string; avatarUrl: string };

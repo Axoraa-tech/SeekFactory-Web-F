@@ -39,7 +39,7 @@ export function FeedListShowcase({ items, settings }: Props) {
 
   return (
     <div className="mx-auto flex max-w-[680px] flex-col gap-4">
-      {items.map((item) => (
+      {items.map((item, index) => (
         <article
           key={item.reel.id}
           data-reel-id={item.reel.id}
@@ -64,7 +64,7 @@ export function FeedListShowcase({ items, settings }: Props) {
             <Hashtags item={item} />
           </div>
 
-          <SeekMedia item={item} play={settings.autoplay && visible === item.reel.id} />
+          <SeekMedia item={item} play={settings.autoplay && visible === item.reel.id} eager={index === 0} />
 
           {settings.showPhotos && <ProductStrip item={item} />}
 
@@ -79,7 +79,7 @@ export function FeedListShowcase({ items, settings }: Props) {
 }
 
 /** 16:9 media plane. Click toggles playback; `play` drives the in-view autoplay. */
-function SeekMedia({ item, play }: { item: FeedItem; play: boolean }) {
+function SeekMedia({ item, play, eager }: { item: FeedItem; play: boolean; eager?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -101,7 +101,8 @@ function SeekMedia({ item, play }: { item: FeedItem; play: boolean }) {
       loop
       playsInline
       controls
-      preload="none"
+      // The first seek is above the fold: fetch its metadata up front so it starts quickly
+      preload={eager ? "metadata" : "none"}
       className="aspect-video w-full bg-black object-contain"
     />
   );

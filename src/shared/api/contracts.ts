@@ -281,7 +281,7 @@ export interface FactoryRepository {
   updateProfile(data: Partial<Manufacturer>): Promise<Manufacturer>;
   getStats(): Promise<SellerStats | null>;
   /** Browser-only: uploads a device file and returns a URL usable in addProduct/addSeek/profile. */
-  uploadMedia(file: File, kind: MediaKind): Promise<UploadedMedia>;
+  uploadMedia(file: File, kind: MediaKind, onProgress?: (percent: number) => void): Promise<UploadedMedia>;
   getProducts(): Promise<Product[]>;
   addProduct(data: NewFactoryProduct): Promise<Product>;
   updateProduct(id: string, data: FactoryProductUpdate): Promise<Product>;

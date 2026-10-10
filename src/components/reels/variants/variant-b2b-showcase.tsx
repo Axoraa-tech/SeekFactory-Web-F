@@ -43,6 +43,8 @@ type Props = {
   followingManufacturer?: boolean;
   /** The seek's primary product: drives the spec chips and the price / order bar. */
   product?: Product;
+  /** Above-the-fold card: fetch video metadata up front so it starts quickly. */
+  eager?: boolean;
 };
 
 /**
@@ -50,7 +52,7 @@ type Props = {
  */
 const SPEC_ICONS = [PackageCheck, Layers, Clock, FileSpreadsheet];
 
-export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product }: Props) {
+export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product, eager }: Props) {
   const t = useTranslations();
   const { following, toggleFollow } = useFollow(manufacturer.id, followingManufacturer, manufacturer.followerCount);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -232,7 +234,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 loop
                 playsInline
                 muted={isMuted}
-                preload="none"
+                preload={eager ? "metadata" : "none"}
                 onTimeUpdate={(e) => {
                   trackImpression(e.currentTarget);
                   if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
@@ -252,6 +254,8 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={reel.posterUrl}
                 alt={reel.title}
+                loading={eager ? "eager" : "lazy"}
+                decoding="async"
                 className="h-full w-full object-cover"
               />
             )}

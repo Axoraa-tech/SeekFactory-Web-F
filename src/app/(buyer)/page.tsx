@@ -26,14 +26,18 @@ export default async function HomePage({ searchParams }: Props) {
   const sub = params.sub || "";
   const q = params.q || "";
 
+  // Without a subcategory filter the feed does not depend on the categories, so it loads in the
+  // same wave. Categories and the user are shared with the layout's requests (see getApi()).
+  const api = getApi();
+  const unfilteredFeed = sub ? null : loadFeed(tab, "", q);
   const [allCategories, showcase, user] = await Promise.all([
-    getApi().categories.list(),
+    api.categories.list(),
     loadShowcase(params.layout),
-    getApi().session.getCurrentUser(),
+    api.session.getCurrentUser(),
   ]);
   const { roots, childrenByRoot } = buildCategoryTree(allCategories);
   const subcategoryId = sub ? allCategories.find((c) => c.slug === sub)?.id ?? "" : "";
-  const items = await loadFeed(tab, subcategoryId, q);
+  const items = await (unfilteredFeed ?? loadFeed(tab, subcategoryId, q));
 
   return (
     <HomeSeeksInteractiveFeed

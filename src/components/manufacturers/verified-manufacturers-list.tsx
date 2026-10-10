@@ -204,6 +204,8 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={m.coverUrl || m.logoUrl}
                   alt={m.name}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-1.5 left-1.5 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-xs flex items-center gap-1">

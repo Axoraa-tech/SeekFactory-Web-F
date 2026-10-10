@@ -54,6 +54,31 @@ function writeDraft(draft: Draft | null) {
 }
 
 /** Grabs a frame ~1s in as a JPEG, so a seek never needs a stock cover image. */
+/** Covers wider/taller than 2000px are re-encoded at 1600px JPEG for a faster upload; anything else (or any failure) keeps the original. */
+async function downscaleImage(file: File, maxEdge = 1600): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const longest = Math.max(bitmap.width, bitmap.height);
+    if (longest <= 2000) {
+      bitmap.close();
+      return file;
+    }
+    const scale = maxEdge / longest;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch {
+    return file;
+  }
+}
+
 function captureFrame(src: string): Promise<Blob | null> {
   return new Promise((resolve) => {
     let settled = false;
@@ -135,7 +160,9 @@ export function SeekComposerModal({
   const titleRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   // Finished uploads survive a failed save, so retrying does not resend large files
-  const uploadsRef = useRef(new Map<File, string>());
+  // (also holds an upload still in flight: the video starts uploading as soon as it is picked)
+  const uploadsRef = useRef(new Map<File, Promise<string>>());
+  const [videoProgress, setVideoProgress] = useState<number | null>(null);
   const busy = status !== "idle";
 
   // Keep the text and links as a draft until the seek is published
@@ -198,6 +225,8 @@ export function SeekComposerModal({
     probe.src = url;
     setError(null);
     setInvalid(null);
+    // Upload in the background while the seller fills in the details; Post reuses this promise
+    upload(file, "video").catch(() => {});
   }
 
   function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
@@ -208,20 +237,28 @@ export function SeekComposerModal({
       setError(t("seller.seek.coverImageIsLargerThan"));
       return;
     }
-    setCover({ file, url: URL.createObjectURL(file) });
     setError(null);
+    void downscaleImage(file).then((scaled) => setCover({ file: scaled, url: URL.createObjectURL(scaled) }));
   }
 
   function toggleProduct(id: string) {
     setProductIds((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
   }
 
-  async function upload(file: File, kind: "image" | "video") {
+  function upload(file: File, kind: "image" | "video"): Promise<string> {
     const cached = uploadsRef.current.get(file);
     if (cached) return cached;
-    const media = await getApi().factory.uploadMedia(file, kind);
-    uploadsRef.current.set(file, media.url);
-    return media.url;
+    if (kind === "video") setVideoProgress(0);
+    const onProgress = kind === "video" ? (p: number) => setVideoProgress(p) : undefined;
+    const promise = getApi()
+      .factory.uploadMedia(file, kind, onProgress)
+      .then((media) => media.url);
+    uploadsRef.current.set(file, promise);
+    // A failed upload is forgotten so the next Post retries it
+    promise.catch(() => {
+      if (uploadsRef.current.get(file) === promise) uploadsRef.current.delete(file);
+    });
+    return promise;
   }
 
   async function publish() {
@@ -279,7 +316,10 @@ export function SeekComposerModal({
   }
 
   const statusLabel: Record<Exclude<Status, "idle">, string> = {
-    "uploading-video": t("seller.seek.status.uploadingVideo"),
+    "uploading-video":
+      videoProgress !== null && videoProgress < 100
+        ? `${t("seller.seek.status.uploadingVideo")} ${videoProgress}%`
+        : t("seller.seek.status.uploadingVideo"),
     "uploading-cover": t("seller.seek.status.uploadingCover"),
     saving: t("seller.seek.status.saving"),
   };

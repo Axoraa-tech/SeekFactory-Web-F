@@ -424,7 +424,13 @@ interface BackendFactoryStats {
 /**
  * Production-ready HTTP ApiClient connecting Next.js to Spring Boot.
  */
-export function createHttpApi(baseUrl: string): ApiClient {
+export function createHttpApi(
+  baseUrl: string,
+  opts: {
+    /** Server only, and only for a client scoped to one request (see getApi): share in-flight GETs. */
+    dedupeServerGets?: boolean;
+  } = {}
+): ApiClient {
   const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
 
   // Request Memoization Cache to prevent duplicate GET requests
@@ -475,18 +481,22 @@ export function createHttpApi(baseUrl: string): ApiClient {
   ): Promise<T> {
     const isGet = !options.method || options.method.toUpperCase() === "GET";
     // A call for an explicit section (sign-in) must not reuse another section's in-flight request
-    const explicitPortal = parsePortal(
-      (options.headers as Record<string, string> | undefined)?.[PORTAL_HEADER]
-    );
-    // Browser only: on the server a shared client would hand one user's in-flight response to another
-    const cacheKey = isGet && !explicitPortal && typeof window !== "undefined" ? endpoint : null;
+    const explicitPortal = (options.headers as Record<string, string> | undefined)?.[PORTAL_HEADER];
+    // Browser, or a server client scoped to one request: a shared server client would hand one
+    // user's in-flight response to another
+    const isBrowser = typeof window !== "undefined";
+    const cacheKey = isGet && !explicitPortal && (isBrowser || opts.dedupeServerGets) ? endpoint : null;
 
     if (cacheKey && pendingRequests.has(cacheKey)) {
       return pendingRequests.get(cacheKey) as Promise<T>;
     }
 
     const requestPromise = (async () => {
-      const defaultHeaders = await getAuthHeaders(explicitPortal ?? undefined, endpoint);
+      const defaultHeaders = await getAuthHeaders();
+      // Public, identical-for-everyone data: send no credentials so Next's data cache can share it
+      if (!isBrowser && (options as { next?: { revalidate?: number } }).next?.revalidate) {
+        delete defaultHeaders["Authorization"];
+      }
       // Route browser requests through our secure proxy, server requests go direct
       let url = typeof window !== "undefined" ? `/api/proxy${endpoint}` : `${cleanBaseUrl}${endpoint}`;
       
@@ -552,49 +562,36 @@ export function createHttpApi(baseUrl: string): ApiClient {
    * The browser gets a 5-minute upload-only pass through the proxy, then sends the file straight
    * to the API with it. The normal session token never reaches page scripts.
    */
-  async function uploadDirect<T>(endpoint: string, body: FormData): Promise<T> {
-    const isFactory = endpoint.startsWith("/api/v1/factory/") || endpoint.startsWith("/api/v1/seller/");
-    const portal: Portal = isFactory ? "seller" : browserPortal();
-
-    if (typeof window === "undefined") {
-      return fetchJson<T>(endpoint, { method: "POST", body, headers: { [PORTAL_HEADER]: portal } });
+  async function uploadDirect<T>(
+    endpoint: string,
+    body: FormData,
+    onProgress?: (percent: number) => void
+  ): Promise<T> {
+    if (typeof window === "undefined") return fetchJson<T>(endpoint, { method: "POST", body });
+    const pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", { method: "POST" });
+    // XMLHttpRequest (not fetch) so the browser reports upload progress
+    const { status, text } = await new Promise<{ status: number; text: string }>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${cleanBaseUrl}${endpoint}`);
+      xhr.setRequestHeader("Authorization", `Bearer ${pass.token}`);
+      if (onProgress) {
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable && e.total > 0) onProgress(Math.min(100, Math.round((e.loaded / e.total) * 100)));
+        };
+      }
+      xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText });
+      xhr.onerror = () => reject(new TypeError("Failed to fetch"));
+      xhr.onabort = () => reject(new TypeError("Upload aborted"));
+      xhr.send(body);
+    });
+    let json: { data?: T; message?: string; error?: string } | null = null;
+    try {
+      json = text ? (JSON.parse(text) as { data?: T; message?: string; error?: string }) : null;
+    } catch {
+      json = null;
     }
-
-    const hasAbsoluteBaseUrl = /^https?:\/\//i.test(cleanBaseUrl);
-    const isMixedContent =
-      window.location.protocol === "https:" && cleanBaseUrl.startsWith("http://");
-
-    // Direct upload attempt when absolute URL is configured and matches scheme
-    if (hasAbsoluteBaseUrl && !isMixedContent) {
-      let pass: { token: string } | null = null;
-      try {
-        pass = await fetchJson<{ token: string }>("/api/v1/media/upload-token", {
-          method: "POST",
-          headers: { [PORTAL_HEADER]: portal },
-        });
-      } catch {
-        // upload-token failed, fall through to proxy upload
-      }
-
-      if (pass?.token) {
-        try {
-          const res = await fetch(`${cleanBaseUrl}${endpoint}`, {
-            method: "POST",
-            body,
-            headers: { Authorization: `Bearer ${pass.token}` },
-          });
-          const json = (await res.json().catch(() => null)) as { data?: T; message?: string; error?: string } | null;
-          if (res.ok && json?.data) {
-            return json.data as T;
-          }
-          // Client errors (4xx) should be reported; server gateway errors (5xx) try proxy
-          if (res.status >= 400 && res.status < 500) {
-            throw new ApiError(json?.message || json?.error || `HTTP ${res.status} on ${endpoint}`, res.status);
-          }
-        } catch (err) {
-          if (err instanceof ApiError) throw err;
-        }
-      }
+    if (status < 200 || status >= 300 || !json) {
+      throw new ApiError(json?.message || json?.error || `HTTP ${status} on ${endpoint}`, status);
     }
 
     // Proxy upload fallback with buffered body
@@ -807,7 +804,9 @@ export function createHttpApi(baseUrl: string): ApiClient {
     },
 
     async listVerified(limit = 20): Promise<Manufacturer[]> {
-      const list = await fetchJson<BackendManufacturer[]>(`/api/v1/manufacturers/verified?limit=${limit}`);
+      const list = await fetchJson<BackendManufacturer[]>(`/api/v1/manufacturers/verified?limit=${limit}`, {
+        next: { revalidate: 60 },
+      });
       return list.map(normalizeManufacturer);
     },
 
@@ -909,7 +908,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
   // ── 5. CATEGORY REPOSITORY ─────────────────────────────────────
   const categories: CategoryRepository = {
     async list(): Promise<Category[]> {
-      const list = await fetchJson<BackendCategory[]>("/api/v1/categories");
+      const list = await fetchJson<BackendCategory[]>("/api/v1/categories", { next: { revalidate: 300 } });
       return list.map(normalizeCategory);
     },
 
@@ -1309,7 +1308,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       }
     },
 
-    async uploadMedia(file: File, kind: MediaKind): Promise<UploadedMedia> {
+    async uploadMedia(file: File, kind: MediaKind, onProgress?: (percent: number) => void): Promise<UploadedMedia> {
       // Assumed backend contract: multipart `file` + `kind` → { url, contentType, size }.
       // Backend should store to Aliyun OSS (video → VOD/HLS) and return a public or CDN URL.
       const body = new FormData();
@@ -1318,6 +1317,7 @@ export function createHttpApi(baseUrl: string): ApiClient {
       const res = await uploadDirect<{ url?: string; contentType?: string; content_type?: string; size?: number }>(
         "/api/v1/factory/media",
         body,
+        onProgress,
       );
       if (!res?.url) throw new Error("Upload succeeded but no media URL was returned");
       return {

@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [],
   },
+  experimental: {
+    // Back/forward and repeat client navigations reuse a page's RSC payload for 30 s instead of
+    // re-rendering it (and re-calling the slow backend). Mutations still refresh via router.refresh().
+    staleTimes: { dynamic: 30 },
+  },
 };
 
 
