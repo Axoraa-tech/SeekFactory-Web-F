@@ -53,16 +53,19 @@ export function ProfileHero({
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/80 to-transparent" />
 
-        <Link href={"/"} className="absolute right-48 top-4 hidden sm:flex items-center gap-1.5 rounded-full  px-3 py-1 text-[12px] font-semibold text-white bg-brand-blue">
+        <div className="absolute right-4 top-4 hidden sm:flex items-center gap-2">
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold text-white bg-brand-orange hover:bg-[#d85b17] transition-all shadow-xs active:scale-95"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            {t("nav.home")}
+          </Link>
 
-          <ChevronLeft className="h-3.5 w-3.5" />
-          {t("nav.home")}
-
-        </Link>
-
-        <div className="absolute right-4 top-4 hidden sm:flex items-center gap-1.5 rounded-full glass-liquid-item px-3 py-1 text-[11px] font-semibold text-brand-blue">
-          <ShieldCheck className="h-3.5 w-3.5" />
-          {t("profile.hero.tradeAssuranceBuyer")}
+          <div className="flex items-center gap-1.5 rounded-full glass-liquid-item px-3 py-1 text-[11px] font-semibold text-brand-blue border border-blue-200/50 bg-white/80 backdrop-blur-sm shadow-2xs">
+            <ShieldCheck className="h-3.5 w-3.5 text-brand-blue" />
+            {t("profile.hero.tradeAssuranceBuyer")}
+          </div>
         </div>
         
       </div>

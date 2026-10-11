@@ -13,8 +13,12 @@ import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "./me
 import { useLocale, useTranslations } from "next-intl";
 import { formatRelativeTime } from "@/shared/lib/format";
 
+import type { BuyerProfile } from "@/entities/user";
+
 type Props = {
   activeThread: ThreadWithMessages;
+  currentUser?: BuyerProfile | null;
+  isSupplier?: boolean;
   mobileShowChat: boolean;
   onBackToThreads: () => void;
   isTyping: boolean;
@@ -38,6 +42,8 @@ type Props = {
 
 export function ChatConversationPane({
   activeThread,
+  currentUser,
+  isSupplier = false,
   mobileShowChat,
   onBackToThreads,
   isTyping,
@@ -61,6 +67,13 @@ export function ChatConversationPane({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canSend = (inputMessage.trim().length > 0 || attachment !== null) && !attachmentUploading;
 
+  const counterpartName = isSupplier
+    ? activeThread.buyerName || activeThread.buyerCompany || t("chat.buyer")
+    : activeThread.manufacturer.name;
+  const counterpartAvatar = isSupplier
+    ? activeThread.buyerAvatarUrl
+    : activeThread.manufacturer.logoUrl;
+
   return (
     <div
       className={cn(
@@ -79,18 +92,24 @@ export function ChatConversationPane({
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img loading="lazy" decoding="async" src={activeThread.manufacturer.logoUrl}
-            alt={activeThread.manufacturer.name}
-            className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
-          />
+          {counterpartAvatar ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img loading="lazy" decoding="async" src={counterpartAvatar}
+              alt={counterpartName}
+              className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-xl bg-blue-50 border border-slate-200 flex items-center justify-center font-bold text-xs text-brand-blue shadow-2xs shrink-0">
+              {(counterpartName || "B").slice(0, 2).toUpperCase()}
+            </div>
+          )}
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="font-bold text-xs sm:text-sm text-slate-900 truncate">
-                {activeThread.manufacturer.name}
+                {counterpartName}
               </h3>
-              {activeThread.manufacturer.verified && (
+              {!isSupplier && activeThread.manufacturer.verified && (
                 <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />
               )}
             </div>
@@ -107,37 +126,44 @@ export function ChatConversationPane({
                     : t("chat.offline")}
                 </span>
               )}
-              {[activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).length > 0 && (
-                <span>
-                  {" · "}
-                  {[activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).join(", ")}
-                </span>
+              {isSupplier ? (
+                activeThread.buyerCompany ? (
+                  <span>{" · "}{activeThread.buyerCompany}</span>
+                ) : null
+              ) : (
+                [activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).length > 0 && (
+                  <span>
+                    {" · "}
+                    {[activeThread.manufacturer.location, activeThread.manufacturer.country].filter(Boolean).join(", ")}
+                  </span>
+                )
               )}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <Link
-            href={`/manufacturers/${activeThread.manufacturer.slug}`}
-            title={t("chat.visitPlant")}
-            aria-label={t("chat.visitPlant")}
-            className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 xl:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors shadow-2xs"
-          >
-            <Building2 className="h-3.5 w-3.5" />
-            {/* Icon only while the chat pane is narrow, so the factory name keeps its room */}
-            <span className="hidden xl:inline">{t("chat.visitPlant")}</span>
-          </Link>
-          <Link
-            href="/rfq/new"
-            title={t("nav.postRfq")}
-            aria-label={t("nav.postRfq")}
-            className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-2.5 xl:px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            <span className="hidden xl:inline">{t("nav.postRfq")}</span>
-          </Link>
-        </div>
+        {!isSupplier && (
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Link
+              href={`/manufacturers/${activeThread.manufacturer.slug}`}
+              title={t("chat.visitPlant")}
+              aria-label={t("chat.visitPlant")}
+              className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 xl:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors shadow-2xs"
+            >
+              <Building2 className="h-3.5 w-3.5" />
+              <span className="hidden xl:inline">{t("chat.visitPlant")}</span>
+            </Link>
+            <Link
+              href="/rfq/new"
+              title={t("nav.postRfq")}
+              aria-label={t("nav.postRfq")}
+              className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-2.5 xl:px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span className="hidden xl:inline">{t("nav.postRfq")}</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
@@ -146,49 +172,62 @@ export function ChatConversationPane({
             <MessageSquare className="mx-auto mb-2 h-8 w-8 text-slate-300" />
             <p className="text-sm font-semibold text-slate-700">{t("chat.startTheConversation")}</p>
             <p className="mt-1 text-xs">
-              {t("chat.ask")} {activeThread.manufacturer.name} {t("chat.aboutPricingSpecsOrDelivery")}
+              {isSupplier
+                ? t("seller.messages.sendAMessageToStart")
+                : `${t("chat.ask")} ${activeThread.manufacturer.name} ${t("chat.aboutPricingSpecsOrDelivery")}`}
             </p>
           </div>
         )}
 
         {activeThread.messages.map((msg) => {
-          const isUser = msg.sender === "user";
+          const isOwn =
+            msg.senderId && currentUser?.id
+              ? msg.senderId === currentUser.id
+              : isSupplier
+              ? msg.sender === "factory" || msg.senderType === "FACTORY"
+              : msg.sender === "user" || msg.senderType === "USER";
 
           return (
             <div
               key={msg.id}
-              className={cn("flex gap-2.5 max-w-[82%]", isUser ? "ml-auto flex-row-reverse" : "mr-auto")}
+              className={cn("flex gap-2.5 max-w-[82%]", isOwn ? "ml-auto flex-row-reverse" : "mr-auto")}
             >
-              {!isUser && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={activeThread.manufacturer.logoUrl}
-                  alt=""
-                  className="h-7 w-7 rounded-lg object-cover border border-slate-200 shrink-0 mt-0.5"
-                />
+              {!isOwn && (
+                counterpartAvatar ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={counterpartAvatar}
+                    alt=""
+                    className="h-7 w-7 rounded-lg object-cover border border-slate-200 shrink-0 mt-0.5"
+                  />
+                ) : (
+                  <div className="h-7 w-7 rounded-lg bg-blue-50 border border-slate-200 flex items-center justify-center font-bold text-[10px] text-brand-blue shrink-0 mt-0.5">
+                    {(counterpartName || "B").slice(0, 2).toUpperCase()}
+                  </div>
+                )
               )}
 
               <div className="space-y-1 min-w-0">
                 <div
                   className={cn(
                     "rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-xs",
-                    isUser
+                    isOwn
                       ? "bg-brand-blue text-white rounded-br-xs"
                       : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs"
                   )}
                 >
-                  {msg.order && <MessageOrderTag order={msg.order} tone={isUser ? "own" : "other"} />}
+                  {msg.order && <MessageOrderTag order={msg.order} tone={isOwn ? "own" : "other"} />}
                   {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
-                  {msg.attachment && <MessageAttachmentView attachment={msg.attachment} tone={isUser ? "own" : "other"} />}
+                  {msg.attachment && <MessageAttachmentView attachment={msg.attachment} tone={isOwn ? "own" : "other"} />}
                 </div>
 
                 <div
                   className={cn(
                     "flex items-center gap-1 text-[10px] text-slate-400 px-1 font-medium",
-                    isUser ? "justify-end" : "justify-start"
+                    isOwn ? "justify-end" : "justify-start"
                   )}
                 >
                   <span>{formatChatTime(msg.time)}</span>
-                  {isUser && <CheckCheck className="h-3 w-3 text-brand-blue" />}
+                  {isOwn && <CheckCheck className="h-3 w-3 text-brand-blue" />}
                 </div>
               </div>
             </div>
@@ -197,25 +236,27 @@ export function ChatConversationPane({
 
         {isTyping && (
           <div className="flex items-center gap-2 text-xs text-slate-400 italic">
-            <span>{activeThread.manufacturer.name} {t("chat.isTyping")}</span>
+            <span>{counterpartName} {t("chat.isTyping")}</span>
           </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="px-4 py-2 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
-        {quickInquiries.map((template, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => onSendMessage(undefined, template)}
-            className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 hover:border-brand-blue hover:bg-blue-50 hover:text-brand-blue transition-colors shadow-2xs whitespace-nowrap"
-          >
-            {template}
-          </button>
-        ))}
-      </div>
+      {quickInquiries.length > 0 && (
+        <div className="px-4 py-2 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
+          {quickInquiries.map((template, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => onSendMessage(undefined, template)}
+              className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 hover:border-brand-blue hover:bg-blue-50 hover:text-brand-blue transition-colors shadow-2xs whitespace-nowrap"
+            >
+              {template}
+            </button>
+          ))}
+        </div>
+      )}
 
       {orders.length > 0 && (
         <div className="px-4 py-1.5 bg-white border-t border-slate-100">

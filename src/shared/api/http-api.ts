@@ -2116,6 +2116,10 @@ function normalizeMessage(m: BackendMessage, conversationId: string): MessageIte
   return {
     id: m.id,
     conversationId: m.conversationId || m.conversation_id || conversationId,
+    senderId: m.senderId || m.sender_id,
+    senderType: rawType,
+    senderName: m.senderName || m.sender_name,
+    senderAvatarUrl: resolveMediaUrl(m.senderAvatarUrl || m.sender_avatar_url),
     sender,
     text: m.messageText || m.message_text || "",
     time: m.createdAt || m.created_at || "",
