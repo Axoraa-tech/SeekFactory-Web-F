@@ -7,6 +7,8 @@ import {
   Award,
   Truck,
   CheckCircle2,
+  PackageX,
+  AlertTriangle,
   Building2,
   FileSpreadsheet,
   FileText,
@@ -65,6 +67,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
   if (!detail) notFound();
   const { product, manufacturer } = detail;
 
+  // Seeks that feature this product play at the end of the gallery; the photos still show if this fails
+  const factory = await api.manufacturers.getBySlug(manufacturer.slug).catch(() => null);
+  const seekVideos = (factory?.reels ?? [])
+    .filter((r) => r.videoUrl && r.listed !== false && r.productIds.includes(product.id))
+    .map((r) => ({ id: r.id, videoUrl: r.videoUrl!, posterUrl: r.posterUrl, title: r.title }));
+
   const category = categories.find((c) => c.id === product.categoryId);
   const parentCategory = category?.parentId ? categories.find((c) => c.id === category.parentId) : undefined;
   const categoryHref = parentCategory
@@ -94,6 +102,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               images={product.imageUrls?.length ? product.imageUrls : [product.imageUrl]}
               alt={product.name}
               badge={t("supplier.oemDirect")}
+              videos={seekVideos}
             />
           </Card>
 
@@ -184,7 +193,15 @@ export default async function ProductPage({ params, searchParams }: Props) {
                     <span className="text-xs text-slate-400">•</span>
                   </>
                 )}
-                {hasPrice ? (
+                {product.stockStatus === "OUT_OF_STOCK" ? (
+                  <span className="text-xs text-rose-600 font-semibold flex items-center gap-1">
+                    <PackageX className="h-3 w-3" /> {t("stock.outOfStock")}
+                  </span>
+                ) : product.stockStatus === "LOW_STOCK" ? (
+                  <span className="text-xs text-amber-600 font-semibold flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" /> {t("stock.lowStock")}
+                  </span>
+                ) : hasPrice ? (
                   <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" /> {t("product.page.readyToOrder")}
                   </span>
@@ -252,6 +269,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 productName={product.name}
                 manufacturerSlug={manufacturer.slug}
                 autoOpenOrder={order === "1"}
+                stockStatus={product.stockStatus}
                 size="lg"
                 layout="vertical"
               />

@@ -43,7 +43,7 @@ import type { Category, CategoryIconKey } from "@/entities/category";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { FeedTab, Reel } from "@/entities/reel";
 import type { Manufacturer } from "@/entities/manufacturer";
-import type { Product } from "@/entities/product";
+import type { Product, StockStatus } from "@/entities/product";
 import type { AppNotification } from "@/entities/notification";
 import type { Conversation } from "@/entities/message";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
@@ -186,6 +186,7 @@ interface BackendProduct {
   imageUrls?: string[];
   datasheetUrl?: string;
   datasheetName?: string;
+  stockStatus?: StockStatus;
   listed?: boolean;
   priceTiers?: PriceTier[];
   savedByMe?: boolean;
@@ -1374,6 +1375,14 @@ export function createHttpApi(
       return normalizeProduct(res);
     },
 
+    async setProductStock(id: string, stockStatus: StockStatus): Promise<Product> {
+      const res = await fetchJson<BackendProduct>(`/api/v1/factory/products/${encodeURIComponent(id)}/stock`, {
+        method: "PATCH",
+        body: JSON.stringify({ stockStatus }),
+      });
+      return normalizeProduct(res);
+    },
+
     async deleteProduct(id: string): Promise<void> {
       await fetchJson<void>(`/api/v1/factory/products/${id}`, {
         method: "DELETE",
@@ -1820,6 +1829,7 @@ function normalizeProduct(p: BackendProduct): Product {
     datasheetUrl: resolveMediaUrl(p.datasheetUrl),
     datasheetName: p.datasheetName,
     listed: p.listed ?? true,
+    stockStatus: p.stockStatus ?? "IN_STOCK",
     priceTiers: (p.priceTiers || []).map((t) => ({ minQty: Number(t.minQty), priceInr: Number(t.priceInr) })),
     savedByMe: p.savedByMe,
   };

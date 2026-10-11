@@ -1,3 +1,4 @@
+import type { StockStatus } from "@/entities/product";
 export const SELLER_TABS = ["overview", "products", "seeks", "rfqs", "orders", "messages", "profile"] as const;
 
 export type SellerTab = (typeof SELLER_TABS)[number];
@@ -56,6 +57,7 @@ export type SellerProduct = {
   moq: string;
   /** Active = visible to buyers; Paused = hidden by the seller (still editable). */
   status: "Active" | "Paused";
+  stockStatus: StockStatus;
   /** Gallery in display order (first = imageUrl). */
   imageUrls: string[];
   datasheetUrl?: string;

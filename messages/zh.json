@@ -1489,5 +1489,14 @@
       "pickCategory": "请选择类别，以便合适的买家看到。",
       "addCover": "请添加封面图，或关联一个带图片的产品。"
     }
+  },
+  "stock": {
+    "label": "库存",
+    "inStock": "有货",
+    "lowStock": "库存紧张",
+    "outOfStock": "缺货",
+    "couldNotUpdate": "无法更新库存：{error}",
+    "setStock": "设置库存状态",
+    "unavailableHint": "暂时缺货——您仍可联系工厂或申请报价。"
   }
 }

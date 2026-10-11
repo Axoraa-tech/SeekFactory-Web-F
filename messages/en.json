@@ -1489,5 +1489,14 @@
       "pickCategory": "Choose a category so the right buyers see it.",
       "addCover": "Add a cover image, or link a product with a photo."
     }
+  },
+  "stock": {
+    "label": "Stock",
+    "inStock": "In stock",
+    "lowStock": "Low stock",
+    "outOfStock": "Out of stock",
+    "couldNotUpdate": "Could not update stock: {error}",
+    "setStock": "Set stock status",
+    "unavailableHint": "Currently unavailable — you can still message the factory or request a quote."
   }
 }

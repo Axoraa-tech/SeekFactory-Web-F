@@ -23,6 +23,7 @@ import {
   deleteProductAction,
   deleteSeekAction,
   setProductListedAction,
+  setProductStockAction,
   setSeekListedAction,
   submitQuoteAction,
   updateProductAction,
@@ -56,7 +57,7 @@ import Link from "next/link";
 import type { FactoryVerification } from "@/shared/api/contracts";
 
 import type { Manufacturer } from "@/entities/manufacturer";
-import type { Product } from "@/entities/product";
+import type { Product, StockStatus } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
 import type { RfqItem } from "@/entities/rfq";
 import type { OrderRequest, OrderStatus } from "@/entities/order";
@@ -238,6 +239,20 @@ export function FactoryDashboard({
     const result = await setProductListedAction(id, listed);
     if (!result.ok) {
       setNotice(t("seller.dashboard.couldNotProduct", { listed: listed ? "relist" : "pause", error: result.error }));
+      return;
+    }
+    const updated = toSellerProduct(result.data, allCategories);
+    setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+  }
+
+  /** Optimistic stock change; rolls back and shows a notice on failure. */
+  async function handleSetProductStock(id: string, stockStatus: StockStatus) {
+    const previous = products.find((p) => p.id === id)?.stockStatus;
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, stockStatus } : p)));
+    const result = await setProductStockAction(id, stockStatus);
+    if (!result.ok) {
+      if (previous) setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, stockStatus: previous } : p)));
+      setNotice(t("stock.couldNotUpdate", { error: result.error }));
       return;
     }
     const updated = toSellerProduct(result.data, allCategories);
@@ -661,6 +676,7 @@ export function FactoryDashboard({
                 onOpenAddProduct={() => setIsAddProductOpen(true)}
                 onEditProduct={setEditingProduct}
                 onSetListed={handleSetProductListed}
+                onSetStock={handleSetProductStock}
                 onDeleteProduct={handleDeleteProduct}
               />
             </div>

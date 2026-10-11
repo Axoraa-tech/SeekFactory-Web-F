@@ -114,6 +114,11 @@ export default async function ExplorePage({ searchParams }: Props) {
                     <ShieldCheck className="h-3 w-3 text-emerald-400" />
                     {t("explore.verifiedOem")}
                   </div>
+                  {product.stockStatus === "OUT_OF_STOCK" && (
+                    <div className="absolute top-2 right-2 rounded-full bg-rose-600/90 px-2 py-0.5 text-[10px] font-bold text-white">
+                      {t("stock.outOfStock")}
+                    </div>
+                  )}
                 </div>
                 <div className="p-3 flex flex-col flex-1 justify-between gap-2">
                   <div>

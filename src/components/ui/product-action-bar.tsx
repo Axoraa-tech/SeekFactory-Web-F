@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, Zap, MessageSquare, FileText } from "lucide-react";
+import { ShoppingCart, Zap, MessageSquare, FileText, PackageX } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import { AddToCartModal } from "@/features/orders/add-to-cart-modal";
+import type { StockStatus } from "@/entities/product";
 
 type ProductActionBarProps = {
   /** Needed for "Add to cart". */
@@ -20,6 +21,8 @@ type ProductActionBarProps = {
   manufacturerSlug?: string;
   /** Open the add-to-cart dialog on mount (after signing in from it). */
   autoOpenOrder?: boolean;
+  /** OUT_OF_STOCK swaps cart/checkout for a disabled button; chat and quotes stay available. */
+  stockStatus?: StockStatus;
   size?: "sm" | "md" | "lg";
   layout?: "horizontal" | "vertical" | "inline";
   showPrice?: boolean;
@@ -35,6 +38,7 @@ export function ProductActionBar({
   productName,
   manufacturerSlug,
   autoOpenOrder = false,
+  stockStatus,
   size = "md",
   layout = "horizontal",
   showPrice = true,
@@ -42,7 +46,8 @@ export function ProductActionBar({
 }: ProductActionBarProps) {
   const { t, formatPrice, translateUnit } = useRegionalSettings();
   const router = useRouter();
-  const [isOrderOpen, setIsOrderOpen] = useState(autoOpenOrder && Boolean(productSlug && productId));
+  const isOutOfStock = stockStatus === "OUT_OF_STOCK";
+  const [isOrderOpen, setIsOrderOpen] = useState(autoOpenOrder && !isOutOfStock && Boolean(productSlug && productId));
 
   const hasPrice = priceInr !== undefined && priceInr > 0;
   const minQty = minimumOrderQuantity(moq);
@@ -121,7 +126,23 @@ export function ProductActionBar({
           <span>{t("common.chat", "Chat")}</span>
         </Link>
 
-        {productSlug && productId && (
+        {isOutOfStock && (
+          /* Out of stock: no cart/checkout, buyers can still chat or request a quote */
+          <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 font-bold text-rose-700 whitespace-nowrap cursor-not-allowed",
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
+            )}
+          >
+            <PackageX className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
+            <span>{t("stock.outOfStock")}</span>
+          </button>
+        )}
+
+        {!isOutOfStock && productSlug && productId && (
           /* 2. Add to cart */
           <button
             type="button"
@@ -137,7 +158,7 @@ export function ProductActionBar({
           </button>
         )}
 
-        {productSlug && hasPrice ? (
+        {!isOutOfStock && productSlug && hasPrice ? (
           /* 3. Buy Now Button */
           <button
             type="button"
@@ -167,7 +188,7 @@ export function ProductActionBar({
         )}
       </div>
 
-      {isOrderOpen && productSlug && productId && (
+      {isOrderOpen && !isOutOfStock && productSlug && productId && (
         <AddToCartModal
           productSlug={productSlug}
           productId={productId}

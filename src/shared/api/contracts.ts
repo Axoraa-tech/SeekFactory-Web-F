@@ -2,7 +2,7 @@ import type { Category } from "@/entities/category";
 import type { Conversation, MessageOrderContext } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { AppNotification } from "@/entities/notification";
-import type { Product } from "@/entities/product";
+import type { Product, StockStatus } from "@/entities/product";
 import type { FeedTab, Reel } from "@/entities/reel";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
@@ -291,6 +291,8 @@ export interface FactoryRepository {
   updateProduct(id: string, data: FactoryProductUpdate): Promise<Product>;
   /** Pause (false) hides the product from buyers without deleting it. */
   setProductListed(id: string, listed: boolean): Promise<Product>;
+  /** Seller-set availability shown to buyers; OUT_OF_STOCK blocks cart/checkout. */
+  setProductStock(id: string, stockStatus: StockStatus): Promise<Product>;
   deleteProduct(id: string): Promise<void>;
   getSeeks(): Promise<Reel[]>;
   addSeek(data: NewFactorySeek): Promise<Reel>;

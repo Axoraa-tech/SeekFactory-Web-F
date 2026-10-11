@@ -27,6 +27,7 @@ export function toSellerProduct(product: Product, categories: Category[]): Selle
     unit: product.unit,
     moq: product.moq,
     status: product.listed === false ? "Paused" : "Active",
+    stockStatus: product.stockStatus ?? "IN_STOCK",
     viewsCount: 0,
     inquiriesCount: 0,
     specs: product.specs,
