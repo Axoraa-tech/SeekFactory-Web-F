@@ -280,7 +280,7 @@ export function DynamicCategoryNav({
         <div className="relative flex items-center px-1.5 sm:px-2">
           {/* Left Scroll Arrow */}
           {showLeftArrow && (
-            <div className="absolute left-0 top-0 bottom-0 z-30 flex items-center pr-4 pl-1 bg-gradient-to-r from-white/95 via-white/80 to-transparent pointer-events-none">
+            <div className="absolute left-0 top-0 bottom-0 z-30 flex items-center pr-4 pl-1 bg-gradient-to-r from-white/95 via-white/80 to-transparent pointer-events-none rounded-l-2xl">
               <button
                 type="button"
                 onClick={handleScrollLeft}
@@ -322,11 +322,11 @@ export function DynamicCategoryNav({
                 }}
                 title={`${t("feed.forYou", "For You")} - ${t("sidebar.allCategories", "All Categories")}`}
                 aria-current={!currentCategory ? "page" : undefined}
-                className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-hidden"}
+                className={"group relative flex w-[66px] sm:w-[74px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1 pt-1 pb-1 select-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-hidden"}
               >
                 <span
                   className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-[10px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
+                    "flex h-7 w-7 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
                     !currentCategory
                       ? "bg-brand-orange-soft"
                       : activePopover?.type === "for-you"
@@ -334,12 +334,12 @@ export function DynamicCategoryNav({
                         : "group-hover:bg-neutral-100"
                   )}
                 >
-                  <CategoryIcon icon="for-you" size={24} />
+                  <CategoryIcon icon="for-you" size={20} />
                 </span>
                 <span className="block max-w-full">
                   <span
                     className={cn(
-                      "block truncate text-center text-[11px] sm:text-xs leading-4 transition-colors",
+                      "block truncate text-center text-[10px] sm:text-[11px] leading-tight transition-colors",
                       !currentCategory
                         ? "font-bold text-ink"
                         : "font-medium text-neutral-600 group-hover:text-ink"
@@ -350,7 +350,7 @@ export function DynamicCategoryNav({
                 </span>
 
                 {!currentCategory && (
-                  <span className="absolute bottom-0 inset-x-6 h-[2.5px] rounded-full bg-brand-orange" />
+                  <span className="absolute bottom-0 inset-x-3 h-[2px] rounded-full bg-brand-orange" />
                 )}
               </Link>
             </div>
@@ -394,11 +394,11 @@ export function DynamicCategoryNav({
                     }}
                     title={translatedName}
                     aria-current={isActive ? "page" : undefined}
-                    className={"group relative flex w-[84px] sm:w-[100px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1.5 pt-1 pb-1.5 select-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-hidden"}
+                    className={"group relative flex w-[66px] sm:w-[74px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1 pt-1 pb-1 select-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-hidden"}
                   >
                     <span
                       className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-[10px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
+                        "flex h-7 w-7 items-center justify-center rounded-[8px] transition-[background-color,transform] duration-200 ease-out group-hover:-translate-y-px motion-reduce:transform-none",
                         isActive
                           ? "bg-brand-orange-soft"
                           : isHovered
@@ -406,12 +406,12 @@ export function DynamicCategoryNav({
                             : "group-hover:bg-neutral-100"
                       )}
                     >
-                      <CategoryIcon icon={item.icon} size={24} />
+                      <CategoryIcon icon={item.icon} size={20} />
                     </span>
                     <span className="block max-w-full">
                       <span
                         className={cn(
-                          "block truncate text-center text-[11px] sm:text-xs leading-4 transition-colors",
+                          "block truncate text-center text-[10px] sm:text-[11px] leading-tight transition-colors",
                           isActive
                             ? "font-bold text-ink"
                             : "font-medium text-neutral-600 group-hover:text-ink"
@@ -422,7 +422,7 @@ export function DynamicCategoryNav({
                     </span>
 
                     {isActive && (
-                      <span className="absolute bottom-0 inset-x-6 h-[2.5px] rounded-full bg-brand-orange" />
+                      <span className="absolute bottom-0 inset-x-3 h-[2px] rounded-full bg-brand-orange" />
                     )}
                   </Link>
                 </div>
@@ -432,7 +432,7 @@ export function DynamicCategoryNav({
 
           {/* Right Scroll Arrow */}
           {showRightArrow && (
-            <div className="absolute right-0 top-0 bottom-0 z-30 flex items-center pl-4 pr-1 bg-gradient-to-l from-white/95 via-white/80 to-transparent pointer-events-none">
+            <div className="absolute right-0 top-0 bottom-0 z-30 flex items-center pl-4 pr-1 bg-gradient-to-l from-white/95 via-white/80 to-transparent pointer-events-none rounded-r-2xl">
               <button
                 type="button"
                 onClick={handleScrollRight}
@@ -464,11 +464,11 @@ export function DynamicCategoryNav({
                     12,
                     Math.min(
                       activePopover.rect.left,
-                      (typeof window !== "undefined" ? window.innerWidth : 1200) - 640 - 12
+                      (typeof window !== "undefined" ? window.innerWidth : 1200) - 520 - 12
                     )
                   ),
                   width: Math.min(
-                    640,
+                    520,
                     (typeof window !== "undefined" ? window.innerWidth : 1200) - 24
                   ),
                 }}
@@ -569,8 +569,8 @@ export function DynamicCategoryNav({
                 const isMultiCol = subcategories.length > 8;
                 const windowWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
                 const popoverWidth = isMultiCol
-                  ? Math.min(480, windowWidth - 24)
-                  : Math.min(300, windowWidth - 24);
+                  ? Math.min(400, windowWidth - 24)
+                  : Math.min(260, windowWidth - 24);
 
                 return (
                   <div

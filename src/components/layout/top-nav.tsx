@@ -101,11 +101,12 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
   const { viewportWidth: W, H1, H_tot, x_left, x_right } = layout;
   const w = W < 640 ? 38 : 54;
 
-  // S-curve Bezier control handles
-  const pr1x = x_right - 0.38 * w;
-  const pr2x = x_right - 0.54 * w;
-  const pl1x = x_left + 0.54 * w;
-  const pl2x = x_left + 0.38 * w;
+  // S-curve Bezier control handles (balanced 0.45 handle tension for perfect smooth curvature)
+  const k = 0.45;
+  const pr1x = x_right - k * w;
+  const pr2x = x_right - (1 - k) * w;
+  const pl1x = x_left + (1 - k) * w;
+  const pl2x = x_left + k * w;
 
   // Closed path for fill & clip (entire unified header)
   const fullPathD = hasCategories
@@ -314,14 +315,14 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
         {/* Tier 2: Categories */}
         {categories && categories.length > 0 && (
           <div className="mx-auto max-w-[1440px] px-3 sm:px-6">
-            <div className="pl-6 sm:pl-14 pr-6 sm:pr-18">
+            <div className="pl-6 sm:pl-14 pr-6 sm:pr-14">
               <DynamicCategoryNav
                 categories={categories}
                 allCategories={allCategories}
                 childrenByParentId={childrenByParentId}
                 forYouHref="/"
                 sticky={false}
-                className="rounded-none border-0 bg-transparent shadow-none"
+                className="border-0 bg-transparent shadow-none"
               />
             </div>
           </div>

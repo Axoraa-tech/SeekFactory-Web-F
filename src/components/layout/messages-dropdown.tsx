@@ -140,15 +140,15 @@ export function MessagesDropdown({
                   }`}
                 >
                   <Avatar
-                    src={item.manufacturer.logoUrl}
-                    alt={item.manufacturer.name}
+                    src={item.buyerAvatarUrl || item.manufacturer.logoUrl}
+                    alt={item.buyerName || item.manufacturer.name}
                     size={40}
                     className="shrink-0 ring-1 ring-slate-200"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
                       <p className="truncate text-xs font-bold text-ink">
-                        {item.manufacturer.name}
+                        {item.buyerName || item.manufacturer.name}
                       </p>
                       <span className="text-[10px] text-ink-faint shrink-0 ml-2">
                         {formatRelativeTime(item.lastMessageAt, locale)}

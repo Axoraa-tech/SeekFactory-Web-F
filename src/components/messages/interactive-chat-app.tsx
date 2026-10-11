@@ -12,21 +12,48 @@ import type { MessageItem } from "@/shared/api/contracts";
 import type { OrderRequest } from "@/entities/order";
 import { useChatAttachment } from "@/hooks/use-chat-attachment";
 import { useTranslations } from "next-intl";
+import type { BuyerProfile } from "@/entities/user";
 import { refreshUnreadCounts } from "@/features/inbox/unread-store";
 
 function toChatMessage(m: MessageItem): ChatMessage {
-  return { id: m.id, sender: m.sender, text: m.text, time: m.time, attachment: m.attachment, order: m.order };
+  return {
+    id: m.id,
+    senderId: m.senderId,
+    senderType: m.senderType,
+    senderName: m.senderName,
+    senderAvatarUrl: m.senderAvatarUrl,
+    sender: m.sender,
+    text: m.text,
+    time: m.time,
+    attachment: m.attachment,
+    order: m.order,
+  };
 }
 
 type Props = {
   initialThreads: (Conversation & { manufacturer: Manufacturer })[];
   allManufacturers?: Manufacturer[];
+  currentUser?: BuyerProfile | null;
 };
 
-export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Props) {
+export function InteractiveChatApp({ initialThreads, allManufacturers = [], currentUser: initialUser }: Props) {
   const tr = useTranslations();
   const searchParams = useSearchParams();
   const withSlug = searchParams.get("with");
+
+  const [currentUser, setCurrentUser] = useState<BuyerProfile | null>(initialUser ?? null);
+  useEffect(() => {
+    if (!currentUser) {
+      getApi()
+        .session.getCurrentUser()
+        .then((u) => {
+          if (u) setCurrentUser(u);
+        })
+        .catch(() => {});
+    }
+  }, [currentUser]);
+
+  const isSupplier = currentUser?.role === "Supplier";
 
   const [threads, setThreads] = useState<ThreadWithMessages[]>(() => {
     return initialThreads.map((t) => ({
@@ -268,7 +295,9 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
     const tempId = `temp-${Date.now()}`;
     const optimisticMsg: ChatMessage = {
       id: tempId,
-      sender: "user",
+      senderId: currentUser?.id,
+      senderType: isSupplier ? "FACTORY" : "USER",
+      sender: isSupplier ? "factory" : "user",
       text: textToSend,
       time: new Date().toISOString(),
       attachment: fileToSend ?? undefined,
@@ -325,16 +354,20 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
     }
   };
 
-  const quickInquiries = [
-    tr("chat.whatIsYourMoqAnd"),
-    tr("chat.canYouProvideCifShipping"),
-    tr("chat.canWeArrangeALive"),
-    tr("chat.pleaseShareIso9001Quality"),
-  ];
+  const quickInquiries = isSupplier
+    ? []
+    : [
+        tr("chat.whatIsYourMoqAnd"),
+        tr("chat.canYouProvideCifShipping"),
+        tr("chat.canWeArrangeALive"),
+        tr("chat.pleaseShareIso9001Quality"),
+      ];
 
   const filteredThreads = threads.filter(
     (t) =>
-      t.manufacturer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (isSupplier
+        ? (t.buyerName || t.buyerCompany || "").toLowerCase().includes(searchQuery.toLowerCase())
+        : t.manufacturer.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       t.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -348,11 +381,14 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [] }: Pr
         onSearchChange={setSearchQuery}
         onSelectThread={handleSelectThread}
         mobileShowChat={mobileShowChat}
+        isSupplier={isSupplier}
       />
 
       {activeThread ? (
         <ChatConversationPane
           activeThread={activeThread}
+          currentUser={currentUser}
+          isSupplier={isSupplier}
           mobileShowChat={mobileShowChat}
           onBackToThreads={() => setMobileShowChat(false)}
           isTyping={isTyping}

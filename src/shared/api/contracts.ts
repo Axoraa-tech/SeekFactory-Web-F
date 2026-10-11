@@ -122,6 +122,10 @@ export type MessageAttachment = {
 export type MessageItem = {
   id: string;
   conversationId: string;
+  senderId?: string;
+  senderType?: string;
+  senderName?: string;
+  senderAvatarUrl?: string;
   sender: "user" | "factory";
   text: string;
   time: string;

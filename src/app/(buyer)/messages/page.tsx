@@ -5,7 +5,7 @@ import { requireUser } from "@/features/auth/require-user";
 export const dynamic = "force-dynamic";
 
 export default async function MessagesPage() {
-  await requireUser("/messages");
+  const user = await requireUser("/messages");
   const [threads, allManufacturers] = await Promise.all([
     getApi().messages.listRecent(10),
     getApi().manufacturers.listAll(),
@@ -14,6 +14,7 @@ export default async function MessagesPage() {
   return (
     <section className="space-y-3">
       <InteractiveChatAppLazy
+        currentUser={user}
         initialThreads={threads}
         allManufacturers={allManufacturers}
       />

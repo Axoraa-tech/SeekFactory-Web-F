@@ -4,6 +4,10 @@ import type { MessageAttachment } from "@/shared/api/contracts";
 
 export type ChatMessage = {
   id: string;
+  senderId?: string;
+  senderType?: string;
+  senderName?: string;
+  senderAvatarUrl?: string;
   sender: "user" | "factory";
   text: string;
   time: string;

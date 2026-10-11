@@ -15,6 +15,7 @@ type Props = {
   onSearchChange: (value: string) => void;
   onSelectThread: (id: string) => void;
   mobileShowChat: boolean;
+  isSupplier?: boolean;
 };
 
 export function ChatThreadList({
@@ -25,6 +26,7 @@ export function ChatThreadList({
   onSearchChange,
   onSelectThread,
   mobileShowChat,
+  isSupplier = false,
 }: Props) {
   const locale = useLocale();
   const t = useTranslations();
@@ -60,6 +62,15 @@ export function ChatThreadList({
       <div className="flex-1 overflow-y-auto divide-y divide-slate-100/80 p-1 space-y-0.5">
         {filteredThreads.map((thread) => {
           const isSelected = thread.id === selectedThreadId;
+          const displayName = isSupplier
+            ? thread.buyerName || thread.buyerCompany || t("chat.buyer")
+            : thread.manufacturer.name;
+          const displayAvatar = isSupplier
+            ? thread.buyerAvatarUrl
+            : thread.manufacturer.logoUrl;
+          const displaySubtitle = isSupplier
+            ? thread.buyerCompany || thread.manufacturer.country
+            : thread.manufacturer.country;
 
           return (
             <button
@@ -74,11 +85,17 @@ export function ChatThreadList({
               )}
             >
               <div className="relative shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img loading="lazy" decoding="async" src={thread.manufacturer.logoUrl}
-                  alt={thread.manufacturer.name}
-                  className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs"
-                />
+                {displayAvatar ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img loading="lazy" decoding="async" src={displayAvatar}
+                    alt={displayName}
+                    className="h-10 w-10 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-xl bg-blue-50 border border-slate-200 flex items-center justify-center font-bold text-xs text-brand-blue shadow-2xs">
+                    {(displayName || "B").slice(0, 2).toUpperCase()}
+                  </div>
+                )}
                 {thread.counterpartOnline && (
                   <span
                     className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white"
@@ -91,9 +108,9 @@ export function ChatThreadList({
                 <div className="flex items-center justify-between gap-1">
                   <div className="flex items-center gap-1 truncate">
                     <p className="font-bold text-xs text-slate-900 truncate">
-                      {thread.manufacturer.name}
+                      {displayName}
                     </p>
-                    {thread.manufacturer.verified && (
+                    {!isSupplier && thread.manufacturer.verified && (
                       <VerifiedBadge className="h-3 w-3 shrink-0" />
                     )}
                   </div>
@@ -106,9 +123,11 @@ export function ChatThreadList({
                   {thread.lastMessage}
                 </p>
 
-                <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400 font-medium">
-                  <span>{thread.manufacturer.country}</span>
-                </div>
+                {displaySubtitle && (
+                  <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400 font-medium">
+                    <span>{displaySubtitle}</span>
+                  </div>
+                )}
               </div>
 
               {thread.unreadCount > 0 && (
