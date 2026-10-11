@@ -359,6 +359,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               moq={product?.moq}
               productSlug={product?.slug ?? productSlug}
               manufacturerSlug={manufacturer.slug}
+              stockStatus={product?.stockStatus}
               size="sm"
             />
           </div>

@@ -17,6 +17,7 @@ import {
   Images,
 } from "lucide-react";
 import type { SellerProduct } from "../types";
+import type { StockStatus } from "@/entities/product";
 import { SafeImage } from "@/components/ui/safe-image";
 import { useTranslations } from "next-intl";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
@@ -27,12 +28,20 @@ type Props = {
   onEditProduct: (product: SellerProduct) => void;
   /** Pause (false) or relist (true); resolves when saved. */
   onSetListed: (id: string, listed: boolean) => Promise<void>;
+  /** Optimistic; the dashboard rolls back on failure. */
+  onSetStock: (id: string, stockStatus: StockStatus) => Promise<void>;
   onDeleteProduct: (id: string) => void;
 };
 
 const STATUS_FILTERS = ["All", "Active", "Paused"] as const;
 
-export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetListed, onDeleteProduct }: Props) {
+const STOCK_OPTIONS: { value: StockStatus; key: string; badge: string }[] = [
+  { value: "IN_STOCK", key: "stock.inStock", badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  { value: "LOW_STOCK", key: "stock.lowStock", badge: "bg-amber-50 text-amber-700 border-amber-200" },
+  { value: "OUT_OF_STOCK", key: "stock.outOfStock", badge: "bg-rose-50 text-rose-700 border-rose-200" },
+];
+
+export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetListed, onSetStock, onDeleteProduct }: Props) {
   const t = useTranslations();
   const { translateCategory } = useRegionalSettings();
   const [searchQuery, setSearchQuery] = useState("");
@@ -172,6 +181,14 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                   >
                     {product.status === "Paused" ? t("seller.products.pausedHiddenFromBuyers") : t("seller.products.active")}
                   </span>
+                  {(() => {
+                    const stock = STOCK_OPTIONS.find((o) => o.value === product.stockStatus) ?? STOCK_OPTIONS[0];
+                    return (
+                      <span className={`rounded-full border px-2 py-0.2 text-[10px] font-bold ${stock.badge}`}>
+                        {t(stock.key)}
+                      </span>
+                    );
+                  })()}
                   {product.imageUrls.length > 1 && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-neutral-500">
                       <Images className="h-3 w-3" /> {t("seller.products.photoCount", { count: product.imageUrls.length })}
@@ -240,6 +257,20 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                     <span>{t("common.view")}</span>
                   </Link>
                 )}
+
+                <select
+                  value={product.stockStatus}
+                  onChange={(e) => void onSetStock(product.id, e.target.value as StockStatus)}
+                  aria-label={t("stock.setStock")}
+                  title={t("stock.setStock")}
+                  className="flex-1 sm:flex-none rounded-xl border border-line bg-canvas px-2 py-1.5 text-xs font-bold text-neutral-700 focus:border-brand-blue focus:outline-hidden shadow-2xs cursor-pointer"
+                >
+                  {STOCK_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {t(o.key)}
+                    </option>
+                  ))}
+                </select>
 
                 <button
                   type="button"

@@ -3,6 +3,7 @@
 import { Price } from "@/components/ui/price";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, ImageOff, MapPin, MessageCircle, Pause, Play, Repeat2, Users, Volume2, VolumeX } from "lucide-react";
 import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useReelEngagement } from "@/features/engagement/use-engagement";
@@ -11,6 +12,7 @@ import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
+import type { Product } from "@/entities/product";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { useTranslations } from "next-intl";
 import { createWheelStepper } from "@/hooks/wheel-stepper";
@@ -114,7 +116,11 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
       setActive((curr) => {
         const next = Math.max(0, Math.min(items.length - 1, curr + direction));
         const el = root.querySelector<HTMLElement>(`[data-index="${next}"]`);
-        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Scroll the player only: scrollIntoView would also scroll the locked page and push the header off screen
+        if (el) {
+          const top = el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
+          root.scrollTo({ top, behavior: "smooth" });
+        }
         return next;
       });
     });
@@ -200,11 +206,27 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
 
                 {/* Caption */}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 sm:p-6 text-white">
-                  <p className="flex items-center gap-2 text-sm font-semibold">
-                    {item.manufacturer.name}
-                    {item.manufacturer.verified && <VerifiedBadge />}
-                  </p>
-                  <h3 className="mt-1 text-lg sm:text-xl font-bold leading-snug line-clamp-2">{item.reel.title}</h3>
+                  {/* The overlay ignores the pointer so the video stays clickable; only these links opt back in */}
+                  <div className="pointer-events-auto inline-block">
+                    <SupplierLockOverlay compact>
+                      <Link
+                        href={`/manufacturers/${item.manufacturer.slug}`}
+                        className="flex items-center gap-2 text-sm font-semibold hover:underline"
+                      >
+                        {item.manufacturer.name}
+                        {item.manufacturer.verified && <VerifiedBadge />}
+                      </Link>
+                    </SupplierLockOverlay>
+                  </div>
+                  <h3 className="mt-1 text-lg sm:text-xl font-bold leading-snug line-clamp-2">
+                    {item.primaryProductSlug ? (
+                      <Link href={`/products/${item.primaryProductSlug}`} className="pointer-events-auto hover:underline">
+                        {item.reel.title}
+                      </Link>
+                    ) : (
+                      item.reel.title
+                    )}
+                  </h3>
                   {item.reel.hashtags?.length > 0 && (
                     <p className="mt-1 text-xs text-white/75 line-clamp-1">{item.reel.hashtags.map((h) => `#${h.replace(/^#/, "")}`).join(" ")}</p>
                   )}
@@ -229,9 +251,6 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
             <IconBtn label={t("showcase.single.previousSeek")} onClick={() => go(safeActive - 1)} disabled={safeActive === 0}><ChevronUp className="h-5 w-5" /></IconBtn>
             <IconBtn label={t("showcase.single.nextSeek")} onClick={() => go(safeActive + 1)} disabled={safeActive >= items.length - 1}><ChevronDown className="h-5 w-5" /></IconBtn>
           </div>
-          <span className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white tabular-nums">
-            {safeActive + 1} / {items.length}
-          </span>
           {/* Like, comment, share and save act on the seek in view */}
           <SeekActionRail item={current} />
 
@@ -240,7 +259,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
         {/* Below 1024px: photos as a horizontal strip under the video */}
         {showPhotos && (
           <div className="mt-3 lg:hidden">
-            <PhotoStrip item={current} />
+            <PhotoStrip item={current} items={items} />
           </div>
         )}
         {/* Below 1280px the profile is summarised under the video instead */}
@@ -254,7 +273,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
       {/* RIGHT: seek photos (≥1024px) */}
       {showPhotos && (
         <aside className="hidden lg:block sticky top-[140px]">
-          <PhotoPanel item={current} />
+          <PhotoPanel item={current} items={items} />
         </aside>
       )}
     </div>
@@ -347,7 +366,8 @@ function ProfilePanel({ item }: { item: FeedItem }) {
   const m = item.manufacturer;
   return (
     <div key={m.id} className="rounded-2xl border border-line bg-surface p-5 shadow-2xs transition-opacity duration-300">
-      <div className="flex items-center gap-3">
+      <SupplierLockOverlay>
+      <Link href={`/manufacturers/${m.slug}`} className="flex items-center gap-3 hover:opacity-90">
         <Logo url={m.logoUrl} name={m.name} size="lg" />
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 font-bold text-ink">
@@ -361,7 +381,8 @@ function ProfilePanel({ item }: { item: FeedItem }) {
             </p>
           )}
         </div>
-      </div>
+      </Link>
+      </SupplierLockOverlay>
 
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
         <Stat label={t("showcase.single.est")} value={m.yearsEstablished ? String(m.yearsEstablished) : "—"} />
@@ -399,6 +420,8 @@ function ProfileBar({ item }: { item: FeedItem }) {
   const m = item.manufacturer;
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3">
+      <SupplierLockOverlay compact className="flex min-w-0 flex-1">
+      <Link href={`/manufacturers/${m.slug}`} className="flex min-w-0 flex-1 items-center gap-3">
       <Logo url={m.logoUrl} name={m.name} />
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-1.5 text-sm font-bold text-ink">
@@ -410,25 +433,52 @@ function ProfileBar({ item }: { item: FeedItem }) {
           <span className="flex items-center gap-0.5"><Users className="h-3 w-3" />{formatCount(m.followerCount || 0)}</span>
         </p>
       </div>
+      </Link>
+      </SupplierLockOverlay>
       <Link href={`/manufacturers/${m.slug}`} className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink">{t("nav.profile")}</Link>
       <Link href="/rfq/new" className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
     </div>
   );
 }
 
-function PhotoPanel({ item }: { item: FeedItem }) {
+/** The seek in view's products first, then every other seek's, without repeats. */
+function photosFor(item: FeedItem, items: FeedItem[]): Product[] {
+  const seen = new Set<string>();
+  const out: Product[] = [];
+  for (const p of [item, ...items].flatMap((i) => i.products ?? [])) {
+    if (seen.has(p.id)) continue;
+    seen.add(p.id);
+    out.push(p);
+  }
+  return out;
+}
+
+function PhotoPanel({ item, items }: { item: FeedItem; items: FeedItem[] }) {
   const t = useTranslations();
-  const products = item.products ?? [];
+  const products = photosFor(item, items);
+  const listRef = useRef<HTMLDivElement>(null);
+  // A new seek in view starts its photos from the top
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: 0 });
+  }, [item.reel.id]);
   return (
     <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs">
       <p className="mb-3 text-sm font-bold text-ink">{t("showcase.single.seekPhotos")}</p>
       {products.length === 0 ? (
         <EmptyPhotos />
       ) : (
-        <div className="grid grid-cols-2 gap-2.5 max-h-[calc(100vh-260px)] overflow-y-auto pr-0.5">
+        // overscroll-contain: the wheel scrolls only the photos, never the seeks or the page
+        <div
+          ref={listRef}
+          data-prevent-seek-wheel
+          className="grid grid-cols-2 gap-2.5 max-h-[calc(100vh-260px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
+        >
           {products.map((p) => (
             <Link key={p.id} href={`/products/${p.slug}`} className="group block">
-              <div className="aspect-square overflow-hidden rounded-xl bg-slate-100">
+              <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
+                {p.stockStatus === "OUT_OF_STOCK" && (
+                  <span className="absolute left-1.5 top-1.5 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
+                )}
                 {p.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.imageUrl} alt={p.name} loading="lazy" className="h-full w-full object-cover text-[0px] transition-transform duration-300 group-hover:scale-105" />
@@ -446,15 +496,18 @@ function PhotoPanel({ item }: { item: FeedItem }) {
   );
 }
 
-function PhotoStrip({ item }: { item: FeedItem }) {
+function PhotoStrip({ item, items }: { item: FeedItem; items: FeedItem[] }) {
   const t = useTranslations();
-  const products = item.products ?? [];
+  const products = photosFor(item, items);
   if (products.length === 0) return null;
   return (
     <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label={t("showcase.single.seekPhotos")}>
       {products.map((p) => (
         <Link key={p.id} href={`/products/${p.slug}`} className="w-32 shrink-0 snap-start">
-          <div className="aspect-square overflow-hidden rounded-xl bg-slate-100">
+          <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
+            {p.stockStatus === "OUT_OF_STOCK" && (
+                  <span className="absolute left-1.5 top-1.5 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
+            )}
             {p.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={p.imageUrl} alt={p.name} loading="lazy" className="h-full w-full object-cover text-[0px]" />

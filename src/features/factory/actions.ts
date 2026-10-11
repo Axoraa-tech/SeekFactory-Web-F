@@ -12,7 +12,7 @@ import type {
   VerificationSubmission,
 } from "@/shared/api/contracts";
 import type { Manufacturer } from "@/entities/manufacturer";
-import type { Product } from "@/entities/product";
+import type { Product, StockStatus } from "@/entities/product";
 import type { Reel } from "@/entities/reel";
 import type { OrderRequest, OrderStatus } from "@/entities/order";
 import { ORDER_STATUSES } from "@/features/orders/order-status";
@@ -80,6 +80,10 @@ export async function updateProductAction(id: string, input: FactoryProductUpdat
 
 export async function setProductListedAction(id: string, listed: boolean): Promise<ActionResult<Product>> {
   return run(() => getApi().factory.setProductListed(id, listed));
+}
+
+export async function setProductStockAction(id: string, stockStatus: StockStatus): Promise<ActionResult<Product>> {
+  return run(() => getApi().factory.setProductStock(id, stockStatus));
 }
 
 export async function deleteProductAction(id: string): Promise<ActionResult> {

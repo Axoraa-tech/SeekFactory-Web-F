@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Bookmark, Eye, Heart, ImageOff, MapPin, MessageCircle, Play, Repeat2 } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
+import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { useReelEngagement } from "@/features/engagement/use-engagement";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
@@ -84,6 +85,7 @@ export function FactoryLine({ item, size = "md" }: { item: FeedItem; size?: "sm"
   const { manufacturer } = item;
   const avatar = size === "sm" ? "h-7 w-7" : "h-10 w-10";
   return (
+    <SupplierLockOverlay compact={size === "sm"}>
     <div className="flex min-w-0 items-center gap-2.5">
       <Poster src={manufacturer.logoUrl} alt="" className={cn(avatar, "shrink-0 rounded-full")} />
       <div className="min-w-0">
@@ -100,6 +102,7 @@ export function FactoryLine({ item, size = "md" }: { item: FeedItem; size?: "sm"
         </p>
       </div>
     </div>
+    </SupplierLockOverlay>
   );
 }
 

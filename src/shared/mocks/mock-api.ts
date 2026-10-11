@@ -589,6 +589,11 @@ const factoryRepo: FactoryRepository = {
     product.listed = listed;
     return delay({ ...product });
   },
+  async setProductStock(id, stockStatus) {
+    const product = ownProduct(id);
+    product.stockStatus = stockStatus;
+    return delay({ ...product });
+  },
   async deleteProduct(id) {
     removeWhere(products, (item) => item.id === id && item.manufacturerId === ownFactory().id);
     return delay(undefined);

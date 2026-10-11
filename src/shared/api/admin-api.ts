@@ -52,6 +52,21 @@ export interface AdminManufacturer {
   verificationStatus?: VerificationStatus; submittedAt?: string;
 }
 
+/** A published seek as seen by moderation. */
+export interface AdminSeekRow {
+  id: string; title: string; description?: string; posterUrl?: string; videoUrl?: string;
+  manufacturerId: string; manufacturerName: string; manufacturerSlug: string;
+  listed: boolean; views: number; likes: number; comments: number; createdAt?: string;
+}
+
+/** A product listing as seen by moderation. */
+export interface AdminProductRow {
+  id: string; name: string; slug: string; imageUrl?: string;
+  manufacturerId: string; manufacturerName: string; manufacturerSlug: string;
+  priceInr?: number; unit?: string; listed: boolean;
+  stockStatus?: "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK"; createdAt?: string;
+}
+
 export type VerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 /** The full application an admin reviews — everything the factory has supplied. */
@@ -184,6 +199,14 @@ export const adminData = {
   showcase: () => adminRequest<AdminShowcase>("settings/feed-showcase"),
   publishShowcase: (s: Pick<AdminShowcase, "mode" | "autoplay" | "showProfile" | "showPhotos">) =>
     adminRequest<AdminShowcase>("settings/feed-showcase", { method: "PUT", body: JSON.stringify(s) }),
+
+  /** Content moderation: browse and take down seeks/products from any manufacturer. */
+  content: {
+    listSeeks: (query: ListQuery) => adminRequest<AdminPage<AdminSeekRow>>("content/seeks", { query }),
+    listProducts: (query: ListQuery) => adminRequest<AdminPage<AdminProductRow>>("content/products", { query }),
+    deleteSeek: (id: string) => adminRequest<void>(`content/seeks/${id}`, { method: "DELETE" }),
+    deleteProduct: (id: string) => adminRequest<void>(`content/products/${id}`, { method: "DELETE" }),
+  },
 
   inviteAdmin: (email: string) =>
     adminRequest<{ token: string }>("auth/invite", { method: "POST", body: JSON.stringify({ email }) }),

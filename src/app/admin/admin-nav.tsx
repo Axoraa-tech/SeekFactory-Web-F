@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Banknote, Building2, Clapperboard, CreditCard, FileText, LayoutDashboard, Settings, Users } from "lucide-react";
+import { Banknote, Building2, Clapperboard, CreditCard, FileText, LayoutDashboard, ListChecks, Settings, Users } from "lucide-react";
 import { PendingBadge } from "@/features/admin/pending-approvals";
 
 const ADMIN_NAV = [
@@ -10,6 +10,7 @@ const ADMIN_NAV = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/manufacturers", label: "Manufacturers", icon: Building2 },
   { href: "/admin/rfqs", label: "RFQs Queue", icon: FileText },
+  { href: "/admin/content", label: "Content", icon: ListChecks },
   { href: "/admin/showcase", label: "Seek Showcase", icon: Clapperboard },
   { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/admin/pricing", label: "Pricing Config", icon: Banknote },

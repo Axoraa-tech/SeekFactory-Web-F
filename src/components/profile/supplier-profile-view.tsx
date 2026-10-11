@@ -519,6 +519,7 @@ export function SupplierProfileView({
                         productSlug={product.slug}
                         productName={product.name}
                         manufacturerSlug={manufacturer.slug}
+                        stockStatus={product.stockStatus}
                         size="sm"
                       />
                     </div>
