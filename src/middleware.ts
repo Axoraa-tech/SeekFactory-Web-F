@@ -25,15 +25,11 @@ import {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Protect Admin routes. The design preview is exempt only in development; the
-  // page itself 404s in a production build, so it can never be reached live.
-  const isDevPreview = process.env.NODE_ENV !== "production" && pathname.startsWith("/admin/preview");
-
+  // Protect Admin routes.
   if (
     pathname.startsWith("/admin") &&
     !pathname.startsWith("/admin/login") &&
-    !pathname.startsWith("/admin/setup") &&
-    !isDevPreview
+    !pathname.startsWith("/admin/setup")
   ) {
     const adminToken = request.cookies.get("admin_token");
     if (!adminToken) {

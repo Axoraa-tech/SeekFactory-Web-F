@@ -39,8 +39,7 @@ type DashboardViewProps = {
 };
 
 /**
- * Presentational dashboard. Kept free of data fetching so the same view can be
- * rendered from live analytics or from fixtures in the dev preview route.
+ * Presentational dashboard, kept free of data fetching; the page passes it live analytics.
  */
 export function DashboardView({ data, error, refreshing, period, onPeriod, onRefresh }: DashboardViewProps) {
   const { pending: pendingApprovals } = usePendingApprovals();
