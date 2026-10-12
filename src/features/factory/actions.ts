@@ -20,8 +20,7 @@ import { getTranslations } from "next-intl/server";
 
 /**
  * Seller hub mutations. Run on the server so that:
- * - mock mode writes to the same fixtures the buyer pages read (/, /explore, /products/*),
- * - HTTP mode forwards the HttpOnly sf-access-token cookie to the backend,
+ * - they forward the HttpOnly sf-access-token cookie to the backend,
  * - every buyer-facing route is revalidated after a change.
  *
  * Errors come back as values: Next.js masks thrown messages from server actions in production.
