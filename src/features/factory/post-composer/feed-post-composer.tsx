@@ -77,22 +77,23 @@ export function FeedPostComposer({ author, categories }: Props) {
 
   return (
     <>
-      <div data-post-composer className="rounded-2xl border border-line bg-surface p-3 sm:p-4 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <Avatar src={author.avatarUrl} alt={author.name} size={44} className="shrink-0" />
+      {/* One slim row from md up so the seeks below keep their height; phones stack the two actions underneath */}
+      <div data-post-composer className="flex flex-col gap-2 rounded-2xl border border-line bg-surface p-3 shadow-2xs md:flex-row md:items-center md:gap-3 md:px-4 md:py-2.5">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <Avatar src={author.avatarUrl} alt={author.name} size={36} className="shrink-0" />
           <button
             type="button"
             onClick={() => open("seek")}
-            className="flex h-11 flex-1 items-center rounded-full border border-slate-300 px-4 text-left text-sm font-semibold text-ink-muted transition hover:bg-canvas"
+            className="flex h-10 min-w-0 flex-1 items-center rounded-full border border-slate-300 px-4 text-left text-sm font-semibold text-ink-muted transition hover:bg-canvas"
           >
-            {t("seller.composer.startAPost")}
+            <span className="truncate">{t("seller.composer.startAPost")}</span>
           </button>
         </div>
-        <div className="mt-2 grid grid-cols-2">
+        <div className="grid grid-cols-2 md:flex md:shrink-0 md:gap-1">
           <button
             type="button"
             onClick={() => open("seek")}
-            className="flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-semibold text-ink-muted transition hover:bg-canvas"
+            className="flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold text-ink-muted transition hover:bg-canvas"
           >
             <Video className="h-5 w-5 text-emerald-600" />
             {t("seller.composer.video")}
@@ -100,7 +101,7 @@ export function FeedPostComposer({ author, categories }: Props) {
           <button
             type="button"
             onClick={() => open("product")}
-            className="flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-semibold text-ink-muted transition hover:bg-canvas"
+            className="flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold text-ink-muted transition hover:bg-canvas"
           >
             <ImageIcon className="h-5 w-5 text-brand-blue" />
             {t("seller.composer.photo")}

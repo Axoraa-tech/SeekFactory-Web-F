@@ -334,6 +334,13 @@
       "moreSeeks": "More seeks",
       "scrollLeft": "Scroll left",
       "scrollRight": "Scroll right"
+    },
+    "products": {
+      "badge": "Products",
+      "viewProduct": "View product",
+      "previous": "Previous product",
+      "next": "Next product",
+      "count": "{count, plural, one {# product} other {# products}}"
     }
   },
   "pages": {
@@ -1193,7 +1200,9 @@
     "composer": {
       "startAPost": "Start a post",
       "video": "Video seek",
-      "photo": "Product photos"
+      "photo": "Product photos",
+      "postVideo": "Post video",
+      "postProduct": "Post product"
     }
   },
   "chat": {
