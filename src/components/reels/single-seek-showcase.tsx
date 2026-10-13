@@ -1,7 +1,7 @@
 "use client";
 
 import { Price } from "@/components/ui/price";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { ImageOff, MapPin, Users } from "lucide-react";
@@ -42,6 +42,21 @@ type Entry =
   | { kind: "seek"; key: string; item: FeedItem; seekIndex: number }
   | { kind: "products"; key: string; group: ProductGroup };
 
+/** Below this window height the page scrolls normally instead of locking to the window. */
+const LOCK_MIN_HEIGHT_QUERY = "(min-height: 700px)";
+
+function useMediaQuery(query: string): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia(query);
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+}
+
 /** A product card after every this many seeks; groups left over follow the last seek. */
 const SEEKS_PER_PRODUCT_CARD = 2;
 
@@ -75,15 +90,19 @@ function interleave(items: FeedItem[], groups: ProductGroup[]): Entry[] {
 export function SingleSeekShowcase({ items, settings, variant = "single", header, productGroups }: Props) {
   const t = useTranslations();
   const scrollerRef = useRef<HTMLDivElement>(null);
-  // Side by side from lg: the page stays put and the seek column fills the window below the Seeks bar
   const entries = useMemo(() => interleave(items, productGroups ?? []), [items, productGroups]);
-  const playerHeight = useViewportLock(scrollerRef, entries.length > 0, 1024);
+  // Side by side from lg on a tall enough window: the page stays put and the seek column fills the
+  // window below the Seeks bar. A short window (browser zoomed in, small laptop) would squeeze the
+  // video into a strip, so it scrolls normally instead, with full-width 16:9 videos as on phones.
+  const tallEnough = useMediaQuery(LOCK_MIN_HEIGHT_QUERY);
+  const playerHeight = useViewportLock(scrollerRef, entries.length > 0 && tallEnough, 1024);
+  const locked = playerHeight !== null;
   const [active, setActive] = useState(0);
 
   // Track which seek is in view: it drives the profile and photo panels
   useEffect(() => {
-    const root = scrollerRef.current;
-    if (!root) return;
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -92,11 +111,12 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
           }
         }
       },
-      { root, threshold: [0.5] },
+      // Locked: the seek column scrolls itself; otherwise the page (viewport) does
+      { root: locked ? scroller : null, threshold: [0.5] },
     );
-    root.querySelectorAll("[data-index]").forEach((el) => observer.observe(el));
+    scroller.querySelectorAll("[data-index]").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [entries]);
+  }, [entries, locked]);
 
   // A different set of seeks (tab, category or search changed) starts again at the first one
   useEffect(() => {
@@ -107,12 +127,15 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
   const scrollToIndex = useCallback((index: number) => {
     const root = scrollerRef.current;
     const target = root?.querySelector<HTMLElement>(`[data-index="${index}"]`);
-    // Scroll the seek column only; scrollIntoView would also move the (locked) page
-    if (root && target) {
-      const top = target.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
-      root.scrollTo({ top, behavior: "smooth" });
+    if (!root || !target) return;
+    if (!locked) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
     }
-  }, []);
+    // Scroll the seek column only; scrollIntoView would also move the (locked) page
+    const top = target.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
+    root.scrollTo({ top, behavior: "smooth" });
+  }, [locked]);
 
   const go = useCallback((index: number) => {
     scrollToIndex(Math.max(0, Math.min(entries.length - 1, index)));
@@ -130,10 +153,10 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
     return () => window.removeEventListener("keydown", onKey);
   }, [active, go]);
 
-  // Controlled single-seek scroll lock on mouse wheel and trackpad two-finger scroll
+  // Controlled single-seek scroll lock on mouse wheel and trackpad two-finger scroll (locked layout only)
   useEffect(() => {
     const root = scrollerRef.current;
-    if (!root) return;
+    if (!root || !locked) return;
 
     const stepper = createWheelStepper((direction) => {
       setActive((curr) => {
@@ -155,7 +178,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
       stepper.dispose();
       root.removeEventListener("wheel", onWheel);
     };
-  }, [entries.length, scrollToIndex]);
+  }, [entries.length, scrollToIndex, locked]);
 
   if (entries.length === 0) {
     return (
@@ -206,7 +229,10 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
           <div
             ref={scrollerRef}
             style={playerHeight ? { height: playerHeight } : undefined}
-            className="space-y-4 rounded-2xl lg:h-[calc(100dvh-230px)] lg:min-h-[480px] lg:overflow-y-auto lg:overscroll-contain lg:snap-y lg:snap-mandatory lg:pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
+            className={cn(
+              "space-y-4 rounded-2xl scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent",
+              locked && "overflow-y-auto overscroll-contain snap-y snap-mandatory pr-1",
+            )}
             aria-label={t("common.seeks")}
           >
             {entries.map((entry, i) => (
@@ -236,16 +262,15 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
                     fill={playerHeight !== null}
                   />
                 )}
+                {/* Below 1024px: each seek's own product photos as a strip right under it */}
+                {showPhotos && !locked && (
+                  <div className="mt-3 lg:hidden">
+                    <PhotoStrip first={entry.kind === "seek" ? entry.item.products ?? [] : entry.group.products} items={[]} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
-
-          {/* Below 1024px: photos as a horizontal strip under the seeks */}
-          {showPhotos && (
-            <div className="mt-3 lg:hidden">
-              <PhotoStrip first={currentProducts} items={items} />
-            </div>
-          )}
           {/* Below 1280px the profile is summarised under the seeks instead */}
           {showProfile && (
             <div className="mt-3 xl:hidden">
@@ -257,7 +282,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
         {/* RIGHT: seek photos (≥1024px) */}
         {showPhotos && (
           <aside className="hidden lg:block sticky top-[140px]">
-            <PhotoPanel first={currentProducts} items={items} resetKey={current.key} />
+            <PhotoPanel first={currentProducts} items={items} groups={productGroups} resetKey={current.key} />
           </aside>
         )}
       </div>
@@ -345,21 +370,32 @@ function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
   );
 }
 
-/** The products in view first, then every seek's, without repeats. */
-function photosFor(first: Product[], items: FeedItem[]): Product[] {
+type Photo = { key: string; product: Product; url: string };
+
+/**
+ * Every gallery photo of the products in view first (so the panel follows the scroll), then one
+ * cover photo for every other product in the feed: those under seeks and those without any seek.
+ */
+function photosFor(first: Product[], items: FeedItem[], groups: ProductGroup[] = []): Photo[] {
   const seen = new Set<string>();
-  const out: Product[] = [];
-  for (const p of [...first, ...items.flatMap((i) => i.products ?? [])]) {
+  const out: Photo[] = [];
+  for (const p of first) {
     if (seen.has(p.id)) continue;
     seen.add(p.id);
-    out.push(p);
+    const gallery = p.imageUrls?.length ? p.imageUrls : p.imageUrl ? [p.imageUrl] : [];
+    gallery.forEach((url, i) => out.push({ key: `${p.id}-${i}`, product: p, url }));
+  }
+  for (const p of [...items.flatMap((i) => i.products ?? []), ...groups.flatMap((g) => g.products)]) {
+    if (seen.has(p.id) || !p.imageUrl) continue;
+    seen.add(p.id);
+    out.push({ key: p.id, product: p, url: p.imageUrl });
   }
   return out;
 }
 
-function PhotoPanel({ first, items, resetKey }: { first: Product[]; items: FeedItem[]; resetKey: string }) {
+function PhotoPanel({ first, items, groups, resetKey }: { first: Product[]; items: FeedItem[]; groups?: ProductGroup[]; resetKey: string }) {
   const t = useTranslations();
-  const products = photosFor(first, items);
+  const photos = photosFor(first, items, groups);
   const listRef = useRef<HTMLDivElement>(null);
   // A new seek in view starts its photos from the top
   useEffect(() => {
@@ -368,59 +404,69 @@ function PhotoPanel({ first, items, resetKey }: { first: Product[]; items: FeedI
   return (
     <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs">
       <p className="mb-3 text-sm font-bold text-ink">{t("showcase.single.seekPhotos")}</p>
-      {products.length === 0 ? (
+      {photos.length === 0 ? (
         <EmptyPhotos />
       ) : (
         // overscroll-contain: the wheel scrolls only the photos, never the seeks or the page
         <div
           ref={listRef}
           data-prevent-seek-wheel
-          // Runs down to the bottom of the seek card (the panel now starts level with the Seeks bar)
-          className="grid grid-cols-2 gap-2.5 max-h-[calc(100vh-225px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
+          // One photo per row; runs down to the bottom of the seek card
+          className="flex flex-col gap-3 max-h-[calc(100vh-225px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
         >
-          {products.map((p) => (
-            <Link key={p.id} href={`/products/${p.slug}`} className="group block">
-              <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
-                {p.stockStatus === "OUT_OF_STOCK" && (
-                  <span className="absolute left-1.5 top-1.5 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
-                )}
-                {p.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.imageUrl} alt={p.name} loading="lazy" className="h-full w-full object-cover text-[0px] transition-transform duration-300 group-hover:scale-105" />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-300"><ImageOff className="h-6 w-6" /></div>
-                )}
-              </div>
-              <p className="mt-1.5 text-xs font-semibold text-ink line-clamp-2">{p.name}</p>
-              {p.priceInr > 0 && <p className="text-xs text-ink-muted"><Price inr={p.priceInr} />{p.unit ? ` / ${p.unit}` : ""}</p>}
-            </Link>
-          ))}
+          {photos.map(({ key, product: p, url }, i) => {
+            // A product's details show once, under its first photo; the rest of its gallery follows
+            const firstOfProduct = i === 0 || photos[i - 1].product.id !== p.id;
+            return (
+              <Link key={key} href={`/products/${p.slug}`} className="group block">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100">
+                  {firstOfProduct && p.stockStatus === "OUT_OF_STOCK" && (
+                    <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
+                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px] transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                {firstOfProduct && <PhotoDetails product={p} />}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
 
-function PhotoStrip({ first, items }: { first: Product[]; items: FeedItem[] }) {
+/** Name, price, minimum order and a short description under a product's photo. */
+function PhotoDetails({ product: p }: { product: Product }) {
   const t = useTranslations();
-  const products = photosFor(first, items);
-  if (products.length === 0) return null;
+  return (
+    <div className="mt-1.5 space-y-0.5">
+      <p className="text-xs font-semibold text-ink line-clamp-2">{p.name}</p>
+      {p.priceInr > 0 && (
+        <p className="text-xs font-semibold text-ink"><Price inr={p.priceInr} />{p.unit ? <span className="font-normal text-ink-muted"> / {p.unit}</span> : null}</p>
+      )}
+      {p.moq && <p className="text-[11px] text-ink-muted">{t("common.minOrder")} {p.moq}</p>}
+      {p.description && <p className="text-[11px] leading-snug text-ink-muted line-clamp-3">{p.description}</p>}
+    </div>
+  );
+}
+
+function PhotoStrip({ first, items, groups }: { first: Product[]; items: FeedItem[]; groups?: ProductGroup[] }) {
+  const t = useTranslations();
+  const photos = photosFor(first, items, groups);
+  if (photos.length === 0) return null;
   return (
     <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label={t("showcase.single.seekPhotos")}>
-      {products.map((p) => (
-        <Link key={p.id} href={`/products/${p.slug}`} className="w-32 shrink-0 snap-start">
+      {photos.map(({ key, product: p, url }, i) => (
+        <Link key={key} href={`/products/${p.slug}`} className="w-40 shrink-0 snap-start">
           <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
             {p.stockStatus === "OUT_OF_STOCK" && (
-                  <span className="absolute left-1.5 top-1.5 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
+              <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
             )}
-            {p.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.imageUrl} alt={p.name} loading="lazy" className="h-full w-full object-cover text-[0px]" />
-            ) : (
-              <div className="flex h-full items-center justify-center text-slate-300"><ImageOff className="h-5 w-5" /></div>
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px]" />
           </div>
-          <p className="mt-1 text-xs font-semibold text-ink line-clamp-1">{p.name}</p>
+          {(i === 0 || photos[i - 1].product.id !== p.id) && <PhotoDetails product={p} />}
         </Link>
       ))}
     </div>

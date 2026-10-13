@@ -269,6 +269,13 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               fill ? "!flex-1 min-h-[160px] max-h-[56.25cqw] aspect-[16/9] w-auto max-w-full self-center" : "aspect-[16/9] w-full",
             )}
           >
+            {/* Blurred poster fills the frame; the video itself is shown whole on top, so it keeps its own
+                aspect ratio however the window (or browser zoom) resizes the box */}
+            {reel.posterUrl && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={reel.posterUrl} alt="" aria-hidden loading="lazy"
+                className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
+            )}
             {reel.videoUrl ? (
               <video
                 ref={videoRef}
@@ -291,7 +298,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 onPause={() => setIsBuffering(false)}
                 onCanPlay={() => setIsBuffering(false)}
                 onError={() => setIsBuffering(false)}
-                className="h-full w-full object-cover"
+                className="relative h-full w-full object-contain"
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
@@ -299,7 +306,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 alt={reel.title}
                 loading={eager ? "eager" : "lazy"}
                 decoding="async"
-                className="h-full w-full object-cover"
+                className="relative h-full w-full object-contain"
               />
             )}
             
