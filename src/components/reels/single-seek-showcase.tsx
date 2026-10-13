@@ -194,9 +194,8 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
   // The list can shrink before the reset effect runs, so never read or show past the end
   const safeActive = Math.min(active, entries.length - 1);
   const current = entries[safeActive];
-  // The side panels follow whatever is in view: a seek's factory and products, or a product card's
+  // The profile panel follows whatever is in view (the photo panel deliberately does not)
   const currentManufacturer = current.kind === "seek" ? current.item.manufacturer : current.group.manufacturer;
-  const currentProducts = current.kind === "seek" ? current.item.products ?? [] : current.group.products;
   // The site's left menu replaces the profile column in the sidebar variant
   const showProfile = variant === "single" && settings.showProfile;
   const showPhotos = settings.showPhotos;
@@ -226,6 +225,12 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
         <section className="min-w-0">
           {/* lg:pr-5: end at the card's edge, not over the seek column's scrollbar */}
           {header && <div className="mb-2 space-y-2 lg:pr-5">{header}</div>}
+          {/* Below 1024px: all product photos as one strip of their own, above the seeks */}
+          {showPhotos && (
+            <div className="mb-3 lg:hidden">
+              <PhotoStrip items={items} groups={productGroups} />
+            </div>
+          )}
           <div
             ref={scrollerRef}
             style={playerHeight ? { height: playerHeight } : undefined}
@@ -262,12 +267,6 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
                     fill={playerHeight !== null}
                   />
                 )}
-                {/* Below 1024px: each seek's own product photos as a strip right under it */}
-                {showPhotos && !locked && (
-                  <div className="mt-3 lg:hidden">
-                    <PhotoStrip first={entry.kind === "seek" ? entry.item.products ?? [] : entry.group.products} items={[]} />
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -282,7 +281,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
         {/* RIGHT: seek photos (≥1024px) */}
         {showPhotos && (
           <aside className="hidden lg:block sticky top-[140px]">
-            <PhotoPanel first={currentProducts} items={items} groups={productGroups} resetKey={current.key} />
+            <PhotoPanel items={items} groups={productGroups} />
           </aside>
         )}
       </div>
@@ -373,34 +372,24 @@ function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
 type Photo = { key: string; product: Product; url: string };
 
 /**
- * Every gallery photo of the products in view first (so the panel follows the scroll), then one
- * cover photo for every other product in the feed: those under seeks and those without any seek.
+ * Every product in the feed (under seeks and from factories without seeks) with its whole gallery,
+ * in a fixed order. Independent of the seek in view: changing videos never reorders or moves it.
  */
-function photosFor(first: Product[], items: FeedItem[], groups: ProductGroup[] = []): Photo[] {
+function photosFor(items: FeedItem[], groups: ProductGroup[] = []): Photo[] {
   const seen = new Set<string>();
   const out: Photo[] = [];
-  for (const p of first) {
+  for (const p of [...items.flatMap((i) => i.products ?? []), ...groups.flatMap((g) => g.products)]) {
     if (seen.has(p.id)) continue;
     seen.add(p.id);
     const gallery = p.imageUrls?.length ? p.imageUrls : p.imageUrl ? [p.imageUrl] : [];
     gallery.forEach((url, i) => out.push({ key: `${p.id}-${i}`, product: p, url }));
   }
-  for (const p of [...items.flatMap((i) => i.products ?? []), ...groups.flatMap((g) => g.products)]) {
-    if (seen.has(p.id) || !p.imageUrl) continue;
-    seen.add(p.id);
-    out.push({ key: p.id, product: p, url: p.imageUrl });
-  }
   return out;
 }
 
-function PhotoPanel({ first, items, groups, resetKey }: { first: Product[]; items: FeedItem[]; groups?: ProductGroup[]; resetKey: string }) {
+function PhotoPanel({ items, groups }: { items: FeedItem[]; groups?: ProductGroup[] }) {
   const t = useTranslations();
-  const photos = photosFor(first, items, groups);
-  const listRef = useRef<HTMLDivElement>(null);
-  // A new seek in view starts its photos from the top
-  useEffect(() => {
-    listRef.current?.scrollTo({ top: 0 });
-  }, [resetKey]);
+  const photos = useMemo(() => photosFor(items, groups), [items, groups]);
   return (
     <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs">
       <p className="mb-3 text-sm font-bold text-ink">{t("showcase.single.seekPhotos")}</p>
@@ -409,7 +398,6 @@ function PhotoPanel({ first, items, groups, resetKey }: { first: Product[]; item
       ) : (
         // overscroll-contain: the wheel scrolls only the photos, never the seeks or the page
         <div
-          ref={listRef}
           data-prevent-seek-wheel
           // One photo per row; runs down to the bottom of the seek card
           className="flex flex-col gap-3 max-h-[calc(100vh-225px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
@@ -451,9 +439,9 @@ function PhotoDetails({ product: p }: { product: Product }) {
   );
 }
 
-function PhotoStrip({ first, items, groups }: { first: Product[]; items: FeedItem[]; groups?: ProductGroup[] }) {
+function PhotoStrip({ items, groups }: { items: FeedItem[]; groups?: ProductGroup[] }) {
   const t = useTranslations();
-  const photos = photosFor(first, items, groups);
+  const photos = useMemo(() => photosFor(items, groups), [items, groups]);
   if (photos.length === 0) return null;
   return (
     <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label={t("showcase.single.seekPhotos")}>
