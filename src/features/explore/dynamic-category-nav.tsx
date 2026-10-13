@@ -643,13 +643,6 @@ export function DynamicCategoryNav({
                             className="group flex items-center justify-between gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 hover:bg-brand-orange-soft hover:text-brand-orange transition-colors"
                           >
                             <span className="truncate group-hover:font-medium">{subName}</span>
-                            {sub.listingCount > 0 && (
-                              <span className="shrink-0 text-[10px] font-semibold text-slate-400 group-hover:text-brand-orange">
-                                {sub.listingCount > 999
-                                  ? `${(sub.listingCount / 1000).toFixed(0)}k`
-                                  : sub.listingCount}
-                              </span>
-                            )}
                           </Link>
                         );
                       })}

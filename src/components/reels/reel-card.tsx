@@ -17,6 +17,8 @@ type ReelCardProps = {
   itemIndex?: number;
   /** Whether the viewer follows this factory; undefined for guests. */
   followingManufacturer?: boolean;
+  /** Fill the parent's height, shrinking the video so the whole card stays visible. */
+  fill?: boolean;
 };
 
 /**
@@ -30,6 +32,7 @@ export function ReelCard({
   products = [],
   itemIndex = 0,
   followingManufacturer,
+  fill,
 }: ReelCardProps) {
   const { openAt } = useReelPopup();
 
@@ -43,6 +46,7 @@ export function ReelCard({
       product={products[0]}
       // The first card of each column is above the fold
       eager={itemIndex < 2}
+      fill={fill}
     />
   );
 }

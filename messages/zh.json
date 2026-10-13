@@ -334,6 +334,13 @@
       "moreSeeks": "更多希克",
       "scrollLeft": "向左滚动",
       "scrollRight": "向右滚动"
+    },
+    "products": {
+      "badge": "产品",
+      "viewProduct": "查看产品",
+      "previous": "上一个产品",
+      "next": "下一个产品",
+      "count": "{count} 个产品"
     }
   },
   "pages": {
@@ -1193,7 +1200,9 @@
     "composer": {
       "startAPost": "开始发布",
       "video": "视频",
-      "photo": "产品图片"
+      "photo": "产品图片",
+      "postVideo": "发布视频",
+      "postProduct": "发布产品"
     }
   },
   "chat": {
