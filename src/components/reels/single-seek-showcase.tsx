@@ -243,7 +243,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
           {/* Below 1024px: photos as a horizontal strip under the seeks */}
           {showPhotos && (
             <div className="mt-3 lg:hidden">
-              <PhotoStrip first={currentProducts} items={items} />
+              <PhotoStrip first={currentProducts} items={items} groups={productGroups} />
             </div>
           )}
           {/* Below 1280px the profile is summarised under the seeks instead */}
@@ -257,7 +257,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
         {/* RIGHT: seek photos (≥1024px) */}
         {showPhotos && (
           <aside className="hidden lg:block sticky top-[140px]">
-            <PhotoPanel first={currentProducts} items={items} resetKey={current.key} />
+            <PhotoPanel first={currentProducts} items={items} groups={productGroups} resetKey={current.key} />
           </aside>
         )}
       </div>
@@ -345,21 +345,32 @@ function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
   );
 }
 
-/** The products in view first, then every seek's, without repeats. */
-function photosFor(first: Product[], items: FeedItem[]): Product[] {
+type Photo = { key: string; product: Product; url: string };
+
+/**
+ * Every gallery photo of the products in view first (so the panel follows the scroll), then one
+ * cover photo for every other product in the feed: those under seeks and those without any seek.
+ */
+function photosFor(first: Product[], items: FeedItem[], groups: ProductGroup[] = []): Photo[] {
   const seen = new Set<string>();
-  const out: Product[] = [];
-  for (const p of [...first, ...items.flatMap((i) => i.products ?? [])]) {
+  const out: Photo[] = [];
+  for (const p of first) {
     if (seen.has(p.id)) continue;
     seen.add(p.id);
-    out.push(p);
+    const gallery = p.imageUrls?.length ? p.imageUrls : p.imageUrl ? [p.imageUrl] : [];
+    gallery.forEach((url, i) => out.push({ key: `${p.id}-${i}`, product: p, url }));
+  }
+  for (const p of [...items.flatMap((i) => i.products ?? []), ...groups.flatMap((g) => g.products)]) {
+    if (seen.has(p.id) || !p.imageUrl) continue;
+    seen.add(p.id);
+    out.push({ key: p.id, product: p, url: p.imageUrl });
   }
   return out;
 }
 
-function PhotoPanel({ first, items, resetKey }: { first: Product[]; items: FeedItem[]; resetKey: string }) {
+function PhotoPanel({ first, items, groups, resetKey }: { first: Product[]; items: FeedItem[]; groups?: ProductGroup[]; resetKey: string }) {
   const t = useTranslations();
-  const products = photosFor(first, items);
+  const photos = photosFor(first, items, groups);
   const listRef = useRef<HTMLDivElement>(null);
   // A new seek in view starts its photos from the top
   useEffect(() => {
@@ -368,57 +379,58 @@ function PhotoPanel({ first, items, resetKey }: { first: Product[]; items: FeedI
   return (
     <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs">
       <p className="mb-3 text-sm font-bold text-ink">{t("showcase.single.seekPhotos")}</p>
-      {products.length === 0 ? (
+      {photos.length === 0 ? (
         <EmptyPhotos />
       ) : (
         // overscroll-contain: the wheel scrolls only the photos, never the seeks or the page
         <div
           ref={listRef}
           data-prevent-seek-wheel
-          // Runs down to the bottom of the seek card (the panel now starts level with the Seeks bar)
-          className="grid grid-cols-2 gap-2.5 max-h-[calc(100vh-225px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
+          // One photo per row; runs down to the bottom of the seek card
+          className="flex flex-col gap-3 max-h-[calc(100vh-225px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
         >
-          {products.map((p) => (
-            <Link key={p.id} href={`/products/${p.slug}`} className="group block">
-              <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
-                {p.stockStatus === "OUT_OF_STOCK" && (
-                  <span className="absolute left-1.5 top-1.5 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
+          {photos.map(({ key, product: p, url }, i) => {
+            // A product's gallery shows its name and price once, under its first photo
+            const firstOfProduct = i === 0 || photos[i - 1].product.id !== p.id;
+            const lastOfProduct = i === photos.length - 1 || photos[i + 1].product.id !== p.id;
+            return (
+              <Link key={key} href={`/products/${p.slug}`} className="group block">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100">
+                  {firstOfProduct && p.stockStatus === "OUT_OF_STOCK" && (
+                    <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
+                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px] transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                {lastOfProduct && (
+                  <>
+                    <p className="mt-1.5 text-xs font-semibold text-ink line-clamp-2">{p.name}</p>
+                    {p.priceInr > 0 && <p className="text-xs text-ink-muted"><Price inr={p.priceInr} />{p.unit ? ` / ${p.unit}` : ""}</p>}
+                  </>
                 )}
-                {p.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.imageUrl} alt={p.name} loading="lazy" className="h-full w-full object-cover text-[0px] transition-transform duration-300 group-hover:scale-105" />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-300"><ImageOff className="h-6 w-6" /></div>
-                )}
-              </div>
-              <p className="mt-1.5 text-xs font-semibold text-ink line-clamp-2">{p.name}</p>
-              {p.priceInr > 0 && <p className="text-xs text-ink-muted"><Price inr={p.priceInr} />{p.unit ? ` / ${p.unit}` : ""}</p>}
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
 
-function PhotoStrip({ first, items }: { first: Product[]; items: FeedItem[] }) {
+function PhotoStrip({ first, items, groups }: { first: Product[]; items: FeedItem[]; groups?: ProductGroup[] }) {
   const t = useTranslations();
-  const products = photosFor(first, items);
-  if (products.length === 0) return null;
+  const photos = photosFor(first, items, groups);
+  if (photos.length === 0) return null;
   return (
     <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label={t("showcase.single.seekPhotos")}>
-      {products.map((p) => (
-        <Link key={p.id} href={`/products/${p.slug}`} className="w-32 shrink-0 snap-start">
+      {photos.map(({ key, product: p, url }) => (
+        <Link key={key} href={`/products/${p.slug}`} className="w-32 shrink-0 snap-start">
           <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
             {p.stockStatus === "OUT_OF_STOCK" && (
-                  <span className="absolute left-1.5 top-1.5 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
+              <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
             )}
-            {p.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.imageUrl} alt={p.name} loading="lazy" className="h-full w-full object-cover text-[0px]" />
-            ) : (
-              <div className="flex h-full items-center justify-center text-slate-300"><ImageOff className="h-5 w-5" /></div>
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px]" />
           </div>
           <p className="mt-1 text-xs font-semibold text-ink line-clamp-1">{p.name}</p>
         </Link>
