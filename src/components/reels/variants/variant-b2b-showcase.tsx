@@ -45,6 +45,12 @@ type Props = {
   product?: Product;
   /** Above-the-fold card: fetch video metadata up front so it starts quickly. */
   eager?: boolean;
+  /**
+   * Single-seek showcase: the card fills its parent's height, every block has a fixed height and
+   * the same rows appear on every seek, and the video takes the rest (at most 16:9), so every seek's
+   * video is the same size. Off: the dual layout's card with a plain 16:9 video.
+   */
+  fill?: boolean;
 };
 
 /**
@@ -52,7 +58,7 @@ type Props = {
  */
 const SPEC_ICONS = [PackageCheck, Layers, Clock, FileSpreadsheet];
 
-export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product, eager }: Props) {
+export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product, eager, fill }: Props) {
   const t = useTranslations();
   const { following, toggleFollow } = useFollow(manufacturer.id, followingManufacturer, manufacturer.followerCount);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -65,10 +71,20 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
 
   const { liked, likes, saved, shares, shared, toggleLike, toggleSave, share } = useReelEngagement(reel);
 
-  const specChips = [
+  const productChips = [
     ...(product?.moq ? [{ label: t("common.minOrder"), value: product.moq }] : []),
     ...Object.entries(product?.specs ?? {}).map(([label, value]) => ({ label, value })),
-  ].slice(0, 4);
+  ];
+  // Showcase: every seek gets the same rows, so a seek without product specs shows its factory's facts
+  const factoryChips = [
+    { label: t("seller.verify.country"), value: [manufacturer.location, manufacturer.country].filter(Boolean).join(", ") },
+    { label: t("showcase.spotlight.established"), value: manufacturer.yearsEstablished ? String(manufacturer.yearsEstablished) : "" },
+    { label: t("showcase.spotlight.employees"), value: manufacturer.employees },
+    { label: t("supplier.certification"), value: manufacturer.certifications?.[0] ?? "" },
+    { label: t("showcase.single.exportsTo"), value: manufacturer.exportCountries?.slice(0, 2).join(", ") ?? "" },
+    { label: t("showcase.spotlight.factorySize"), value: manufacturer.factorySize },
+  ].filter((chip) => chip.value);
+  const specChips = (productChips.length === 0 && fill ? factoryChips : productChips).slice(0, 4);
 
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
@@ -153,14 +169,26 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
     <>
       <article
         ref={containerRef}
-        className="seek-stage group/card relative overflow-hidden rounded-card border border-[rgba(28,22,22,0.07)] shadow-[0_1px_1px_rgba(28,22,22,0.03),0_18px_40px_-26px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_1px_1px_rgba(28,22,22,0.03),0_24px_48px_-26px_rgba(15,23,42,0.45)]"
+        className={cn(
+          "seek-stage group/card relative overflow-hidden rounded-card border border-[rgba(28,22,22,0.07)] shadow-[0_1px_1px_rgba(28,22,22,0.03),0_18px_40px_-26px_rgba(15,23,42,0.35)] transition-shadow duration-300 hover:shadow-[0_1px_1px_rgba(28,22,22,0.03),0_24px_48px_-26px_rgba(15,23,42,0.45)]",
+          // Showcase: exactly the parent's height
+          fill && "flex h-full flex-col",
+        )}
       >
 
-        <div className="p-3.5 sm:p-4 pb-2 sm:pb-2.5 space-y-2.5">
+        <div
+          // Showcase: every block has a fixed height and the video takes the rest (at most 16:9 of the
+          // card's width, via container units), so every seek's video is the same size
+          className={cn(
+            "p-3.5 sm:p-4 pb-2 sm:pb-2.5",
+            fill ? "flex min-h-0 flex-1 flex-col space-y-2 [container-type:inline-size] [&>*]:shrink-0" : "space-y-2.5",
+          )}
+        >
           {/* Header with SupplierLockOverlay */}
           <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
             {/* On narrow phones the actions wrap under the name instead of squeezing it */}
-            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+            {/* Showcase (desktop only): one fixed row, the name truncates instead of pushing the buttons down */}
+            <div className={cn("flex items-center justify-between gap-x-3 gap-y-2", fill ? "h-10 flex-nowrap" : "flex-wrap")}>
               <Link
                 href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
                 className="flex flex-1 basis-[200px] items-center gap-3 hover:opacity-90 transition min-w-0"
@@ -172,8 +200,12 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                   className="h-10 w-10 rounded-lg border border-neutral-200 object-cover shadow-xs flex-shrink-0"
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="min-w-0 line-clamp-2 break-words text-sm font-bold text-ink hover:text-brand-orange transition">
+                  <div className={cn("flex items-center gap-1.5", fill ? "flex-nowrap overflow-hidden" : "flex-wrap")}>
+                    <p
+                      // Showcase: one line so every card is the same height
+                      title={fill ? manufacturer.name : undefined}
+                      className={cn("min-w-0 break-words text-sm font-bold text-ink hover:text-brand-orange transition", fill ? "truncate" : "line-clamp-2")}
+                    >
                       {manufacturer.name}
                     </p>
                     <SeekTrustBadge manufacturer={manufacturer} />
@@ -209,12 +241,19 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
           </SupplierLockOverlay>
 
           {/* Hairline between the manufacturer row and the seek's title */}
-          <div aria-hidden="true" className="h-px bg-gradient-to-r from-slate-200 via-slate-200/70 to-transparent" />
+          {!fill && <div aria-hidden="true" className="h-px bg-gradient-to-r from-slate-200 via-slate-200/70 to-transparent" />}
 
-          {/* Title & Description */}
-          <div>
-            <h3 className="text-base font-bold text-ink leading-snug">{reel.title}</h3>
-            <p className="text-xs sm:text-sm text-neutral-600 mt-0.5 leading-relaxed">{reel.description}</p>
+          {/* Title & Description (showcase: one line, the description trailing the title) */}
+          <div className={cn(fill && "flex h-6 min-w-0 items-baseline gap-2")}>
+            <h3 className={cn("text-base font-bold text-ink leading-snug", fill && "shrink-0 max-w-[60%] truncate")} title={fill ? reel.title : undefined}>
+              {reel.title}
+            </h3>
+            {/* Showcase skips a description that only repeats the title */}
+            {(!fill || (reel.description && reel.description !== reel.title)) && (
+              <p className={cn("text-xs sm:text-sm text-neutral-600 leading-relaxed", fill ? "min-w-0 truncate" : "mt-0.5")}>
+                {reel.description}
+              </p>
+            )}
           </div>
 
                     {/* Video Player */}
@@ -224,7 +263,11 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTogglePlay}
-            className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black cursor-pointer shadow-sm group select-none"
+            className={cn(
+              "relative w-full overflow-hidden rounded-xl bg-black cursor-pointer shadow-sm group select-none",
+              // Showcase: all the space the fixed blocks leave, never taller than 16:9
+              fill ? "!flex-1 min-h-[160px] max-h-[56.25cqw]" : "aspect-[16/9]",
+            )}
           >
             {reel.videoUrl ? (
               <video
@@ -326,8 +369,28 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
 
 
           {/* Technical Spec Sheet Chips with SupplierLockOverlay: the product's MOQ plus the factory's own specs */}
-          {specChips.length > 0 && (
+          {/* Showcase: the row is always there (fixed height) so every card has the same shape */}
+          {(specChips.length > 0 || fill) && (
             <SupplierLockOverlay badgeLabel={t("seek.viewFactorySpecs")} compact>
+              {fill ? (
+                // Showcase: one slim row of "label value" chips instead of tall tiles
+                <div className="flex h-8 min-w-0 gap-2 overflow-hidden">
+                  {specChips.map((chip, index) => {
+                    const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
+                    return (
+                      <div
+                        key={chip.label}
+                        className="glass-tile flex h-8 min-w-0 flex-1 items-center gap-1.5 rounded-xl px-2.5 text-xs"
+                        title={`${chip.label}: ${chip.value}`}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0 text-brand-blue" strokeWidth={2} />
+                        <span className="shrink-0 text-ink-muted">{chip.label.charAt(0).toUpperCase() + chip.label.slice(1).toLowerCase()}</span>
+                        <span className="min-w-0 truncate font-semibold text-ink">{chip.value}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {specChips.map((chip, index) => {
                   const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
@@ -346,15 +409,17 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                   );
                 })}
               </div>
+              )}
             </SupplierLockOverlay>
           )}
 
           {/* B2B Instant Commercial Bar: Price, Buy Now, Add to Cart, Chat */}
-          <div className="glass-tile rounded-2xl px-3 py-2.5">
+          <div className={cn("glass-tile rounded-2xl px-3", fill ? "flex h-[52px] items-center [&>*]:w-full" : "py-2.5")}>
             <ProductActionBar
               productId={product?.id}
               productName={product?.name}
-              priceInr={product?.priceInr}
+              // Showcase: a seek without a product still shows the price slot ("Price on request")
+              priceInr={product?.priceInr ?? (fill ? 0 : undefined)}
               unit={product?.unit}
               moq={product?.moq}
               productSlug={product?.slug ?? productSlug}

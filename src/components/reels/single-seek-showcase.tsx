@@ -1,12 +1,14 @@
 "use client";
 
 import { Price } from "@/components/ui/price";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
-import { Bookmark, ChevronDown, ChevronUp, Eye, Heart, ImageOff, MapPin, MessageCircle, Pause, Play, Repeat2, Users, Volume2, VolumeX } from "lucide-react";
-import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
-import { useReelEngagement } from "@/features/engagement/use-engagement";
+import { ImageOff, MapPin, Users } from "lucide-react";
+import { ReelCard } from "@/components/reels/reel-card";
+import { ProductSlideshowCard } from "@/components/reels/product-slideshow-card";
+import { ReelPopupProvider } from "@/components/reels/use-reel-popup";
+import { ReelPopupModal } from "@/components/reels/reel-popup-modal";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
@@ -14,6 +16,8 @@ import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { Product } from "@/entities/product";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
+import type { ProductGroup } from "@/features/feed/use-showcase-products";
+import type { Manufacturer } from "@/entities/manufacturer";
 import { useTranslations } from "next-intl";
 import { createWheelStepper } from "@/hooks/wheel-stepper";
 
@@ -28,45 +32,71 @@ type Props = {
    * has to reach the DOM rather than staying a prop.
    */
   variant?: "single" | "sidebar";
+  /** The feed's Seeks bar: shown at the top of the centre column, so it is only as wide as the seek card. */
+  header?: ReactNode;
+  /** Factories' products, mixed in between the seeks as auto-sliding cards (see interleave). */
+  productGroups?: ProductGroup[];
 };
 
+type Entry =
+  | { kind: "seek"; key: string; item: FeedItem; seekIndex: number }
+  | { kind: "products"; key: string; group: ProductGroup };
+
+/** A product card after every this many seeks; groups left over follow the last seek. */
+const SEEKS_PER_PRODUCT_CARD = 2;
+
+function interleave(items: FeedItem[], groups: ProductGroup[]): Entry[] {
+  const out: Entry[] = [];
+  let g = 0;
+  items.forEach((item, i) => {
+    out.push({ kind: "seek", key: `seek-${item.reel.id}`, item, seekIndex: i });
+    if ((i + 1) % SEEKS_PER_PRODUCT_CARD === 0 && g < groups.length) {
+      const group = groups[g++];
+      out.push({ kind: "products", key: `products-${group.manufacturer.id}`, group });
+    }
+  });
+  // Factories without seeks (or more groups than gaps) still get shown
+  for (; g < groups.length; g++) {
+    out.push({ kind: "products", key: `products-${groups[g].manufacturer.id}`, group: groups[g] });
+  }
+  return out;
+}
+
 /**
- * Single-video seek showcase:
- *   ≥1280px  [factory profile 280] [video, max space] [seek photos 280]
- *   ≥1024px  profile drops out → [video] [photos 280]
- *   <1024px  video full width with a horizontal photo strip underneath
- * The seek in view drives both side panels. Only that seek's video plays.
+ * Single-video seek showcase, built from the same seek card as the dual layout:
+ *   ≥1280px  [factory profile 280] [seek card, max space] [seek photos 280]
+ *   ≥1024px  profile drops out → [seek card] [photos 280]
+ *   <1024px  cards full width with a horizontal photo strip underneath
+ * The seek in view drives both side panels; the card plays itself when mostly in view.
  *
  * In the "sidebar" variant the factory profile panel is never shown: the site's
  * own left menu occupies that column instead.
  */
-export function SingleSeekShowcase({ items, settings, variant = "single" }: Props) {
+export function SingleSeekShowcase({ items, settings, variant = "single", header, productGroups }: Props) {
   const t = useTranslations();
   const scrollerRef = useRef<HTMLDivElement>(null);
-  // Side by side from lg: the page stays put and the player fills the window below the Seeks bar
-  const playerHeight = useViewportLock(scrollerRef, items.length > 0, 1024);
-  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
+  // Side by side from lg: the page stays put and the seek column fills the window below the Seeks bar
+  const entries = useMemo(() => interleave(items, productGroups ?? []), [items, productGroups]);
+  const playerHeight = useViewportLock(scrollerRef, entries.length > 0, 1024);
   const [active, setActive] = useState(0);
-  const [muted, setMuted] = useState(true);
-  const [paused, setPaused] = useState(!settings.autoplay);
 
-  // Track which slide is in view
+  // Track which seek is in view: it drives the profile and photo panels
   useEffect(() => {
     const root = scrollerRef.current;
     if (!root) return;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+          if (e.isIntersecting && e.intersectionRatio >= 0.5) {
             setActive(Number((e.target as HTMLElement).dataset.index));
           }
         }
       },
-      { root, threshold: [0.6] },
+      { root, threshold: [0.5] },
     );
     root.querySelectorAll("[data-index]").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [items]);
+  }, [entries]);
 
   // A different set of seeks (tab, category or search changed) starts again at the first one
   useEffect(() => {
@@ -74,26 +104,19 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
     scrollerRef.current?.scrollTo({ top: 0 });
   }, [items]);
 
-  // Play only the active video
-  useEffect(() => {
-    videoRefs.current.forEach((video, i) => {
-      if (i === active && !paused) {
-        video.play().catch(() => setPaused(true)); // autoplay can be blocked by the browser
-      } else {
-        video.pause();
-      }
-    });
-  }, [active, paused, items]);
-
-  const go = useCallback((index: number) => {
+  const scrollToIndex = useCallback((index: number) => {
     const root = scrollerRef.current;
-    const target = root?.querySelector<HTMLElement>(`[data-index="${Math.max(0, Math.min(items.length - 1, index))}"]`);
-    // Scroll the player only; scrollIntoView would also move the (locked) page
+    const target = root?.querySelector<HTMLElement>(`[data-index="${index}"]`);
+    // Scroll the seek column only; scrollIntoView would also move the (locked) page
     if (root && target) {
       const top = target.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
       root.scrollTo({ top, behavior: "smooth" });
     }
-  }, [items.length]);
+  }, []);
+
+  const go = useCallback((index: number) => {
+    scrollToIndex(Math.max(0, Math.min(entries.length - 1, index)));
+  }, [entries.length, scrollToIndex]);
 
   // Arrow keys move between seeks (ignored while typing)
   useEffect(() => {
@@ -114,13 +137,8 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
 
     const stepper = createWheelStepper((direction) => {
       setActive((curr) => {
-        const next = Math.max(0, Math.min(items.length - 1, curr + direction));
-        const el = root.querySelector<HTMLElement>(`[data-index="${next}"]`);
-        // Scroll the player only: scrollIntoView would also scroll the locked page and push the header off screen
-        if (el) {
-          const top = el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
-          root.scrollTo({ top, behavior: "smooth" });
-        }
+        const next = Math.max(0, Math.min(entries.length - 1, curr + direction));
+        scrollToIndex(next);
         return next;
       });
     });
@@ -137,233 +155,120 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
       stepper.dispose();
       root.removeEventListener("wheel", onWheel);
     };
-  }, [items.length]);
+  }, [entries.length, scrollToIndex]);
 
-  if (items.length === 0) {
+  if (entries.length === 0) {
     return (
-      <div className="rounded-card border border-line bg-surface p-8 text-center text-sm text-ink-muted">
-        {t("feed.emptyTab")}
+      <div className="space-y-3.5">
+        {header}
+        <div className="rounded-card border border-line bg-surface p-8 text-center text-sm text-ink-muted">
+          {t("feed.emptyTab")}
+        </div>
       </div>
     );
   }
 
   // The list can shrink before the reset effect runs, so never read or show past the end
-  const safeActive = Math.min(active, items.length - 1);
-  const current = items[safeActive];
+  const safeActive = Math.min(active, entries.length - 1);
+  const current = entries[safeActive];
+  // The side panels follow whatever is in view: a seek's factory and products, or a product card's
+  const currentManufacturer = current.kind === "seek" ? current.item.manufacturer : current.group.manufacturer;
+  const currentProducts = current.kind === "seek" ? current.item.products ?? [] : current.group.products;
   // The site's left menu replaces the profile column in the sidebar variant
   const showProfile = variant === "single" && settings.showProfile;
   const showPhotos = settings.showPhotos;
 
   return (
-    <div
-      {...(variant === "single" ? { "data-showcase-single": "" } : { "data-showcase-sidebar": "" })}
-      className={cn(
-        "grid grid-cols-[minmax(0,1fr)] gap-5 items-start",
-        showPhotos && "lg:grid-cols-[minmax(0,1fr)_280px]",
-        showProfile && !showPhotos && "xl:grid-cols-[280px_minmax(0,1fr)]",
-        showProfile && showPhotos && "xl:grid-cols-[280px_minmax(0,1fr)_280px]",
-      )}
-    >
-      {/* LEFT: factory profile (≥1280px) */}
-      {showProfile && (
-        <aside className="hidden xl:block sticky top-[140px]">
-          <ProfilePanel item={current} />
-        </aside>
-      )}
+    <ReelPopupProvider totalItems={items.length}>
+      {/* The card's expand button opens the same popup as the dual layout */}
+      <ReelPopupModal items={items} />
 
-      {/* CENTRE: one seek at a time */}
-      <section className="min-w-0">
-        <div className="relative">
+      <div
+        {...(variant === "single" ? { "data-showcase-single": "" } : { "data-showcase-sidebar": "" })}
+        className={cn(
+          "grid grid-cols-[minmax(0,1fr)] gap-5 items-start",
+          showPhotos && "lg:grid-cols-[minmax(0,1fr)_280px]",
+          showProfile && !showPhotos && "xl:grid-cols-[280px_minmax(0,1fr)]",
+          showProfile && showPhotos && "xl:grid-cols-[280px_minmax(0,1fr)_280px]",
+        )}
+      >
+        {/* LEFT: factory profile (≥1280px) */}
+        {showProfile && (
+          <aside className="hidden xl:block sticky top-[140px]">
+            <ProfilePanel manufacturer={currentManufacturer} />
+          </aside>
+        )}
+
+        {/* CENTRE: the dual layout's seek card, one per step, across the whole column */}
+        <section className="min-w-0">
+          {/* lg:pr-5: end at the card's edge, not over the seek column's scrollbar */}
+          {header && <div className="mb-2 space-y-2 lg:pr-5">{header}</div>}
           <div
             ref={scrollerRef}
             style={playerHeight ? { height: playerHeight } : undefined}
-            className="h-[58vh] min-h-[340px] lg:h-[calc(100vh-240px)] lg:min-h-[480px] overflow-y-auto snap-y snap-mandatory rounded-2xl bg-slate-950 scrollbar-none"
+            className="space-y-4 rounded-2xl lg:h-[calc(100dvh-230px)] lg:min-h-[480px] lg:overflow-y-auto lg:overscroll-contain lg:snap-y lg:snap-mandatory lg:pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
             aria-label={t("common.seeks")}
           >
-            {items.map((item, i) => (
+            {entries.map((entry, i) => (
               <div
-                key={item.reel.id}
+                key={entry.key}
                 data-index={i}
-                data-feed-reel-id={item.reel.id}
-                className="relative h-full w-full snap-start snap-always overflow-hidden"
+                {...(entry.kind === "seek" ? { "data-feed-reel-id": entry.item.reel.id } : {})}
+                // While the page is locked each card is exactly one column tall, so no window size cuts one off
+                style={playerHeight ? { height: playerHeight } : undefined}
+                className="snap-start shrink-0"
               >
-                {item.reel.videoUrl ? (
-                  <video
-                    ref={(el) => { if (el) videoRefs.current.set(i, el); else videoRefs.current.delete(i); }}
-                    src={Math.abs(i - active) <= 1 ? item.reel.videoUrl : undefined}
-                    poster={item.reel.posterUrl}
-                    muted={muted}
-                    loop
-                    playsInline
-                    preload={i === active ? "auto" : "metadata"}
-                    onClick={() => setPaused((p) => !p)}
-                    className="h-full w-full object-contain bg-black cursor-pointer"
+                {entry.kind === "seek" ? (
+                  <ReelCard
+                    reel={entry.item.reel}
+                    followingManufacturer={entry.item.followingManufacturer}
+                    manufacturer={entry.item.manufacturer}
+                    productSlug={entry.item.primaryProductSlug}
+                    products={entry.item.products}
+                    // The popup only knows seeks, so it is addressed by seek position
+                    itemIndex={entry.seekIndex}
+                    fill={playerHeight !== null}
                   />
                 ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.reel.posterUrl} alt="" className="h-full w-full object-cover" />
+                  <ProductSlideshowCard
+                    manufacturer={entry.group.manufacturer}
+                    products={entry.group.products}
+                    fill={playerHeight !== null}
+                  />
                 )}
-
-                {/* Caption */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 sm:p-6 text-white">
-                  {/* The overlay ignores the pointer so the video stays clickable; only these links opt back in */}
-                  <div className="pointer-events-auto inline-block">
-                    <SupplierLockOverlay compact>
-                      <Link
-                        href={`/manufacturers/${item.manufacturer.slug}`}
-                        className="flex items-center gap-2 text-sm font-semibold hover:underline"
-                      >
-                        {item.manufacturer.name}
-                        {item.manufacturer.verified && <VerifiedBadge />}
-                      </Link>
-                    </SupplierLockOverlay>
-                  </div>
-                  <h3 className="mt-1 text-lg sm:text-xl font-bold leading-snug line-clamp-2">
-                    {item.primaryProductSlug ? (
-                      <Link href={`/products/${item.primaryProductSlug}`} className="pointer-events-auto hover:underline">
-                        {item.reel.title}
-                      </Link>
-                    ) : (
-                      item.reel.title
-                    )}
-                  </h3>
-                  {item.reel.hashtags?.length > 0 && (
-                    <p className="mt-1 text-xs text-white/75 line-clamp-1">{item.reel.hashtags.map((h) => `#${h.replace(/^#/, "")}`).join(" ")}</p>
-                  )}
-                  <p className="mt-2 flex items-center gap-4 text-xs text-white/80">
-                    <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{formatCount(item.reel.views)}</span>
-                  </p>
-                </div>
               </div>
             ))}
           </div>
 
-          {/* Controls */}
-          <div className="absolute right-3 top-3 z-10 flex flex-col gap-2">
-            <IconBtn label={paused ? t("common.play") : t("common.pause")} onClick={() => setPaused((p) => !p)}>
-              {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-            </IconBtn>
-            <IconBtn label={muted ? t("common.unmute") : t("common.mute")} onClick={() => setMuted((m) => !m)}>
-              {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-            </IconBtn>
-          </div>
-          <div className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 flex-col gap-2 sm:flex">
-            <IconBtn label={t("showcase.single.previousSeek")} onClick={() => go(safeActive - 1)} disabled={safeActive === 0}><ChevronUp className="h-5 w-5" /></IconBtn>
-            <IconBtn label={t("showcase.single.nextSeek")} onClick={() => go(safeActive + 1)} disabled={safeActive >= items.length - 1}><ChevronDown className="h-5 w-5" /></IconBtn>
-          </div>
-          {/* Like, comment, share and save act on the seek in view */}
-          <SeekActionRail item={current} />
+          {/* Below 1024px: photos as a horizontal strip under the seeks */}
+          {showPhotos && (
+            <div className="mt-3 lg:hidden">
+              <PhotoStrip first={currentProducts} items={items} />
+            </div>
+          )}
+          {/* Below 1280px the profile is summarised under the seeks instead */}
+          {showProfile && (
+            <div className="mt-3 xl:hidden">
+              <ProfileBar manufacturer={currentManufacturer} />
+            </div>
+          )}
+        </section>
 
-        </div>
-
-        {/* Below 1024px: photos as a horizontal strip under the video */}
+        {/* RIGHT: seek photos (≥1024px) */}
         {showPhotos && (
-          <div className="mt-3 lg:hidden">
-            <PhotoStrip item={current} items={items} />
-          </div>
+          <aside className="hidden lg:block sticky top-[140px]">
+            <PhotoPanel first={currentProducts} items={items} resetKey={current.key} />
+          </aside>
         )}
-        {/* Below 1280px the profile is summarised under the video instead */}
-        {showProfile && (
-          <div className="mt-3 xl:hidden">
-            <ProfileBar item={current} />
-          </div>
-        )}
-      </section>
-
-      {/* RIGHT: seek photos (≥1024px) */}
-      {showPhotos && (
-        <aside className="hidden lg:block sticky top-[140px]">
-          <PhotoPanel item={current} items={items} />
-        </aside>
-      )}
-    </div>
-  );
-}
-
-/* ─────────── actions ─────────── */
-
-/**
- * Like / comment / share / save for the seek in view, backed by the same engagement code as the
- * seek popup: optimistic updates that roll back on failure, and guests are sent to sign in.
- */
-function SeekActionRail({ item }: { item: FeedItem }) {
-  const t = useTranslations();
-  const reel = item.reel;
-  const { liked, likes, saved, shares, shared, toggleLike, toggleSave, share } = useReelEngagement(reel);
-  const [commentsOpen, setCommentsOpen] = useState(false);
-  // Comments added in this session, per seek, on top of the count the server sent
-  const [added, setAdded] = useState<Record<string, number>>({});
-  const comments = reel.comments + (added[reel.id] ?? 0);
-
-  return (
-    <>
-      <div className="absolute bottom-24 right-3 z-10 flex flex-col items-center gap-3 sm:bottom-28">
-        <RailBtn
-          label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
-          count={likes}
-          active={liked}
-          activeClass="text-rose-400"
-          onClick={toggleLike}
-        >
-          <Heart className={cn("h-5 w-5", liked && "fill-rose-500 text-rose-500")} />
-        </RailBtn>
-        <RailBtn label={t("seek.rail.openComments")} count={comments} onClick={() => setCommentsOpen(true)}>
-          <MessageCircle className="h-5 w-5" />
-        </RailBtn>
-        <RailBtn label={t("seek.shareSeek")} count={shares} active={shared} activeClass="text-emerald-400" onClick={share}>
-          <Repeat2 className="h-5 w-5" />
-        </RailBtn>
-        <RailBtn
-          label={saved ? t("seek.removeFromSaved") : t("seek.saveSeek")}
-          text={saved ? t("common.saved") : t("common.save")}
-          active={saved}
-          activeClass="text-sky-300"
-          onClick={toggleSave}
-        >
-          <Bookmark className={cn("h-5 w-5", saved && "fill-sky-300")} />
-        </RailBtn>
       </div>
-
-      <CommentsModalLazy
-        reelId={reel.id}
-        reelTitle={reel.title}
-        isOpen={commentsOpen}
-        onClose={() => setCommentsOpen(false)}
-        onCommentAdded={() => setAdded((a) => ({ ...a, [reel.id]: (a[reel.id] ?? 0) + 1 }))}
-      />
-    </>
-  );
-}
-
-function RailBtn({ label, count, text, active, activeClass, onClick, children }: {
-  label: string; count?: number; text?: string; active?: boolean; activeClass?: string; onClick: () => void; children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      aria-pressed={active}
-      className="group flex flex-col items-center gap-0.5 transition active:scale-90"
-    >
-      <span className={cn(
-        "flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition group-hover:bg-black/75",
-        active && activeClass,
-      )}>
-        {children}
-      </span>
-      <span className="text-[11px] font-semibold tabular-nums text-white drop-shadow">
-        {text ?? formatCount(count ?? 0)}
-      </span>
-    </button>
+    </ReelPopupProvider>
   );
 }
 
 /* ─────────── panels ─────────── */
 
-function ProfilePanel({ item }: { item: FeedItem }) {
+function ProfilePanel({ manufacturer: m }: { manufacturer: Manufacturer }) {
   const t = useTranslations();
-  const m = item.manufacturer;
   return (
     <div key={m.id} className="rounded-2xl border border-line bg-surface p-5 shadow-2xs transition-opacity duration-300">
       <SupplierLockOverlay>
@@ -415,9 +320,8 @@ function ProfilePanel({ item }: { item: FeedItem }) {
   );
 }
 
-function ProfileBar({ item }: { item: FeedItem }) {
+function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
   const t = useTranslations();
-  const m = item.manufacturer;
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3">
       <SupplierLockOverlay compact className="flex min-w-0 flex-1">
@@ -441,11 +345,11 @@ function ProfileBar({ item }: { item: FeedItem }) {
   );
 }
 
-/** The seek in view's products first, then every other seek's, without repeats. */
-function photosFor(item: FeedItem, items: FeedItem[]): Product[] {
+/** The products in view first, then every seek's, without repeats. */
+function photosFor(first: Product[], items: FeedItem[]): Product[] {
   const seen = new Set<string>();
   const out: Product[] = [];
-  for (const p of [item, ...items].flatMap((i) => i.products ?? [])) {
+  for (const p of [...first, ...items.flatMap((i) => i.products ?? [])]) {
     if (seen.has(p.id)) continue;
     seen.add(p.id);
     out.push(p);
@@ -453,14 +357,14 @@ function photosFor(item: FeedItem, items: FeedItem[]): Product[] {
   return out;
 }
 
-function PhotoPanel({ item, items }: { item: FeedItem; items: FeedItem[] }) {
+function PhotoPanel({ first, items, resetKey }: { first: Product[]; items: FeedItem[]; resetKey: string }) {
   const t = useTranslations();
-  const products = photosFor(item, items);
+  const products = photosFor(first, items);
   const listRef = useRef<HTMLDivElement>(null);
   // A new seek in view starts its photos from the top
   useEffect(() => {
     listRef.current?.scrollTo({ top: 0 });
-  }, [item.reel.id]);
+  }, [resetKey]);
   return (
     <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs">
       <p className="mb-3 text-sm font-bold text-ink">{t("showcase.single.seekPhotos")}</p>
@@ -471,7 +375,8 @@ function PhotoPanel({ item, items }: { item: FeedItem; items: FeedItem[] }) {
         <div
           ref={listRef}
           data-prevent-seek-wheel
-          className="grid grid-cols-2 gap-2.5 max-h-[calc(100vh-260px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
+          // Runs down to the bottom of the seek card (the panel now starts level with the Seeks bar)
+          className="grid grid-cols-2 gap-2.5 max-h-[calc(100vh-225px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
         >
           {products.map((p) => (
             <Link key={p.id} href={`/products/${p.slug}`} className="group block">
@@ -496,9 +401,9 @@ function PhotoPanel({ item, items }: { item: FeedItem; items: FeedItem[] }) {
   );
 }
 
-function PhotoStrip({ item, items }: { item: FeedItem; items: FeedItem[] }) {
+function PhotoStrip({ first, items }: { first: Product[]; items: FeedItem[] }) {
   const t = useTranslations();
-  const products = photosFor(item, items);
+  const products = photosFor(first, items);
   if (products.length === 0) return null;
   return (
     <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label={t("showcase.single.seekPhotos")}>
@@ -548,19 +453,5 @@ function Stat({ label, value }: { label: string; value: string }) {
       <dd className="text-sm font-bold text-ink truncate">{value}</dd>
       <dt className="text-[10px] uppercase tracking-wide text-ink-muted">{label}</dt>
     </div>
-  );
-}
-
-function IconBtn({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-black/80 disabled:opacity-30"
-    >
-      {children}
-    </button>
   );
 }
