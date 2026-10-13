@@ -10,7 +10,6 @@ import { useReelEngagement } from "@/features/engagement/use-engagement";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
-import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { Product } from "@/entities/product";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
@@ -44,7 +43,6 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
   const t = useTranslations();
   const scrollerRef = useRef<HTMLDivElement>(null);
   // Side by side from lg: the page stays put and the player fills the window below the Seeks bar
-  const playerHeight = useViewportLock(scrollerRef, items.length > 0, 1024);
   const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const [active, setActive] = useState(0);
   const [muted, setMuted] = useState(true);
@@ -176,8 +174,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single" }: Prop
         <div className="relative">
           <div
             ref={scrollerRef}
-            style={playerHeight ? { height: playerHeight } : undefined}
-            className="h-[58vh] min-h-[340px] lg:h-[calc(100vh-240px)] lg:min-h-[480px] overflow-y-auto snap-y snap-mandatory rounded-2xl bg-slate-950 scrollbar-none"
+            className="mx-auto aspect-video w-full lg:max-w-[calc((100vh-240px)*16/9)] overflow-y-auto snap-y snap-mandatory rounded-2xl bg-slate-950 scrollbar-none"
             aria-label={t("common.seeks")}
           >
             {items.map((item, i) => (
