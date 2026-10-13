@@ -12,6 +12,7 @@ import { ReelPopupModal } from "@/components/reels/reel-popup-modal";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
+import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { Product } from "@/entities/product";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
@@ -74,8 +75,9 @@ function interleave(items: FeedItem[], groups: ProductGroup[]): Entry[] {
 export function SingleSeekShowcase({ items, settings, variant = "single", header, productGroups }: Props) {
   const t = useTranslations();
   const scrollerRef = useRef<HTMLDivElement>(null);
-  // Side by side from lg: the page stays put and the player fills the window below the Seeks bar
-  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
+  // Side by side from lg: the page stays put and the seek column fills the window below the Seeks bar
+  const entries = useMemo(() => interleave(items, productGroups ?? []), [items, productGroups]);
+  const playerHeight = useViewportLock(scrollerRef, entries.length > 0, 1024);
   const [active, setActive] = useState(0);
 
   // Track which seek is in view: it drives the profile and photo panels
@@ -203,7 +205,8 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
           {header && <div className="mb-2 space-y-2 lg:pr-5">{header}</div>}
           <div
             ref={scrollerRef}
-            className="mx-auto aspect-video w-full lg:max-w-[calc((100vh-240px)*16/9)] overflow-y-auto snap-y snap-mandatory rounded-2xl bg-slate-950 scrollbar-none"
+            style={playerHeight ? { height: playerHeight } : undefined}
+            className="space-y-4 rounded-2xl lg:h-[calc(100dvh-230px)] lg:min-h-[480px] lg:overflow-y-auto lg:overscroll-contain lg:snap-y lg:snap-mandatory lg:pr-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent"
             aria-label={t("common.seeks")}
           >
             {entries.map((entry, i) => (

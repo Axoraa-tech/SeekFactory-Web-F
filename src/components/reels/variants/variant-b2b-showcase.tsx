@@ -264,9 +264,9 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             onMouseLeave={handleMouseLeave}
             onClick={handleTogglePlay}
             className={cn(
-              "relative w-full overflow-hidden rounded-xl bg-black cursor-pointer shadow-sm group select-none",
-              // Showcase: all the space the fixed blocks leave, never taller than 16:9
-              fill ? "!flex-1 min-h-[160px] max-h-[56.25cqw]" : "aspect-[16/9]",
+              "relative overflow-hidden rounded-xl bg-black cursor-pointer shadow-sm group select-none",
+              // Showcase: always 16:9 — as tall as the fixed blocks leave room for, narrowing (centred) rather than flattening
+              fill ? "!flex-1 min-h-[160px] max-h-[56.25cqw] aspect-[16/9] w-auto max-w-full self-center" : "aspect-[16/9] w-full",
             )}
           >
             {reel.videoUrl ? (
