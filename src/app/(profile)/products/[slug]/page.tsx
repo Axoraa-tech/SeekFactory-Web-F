@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   PackageX,
   AlertTriangle,
-  Building2,
   FileSpreadsheet,
   FileText,
   Download,
@@ -108,34 +107,24 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
           {/* Supplier Mini Profile Bar */}
           <Card className="p-4 border-slate-200/90 shadow-2xs">
-            <div className="flex items-center justify-between gap-3">
-              <Link
-                href={`/manufacturers/${manufacturer.slug}`}
-                className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
-              >
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-200 shadow-2xs">
-                  <SafeImage src={manufacturer.logoUrl} alt={manufacturer.name} className="h-full w-full object-cover" />
+            <Link
+              href={`/manufacturers/${manufacturer.slug}`}
+              className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
+            >
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-200 shadow-2xs">
+                <SafeImage src={manufacturer.logoUrl} alt={manufacturer.name} className="h-full w-full object-cover" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="font-bold text-sm text-slate-900 truncate hover:text-brand-blue transition-colors">{manufacturer.name}</p>
+                  {manufacturer.verified && <VerifiedBadge className="h-4 w-4 shrink-0" />}
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="font-bold text-sm text-slate-900 truncate">{manufacturer.name}</p>
-                    {manufacturer.verified && <VerifiedBadge className="h-4 w-4 shrink-0" />}
-                  </div>
-                  <p className="text-xs text-slate-500 truncate">
-                    {[manufacturer.location, manufacturer.country].filter(Boolean).join(", ")}
-                    {manufacturer.yearsEstablished > 0 ? ` • ${t("seek.trust.since", { year: manufacturer.yearsEstablished })}` : ""}
-                  </p>
-                </div>
-              </Link>
-
-              <Link
-                href={`/manufacturers/${manufacturer.slug}`}
-                className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
-              >
-                <Building2 className="h-3.5 w-3.5" />
-                <span>{t("product.page.visitFactory")}</span>
-              </Link>
-            </div>
+                <p className="text-xs text-slate-500 truncate">
+                  {[manufacturer.location, manufacturer.country].filter(Boolean).join(", ")}
+                  {manufacturer.yearsEstablished > 0 ? ` • ${t("seek.trust.since", { year: manufacturer.yearsEstablished })}` : ""}
+                </p>
+              </div>
+            </Link>
           </Card>
 
           {/* Technical Specifications Sheet */}

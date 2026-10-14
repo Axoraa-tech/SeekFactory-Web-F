@@ -1,6 +1,5 @@
 "use client";
 
-import { Price } from "@/components/ui/price";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
@@ -403,10 +402,9 @@ function PhotoPanel({ items, groups }: { items: FeedItem[]; groups?: ProductGrou
           className="flex flex-col gap-3 max-h-[calc(100vh-225px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
         >
           {photos.map(({ key, product: p, url }, i) => {
-            // A product's details show once, under its first photo; the rest of its gallery follows
             const firstOfProduct = i === 0 || photos[i - 1].product.id !== p.id;
             return (
-              <Link key={key} href={`/products/${p.slug}`} className="group block">
+              <Link key={key} href={`/products/${p.slug}`} title={p.name} className="group block">
                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100">
                   {firstOfProduct && p.stockStatus === "OUT_OF_STOCK" && (
                     <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
@@ -414,27 +412,11 @@ function PhotoPanel({ items, groups }: { items: FeedItem[]; groups?: ProductGrou
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px] transition-transform duration-300 group-hover:scale-105" />
                 </div>
-                {firstOfProduct && <PhotoDetails product={p} />}
               </Link>
             );
           })}
         </div>
       )}
-    </div>
-  );
-}
-
-/** Name, price, minimum order and a short description under a product's photo. */
-function PhotoDetails({ product: p }: { product: Product }) {
-  const t = useTranslations();
-  return (
-    <div className="mt-1.5 space-y-0.5">
-      <p className="text-xs font-semibold text-ink line-clamp-2">{p.name}</p>
-      {p.priceInr > 0 && (
-        <p className="text-xs font-semibold text-ink"><Price inr={p.priceInr} />{p.unit ? <span className="font-normal text-ink-muted"> / {p.unit}</span> : null}</p>
-      )}
-      {p.moq && <p className="text-[11px] text-ink-muted">{t("common.minOrder")} {p.moq}</p>}
-      {p.description && <p className="text-[11px] leading-snug text-ink-muted line-clamp-3">{p.description}</p>}
     </div>
   );
 }
@@ -445,18 +427,20 @@ function PhotoStrip({ items, groups }: { items: FeedItem[]; groups?: ProductGrou
   if (photos.length === 0) return null;
   return (
     <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label={t("showcase.single.seekPhotos")}>
-      {photos.map(({ key, product: p, url }, i) => (
-        <Link key={key} href={`/products/${p.slug}`} className="w-40 shrink-0 snap-start">
-          <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
-            {p.stockStatus === "OUT_OF_STOCK" && (
-              <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
-            )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px]" />
-          </div>
-          {(i === 0 || photos[i - 1].product.id !== p.id) && <PhotoDetails product={p} />}
-        </Link>
-      ))}
+      {photos.map(({ key, product: p, url }, i) => {
+        const firstOfProduct = i === 0 || photos[i - 1].product.id !== p.id;
+        return (
+          <Link key={key} href={`/products/${p.slug}`} title={p.name} className="w-40 shrink-0 snap-start">
+            <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
+              {firstOfProduct && p.stockStatus === "OUT_OF_STOCK" && (
+                <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
+              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px]" />
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }
