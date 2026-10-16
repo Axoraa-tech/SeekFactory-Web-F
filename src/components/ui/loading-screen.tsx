@@ -133,7 +133,7 @@ export function LoadingScreen() {
         <button
           type="button"
           onClick={handleDismiss}
-          className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/25 flex items-center gap-1.5 transition-all cursor-pointer"
+          className="sf-btn-soft px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/25 flex items-center gap-1.5 transition-all cursor-pointer"
         >
           <span>Skip ({secondsRemaining}s)</span>
           <X className="w-3.5 h-3.5" />

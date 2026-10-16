@@ -358,7 +358,7 @@ export function ReelPopupModal({ items }: Props) {
                   <button
                     type="button"
                     onClick={() => handleSeek(currentTime - 5)}
-                    className="flex h-8 items-center gap-1 rounded-full bg-white/10 px-2.5 text-[11px] font-semibold hover:bg-white/20 transition active:scale-95"
+                    className="sf-btn-soft flex h-8 items-center gap-1 rounded-full bg-white/10 px-2.5 text-[11px] font-semibold hover:bg-white/20 transition active:scale-95"
                     aria-label={t("seek.popup.skipBack5s")}
                   >
                     <RotateCcw className="h-3.5 w-3.5" /> -5s
@@ -367,7 +367,7 @@ export function ReelPopupModal({ items }: Props) {
                   <button
                     type="button"
                     onClick={() => handleSeek(currentTime + 5)}
-                    className="flex h-8 items-center gap-1 rounded-full bg-white/10 px-2.5 text-[11px] font-semibold hover:bg-white/20 transition active:scale-95"
+                    className="sf-btn-soft flex h-8 items-center gap-1 rounded-full bg-white/10 px-2.5 text-[11px] font-semibold hover:bg-white/20 transition active:scale-95"
                     aria-label={t("seek.popup.skipForward5s")}
                   >
                     +5s <RotateCw className="h-3.5 w-3.5" />
@@ -414,7 +414,7 @@ export function ReelPopupModal({ items }: Props) {
                   type="button"
                   onClick={toggleFollow}
                   className={cn(
-                    "rounded-lg px-3 py-1 text-xs font-semibold transition border",
+                    "sf-btn-toggle rounded-lg px-3 py-1 text-xs font-semibold transition border",
                     following
                       ? "border-neutral-200 bg-neutral-100 text-neutral-700"
                       : "border-brand-blue/30 bg-blue-50 text-brand-blue hover:bg-brand-blue hover:text-white"
@@ -425,7 +425,7 @@ export function ReelPopupModal({ items }: Props) {
                 <Link
                   href="/rfq/new"
                   onClick={close}
-                  className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white hover:bg-brand-blue-dark transition active:scale-95"
+                  className="sf-btn-commit inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white hover:bg-brand-blue-dark transition active:scale-95"
                 >
                   <Send className="h-3 w-3" />
                   <span>{t("feed.sendRfq")}</span>
@@ -445,7 +445,7 @@ export function ReelPopupModal({ items }: Props) {
               <button
                 type="button"
                 onClick={() => setIsCommentsOpen(true)}
-                className="flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition"
+                className="sf-btn-soft flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition"
               >
                 <MessageCircle className="h-3.5 w-3.5" />
                 <span className="font-medium text-[11px]">{formatCount(commentCount)}</span>
@@ -457,7 +457,7 @@ export function ReelPopupModal({ items }: Props) {
                 onClick={share}
                 aria-label={t("seek.shareSeek")}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-emerald-600 hover:shadow-xs transition",
+                  "sf-btn-soft flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-emerald-600 hover:shadow-xs transition",
                   shared && "text-emerald-600 bg-white shadow-xs"
                 )}
               >
@@ -471,7 +471,7 @@ export function ReelPopupModal({ items }: Props) {
                 onClick={toggleLike}
                 aria-label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-rose-600 hover:shadow-xs transition",
+                  "sf-btn-toggle flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-rose-600 hover:shadow-xs transition",
                   liked && "text-rose-600 bg-white shadow-xs"
                 )}
               >
@@ -491,7 +491,7 @@ export function ReelPopupModal({ items }: Props) {
                 onClick={toggleSave}
                 aria-label={saved ? t("seek.removeFromSaved") : t("seek.saveSeek")}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition",
+                  "sf-btn-toggle flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-lg text-neutral-600 hover:bg-white hover:text-brand-blue hover:shadow-xs transition",
                   saved && "text-brand-blue bg-white shadow-xs"
                 )}
               >
@@ -506,7 +506,7 @@ export function ReelPopupModal({ items }: Props) {
               onClick={goNext}
               disabled={isLast}
               className={cn(
-                "w-full flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition",
+                "sf-btn-nav w-full flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition",
                 isLast
                   ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
                   : "bg-slate-900 text-white hover:bg-slate-700 active:scale-95"

@@ -135,7 +135,7 @@ export function NotificationsDropdown({ initialCount }: NotificationsDropdownPro
               <button
                 type="button"
                 onClick={handleMarkAllRead}
-                className="flex items-center gap-1 text-[11px] font-semibold text-brand-orange hover:underline"
+                className="sf-btn-toggle flex items-center gap-1 text-[11px] font-semibold text-brand-orange hover:underline"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 {t("layout.notifications.markAllRead")}

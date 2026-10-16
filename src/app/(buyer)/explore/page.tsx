@@ -59,8 +59,8 @@ export default async function ExplorePage({ searchParams }: Props) {
               href={`/explore?category=${selectedRoot.slug}`}
               className={
                 !selectedSub
-                  ? "rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
-                  : "rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
+                  ? "sf-btn-soft rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
+                  : "sf-btn-soft rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
               }
             >
               {t("common.all")} {selectedRoot.name}
@@ -74,8 +74,8 @@ export default async function ExplorePage({ searchParams }: Props) {
                   href={href}
                   className={
                     active
-                      ? "flex items-center gap-1.5 rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
-                      : "flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
+                      ? "sf-btn-soft flex items-center gap-1.5 rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
+                      : "sf-btn-soft flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
                   }
                 >
                   <CategoryIcon icon={child.icon} size={14} className="opacity-80" />
@@ -149,7 +149,7 @@ export default async function ExplorePage({ searchParams }: Props) {
           <p className="text-xs text-neutral-500">{t("explore.tryBrowsingAllCategoriesOr")}</p>
           <Link
             href="/explore"
-            className="inline-flex h-8 items-center rounded-full bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors mt-2"
+            className="sf-btn-nav inline-flex h-8 items-center rounded-full bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors mt-2"
           >
             {t("explore.exploreAllCategories")}
           </Link>

@@ -117,7 +117,7 @@ export function ProductActionBar({
           href={manufacturerSlug ? `/messages?with=${manufacturerSlug}` : "/messages"}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-brand-blue/40 hover:bg-blue-50/60 hover:text-brand-blue transition-all active:scale-95 shadow-2xs whitespace-nowrap",
+            "sf-btn-soft inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-brand-blue/40 hover:bg-blue-50/60 hover:text-brand-blue transition-all active:scale-95 shadow-2xs whitespace-nowrap",
             isSmall ? "h-8 px-2.5 text-xs" : isLarge ? "h-12 px-5 text-sm w-full sm:w-auto" : "h-9 px-3 text-xs"
           )}
           title={t("product.actions.chatWithFactory")}
@@ -148,7 +148,7 @@ export function ProductActionBar({
             type="button"
             onClick={handleOrder}
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
+              "sf-btn-add inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
               "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
@@ -164,7 +164,7 @@ export function ProductActionBar({
             type="button"
             onClick={handleBuyNow}
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
+              "sf-btn-commit inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
               "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 disabled:opacity-75",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
@@ -178,7 +178,7 @@ export function ProductActionBar({
             href={productSlug ? `/rfq/new?product=${productSlug}` : "/rfq/new"}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-orange hover:bg-[#d85b17]",
+              "sf-btn-commit inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-orange hover:bg-[#d85b17]",
               isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
             )}
           >

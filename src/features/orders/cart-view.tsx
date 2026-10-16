@@ -92,7 +92,7 @@ export function CartView({ user, initialCart }: Props) {
         <p className="text-xs text-ink-muted">{t("orders.cart.addProductsFromAFactory")}</p>
         <Link
           href="/explore"
-          className="inline-flex h-9 items-center rounded-full bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors"
+          className="sf-btn-nav inline-flex h-9 items-center rounded-full bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors"
         >
           {t("orders.exploreProducts")}
         </Link>
@@ -218,7 +218,7 @@ export function CartView({ user, initialCart }: Props) {
                         <button
                           type="button"
                           onClick={() => openNote(item.id)}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-orange hover:underline transition-colors"
+                          className="sf-btn-add inline-flex items-center gap-1 text-[11px] font-semibold text-brand-orange hover:underline transition-colors"
                         >
                           <MessageSquarePlus className="h-3.5 w-3.5" />
                           {t("orders.cart.addNote")}

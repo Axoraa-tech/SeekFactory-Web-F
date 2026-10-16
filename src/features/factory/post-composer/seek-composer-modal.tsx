@@ -422,7 +422,7 @@ export function SeekComposerModal({
               type="button"
               onClick={() => videoInputRef.current?.click()}
               className={cn(
-                "flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed bg-canvas px-4 py-10 text-center transition hover:border-brand-blue",
+                "sf-btn-add flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed bg-canvas px-4 py-10 text-center transition hover:border-brand-blue",
                 invalid === "video" ? "border-red-400" : "border-line",
               )}
             >
@@ -445,7 +445,7 @@ export function SeekComposerModal({
                 type="button"
                 onClick={() => coverInputRef.current?.click()}
                 disabled={busy}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-blue hover:underline"
+                className="sf-btn-add inline-flex items-center gap-1.5 text-xs font-semibold text-brand-blue hover:underline"
               >
                 <ImageIcon className="h-3.5 w-3.5" />
                 {cover ? t("composer.changeCover") : t("composer.addCover")}
@@ -483,7 +483,7 @@ export function SeekComposerModal({
                 type="button"
                 onClick={() => setPickerOpen((v) => !v)}
                 aria-expanded={pickerOpen}
-                className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-brand-blue/50 px-3 py-1 text-xs font-semibold text-brand-blue hover:bg-brand-blue-soft"
+                className="sf-btn-add inline-flex items-center gap-1.5 rounded-full border border-dashed border-brand-blue/50 px-3 py-1 text-xs font-semibold text-brand-blue hover:bg-brand-blue-soft"
               >
                 <Link2 className="h-3.5 w-3.5" />
                 {t("composer.linkProduct")}
@@ -585,7 +585,7 @@ export function SeekComposerModal({
               type="button"
               onClick={() => void publish()}
               disabled={busy}
-              className="rounded-full bg-brand-blue px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-60"
+              className="sf-btn-commit rounded-full bg-brand-blue px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-60"
             >
               {t("composer.post")}
             </button>

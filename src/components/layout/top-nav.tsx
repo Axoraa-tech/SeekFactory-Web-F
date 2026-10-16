@@ -267,7 +267,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
                 <LanguageCurrencyDropdown compact={isManufacturer} />
                 <Link
                   href="/rfq/new"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand-orange px-3 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition hover:bg-[#d85b17] active:scale-95"
+                  className="sf-btn-commit inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand-orange px-3 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition hover:bg-[#d85b17] active:scale-95"
                 >
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">{t("nav.postRfq", "Post RFQ")}</span>
@@ -289,7 +289,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
 
                 <Link
                   href="/join?role=manufacturer"
-                  className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-brand-blue transition-all rounded-xl hover:bg-white/60 hover:backdrop-blur-sm hover:shadow-2xs"
+                  className="sf-btn-nav hidden lg:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-brand-blue transition-all rounded-xl hover:bg-white/60 hover:backdrop-blur-sm hover:shadow-2xs"
                 >
                   <Building2 className="h-4 w-4 text-amber-600" />
                   <span>{t("nav.forManufacturers", "For Manufacturers")}</span>
@@ -297,7 +297,7 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
 
                 <Link
                   href="/rfq/new"
-                  className="hidden sm:inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl border border-brand-orange/30 bg-orange-500/10 backdrop-blur-md px-3 sm:px-3.5 text-xs font-semibold text-brand-orange hover:bg-brand-orange hover:text-white transition-all shadow-2xs active:scale-95"
+                  className="sf-btn-commit hidden sm:inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl border border-brand-orange/30 bg-orange-500/10 backdrop-blur-md px-3 sm:px-3.5 text-xs font-semibold text-brand-orange hover:bg-brand-orange hover:text-white transition-all shadow-2xs active:scale-95"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>{t("nav.postRfq", "Post RFQ")}</span>
@@ -305,14 +305,14 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
 
                 <Link
                   href="/login"
-                  className="hidden min-[380px]:inline-flex h-9 sm:h-10 items-center px-2 sm:px-3 text-xs sm:text-sm font-semibold text-slate-800 hover:text-brand-blue transition-all rounded-xl hover:bg-white/60 hover:backdrop-blur-sm"
+                  className="sf-btn-nav hidden min-[380px]:inline-flex h-9 sm:h-10 items-center px-2 sm:px-3 text-xs sm:text-sm font-semibold text-slate-800 hover:text-brand-blue transition-all rounded-xl hover:bg-white/60 hover:backdrop-blur-sm"
                 >
                   {t("nav.signIn", "Sign in")}
                 </Link>
 
                 <Link
                   href="/join"
-                  className="inline-flex h-9 sm:h-10 items-center justify-center whitespace-nowrap rounded-full bg-gradient-to-r from-brand-blue via-blue-600 to-indigo-600 px-3 sm:px-5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] transition-all hover:shadow-[0_6px_20px_rgba(37,99,235,0.45)] hover:brightness-105 active:scale-95"
+                  className="sf-btn-nav inline-flex h-9 sm:h-10 items-center justify-center whitespace-nowrap rounded-full bg-gradient-to-r from-brand-blue via-blue-600 to-indigo-600 px-3 sm:px-5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] transition-all hover:shadow-[0_6px_20px_rgba(37,99,235,0.45)] hover:brightness-105 active:scale-95"
                 >
                   {t("nav.joinNow", "Join now")}
                 </Link>

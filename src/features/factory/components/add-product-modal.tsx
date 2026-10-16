@@ -408,7 +408,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                 <button
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
-                  className="aspect-4/3 rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas flex flex-col items-center justify-center gap-1 text-brand-blue transition"
+                  className="sf-btn-add aspect-4/3 rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas flex flex-col items-center justify-center gap-1 text-brand-blue transition"
                 >
                   <ImageIcon className="h-5 w-5" />
                   <span className="text-[10px] font-bold">{t("seller.product.addPhotos")}</span>
@@ -443,7 +443,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                   <button
                     type="button"
                     onClick={() => pdfInputRef.current?.click()}
-                    className="text-[11px] font-bold text-brand-blue hover:underline"
+                    className="sf-btn-soft text-[11px] font-bold text-brand-blue hover:underline"
                   >
                     {t("seller.product.replace")}
                   </button>
@@ -461,7 +461,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               <button
                 type="button"
                 onClick={() => pdfInputRef.current?.click()}
-                className="flex w-full items-center gap-2 rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas px-3 py-3 text-xs font-semibold text-ink transition"
+                className="sf-btn-add flex w-full items-center gap-2 rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas px-3 py-3 text-xs font-semibold text-ink transition"
               >
                 <FileText className="h-4 w-4 text-brand-blue" />
                 <span>
@@ -481,7 +481,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               <button
                 type="button"
                 onClick={() => setSpecs((prev) => [...prev, { key: "", value: "" }])}
-                className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline"
+                className="sf-btn-add inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>{t("seller.product.addSpecification")}</span>
@@ -552,14 +552,14 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="rounded-lg border border-line px-4 py-2 text-xs font-bold text-ink hover:bg-canvas transition disabled:opacity-50"
+              className="sf-btn-soft rounded-lg border border-line px-4 py-2 text-xs font-bold text-ink hover:bg-canvas transition disabled:opacity-50"
             >
               {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={busy}
-              className="rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-70 disabled:active:scale-100"
+              className="sf-btn-commit rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-70 disabled:active:scale-100"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
               <span>

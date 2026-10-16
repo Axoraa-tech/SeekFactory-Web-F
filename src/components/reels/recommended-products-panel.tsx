@@ -59,7 +59,7 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
           <button
             type="button"
             onClick={retry}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-ink hover:bg-canvas"
+            className="sf-btn-soft mt-3 inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-ink hover:bg-canvas"
           >
             <RotateCw className="h-3.5 w-3.5" />
             {t("showcase.single.tryAgain")}
@@ -116,7 +116,7 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
             </p>
             <Link
               href="/explore"
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-brand-orange/30 bg-brand-orange-soft text-sm font-semibold text-brand-orange transition hover:bg-brand-orange hover:text-white"
+              className="sf-btn-nav inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-brand-orange/30 bg-brand-orange-soft text-sm font-semibold text-brand-orange transition hover:bg-brand-orange hover:text-white"
             >
               {t("showcase.single.viewAllProducts")}
               <ArrowRight className="h-4 w-4" />
@@ -238,7 +238,7 @@ function RecommendedProductCard({
                   <button
                     type="button"
                     onClick={() => router.push(`/checkout?product=${encodeURIComponent(p.slug)}&qty=${minimumOrderQuantity(p.moq)}`)}
-                    className="inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-lg bg-gradient-to-r from-rose-600 to-red-600 px-3 text-xs font-bold text-white shadow-sm transition-all duration-150 hover:from-rose-700 hover:to-red-700 active:scale-95"
+                    className="sf-btn-commit inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-lg bg-gradient-to-r from-rose-600 to-red-600 px-3 text-xs font-bold text-white shadow-sm transition-all duration-150 hover:from-rose-700 hover:to-red-700 active:scale-95"
                   >
                     <Zap className="h-3.5 w-3.5 fill-white/80" />
                     {t("common.buyNow", "Buy Now")}
@@ -247,7 +247,7 @@ function RecommendedProductCard({
                   // No listed price: the factory quotes on request
                   <Link
                     href={`/rfq/new?product=${p.slug}`}
-                    className="inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-lg bg-brand-orange px-3 text-xs font-bold text-white shadow-sm transition-all duration-150 hover:bg-[#d85b17] active:scale-95"
+                    className="sf-btn-commit inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-lg bg-brand-orange px-3 text-xs font-bold text-white shadow-sm transition-all duration-150 hover:bg-[#d85b17] active:scale-95"
                   >
                     <FileText className="h-3.5 w-3.5" />
                     {t("product.actions.requestQuote")}

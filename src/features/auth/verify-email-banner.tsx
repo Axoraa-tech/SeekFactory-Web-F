@@ -55,7 +55,7 @@ export function VerifyEmailBanner({ email }: { email: string }) {
           type="button"
           onClick={() => void resend()}
           disabled={sending}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-600 px-3 py-1 font-bold text-white hover:bg-amber-700 disabled:opacity-70"
+          className="sf-btn-soft inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-600 px-3 py-1 font-bold text-white hover:bg-amber-700 disabled:opacity-70"
         >
           {sending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
           {t("auth.verifyBanner.resend")}

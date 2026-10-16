@@ -108,7 +108,7 @@ export function LeftSidebar({
           </p>
           <Link
             href="/profile"
-            className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-lg bg-brand-orange text-sm font-semibold text-white"
+            className="sf-btn-commit mt-3 inline-flex h-9 w-full items-center justify-center rounded-lg bg-brand-orange text-sm font-semibold text-white"
           >
             {t("sidebar.upgradeNow", "Upgrade Now")}
           </Link>

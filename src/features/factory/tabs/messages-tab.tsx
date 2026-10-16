@@ -311,7 +311,7 @@ export function MessagesTab({
                 type="button"
                 onClick={() => void send(qr, false)}
                 disabled={sending}
-                className="shrink-0 rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-semibold text-neutral-700 hover:bg-neutral-200 hover:border-brand-blue transition disabled:opacity-50"
+                className="sf-btn-soft shrink-0 rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-semibold text-neutral-700 hover:bg-neutral-200 hover:border-brand-blue transition disabled:opacity-50"
               >
                 {qr}
               </button>
@@ -344,7 +344,7 @@ export function MessagesTab({
                 <button
                   type="button"
                   onClick={upload.clear}
-                  className="font-bold text-red-500 hover:underline text-[11px] ml-2 inline-flex items-center gap-0.5"
+                  className="sf-btn-danger font-bold text-red-500 hover:underline text-[11px] ml-2 inline-flex items-center gap-0.5"
                 >
                   <X className="h-3 w-3" /> {t("common.remove")}
                 </button>

@@ -241,7 +241,7 @@ export function HomeSeeksInteractiveFeed({
                   updateUrl(expandedCategorySlug, selectedSubcategorySlug, "for-you", viewMode, searchQuery);
                 }}
                 className={cn(
-                  "rounded-lg px-2.5 py-1 transition cursor-pointer",
+                  "sf-btn-toggle rounded-lg px-2.5 py-1 transition cursor-pointer",
                   tab === "for-you"
                     ? "bg-brand-blue text-white shadow-xs"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -256,7 +256,7 @@ export function HomeSeeksInteractiveFeed({
                   updateUrl(expandedCategorySlug, selectedSubcategorySlug, "following", viewMode, searchQuery);
                 }}
                 className={cn(
-                  "rounded-lg px-2.5 py-1 transition cursor-pointer",
+                  "sf-btn-toggle rounded-lg px-2.5 py-1 transition cursor-pointer",
                   tab === "following"
                     ? "bg-brand-blue text-white shadow-xs"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -316,7 +316,7 @@ export function HomeSeeksInteractiveFeed({
             <button
               type="button"
               onClick={handleClearFilter}
-              className="text-brand-blue hover:text-brand-blue-dark font-bold underline cursor-pointer shrink-0 ml-2"
+              className="sf-btn-soft text-brand-blue hover:text-brand-blue-dark font-bold underline cursor-pointer shrink-0 ml-2"
             >
               {t("feed.clearFilter", "Clear filter")}
             </button>
@@ -352,7 +352,7 @@ export function HomeSeeksInteractiveFeed({
                 <button
                   type="button"
                   onClick={handleClearFilter}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 transition cursor-pointer"
+                  className="sf-btn-soft inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 transition cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                   <span>{t("feed.clearFilter", "Clear filter")}</span>
@@ -373,7 +373,7 @@ export function HomeSeeksInteractiveFeed({
             <Link
               href={`/explore?category=${expandedRoot.slug}`}
               className={cn(
-                "rounded-full px-3.5 py-1 text-xs font-bold transition cursor-pointer",
+                "sf-btn-soft rounded-full px-3.5 py-1 text-xs font-bold transition cursor-pointer",
                 !selectedSub
                   ? "bg-brand-blue text-white shadow-xs"
                   : "border border-neutral-200 bg-neutral-50 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink"
@@ -393,7 +393,7 @@ export function HomeSeeksInteractiveFeed({
                   key={child.id}
                   href={href}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs transition cursor-pointer",
+                    "sf-btn-soft flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs transition cursor-pointer",
                     isActive
                       ? "bg-brand-blue font-bold text-white shadow-xs"
                       : "border border-neutral-200 bg-neutral-50 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink"

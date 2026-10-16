@@ -63,7 +63,7 @@ function EmailVerificationRow({ email, verified }: { email: string; verified: bo
             type="button"
             onClick={() => void resend()}
             disabled={state !== "idle"}
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"
+            className="sf-btn-soft inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"
           >
             {state === "sending" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {state === "sent" && <CheckCircle2 className="h-3.5 w-3.5" />}
@@ -123,7 +123,7 @@ function ChangePasswordForm() {
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
-          className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-muted hover:text-brand-blue"
+          className="sf-btn-toggle inline-flex items-center gap-1 text-[11px] font-semibold text-ink-muted hover:text-brand-blue"
         >
           {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           {show ? t("common.hide") : t("common.show")}
@@ -181,7 +181,7 @@ function ChangePasswordForm() {
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-5 py-2 text-xs font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"
+          className="sf-btn-commit inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-blue px-5 py-2 text-xs font-bold text-white transition hover:bg-brand-blue-dark disabled:opacity-70"
         >
           {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
           {t("auth.security.updatePassword")}

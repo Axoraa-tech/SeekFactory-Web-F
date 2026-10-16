@@ -76,7 +76,7 @@ export function SearchBar({ categories = [], compact = false }: SearchBarProps) 
 
         <button
           type="submit"
-          className="ml-2 flex h-7 px-3 items-center justify-center gap-1 rounded-full bg-brand-orange text-xs font-semibold text-white transition-all hover:bg-[#d85b17] active:scale-95 shadow-xs"
+          className="sf-btn-commit ml-2 flex h-7 px-3 items-center justify-center gap-1 rounded-full bg-brand-orange text-xs font-semibold text-white transition-all hover:bg-[#d85b17] active:scale-95 shadow-xs"
         >
           <span>{t("nav.search", "Search")}</span>
         </button>
@@ -146,7 +146,7 @@ export function SearchBar({ categories = [], compact = false }: SearchBarProps) 
             )}
             <button
               type="submit"
-              className="flex h-7 px-3 items-center justify-center rounded-full bg-brand-orange hover:bg-[#d85b17] text-xs font-semibold text-white ml-1 transition-colors"
+              className="sf-btn-commit flex h-7 px-3 items-center justify-center rounded-full bg-brand-orange hover:bg-[#d85b17] text-xs font-semibold text-white ml-1 transition-colors"
             >
               {t("nav.search", "Search")}
             </button>

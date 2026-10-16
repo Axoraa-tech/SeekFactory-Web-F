@@ -94,7 +94,7 @@ export function LanguageCurrencyDropdown({
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className={`group flex items-center rounded-full border transition-all ${compact ? "gap-1.5 py-1 pl-1.5 pr-2" : "gap-2 py-1.5 pl-2 pr-3"} duration-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 ${
+        className={`sf-btn-soft group flex items-center rounded-full border transition-all ${compact ? "gap-1.5 py-1 pl-1.5 pr-2" : "gap-2 py-1.5 pl-2 pr-3"} duration-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 ${
           isOpen
             ? "border-brand-blue bg-blue-50/50 shadow-sm"
             : "border-transparent hover:border-line hover:bg-canvas"
@@ -311,7 +311,7 @@ export function LanguageCurrencyDropdown({
                 setIsLangOpen(false);
                 setIsCurrOpen(false);
               }}
-              className="rounded-lg bg-brand-blue px-3 py-1 text-xs font-semibold text-white shadow-xs hover:bg-brand-blue-dark transition-all active:scale-95"
+              className="sf-btn-soft rounded-lg bg-brand-blue px-3 py-1 text-xs font-semibold text-white shadow-xs hover:bg-brand-blue-dark transition-all active:scale-95"
             >
               {t("common.done")}
             </button>

@@ -221,7 +221,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                   type="button"
                   onClick={toggleFollow}
                   className={cn(
-                    "rounded-lg px-3 py-1 text-xs font-semibold transition border",
+                    "sf-btn-toggle rounded-lg px-3 py-1 text-xs font-semibold transition border",
                     following
                       ? "border-neutral-200 bg-neutral-100 text-neutral-700"
                       : "border-brand-blue/30 bg-brand-blue-soft text-brand-blue hover:bg-brand-blue hover:text-white"
@@ -231,7 +231,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 </button>
                 <Link
                   href="/rfq/new"
-                  className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
+                  className="sf-btn-commit inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
                 >
                   <Send className="h-3 w-3" />
                   <span>{t("feed.sendRfq")}</span>
@@ -443,7 +443,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             <button
               type="button"
               onClick={() => setIsCommentsOpen(true)}
-              className="flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition"
+              className="sf-btn-soft flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition"
             >
               <MessageCircle className="h-3.5 w-3.5" />
               <span className="font-medium text-[11px]">{formatCount(commentCount)}</span>
@@ -457,7 +457,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               onClick={share}
               aria-label={t("seek.shareSeek")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition",
+                "sf-btn-soft flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition",
                 shared && "text-brand-blue bg-white shadow-xs"
               )}
             >
@@ -473,7 +473,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               onClick={toggleLike}
               aria-label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-rose-600 hover:shadow-xs transition",
+                "sf-btn-toggle flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-rose-600 hover:shadow-xs transition",
                 liked && "text-rose-600 bg-white shadow-xs"
               )}
             >
@@ -497,7 +497,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               onClick={toggleSave}
               aria-label={saved ? t("seek.removeFromSaved") : t("seek.saveSeek")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition",
+                "sf-btn-toggle flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-brand-blue hover:shadow-xs transition",
                 saved && "text-brand-blue bg-white shadow-xs"
               )}
             >

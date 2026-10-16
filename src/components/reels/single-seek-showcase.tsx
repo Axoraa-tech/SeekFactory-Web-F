@@ -358,10 +358,10 @@ function ProfilePanel({ manufacturer: m }: { manufacturer: Manufacturer }) {
       )}
 
       <div className="mt-5 grid gap-2">
-        <Link href="/rfq/new" className="rounded-xl bg-orange-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-orange-400">
+        <Link href="/rfq/new" className="sf-btn-commit rounded-xl bg-orange-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-orange-400">
           {t("feed.sendRfq")}
         </Link>
-        <Link href={`/manufacturers/${m.slug}`} className="rounded-xl border border-line px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-slate-50">
+        <Link href={`/manufacturers/${m.slug}`} className="sf-btn-nav rounded-xl border border-line px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-slate-50">
           {t("showcase.single.viewFactoryProfile")}
         </Link>
       </div>
@@ -388,8 +388,8 @@ function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
       </div>
       </Link>
       </SupplierLockOverlay>
-      <Link href={`/manufacturers/${m.slug}`} className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink">{t("nav.profile")}</Link>
-      <Link href="/rfq/new" className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
+      <Link href={`/manufacturers/${m.slug}`} className="sf-btn-nav shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink">{t("nav.profile")}</Link>
+      <Link href="/rfq/new" className="sf-btn-commit shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
     </div>
   );
 }

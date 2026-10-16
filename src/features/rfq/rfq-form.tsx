@@ -148,7 +148,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/profile?tab=rfqs"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-orange px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-xs"
+            className="sf-btn-nav w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-orange px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-xs"
           >
             <span>{t("rfq.form.trackInMyRfqsProfile")}</span>
             <ArrowRight className="h-4 w-4" />
@@ -156,7 +156,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
 
           <Link
             href="/explore"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+            className="sf-btn-nav w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
           >
             <span>{t("rfq.form.browseMoreMachinery")}</span>
           </Link>
@@ -357,7 +357,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
             disabled={uploading}
             onClick={handleAttach}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs shrink-0",
+              "sf-btn-add px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs shrink-0",
               attachedFile
                 ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
                 : "bg-white text-brand-blue border border-slate-200 hover:bg-blue-50"
@@ -378,7 +378,7 @@ export function RfqForm({ categories, initialCompanyName = "", initialProductNam
           <Button
             type="submit"
             disabled={status === "saving" || uploading}
-            className="h-11 px-6 rounded-xl bg-brand-orange text-white font-bold text-xs sm:text-sm hover:bg-[#d85b17] shadow-md active:scale-95 transition-all"
+            className="sf-btn-commit h-11 px-6 rounded-xl bg-brand-orange text-white font-bold text-xs sm:text-sm hover:bg-[#d85b17] shadow-md active:scale-95 transition-all"
           >
             {status === "saving" ? t("rfq.form.publishingToVerifiedPlants") : t("rfq.form.postBuyingRequestToVerified")}
           </Button>

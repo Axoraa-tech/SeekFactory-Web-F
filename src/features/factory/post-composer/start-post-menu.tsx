@@ -49,7 +49,7 @@ export function StartPostMenu() {
         aria-expanded={open}
         aria-label={t("seller.composer.startAPost")}
         title={t("seller.composer.startAPost")}
-        className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-xl bg-brand-blue px-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95 xl:gap-1.5 xl:px-3"
+        className="sf-btn-commit inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-xl bg-brand-blue px-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95 xl:gap-1.5 xl:px-3"
       >
         <Plus className="h-4 w-4" />
         {/* Icon-only on small laptops so the search bar keeps its width */}

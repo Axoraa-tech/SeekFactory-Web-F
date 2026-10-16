@@ -41,7 +41,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
           </p>
           <Link
             href="/explore"
-            className="inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white"
+            className="sf-btn-nav inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white"
           >
             {t("profile.saved.exploreCatalog")}
           </Link>
@@ -86,7 +86,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                 <button
                   type="button"
                   onClick={(e) => onRemoveSaved(p.id, e)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-faint hover:text-red-600 transition-colors"
+                  className="sf-btn-danger inline-flex items-center gap-1 text-[11px] font-semibold text-ink-faint hover:text-red-600 transition-colors"
                 >
                   <Trash2 className="h-3 w-3" />
                   <span>{t("common.remove")}</span>
@@ -95,14 +95,14 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                 <div className="flex items-center gap-1.5">
                   <Link
                     href={`/products/${p.slug}?order=1`}
-                    className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
+                    className="sf-btn-add inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
                     <ShoppingCart className="h-3 w-3" />
                     <span>{t("common.order")}</span>
                   </Link>
                   <Link
                     href={p.priceInr > 0 ? `/checkout?product=${p.slug}&qty=${minimumOrderQuantity(p.moq)}` : `/rfq/new?product=${p.slug}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm"
+                    className="sf-btn-commit inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
                     <Zap className="h-3 w-3 fill-white/80" />
                     <span>{t("common.buyNow")}</span>
@@ -148,14 +148,14 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                   <button
                     type="button"
                     onClick={() => onRemoveSeek(reel.id)}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink-faint hover:text-red-600 transition-colors"
+                    className="sf-btn-danger inline-flex items-center gap-1 text-[11px] font-semibold text-ink-faint hover:text-red-600 transition-colors"
                   >
                     <Trash2 className="h-3 w-3" />
                     <span>{t("common.remove")}</span>
                   </button>
                   <Link
                     href={`/manufacturers/${manufacturer.slug}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm"
+                    className="sf-btn-nav inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
                     <span>{t("profile.saved.viewFactory")}</span>
                   </Link>

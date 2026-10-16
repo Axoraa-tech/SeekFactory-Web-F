@@ -134,7 +134,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
             <button
               type="button"
               onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-brand-orange/40 hover:text-brand-orange transition-all active:scale-95 shadow-2xs"
+              className="sf-btn-toggle inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-brand-orange/40 hover:text-brand-orange transition-all active:scale-95 shadow-2xs"
             >
               <CheckCheck className="h-3.5 w-3.5 text-brand-orange" />
               <span>{t("notifications.markAllAsRead", "Mark all read")}</span>
@@ -145,7 +145,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
             <button
               type="button"
               onClick={handleClearAll}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95 shadow-2xs"
+              className="sf-btn-danger inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95 shadow-2xs"
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span>{t("notificationsCenter.clearAll")}</span>
@@ -160,7 +160,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
           type="button"
           onClick={() => setActiveTab("all")}
           className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
+            "sf-btn-toggle inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
             activeTab === "all"
               ? "border-brand-orange text-brand-orange"
               : "border-transparent text-slate-500 hover:text-slate-800"
@@ -183,7 +183,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
           type="button"
           onClick={() => setActiveTab("unread")}
           className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
+            "sf-btn-toggle inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
             activeTab === "unread"
               ? "border-brand-orange text-brand-orange"
               : "border-transparent text-slate-500 hover:text-slate-800"
@@ -201,7 +201,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
           type="button"
           onClick={() => setActiveTab("quotes")}
           className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
+            "sf-btn-toggle inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
             activeTab === "quotes"
               ? "border-brand-orange text-brand-orange"
               : "border-transparent text-slate-500 hover:text-slate-800"
@@ -214,7 +214,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
           type="button"
           onClick={() => setActiveTab("system")}
           className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
+            "sf-btn-toggle inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold border-b-2 transition-all",
             activeTab === "system"
               ? "border-brand-orange text-brand-orange"
               : "border-transparent text-slate-500 hover:text-slate-800"
@@ -304,7 +304,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                           <button
                             type="button"
                             onClick={(e) => handleToggleRead(item.id, e)}
-                            className="text-[11px] font-semibold text-slate-500 hover:text-brand-orange"
+                            className="sf-btn-toggle text-[11px] font-semibold text-slate-500 hover:text-brand-orange"
                           >
                             {t("notificationsCenter.markAsRead")}
                           </button>
@@ -314,7 +314,7 @@ export function InteractiveNotificationsCenter({ initialNotifications }: Props) 
                       <button
                         type="button"
                         onClick={(e) => handleDelete(item.id, e)}
-                        className="text-[11px] font-semibold text-slate-400 hover:text-red-600"
+                        className="sf-btn-danger text-[11px] font-semibold text-slate-400 hover:text-red-600"
                       >
                         {t("common.delete")}
                       </button>

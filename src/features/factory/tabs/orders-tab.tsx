@@ -77,7 +77,7 @@ export function OrdersTab({ orders, onUpdateStatus, onChatWithBuyer }: Props) {
                 key={status}
                 type="button"
                 onClick={() => setFilter(status)}
-                className={`rounded-xl px-3 py-2 text-xs font-bold transition shadow-xs ${
+                className={`sf-btn-toggle rounded-xl px-3 py-2 text-xs font-bold transition shadow-xs ${
                   filter === status
                     ? "bg-brand-blue text-white"
                     : "bg-white border border-line text-neutral-700 hover:bg-canvas"
@@ -235,7 +235,7 @@ function OrderCard({
               type="button"
               onClick={handleChat}
               disabled={openingChat}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-blue px-3 py-1.5 text-[11px] font-bold text-white hover:bg-brand-blue-dark disabled:opacity-60"
+              className="sf-btn-soft inline-flex items-center gap-1.5 rounded-lg bg-brand-blue px-3 py-1.5 text-[11px] font-bold text-white hover:bg-brand-blue-dark disabled:opacity-60"
             >
               {openingChat ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageSquare className="h-3.5 w-3.5" />}
               {t("seller.chatWithBuyer")}
@@ -294,7 +294,7 @@ function OrderCard({
           type="button"
           onClick={handleSave}
           disabled={!dirty || saving}
-          className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:active:scale-100"
+          className="sf-btn-commit rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:active:scale-100"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
           <span>{saving ? t("common.saving") : t("seller.orders.updateStatus")}</span>

@@ -140,7 +140,7 @@ export function UploadCertificateModal({
                   key={i}
                   type="button"
                   onClick={() => handleSelectPreset(p)}
-                  className="rounded-lg border border-neutral-200 bg-neutral-50 hover:border-amber-400 hover:bg-amber-50/50 hover:text-amber-900 px-2.5 py-1 text-[11px] font-medium text-neutral-700 transition active:scale-95"
+                  className="sf-btn-soft rounded-lg border border-neutral-200 bg-neutral-50 hover:border-amber-400 hover:bg-amber-50/50 hover:text-amber-900 px-2.5 py-1 text-[11px] font-medium text-neutral-700 transition active:scale-95"
                 >
                   + {p.title.split(" ")[0]} ({p.issuer.split(" ")[0]})
                 </button>
@@ -286,14 +286,14 @@ export function UploadCertificateModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-neutral-300 px-4 py-2 font-semibold text-neutral-700 hover:bg-neutral-50 transition"
+              className="sf-btn-soft rounded-xl border border-neutral-300 px-4 py-2 font-semibold text-neutral-700 hover:bg-neutral-50 transition"
             >
               {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={isUploading}
-              className="disabled:opacity-60 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 font-bold px-5 py-2 transition shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
+              className="sf-btn-commit disabled:opacity-60 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 font-bold px-5 py-2 transition shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
             >
               <CheckCircle2 className="h-4 w-4" />
               <span>{t("seller.cert.publishToHallOfFame")}</span>

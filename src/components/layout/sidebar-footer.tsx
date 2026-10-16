@@ -77,7 +77,7 @@ function FooterMenu({
     <span className="relative inline-block">
       <button
         type="button"
-        className="inline-flex items-center gap-0.5 hover:text-brand-blue hover:underline"
+        className="sf-btn-soft inline-flex items-center gap-0.5 hover:text-brand-blue hover:underline"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
       >

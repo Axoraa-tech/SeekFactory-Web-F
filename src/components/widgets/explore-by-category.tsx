@@ -24,7 +24,7 @@ export function ExploreByCategory({ categories }: Props) {
             key={category.id}
             href={`/explore?category=${category.slug}`}
             title={translateCategory(category.name)}
-            className="flex min-w-0 flex-col items-center gap-1.5 rounded-xl border border-line px-1.5 py-2.5 text-center hover:bg-canvas"
+            className="sf-btn-nav flex min-w-0 flex-col items-center gap-1.5 rounded-xl border border-line px-1.5 py-2.5 text-center hover:bg-canvas"
           >
             <CategoryIcon icon={category.icon} className="h-5 w-5 shrink-0 text-ink-muted" />
             <span className="line-clamp-2 w-full break-words text-[11px] font-medium leading-tight [hyphens:auto]">
@@ -34,7 +34,7 @@ export function ExploreByCategory({ categories }: Props) {
         ))}
         <Link
           href="/explore"
-          className="flex flex-col items-center justify-center rounded-xl border border-line px-2 py-3 text-center text-xs font-semibold text-brand-orange hover:bg-canvas hover:border-brand-orange/40 transition-colors"
+          className="sf-btn-nav flex flex-col items-center justify-center rounded-xl border border-line px-2 py-3 text-center text-xs font-semibold text-brand-orange hover:bg-canvas hover:border-brand-orange/40 transition-colors"
         >
           {t("widgets.viewAll", "More")}
         </Link>

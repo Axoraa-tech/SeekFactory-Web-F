@@ -171,7 +171,7 @@ function StatButton({ label, count, active, activeClass, onClick, children }: {
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        "flex items-center gap-1 rounded-lg px-2 py-1 transition hover:bg-canvas hover:text-ink active:scale-95",
+        "sf-btn-toggle flex items-center gap-1 rounded-lg px-2 py-1 transition hover:bg-canvas hover:text-ink active:scale-95",
         active && activeClass,
       )}
     >
@@ -201,14 +201,14 @@ export function SeekActions({ item }: { item: FeedItem }) {
       {productHref && (
         <Link
           href={productHref}
-          className="rounded-full bg-brand-blue px-3.5 py-1.5 text-xs font-medium text-white hover:bg-brand-blue-dark"
+          className="sf-btn-nav rounded-full bg-brand-blue px-3.5 py-1.5 text-xs font-medium text-white hover:bg-brand-blue-dark"
         >
           {t("feed.viewProducts")}
         </Link>
       )}
       <Link
         href={`/manufacturers/${item.manufacturer.slug}`}
-        className="rounded-full border border-line px-3.5 py-1.5 text-xs font-medium text-ink hover:border-brand-orange hover:text-brand-orange transition-colors"
+        className="sf-btn-nav rounded-full border border-line px-3.5 py-1.5 text-xs font-medium text-ink hover:border-brand-orange hover:text-brand-orange transition-colors"
       >
         {t("showcase.viewManufacturer")}
       </Link>

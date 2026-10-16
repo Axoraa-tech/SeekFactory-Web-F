@@ -56,7 +56,7 @@ export function ProfileHero({
         <div className="absolute right-4 top-4 hidden sm:flex items-center gap-2">
           <Link
             href="/"
-            className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold text-white bg-brand-orange hover:bg-[#d85b17] transition-all shadow-xs active:scale-95"
+            className="sf-btn-nav flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold text-white bg-brand-orange hover:bg-[#d85b17] transition-all shadow-xs active:scale-95"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
             {t("nav.home")}
@@ -126,7 +126,7 @@ export function ProfileHero({
           <div className="flex flex-wrap items-center gap-2 shrink-0 pb-1">
             <Link
               href="/rfq/new"
-              className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-brand-blue-dark transition active:scale-[0.98]"
+              className="sf-btn-commit inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-brand-blue-dark transition active:scale-[0.98]"
             >
               <FileText className="h-3.5 w-3.5" />
               {t("nav.postRfq")}
@@ -134,7 +134,7 @@ export function ProfileHero({
             <button
               type="button"
               onClick={onOpenPremium}
-              className="glass-liquid-item inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold text-brand-orange"
+              className="sf-btn-nav glass-liquid-item inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold text-brand-orange"
             >
               <Crown className="h-3.5 w-3.5" />
               {t("profile.hero.membership")}
@@ -143,7 +143,7 @@ export function ProfileHero({
               type="button"
               disabled={isLoggingOut}
               onClick={onLogout}
-              className="glass-liquid-item inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-ink-muted hover:text-red-600 disabled:opacity-50"
+              className="sf-btn-danger glass-liquid-item inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-ink-muted hover:text-red-600 disabled:opacity-50"
             >
               <LogOut className="h-3.5 w-3.5" />
               {isLoggingOut ? t("userMenu.signingOut") : t("userMenu.signOut")}
