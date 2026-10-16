@@ -5,6 +5,8 @@ import { ProductImageCarousel } from "@/components/products/product-image-carous
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { VerifiedManufacturersSection } from "@/features/explore/verified-manufacturers-section";
 import { RecordSearch } from "@/features/explore/record-search";
+import { ProductSortMenu } from "@/features/explore/product-sort-menu";
+import { parseProductSort, sortProducts } from "@/features/explore/product-sort";
 import { getApi } from "@/shared/api";
 import { buildCategoryTree } from "@/features/categories/category-tree";
 import { Package, ShieldCheck } from "lucide-react";
@@ -13,12 +15,13 @@ import { getTranslations } from "next-intl/server";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams: Promise<{ q?: string; category?: string; sub?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; sub?: string; sort?: string }>;
 };
 
 export default async function ExplorePage({ searchParams }: Props) {
   const t = await getTranslations();
-  const { q = "", category = "", sub = "" } = await searchParams;
+  const { q = "", category = "", sub = "", sort: sortParam } = await searchParams;
+  const sort = parseProductSort(sortParam);
   const api = getApi();
   const { roots, childrenByRoot } = buildCategoryTree(await api.categories.list());
 
@@ -28,11 +31,12 @@ export default async function ExplorePage({ searchParams }: Props) {
   const selected = selectedSub ?? selectedRoot;
 
   // The backend searches name/description/location and includes every subcategory of the selection
-  const { manufacturers: visibleManufacturers, products: visibleProducts } = await api.search.query({
+  const { manufacturers: visibleManufacturers, products: foundProducts } = await api.search.query({
     q: q.trim(),
     category: selected?.id ?? "",
     limit: 60,
   });
+  const visibleProducts = sortProducts(foundProducts, sort, q);
 
   return (
     <section className="space-y-6">
@@ -92,14 +96,17 @@ export default async function ExplorePage({ searchParams }: Props) {
 
       {/* 4. Machinery Products Section */}
       <div className="space-y-3 pt-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-ink flex items-center gap-2">
-            <Package className="h-4 w-4 text-brand-orange" />
-            <span>{t("explore.featuredMachineryProducts")}</span>
-            <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-bold text-brand-orange">
-              {visibleProducts.length}
-            </span>
-          </h2>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h2 className="text-base font-bold text-ink flex items-center gap-2">
+              <Package className="h-4 w-4 text-brand-orange" />
+              <span>{t("explore.featuredMachineryProducts")}</span>
+              <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-bold text-brand-orange">
+                {visibleProducts.length}
+              </span>
+            </h2>
+            {visibleProducts.length > 1 && <ProductSortMenu current={sort} />}
+          </div>
           <span className="text-xs text-neutral-500">{t("explore.directFactoryPricing")}</span>
         </div>
 

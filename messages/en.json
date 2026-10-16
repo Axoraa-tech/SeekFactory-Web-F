@@ -365,7 +365,17 @@
     "inquire": "Inquire →",
     "noMachineryMatchingThisCategory": "No machinery matching this category or query.",
     "tryBrowsingAllCategoriesOr": "Try browsing all categories or searching another term.",
-    "exploreAllCategories": "Explore All Categories"
+    "exploreAllCategories": "Explore All Categories",
+    "sort": {
+      "label": "Sort",
+      "options": {
+        "relevance": "Best match",
+        "price-asc": "Price: low to high",
+        "price-desc": "Price: high to low",
+        "newest": "Newest first",
+        "moq": "Lowest MOQ"
+      }
+    }
   },
   "profile": {
     "page": {
@@ -788,10 +798,12 @@
     },
     "onlineWorkAnimation": "Online Work Animation",
     "verifyBanner": {
-      "message": "Please verify your email address. We sent a confirmation link to {email}.",
       "resend": "Resend link",
       "sent": "Verification link sent to {email}. Check your inbox and spam folder.",
-      "dismiss": "Hide this reminder"
+      "dismiss": "Hide this reminder",
+      "title": "Verify your email",
+      "detail": "We sent a confirmation link to {email}",
+      "linkSent": "Link sent"
     }
   },
   "notFound": {

@@ -365,7 +365,17 @@
     "inquire": "咨询 →",
     "noMachineryMatchingThisCategory": "没有符合该类目或搜索条件的机械。",
     "tryBrowsingAllCategoriesOr": "试试浏览全部类目，或换个关键词搜索。",
-    "exploreAllCategories": "浏览全部类目"
+    "exploreAllCategories": "浏览全部类目",
+    "sort": {
+      "label": "排序",
+      "options": {
+        "relevance": "最佳匹配",
+        "price-asc": "价格：从低到高",
+        "price-desc": "价格：从高到低",
+        "newest": "最新上架",
+        "moq": "起订量最低"
+      }
+    }
   },
   "profile": {
     "page": {
@@ -788,10 +798,12 @@
     },
     "onlineWorkAnimation": "在线办公动画",
     "verifyBanner": {
-      "message": "请验证您的邮箱。我们已向 {email} 发送确认链接。",
       "resend": "重新发送",
       "sent": "验证链接已发送至 {email}，请查看收件箱和垃圾邮件。",
-      "dismiss": "隐藏此提醒"
+      "dismiss": "隐藏此提醒",
+      "title": "请验证您的邮箱",
+      "detail": "确认链接已发送至 {email}",
+      "linkSent": "已发送"
     }
   },
   "notFound": {

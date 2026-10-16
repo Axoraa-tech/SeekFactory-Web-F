@@ -1016,3 +1016,37 @@ a.hover\:bg-brand-blue:hover,
     transform: none !important;
   }
 }
+
+/* Page notices (e.g. verify-email): arrive with a short fade-down instead of popping in.
+   Shown once per page view, so a standard entrance; reduced motion keeps only the fade. */
+@keyframes sf-notice-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.sf-notice-in {
+  animation: sf-notice-in 220ms var(--sf-ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes sf-notice-in-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .sf-notice-in {
+    animation-name: sf-notice-in-fade;
+  }
+}
+
+/* Menus that drop from a button (e.g. Explore's Sort): scale out of the trigger, not from nothing.
+   Opens with motion, closes instantly (unmount). Reduced motion: fade only. */
+@keyframes sf-menu-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+.sf-menu-in {
+  animation: sf-menu-in 200ms var(--sf-ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-menu-in {
+    animation-name: sf-notice-in-fade;
+  }
+}
