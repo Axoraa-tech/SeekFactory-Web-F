@@ -12,6 +12,8 @@ type Props = {
   /** Spreads the auto-advance of neighbouring cards so a grid doesn't flip in step. */
   index?: number;
   className?: string;
+  /** false: photos only move with the arrows, dots or a swipe (e.g. a long list of cards). */
+  autoplay?: boolean;
 };
 
 const AUTOPLAY_MS = 3200;
@@ -20,13 +22,15 @@ const SWIPE_PX = 40;
 /**
  * Product photos for a card inside a link: slides by itself while the card is on screen, and can
  * be moved with the arrows, the dots or a swipe. Moving the photos never opens the product; a
- * plain click still does.
+ * plain click still does. Only the first photo loads up front; each next one loads as it comes up.
  */
-export function ProductImageCarousel({ images, alt, index = 0, className }: Props) {
+export function ProductImageCarousel({ images, alt, index = 0, className, autoplay = true }: Props) {
   const t = useTranslations();
   const photos = images.filter(Boolean);
   const count = photos.length;
   const [current, setCurrent] = useState(0);
+  // Furthest photo shown so far: it and the one after it are loaded (the next is ready to slide in)
+  const [reached, setReached] = useState(0);
   const [inView, setInView] = useState(false);
   const [paused, setPaused] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -36,11 +40,15 @@ export function ProductImageCarousel({ images, alt, index = 0, className }: Prop
   // Only slide while visible, and not for visitors who asked for less motion
   useEffect(() => {
     const el = rootRef.current;
-    if (!el || count < 2) return;
+    if (!el || count < 2 || !autoplay) return;
     const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.5 });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [count]);
+  }, [count, autoplay]);
+
+  useEffect(() => {
+    setReached((r) => Math.max(r, current));
+  }, [current]);
 
   useEffect(() => {
     if (!inView || paused || count < 2) return;
@@ -106,11 +114,15 @@ export function ProductImageCarousel({ images, alt, index = 0, className }: Prop
         {photos.map((src, i) => (
           <div key={`${src}-${i}`} className="h-full w-full shrink-0">
             {/* A dead photo link shows a neutral tile instead of an empty box or raw alt text */}
-            <SafeImage
-              src={src}
-              alt={i === 0 ? alt : `${alt} (${i + 1}/${count})`}
-              className="pointer-events-none h-full w-full object-cover"
-            />
+            {i <= reached + 1 || i === count - 1 ? (
+              <SafeImage
+                src={src}
+                alt={i === 0 ? alt : `${alt} (${i + 1}/${count})`}
+                className="pointer-events-none h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-neutral-100" />
+            )}
           </div>
         ))}
       </div>

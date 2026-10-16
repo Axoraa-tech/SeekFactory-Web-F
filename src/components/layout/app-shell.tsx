@@ -51,7 +51,6 @@ export function AppShell({
           <LeftSidebar
             categories={categories}
             manufacturers={manufacturers}
-            products={products}
             messages={messages}
             messageCount={messageCount}
             notificationCount={notificationCount}

@@ -541,9 +541,6 @@ export function DynamicCategoryNav({
                             )}
                           </div>
                         </div>
-                        <span className="shrink-0 text-[10px] font-semibold text-slate-400 group-hover:text-brand-orange">
-                          {cat.listingCount > 0 ? `${(cat.listingCount / 1000).toFixed(0)}k+` : ""}
-                        </span>
                       </Link>
                     );
                   })}

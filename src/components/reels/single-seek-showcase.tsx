@@ -3,17 +3,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
-import { ImageOff, MapPin, Users } from "lucide-react";
+import { MapPin, Users } from "lucide-react";
 import { ReelCard } from "@/components/reels/reel-card";
 import { ProductSlideshowCard } from "@/components/reels/product-slideshow-card";
 import { ReelPopupProvider } from "@/components/reels/use-reel-popup";
 import { ReelPopupModal } from "@/components/reels/reel-popup-modal";
+import { RecommendedProductsPanel } from "@/components/reels/recommended-products-panel";
+import { useRecommendedProducts } from "@/features/feed/use-recommended-products";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import { useViewportLock } from "@/components/reels/use-viewport-lock";
 import type { FeedItem } from "@/shared/api/contracts";
-import type { Product } from "@/entities/product";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import type { ProductGroup } from "@/features/feed/use-showcase-products";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -25,7 +26,7 @@ type Props = {
   settings: FeedShowcase;
   /**
    * "single"  — the showcase owns the full width; both site sidebars step aside.
-   * "sidebar" — the site's left menu stays put and only photos sit on the right.
+   * "sidebar" — the site's left menu stays put and only the products panel sits on the right.
    *
    * The marker attribute is what the CSS in globals.css keys off, so the choice
    * has to reach the DOM rather than staying a prop.
@@ -35,6 +36,8 @@ type Props = {
   header?: ReactNode;
   /** Factories' products, mixed in between the seeks as auto-sliding cards (see interleave). */
   productGroups?: ProductGroup[];
+  /** The feed's current search: remembered, and the products panel reloads for it. */
+  productsKey?: string;
 };
 
 type Entry =
@@ -78,16 +81,19 @@ function interleave(items: FeedItem[], groups: ProductGroup[]): Entry[] {
 
 /**
  * Single-video seek showcase, built from the same seek card as the dual layout:
- *   ≥1280px  [factory profile 280] [seek card, max space] [seek photos 280]
- *   ≥1024px  profile drops out → [seek card] [photos 280]
- *   <1024px  cards full width with a horizontal photo strip underneath
- * The seek in view drives both side panels; the card plays itself when mostly in view.
+ *   ≥1280px  [factory profile 280] [seek card, max space] [products 360, 400 from 1400px]
+ *   ≥1024px  profile drops out → [seek card] [products 340]
+ *   <1024px  cards full width with a horizontal row of product cards above
+ * The seek in view drives the profile panel; the products panel is the viewer's own (searches,
+ * activity, trending) and never follows the seek. The card plays itself when mostly in view.
  *
  * In the "sidebar" variant the factory profile panel is never shown: the site's
  * own left menu occupies that column instead.
  */
-export function SingleSeekShowcase({ items, settings, variant = "single", header, productGroups }: Props) {
+export function SingleSeekShowcase({ items, settings, variant = "single", header, productGroups, productsKey }: Props) {
   const t = useTranslations();
+  // One load for both the desktop column and the small-screen row
+  const recommended = useRecommendedProducts(productsKey, settings.showPhotos);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const entries = useMemo(() => interleave(items, productGroups ?? []), [items, productGroups]);
   // Side by side from lg on a tall enough window: the page stays put and the seek column fills the
@@ -96,6 +102,21 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
   const tallEnough = useMediaQuery(LOCK_MIN_HEIGHT_QUERY);
   const playerHeight = useViewportLock(scrollerRef, entries.length > 0 && tallEnough, 1024);
   const locked = playerHeight !== null;
+  // Width the seek column's scrollbar takes (0 for overlay scrollbars): the Seeks bar above is
+  // inset by it, plus the column's pr-1, so the bar ends exactly where the seek card does
+  const [scrollbarWidth, setScrollbarWidth] = useState(0);
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || !locked) {
+      setScrollbarWidth(0);
+      return;
+    }
+    const measure = () => setScrollbarWidth(el.offsetWidth - el.clientWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [locked, entries.length]);
   const [active, setActive] = useState(0);
 
   // Track which seek is in view: it drives the profile and photo panels
@@ -193,7 +214,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
   // The list can shrink before the reset effect runs, so never read or show past the end
   const safeActive = Math.min(active, entries.length - 1);
   const current = entries[safeActive];
-  // The profile panel follows whatever is in view (the photo panel deliberately does not)
+  // The profile panel follows whatever is in view (the products panel deliberately does not)
   const currentManufacturer = current.kind === "seek" ? current.item.manufacturer : current.group.manufacturer;
   // The site's left menu replaces the profile column in the sidebar variant
   const showProfile = variant === "single" && settings.showProfile;
@@ -208,9 +229,10 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
         {...(variant === "single" ? { "data-showcase-single": "" } : { "data-showcase-sidebar": "" })}
         className={cn(
           "grid grid-cols-[minmax(0,1fr)] gap-5 items-start",
-          showPhotos && "lg:grid-cols-[minmax(0,1fr)_280px]",
+          showPhotos && "lg:grid-cols-[minmax(0,1fr)_340px]",
+          showPhotos && !showProfile && "xl:grid-cols-[minmax(0,1fr)_360px] min-[1400px]:grid-cols-[minmax(0,1fr)_400px]",
           showProfile && !showPhotos && "xl:grid-cols-[280px_minmax(0,1fr)]",
-          showProfile && showPhotos && "xl:grid-cols-[280px_minmax(0,1fr)_280px]",
+          showProfile && showPhotos && "xl:grid-cols-[280px_minmax(0,1fr)_360px] min-[1400px]:grid-cols-[280px_minmax(0,1fr)_400px]",
         )}
       >
         {/* LEFT: factory profile (≥1280px) */}
@@ -222,19 +244,22 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
 
         {/* CENTRE: the dual layout's seek card, one per step, across the whole column */}
         <section className="min-w-0">
-          {/* lg:pr-5: end at the card's edge, not over the seek column's scrollbar */}
-          {header && <div className="mb-2 space-y-2 lg:pr-5">{header}</div>}
-          {/* Below 1024px: all product photos as one strip of their own, above the seeks */}
+          {header && (
+            <div className="mb-2 space-y-2" style={locked ? { paddingRight: 4 + scrollbarWidth } : undefined}>
+              {header}
+            </div>
+          )}
+          {/* Below 1024px: the products as one swipeable row of their own, above the seeks */}
           {showPhotos && (
             <div className="mb-3 lg:hidden">
-              <PhotoStrip items={items} groups={productGroups} />
+              <RecommendedProductsPanel variant="strip" recommended={recommended} />
             </div>
           )}
           <div
             ref={scrollerRef}
             style={playerHeight ? { height: playerHeight } : undefined}
             className={cn(
-              "space-y-4 rounded-2xl scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent",
+              "space-y-4 rounded-2xl scrollbar-subtle",
               locked && "overflow-y-auto overscroll-contain snap-y snap-mandatory pr-1",
             )}
             aria-label={t("common.seeks")}
@@ -277,10 +302,11 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
           )}
         </section>
 
-        {/* RIGHT: seek photos (≥1024px) */}
+        {/* RIGHT: products for the viewer (≥1024px), one below the other, scrolling on their own */}
         {showPhotos && (
-          <aside className="hidden lg:block sticky top-[140px]">
-            <PhotoPanel items={items} groups={productGroups} />
+          // top-[88px] as the left menu: a larger offset would push the panel below the other columns
+          <aside className="hidden lg:block sticky top-[88px]">
+            <RecommendedProductsPanel variant="column" recommended={recommended} />
           </aside>
         )}
       </div>
@@ -364,93 +390,6 @@ function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
       </SupplierLockOverlay>
       <Link href={`/manufacturers/${m.slug}`} className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink">{t("nav.profile")}</Link>
       <Link href="/rfq/new" className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
-    </div>
-  );
-}
-
-type Photo = { key: string; product: Product; url: string };
-
-/**
- * Every product in the feed (under seeks and from factories without seeks) with its whole gallery,
- * in a fixed order. Independent of the seek in view: changing videos never reorders or moves it.
- */
-function photosFor(items: FeedItem[], groups: ProductGroup[] = []): Photo[] {
-  const seen = new Set<string>();
-  const out: Photo[] = [];
-  for (const p of [...items.flatMap((i) => i.products ?? []), ...groups.flatMap((g) => g.products)]) {
-    if (seen.has(p.id)) continue;
-    seen.add(p.id);
-    const gallery = p.imageUrls?.length ? p.imageUrls : p.imageUrl ? [p.imageUrl] : [];
-    gallery.forEach((url, i) => out.push({ key: `${p.id}-${i}`, product: p, url }));
-  }
-  return out;
-}
-
-function PhotoPanel({ items, groups }: { items: FeedItem[]; groups?: ProductGroup[] }) {
-  const t = useTranslations();
-  const photos = useMemo(() => photosFor(items, groups), [items, groups]);
-  return (
-    <div className="rounded-2xl border border-line bg-surface p-4 shadow-2xs">
-      <p className="mb-3 text-sm font-bold text-ink">{t("showcase.single.seekPhotos")}</p>
-      {photos.length === 0 ? (
-        <EmptyPhotos />
-      ) : (
-        // overscroll-contain: the wheel scrolls only the photos, never the seeks or the page
-        <div
-          data-prevent-seek-wheel
-          // One photo per row; runs down to the bottom of the seek card
-          className="flex flex-col gap-3 max-h-[calc(100vh-225px)] overflow-y-auto overscroll-contain pr-0.5 scrollbar-none"
-        >
-          {photos.map(({ key, product: p, url }, i) => {
-            const firstOfProduct = i === 0 || photos[i - 1].product.id !== p.id;
-            return (
-              <Link key={key} href={`/products/${p.slug}`} title={p.name} className="group block">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100">
-                  {firstOfProduct && p.stockStatus === "OUT_OF_STOCK" && (
-                    <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
-                  )}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px] transition-transform duration-300 group-hover:scale-105" />
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PhotoStrip({ items, groups }: { items: FeedItem[]; groups?: ProductGroup[] }) {
-  const t = useTranslations();
-  const photos = useMemo(() => photosFor(items, groups), [items, groups]);
-  if (photos.length === 0) return null;
-  return (
-    <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none" aria-label={t("showcase.single.seekPhotos")}>
-      {photos.map(({ key, product: p, url }, i) => {
-        const firstOfProduct = i === 0 || photos[i - 1].product.id !== p.id;
-        return (
-          <Link key={key} href={`/products/${p.slug}`} title={p.name} className="w-40 shrink-0 snap-start">
-            <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
-              {firstOfProduct && p.stockStatus === "OUT_OF_STOCK" && (
-                <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-rose-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white">{t("stock.outOfStock")}</span>
-              )}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt={p.name} loading="lazy" className="h-full w-full object-contain text-[0px]" />
-            </div>
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
-
-function EmptyPhotos() {
-  const t = useTranslations();
-  return (
-    <div className="flex flex-col items-center justify-center rounded-xl bg-slate-50 py-10 text-center text-xs text-ink-muted">
-      <ImageOff className="mb-2 h-6 w-6 text-slate-300" />
-      {t("showcase.single.noProductPhotosForThis")}
     </div>
   );
 }

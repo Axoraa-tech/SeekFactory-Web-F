@@ -164,8 +164,7 @@
     "search": {
       "clearSearch": "Clear search",
       "matchingCategories": "Matching Categories",
-      "openSearch": "Open search",
-      "listingCount": "{count} listings"
+      "openSearch": "Open search"
     },
     "topNav": {
       "seekfactoryHome": "SeekFactory home"
@@ -324,8 +323,16 @@
       "exportsTo": "Exports to",
       "viewFactoryProfile": "View factory profile",
       "rfq": "RFQ",
-      "seekPhotos": "Seek photos",
-      "noProductPhotosForThis": "No product photos for this seek yet"
+      "productsForYou": "Recommended for you",
+      "productsForYouHint": "Based on your searches and activity",
+      "trendingProducts": "Trending products",
+      "trendingProductsHint": "Popular with buyers right now",
+      "viewAllProducts": "View all products",
+      "seenAllProducts": "That's the top {count} products",
+      "noProductsYet": "No products to show yet",
+      "couldNotLoadProducts": "Couldn't load products",
+      "tryAgain": "Try again",
+      "productsPanel": "Products"
     },
     "spotlight": {
       "established": "Established",

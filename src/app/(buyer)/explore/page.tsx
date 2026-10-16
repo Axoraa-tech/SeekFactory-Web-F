@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { ProductImageCarousel } from "@/components/products/product-image-carousel";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { VerifiedManufacturersSection } from "@/features/explore/verified-manufacturers-section";
+import { RecordSearch } from "@/features/explore/record-search";
 import { getApi } from "@/shared/api";
 import { buildCategoryTree } from "@/features/categories/category-tree";
 import { Package, ShieldCheck } from "lucide-react";
@@ -35,6 +36,8 @@ export default async function ExplorePage({ searchParams }: Props) {
 
   return (
     <section className="space-y-6">
+      {/* Remembered in this browser: the home feed's product panel follows recent searches */}
+      <RecordSearch term={q} />
       {/* 2. Subcategory Quick Filter Chips (if Root Selected) */}
       {selectedRoot ? (
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs space-y-3">

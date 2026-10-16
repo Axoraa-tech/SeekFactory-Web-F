@@ -164,8 +164,7 @@
     "search": {
       "clearSearch": "清除搜索",
       "matchingCategories": "匹配的类目",
-      "openSearch": "打开搜索",
-      "listingCount": "{count} 个商品"
+      "openSearch": "打开搜索"
     },
     "topNav": {
       "seekfactoryHome": "SeekFactory 首页"
@@ -324,8 +323,16 @@
       "exportsTo": "出口至",
       "viewFactoryProfile": "查看工厂主页",
       "rfq": "询价",
-      "seekPhotos": "希克图片",
-      "noProductPhotosForThis": "此希克暂无产品图片"
+      "productsForYou": "为你推荐",
+      "productsForYouHint": "根据你的搜索和浏览记录",
+      "trendingProducts": "热门产品",
+      "trendingProductsHint": "买家近期关注",
+      "viewAllProducts": "查看全部产品",
+      "seenAllProducts": "以上为精选的 {count} 款产品",
+      "noProductsYet": "暂无可展示的产品",
+      "couldNotLoadProducts": "产品加载失败",
+      "tryAgain": "重试",
+      "productsPanel": "产品"
     },
     "spotlight": {
       "established": "成立时间",

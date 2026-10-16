@@ -18,8 +18,49 @@
   display: none;
 }
 
+/* ...and the left menu narrows so the seek and the products column get the room:
+   220px from 1280px, an icon-only rail between 1024px and 1279px. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] {
+    width: 64px;
+  }
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] [data-left-sidebar-link] {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] [data-left-sidebar-label],
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] [data-left-sidebar-extras] {
+    display: none;
+  }
+  /* The unread count becomes a corner badge on the icon */
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] [data-left-sidebar-badge] {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    margin-left: 0;
+  }
+}
+@media (min-width: 1280px) {
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] {
+    width: 220px;
+  }
+}
+
 .scrollbar-none {
   scrollbar-width: none;
+}
+
+/* Side panels and the seek column: a slim scrollbar that only shows while the pointer is over
+   the panel (the standard properties win over ::-webkit-scrollbar in current browsers) */
+.scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s;
+}
+.scrollbar-subtle:hover,
+.scrollbar-subtle:focus-within {
+  scrollbar-color: #d0d5dd transparent;
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;

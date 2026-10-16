@@ -94,7 +94,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
   }, []);
 
   return (
-    <Card className="p-4 border-slate-200/90 shadow-2xs">
+    <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-bold text-slate-900">
           {t("widgets.verifiedManufacturers", "Verified Manufacturers")}

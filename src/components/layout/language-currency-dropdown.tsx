@@ -11,8 +11,17 @@ import {
 } from "@/shared/i18n/regional-context";
 import { useTranslations } from "next-intl";
 
-/** `align="right"` opens the panel leftwards, for triggers near the right edge of the page. */
-export function LanguageCurrencyDropdown({ align = "left" }: { align?: "left" | "right" }) {
+/**
+ * `align="right"` opens the panel leftwards, for triggers near the right edge of the page.
+ * `compact` slims the trigger where the header is crowded (manufacturers' TopNav).
+ */
+export function LanguageCurrencyDropdown({
+  align = "left",
+  compact = false,
+}: {
+  align?: "left" | "right";
+  compact?: boolean;
+}) {
   const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const { selectedLanguage, selectedCurrency, setLanguage, setCurrency } = useRegionalSettings();
@@ -85,14 +94,16 @@ export function LanguageCurrencyDropdown({ align = "left" }: { align?: "left" | 
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className={`group flex items-center gap-2 rounded-full border py-1.5 pl-2 pr-3 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 ${
+        className={`group flex items-center rounded-full border transition-all ${compact ? "gap-1.5 py-1 pl-1.5 pr-2" : "gap-2 py-1.5 pl-2 pr-3"} duration-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 ${
           isOpen
             ? "border-brand-blue bg-blue-50/50 shadow-sm"
             : "border-transparent hover:border-line hover:bg-canvas"
         }`}
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100/80 text-brand-blue ring-2 ring-brand-blue/20 transition-transform duration-200 group-hover:scale-105">
-          <Globe className="h-4 w-4" />
+        <div
+          className={`flex items-center justify-center rounded-full bg-blue-100/80 text-brand-blue ring-2 ring-brand-blue/20 transition-transform duration-200 group-hover:scale-105 ${compact ? "h-6 w-6" : "h-7 w-7"}`}
+        >
+          <Globe className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
         </div>
         <span className="hidden sm:block text-left leading-tight">
           <span className="block text-xs font-semibold text-ink group-hover:text-brand-blue transition-colors">
@@ -103,7 +114,7 @@ export function LanguageCurrencyDropdown({ align = "left" }: { align?: "left" | 
           {selectedLanguage.code}
         </span>
         <ChevronDown
-          className={`h-4 w-4 text-ink-faint transition-transform duration-200 ${
+          className={`text-ink-faint transition-transform duration-200 ${compact ? "h-3.5 w-3.5" : "h-4 w-4"} ${
             isOpen ? "rotate-180 text-brand-blue" : "group-hover:text-ink"
           }`}
         />

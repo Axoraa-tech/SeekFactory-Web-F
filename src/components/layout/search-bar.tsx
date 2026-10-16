@@ -7,9 +7,11 @@ import { useRegionalSettings } from "@/shared/i18n/regional-context";
 
 type SearchBarProps = {
   categories?: Category[];
+  /** Slimmer bar, leaving room for the manufacturers' "Start a post" button in the TopNav. */
+  compact?: boolean;
 };
 
-export function SearchBar({ categories = [] }: SearchBarProps) {
+export function SearchBar({ categories = [], compact = false }: SearchBarProps) {
   const { t, translateCategory } = useRegionalSettings();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -30,11 +32,11 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
   }, []);
 
   return (
-    <div className="relative min-w-0 flex-1 max-w-xl mx-2 lg:mx-4">
+    <div className={`relative min-w-0 flex-1 mx-2 ${compact ? "max-w-lg lg:mx-1" : "max-w-xl lg:mx-4"}`}>
       {/* Desktop & Tablet Minimalist Search Bar */}
       <form
         action="/explore"
-        className={`hidden md:flex h-11 w-full items-center rounded-full border px-4 transition-all duration-200 ${
+        className={`hidden md:flex ${compact ? "h-10" : "h-11"} w-full items-center rounded-full border px-4 transition-all duration-200 ${
           isFocused
             ? "border-brand-blue/70 bg-white/95 ring-3 ring-brand-blue/15 shadow-[0_4px_16px_rgba(37,99,235,0.12)]"
             : "border-white/80 bg-white/55 backdrop-blur-md hover:bg-white/80 hover:border-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.03),0_2px_8px_rgba(0,0,0,0.04)]"
@@ -67,7 +69,7 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
             <X className="h-3 w-3" />
           </button>
         ) : (
-          <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded-md border border-slate-200 bg-white/80 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 select-none shadow-2xs">
+          <kbd className={`hidden ${compact ? "xl:inline-flex" : "lg:inline-flex"} items-center gap-0.5 rounded-md border border-slate-200 bg-white/80 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 select-none shadow-2xs`}>
             <Command className="h-2.5 w-2.5" />K
           </kbd>
         )}
@@ -94,10 +96,9 @@ export function SearchBar({ categories = [] }: SearchBarProps) {
                 <a
                   key={cat.id}
                   href={`/explore?category=${cat.slug}`}
-                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
+                  className="flex items-center rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors"
                 >
-                  <span>{translateCategory(cat.name)}</span>
-                  <span className="text-[10px] text-slate-400">{t("layout.search.listingCount", { count: cat.listingCount })}</span>
+                  {translateCategory(cat.name)}
                 </a>
               ))}
           </div>

@@ -893,6 +893,29 @@ export function createHttpApi(
       return list.map(normalizeProduct);
     },
 
+    async listRecommended({ limit = 60, viewerId, searchTerms = [] }) {
+      const params = new URLSearchParams({ limit: String(limit) });
+      if (viewerId) params.set("viewerId", viewerId);
+      for (const term of searchTerms) params.append("q", term);
+      const res = await fetchJson<{
+        personalized?: boolean;
+        products?: BackendProduct[];
+        manufacturers?: (BackendManufacturer & { logo?: string })[];
+      }>(`/api/v1/products/recommended?${params}`, { cache: "no-store" });
+      return {
+        personalized: Boolean(res.personalized),
+        products: (res.products || []).map(normalizeProduct),
+        manufacturers: (res.manufacturers || []).map((m) => ({
+          id: m.id || "",
+          slug: m.slug || "",
+          name: m.name || "",
+          logoUrl: resolveMediaUrl(m.logo || m.logoUrl) || PLACEHOLDER_IMAGE,
+          country: m.country || "",
+          verified: Boolean(m.verified),
+        })),
+      };
+    },
+
     async recordView(productId: string, viewerId?: string): Promise<void> {
       try {
         await fetchJson<unknown>(`/api/v1/products/${encodeURIComponent(productId)}/view`, {

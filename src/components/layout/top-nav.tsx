@@ -11,6 +11,7 @@ import { UserDropdown } from "@/components/layout/user-dropdown";
 import { VerifyEmailBanner } from "@/features/auth/verify-email-banner";
 import { LanguageCurrencyDropdown } from "@/components/layout/language-currency-dropdown";
 import { DynamicCategoryNav } from "@/features/explore/dynamic-category-nav";
+import { StartPostMenu } from "@/features/factory/post-composer/start-post-menu";
 import type { BuyerProfile } from "@/entities/user";
 import type { Category } from "@/entities/category";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
@@ -198,6 +199,7 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
 
 export function TopNav({ user, messageCount, notificationCount, categories, allCategories }: Props) {
   const { t } = useRegionalSettings();
+  const isManufacturer = user?.role === "Supplier";
 
   // The buyer plan lives on the account; keep the (root-level) plan provider in step with it
   const { syncPlan } = useBuyerPlan();
@@ -249,16 +251,23 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
           </Link>
 
           {/* Search Bar */}
-          <SearchBar categories={categories} />
+          <SearchBar categories={categories} compact={isManufacturer} />
+
+          {/* Manufacturers only; below lg the bottom MobileNav has the Post button */}
+          {isManufacturer && (
+            <div className="hidden lg:block shrink-0">
+              <StartPostMenu />
+            </div>
+          )}
 
           {/* Right Actions */}
           <div data-actions className="ml-auto flex min-w-0 items-center gap-1 sm:gap-2.5 shrink-0">
             {user ? (
               <>
-                <LanguageCurrencyDropdown />
+                <LanguageCurrencyDropdown compact={isManufacturer} />
                 <Link
                   href="/rfq/new"
-                  className="inline-flex h-9 sm:h-10 items-center gap-1.5 rounded-xl bg-brand-orange px-3 sm:px-3.5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition hover:bg-[#d85b17] active:scale-95"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand-orange px-3 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition hover:bg-[#d85b17] active:scale-95"
                 >
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">{t("nav.postRfq", "Post RFQ")}</span>
