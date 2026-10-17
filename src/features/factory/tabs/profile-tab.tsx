@@ -134,7 +134,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal, email
               <button
                 type="button"
                 onClick={onOpenUpgradeModal}
-                className="inline-flex items-center gap-1 rounded-full bg-[#1A73E8] px-2.5 py-0.5 text-xs font-bold text-white shadow-xs hover:bg-[#1557B0] active:scale-95 transition cursor-pointer"
+                className="sf-btn-commit inline-flex items-center gap-1 rounded-full bg-[#1A73E8] px-2.5 py-0.5 text-xs font-bold text-white shadow-xs hover:bg-[#1557B0] active:scale-95 transition cursor-pointer"
               >
                 <span>{t("seller.profile.upgradePlan")}</span>
               </button>
@@ -163,7 +163,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal, email
             <button
               type="button"
               onClick={focusWebsiteInput}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#1A73E8]/30 bg-[#E8F1FD] px-3.5 py-2 text-xs font-bold text-[#1A73E8] transition hover:bg-[#1A73E8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
+              className="sf-btn-add inline-flex items-center gap-1.5 rounded-xl border border-[#1A73E8]/30 bg-[#E8F1FD] px-3.5 py-2 text-xs font-bold text-[#1A73E8] transition hover:bg-[#1A73E8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
             >
               <Globe2 className="h-3.5 w-3.5" />
               <span>{t("seller.nav.addOfficialWebsite")}</span>
@@ -369,7 +369,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal, email
               type="button"
               onClick={addExportCountry}
               disabled={!newExportCountry.trim() || exportCountries.some((item) => item.toLocaleLowerCase() === newExportCountry.trim().toLocaleLowerCase())}
-              className="rounded-xl border border-brand-blue px-4 py-2 text-xs font-bold text-brand-blue transition hover:bg-brand-blue-soft disabled:cursor-not-allowed disabled:opacity-50"
+              className="sf-btn-add rounded-xl border border-brand-blue px-4 py-2 text-xs font-bold text-brand-blue transition hover:bg-brand-blue-soft disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t("seller.profile.addExportMarket")}
             </button>
@@ -396,7 +396,7 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal, email
           <button
             type="submit"
             disabled={isSaving}
-            className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 text-xs font-bold shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-70 disabled:active:scale-100"
+            className="sf-btn-commit rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 text-xs font-bold shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-70 disabled:active:scale-100"
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span>{isSaving ? t("common.saving") : t("profile.details.saveProfileChanges")}</span>

@@ -140,13 +140,13 @@ export function AddToCartModal({ productSlug, productId, productName, priceInr, 
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas"
+                className="sf-btn-soft rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas"
               >
                 {t("orders.addToCart.continueBrowsing")}
               </button>
               <Link
                 href="/cart"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-brand-blue px-4 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark"
+                className="sf-btn-nav inline-flex items-center gap-1.5 rounded-xl bg-brand-blue px-4 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark"
               >
                 <ShoppingCart className="h-4 w-4" />
                 {t("orders.addToCart.viewCart")}
@@ -205,14 +205,14 @@ export function AddToCartModal({ productSlug, productId, productName, priceInr, 
                 type="button"
                 onClick={onClose}
                 disabled={status === "sending"}
-                className="rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas disabled:opacity-50"
+                className="sf-btn-soft rounded-xl border border-line px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-canvas disabled:opacity-50"
               >
                 {t("common.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={status === "sending" || !(quantity >= 1)}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-amber-600 hover:to-orange-600 disabled:opacity-60"
+                className="sf-btn-add inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-amber-600 hover:to-orange-600 disabled:opacity-60"
               >
                 {status === "sending" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}
                 <span>{status === "sending" ? t("orders.addToCart.adding") : t("orders.addToCart.title")}</span>

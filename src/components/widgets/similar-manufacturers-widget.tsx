@@ -31,7 +31,7 @@ function SimilarFollowButton({ manufacturer }: { manufacturer: Manufacturer }) {
       disabled={pending}
       aria-pressed={isFollowing}
       className={cn(
-        "shrink-0 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold transition-all border disabled:opacity-70",
+        "sf-btn-toggle shrink-0 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold transition-all border disabled:opacity-70",
         isFollowing
           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
           : "border-slate-200 bg-white text-slate-700 hover:border-brand-blue/30 hover:bg-blue-50/60 hover:text-brand-blue"
@@ -148,13 +148,13 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
           <div className="mt-3.5 flex items-center gap-2">
             <Link
               href={`/messages?with=${currentManufacturer.slug}`}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-orange py-2 px-3 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-sm"
+              className="sf-btn-nav flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-orange py-2 px-3 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-sm"
             >
               {t("widgets.similar.startChat")}
             </Link>
             <Link
               href="/rfq/new"
-              className="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 py-2 px-3 text-xs font-semibold text-white transition-all"
+              className="sf-btn-commit inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 py-2 px-3 text-xs font-semibold text-white transition-all"
             >
               {t("feed.sendRfq")}
             </Link>

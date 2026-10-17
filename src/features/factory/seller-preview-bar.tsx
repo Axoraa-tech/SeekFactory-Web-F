@@ -23,7 +23,7 @@ export async function SellerPreviewBar() {
 
         <Link
           href="/factory"
-          className="inline-flex h-9 sm:h-10 shrink-0 items-center gap-1.5 rounded-xl bg-brand-orange hover:bg-[#d85b17] px-3.5 sm:px-4 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition-all active:scale-95"
+          className="sf-btn-nav inline-flex h-9 sm:h-10 shrink-0 items-center gap-1.5 rounded-xl bg-brand-orange hover:bg-[#d85b17] px-3.5 sm:px-4 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition-all active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>{t("seller.preview.backToSellerHub")}</span>

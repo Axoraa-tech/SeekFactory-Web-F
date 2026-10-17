@@ -66,7 +66,7 @@ function RailFollowButton({ manufacturer }: { manufacturer: Manufacturer }) {
       disabled={pending}
       aria-pressed={isFollowing}
       className={cn(
-        "shrink-0 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all border shadow-2xs disabled:opacity-70",
+        "sf-btn-toggle shrink-0 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all border shadow-2xs disabled:opacity-70",
         isFollowing
           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
           : "border-slate-200 bg-white text-slate-700 hover:border-brand-orange/40 hover:bg-brand-orange-soft/60 hover:text-brand-orange"
@@ -94,7 +94,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
   }, []);
 
   return (
-    <Card className="p-4 border-slate-200/90 shadow-2xs">
+    <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-bold text-slate-900">
           {t("widgets.verifiedManufacturers", "Verified Manufacturers")}
@@ -103,7 +103,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
           <button
             type="button"
             onClick={openUpgradeModal}
-            className="text-xs font-semibold text-brand-orange hover:underline cursor-pointer"
+            className="sf-btn-nav text-xs font-semibold text-brand-orange hover:underline cursor-pointer"
           >
             {t("widgets.viewAll", "View all")}
           </button>
@@ -177,7 +177,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
           title={isExpanded ? t("manufacturers.list.showFewerManufacturers") : t("manufacturers.list.viewAllManufacturers", { length: manufacturers.length })}
-          className="group flex items-center gap-1.5 rounded-full bg-brand-orange hover:bg-[#d85b17] text-white px-3 py-1.5 text-xs font-bold shadow-md transition-all active:scale-95"
+          className="sf-btn-nav group flex items-center gap-1.5 rounded-full bg-brand-orange hover:bg-[#d85b17] text-white px-3 py-1.5 text-xs font-bold shadow-md transition-all active:scale-95"
         >
           <span className="hidden sm:inline">
             {isExpanded ? t("common.showLess") : t("manufacturers.list.viewAll", { length: manufacturers.length })}
@@ -248,7 +248,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
           <button
             type="button"
             onClick={() => setIsExpanded(true)}
-            className="text-xs font-bold text-brand-orange hover:text-[#d85b17] hover:underline transition inline-flex items-center gap-1"
+            className="sf-btn-nav text-xs font-bold text-brand-orange hover:text-[#d85b17] hover:underline transition inline-flex items-center gap-1"
           >
             <span>{t("manufacturers.list.seeAll")} {manufacturers.length} {t("manufacturers.list.verifiedFactories")}</span>
             <ArrowRight className="h-3.5 w-3.5" />

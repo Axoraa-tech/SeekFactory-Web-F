@@ -29,7 +29,7 @@ const LAYOUTS = [
   {
     mode: "SINGLE",
     title: "Single video",
-    description: "Profile · video · photos",
+    description: "Profile · video · products",
     supports: { profile: true, photos: true, autoplay: true },
     thumb: (
       <div className="grid h-full grid-cols-[2fr_5fr_2fr] gap-1">
@@ -88,11 +88,11 @@ const LAYOUTS = [
   },
   {
     mode: "SIDEBAR",
-    title: "Sidebar + photos",
-    description: "Site menu · seek · photos",
+    title: "Sidebar + products",
+    description: "Site menu · seek · products",
     supports: { profile: false, photos: true, autoplay: true },
     thumb: (
-      <div className="grid h-full grid-cols-[2fr_5fr_2fr] gap-1">
+      <div className="grid h-full grid-cols-[3fr_10fr_6fr] gap-1">
         <Block menu /><Block video /><Block photos />
       </div>
     ),
@@ -108,7 +108,7 @@ const PANEL_HINTS: Record<ShowcaseMode, { profile: string; photos: string; autop
   },
   SINGLE: {
     profile: "Left panel, 280px. Hidden first as the window narrows.",
-    photos: "Right panel on wide screens; a photo strip under the video on phones.",
+    photos: "Products for each buyer (their searches and activity, then trending) on the right; a swipeable row on phones.",
     autoplay: "Start the seek in view automatically (muted).",
   },
   FEED: {
@@ -133,7 +133,7 @@ const PANEL_HINTS: Record<ShowcaseMode, { profile: string; photos: string; autop
   },
   SIDEBAR: {
     profile: "Not used: the site's own left menu fills that column.",
-    photos: "Right panel on wide screens; a photo strip under the video on phones.",
+    photos: "Products for each buyer (their searches and activity, then trending) on the right; a swipeable row on phones.",
     autoplay: "Start the seek in view automatically (muted).",
   },
 };
@@ -295,7 +295,7 @@ export default function AdminShowcasePage() {
                 onChange={(v) => setDraft({ ...draft, showProfile: v })}
               />
               <Option
-                label="Seek photos"
+                label="Products"
                 hint={PANEL_HINTS[draft.mode].photos}
                 checked={draft.showPhotos}
                 disabled={!layout.supports.photos}

@@ -51,7 +51,7 @@ export function ProfileTabNav({
               type="button"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "relative inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200",
+                "sf-btn-toggle relative inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200",
                 active
                   ? "bg-brand-blue text-white shadow-[0_8px_20px_rgba(26,115,232,0.35)]"
                   : "glass-liquid-item text-ink-muted hover:text-ink"

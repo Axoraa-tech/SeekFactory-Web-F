@@ -50,8 +50,8 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
               onClick={() => setFilter(key)}
               className={
                 filter === key
-                  ? "rounded-lg bg-[#1A73E8] px-3 py-1.5 text-xs font-bold text-white shadow-2xs"
-                  : "rounded-lg border border-[#E6E8EB] bg-white px-3 py-1.5 text-xs font-semibold text-[#5F6368] hover:bg-[#F3F4F6] transition shadow-2xs"
+                  ? "sf-btn-toggle rounded-lg bg-[#1A73E8] px-3 py-1.5 text-xs font-bold text-white shadow-2xs"
+                  : "sf-btn-toggle rounded-lg border border-[#E6E8EB] bg-white px-3 py-1.5 text-xs font-semibold text-[#5F6368] hover:bg-[#F3F4F6] transition shadow-2xs"
               }
             >
               {label}
@@ -61,7 +61,7 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
             <button
               type="button"
               onClick={onViewAll}
-              className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold text-[#1A73E8] hover:underline"
+              className="sf-btn-nav inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold text-[#1A73E8] hover:underline"
             >
               {t("widgets.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
             </button>
@@ -130,7 +130,7 @@ export function SalesproDataTable({ rfqs, onOpenQuoteModal, onViewAll }: Props) 
                     <button
                       type="button"
                       onClick={() => onOpenQuoteModal(rfq)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-[#1A73E8] hover:bg-[#1557B0] text-white px-2.5 py-1 text-xs font-bold transition active:scale-95 shadow-2xs"
+                      className="sf-btn-commit inline-flex items-center gap-1 rounded-lg bg-[#1A73E8] hover:bg-[#1557B0] text-white px-2.5 py-1 text-xs font-bold transition active:scale-95 shadow-2xs"
                     >
                       <Send className="h-3 w-3" />
                       <span>{rfq.status === "Quoted" ? t("seller.table.editQuote") : t("seller.table.quote")}</span>

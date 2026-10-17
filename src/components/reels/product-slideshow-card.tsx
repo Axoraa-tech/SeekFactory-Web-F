@@ -119,7 +119,7 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
                 type="button"
                 onClick={toggleFollow}
                 className={cn(
-                  "rounded-lg border px-3 py-1 text-xs font-semibold transition",
+                  "sf-btn-toggle rounded-lg border px-3 py-1 text-xs font-semibold transition",
                   following
                     ? "border-neutral-200 bg-neutral-100 text-neutral-700"
                     : "border-brand-blue/30 bg-brand-blue-soft text-brand-blue hover:bg-brand-blue hover:text-white",
@@ -129,7 +129,7 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
               </button>
               <Link
                 href="/rfq/new"
-                className="inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95"
+                className="sf-btn-commit inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95"
               >
                 <Send className="h-3 w-3" />
                 <span>{t("feed.sendRfq")}</span>

@@ -13,13 +13,11 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { VerifiedManufacturers } from "@/components/widgets/verified-manufacturers";
-import { TrendingProducts } from "@/components/widgets/trending-products";
 import { RecentMessages } from "@/components/widgets/recent-messages";
 import { ExploreByCategory } from "@/components/widgets/explore-by-category";
 import { SidebarFooter } from "@/components/layout/sidebar-footer";
 import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
-import type { Product } from "@/entities/product";
 import type { Conversation } from "@/entities/message";
 import { useUnreadCounts } from "@/features/inbox/unread-store";
 import { cn } from "@/shared/lib/cn";
@@ -29,7 +27,6 @@ type Props = {
   messageCount: number;
   notificationCount: number;
   manufacturers?: Manufacturer[];
-  products?: Product[];
   messages?: (Conversation & { manufacturer: Manufacturer })[];
   categories?: Category[];
 };
@@ -47,7 +44,6 @@ export function LeftSidebar({
   messageCount,
   notificationCount,
   manufacturers = [],
-  products = [],
   messages = [],
   categories = [],
 }: Props) {
@@ -56,8 +52,9 @@ export function LeftSidebar({
   const counts = useUnreadCounts({ messages: messageCount, notifications: notificationCount });
 
   return (
-    <aside className="hidden w-[280px] shrink-0 lg:block">
-      <div data-lock-fill className="sticky top-[88px] h-[calc(100vh-104px)] overflow-y-auto space-y-4 pr-1">
+    // data-left-sidebar*: the home seek layout narrows this menu (see globals.css)
+    <aside data-left-sidebar className="hidden w-[280px] shrink-0 lg:block">
+      <div data-lock-fill className="scrollbar-subtle sticky top-[88px] h-[calc(100vh-104px)] overflow-y-auto space-y-4 pr-1">
         <Card className="overflow-hidden p-2">
           <nav className="flex flex-col">
             {navItems.map((item) => {
@@ -68,15 +65,17 @@ export function LeftSidebar({
                 <Link
                   key={item.href}
                   href={item.href}
+                  title={t(item.key, item.defaultLabel)}
+                  data-left-sidebar-link
                   className={cn(
                     "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
                     active ? "bg-brand-blue-soft text-brand-blue" : "text-ink-muted hover:bg-canvas",
                   )}
                 >
-                  <Icon className="h-[18px] w-[18px]" />
-                  {t(item.key, item.defaultLabel)}
+                  <Icon className="h-[18px] w-[18px] shrink-0" />
+                  <span data-left-sidebar-label className="truncate">{t(item.key, item.defaultLabel)}</span>
                   {badge > 0 ? (
-                    <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                    <span data-left-sidebar-badge className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                       {badge}
                     </span>
                   ) : null}
@@ -86,12 +85,9 @@ export function LeftSidebar({
           </nav>
         </Card>
 
+        <div data-left-sidebar-extras className="space-y-4">
         {manufacturers.length > 0 ? (
           <VerifiedManufacturers manufacturers={manufacturers} />
-        ) : null}
-
-        {products.length > 0 ? (
-          <TrendingProducts products={products} />
         ) : null}
 
         {messages.length > 0 ? (
@@ -112,13 +108,14 @@ export function LeftSidebar({
           </p>
           <Link
             href="/profile"
-            className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-lg bg-brand-orange text-sm font-semibold text-white"
+            className="sf-btn-commit mt-3 inline-flex h-9 w-full items-center justify-center rounded-lg bg-brand-orange text-sm font-semibold text-white"
           >
             {t("sidebar.upgradeNow", "Upgrade Now")}
           </Link>
         </Card>
 
         <SidebarFooter />
+        </div>
       </div>
     </aside>
   );

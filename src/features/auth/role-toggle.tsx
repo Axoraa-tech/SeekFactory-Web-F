@@ -24,7 +24,7 @@ export function RoleToggle({ compact = false }: { compact?: boolean }) {
       <Link
         href={hrefFor("buyer")}
         className={cn(
-          "rounded-full text-center font-semibold transition-colors",
+          "sf-btn-toggle rounded-full text-center font-semibold transition-colors",
           compact ? "py-1 text-xs" : "py-1.5 text-sm",
           role === "buyer" ? "bg-brand-orange text-white" : "text-ink-muted hover:text-ink",
         )}
@@ -34,7 +34,7 @@ export function RoleToggle({ compact = false }: { compact?: boolean }) {
       <Link
         href={hrefFor("manufacturer")}
         className={cn(
-          "rounded-full text-center font-semibold transition-colors",
+          "sf-btn-toggle rounded-full text-center font-semibold transition-colors",
           compact ? "py-1 text-xs" : "py-1.5 text-sm",
           role === "manufacturer" ? "bg-brand-orange text-white" : "text-ink-muted hover:text-ink",
         )}

@@ -166,7 +166,7 @@ export function SupplierProfileView({
               <button
                 type="button"
                 onClick={() => upgradeTier("pro")}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-700 transition active:scale-[0.99] cursor-pointer"
+                className="sf-btn-commit w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-700 transition active:scale-[0.99] cursor-pointer"
               >
                 <Sparkles className="h-4 w-4 fill-amber-300 text-amber-300" />
                 <span>
@@ -179,7 +179,7 @@ export function SupplierProfileView({
                 <button
                   type="button"
                   onClick={openUpgradeModal}
-                  className="text-brand-blue hover:underline cursor-pointer"
+                  className="sf-btn-nav text-brand-blue hover:underline cursor-pointer"
                 >
                   {t("supplier.compareAllSourcingPlans")}
                 </button>
@@ -241,7 +241,7 @@ export function SupplierProfileView({
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center gap-1 rounded-full bg-slate-900/70 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-900 transition-colors border border-white/10"
+              className="sf-btn-soft inline-flex items-center gap-1 rounded-full bg-slate-900/70 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-900 transition-colors border border-white/10"
               title={t("supplier.shareProfile")}
             >
               <Share2 className="h-3.5 w-3.5" />
@@ -311,7 +311,7 @@ export function SupplierProfileView({
                   href={manufacturer.websiteUrl}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
+                  className="sf-btn-nav inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-blue-200/90 bg-blue-50/70 px-3.5 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all active:scale-95 shadow-2xs group"
                   title={t("supplier.visitOfficialSellerWebsite")}
                 >
                   <Globe2 className="h-4 w-4 text-brand-blue group-hover:text-white transition-colors" />
@@ -324,7 +324,7 @@ export function SupplierProfileView({
                 type="button"
                 onClick={toggleFollow}
                 className={cn(
-                  "inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-bold transition-all border shadow-2xs active:scale-95",
+                  "sf-btn-toggle inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-bold transition-all border shadow-2xs active:scale-95",
                   isFollowing
                     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                     : "border-slate-300 bg-white text-slate-800 hover:border-brand-blue hover:bg-blue-50/50 hover:text-brand-blue"
@@ -345,7 +345,7 @@ export function SupplierProfileView({
 
               <Link
                 href={`/messages?with=${manufacturer.slug}`}
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-800 hover:bg-slate-50 hover:border-brand-blue/40 hover:text-brand-blue transition-all active:scale-95 shadow-2xs"
+                className="sf-btn-soft inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-800 hover:bg-slate-50 hover:border-brand-blue/40 hover:text-brand-blue transition-all active:scale-95 shadow-2xs"
               >
                 <MessageSquare className="h-4 w-4 text-brand-blue" />
                 <span>{t("supplier.chatNow")}</span>
@@ -353,7 +353,7 @@ export function SupplierProfileView({
 
               <Link
                 href="/rfq/new"
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-xs"
+                className="sf-btn-commit inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-xs"
               >
                 <Send className="h-3.5 w-3.5" />
                 <span>{t("feed.sendRfq")}</span>
@@ -412,7 +412,7 @@ export function SupplierProfileView({
               type="button"
               onClick={() => setActiveTab("products")}
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-all",
+                "sf-btn-toggle inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-all",
                 activeTab === "products"
                   ? "border-brand-blue text-brand-blue"
                   : "border-transparent text-slate-600 hover:text-slate-900"
@@ -429,7 +429,7 @@ export function SupplierProfileView({
               type="button"
               onClick={() => setActiveTab("videos")}
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-all",
+                "sf-btn-toggle inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-all",
                 activeTab === "videos"
                   ? "border-brand-blue text-brand-blue"
                   : "border-transparent text-slate-600 hover:text-slate-900"
@@ -446,7 +446,7 @@ export function SupplierProfileView({
               type="button"
               onClick={() => setActiveTab("about")}
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-all",
+                "sf-btn-toggle inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-all",
                 activeTab === "about"
                   ? "border-brand-blue text-brand-blue"
                   : "border-transparent text-slate-600 hover:text-slate-900"

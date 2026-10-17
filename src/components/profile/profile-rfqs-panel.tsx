@@ -118,7 +118,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
 
         <Link
           href="/rfq/new"
-          className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-sm shrink-0"
+          className="sf-btn-commit inline-flex items-center gap-1.5 rounded-full bg-brand-blue px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-sm shrink-0"
         >
           <Plus className="h-3.5 w-3.5" />
           <span>{t("rfq.buyer.postNewRfq")}</span>
@@ -136,7 +136,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
           <FileText className="h-8 w-8 mx-auto text-ink-faint" />
           <p className="font-bold text-sm text-ink">{t("rfq.buyer.noRfqsYet")}</p>
           <p className="text-xs text-ink-muted">{t("rfq.buyer.postABuyingRequestAnd")}</p>
-          <Link href="/rfq/new" className="inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white">
+          <Link href="/rfq/new" className="sf-btn-commit inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white">
             {t("rfq.buyer.postAnRfq")}
           </Link>
         </div>
@@ -193,7 +193,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                             void act(() => getApi().rfq.cancel(rfq.id), `${rfq.referenceNumber} cancelled`);
                           }
                         }}
-                        className="text-[11px] font-semibold text-ink-faint hover:text-rose-600 disabled:opacity-50"
+                        className="sf-btn-danger text-[11px] font-semibold text-ink-faint hover:text-rose-600 disabled:opacity-50"
                       >
                         {t("common.cancel")}
                       </button>
@@ -202,7 +202,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                       type="button"
                       onClick={() => toggle(rfq.id)}
                       aria-expanded={isOpen}
-                      className="glass-liquid-item inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold text-ink hover:text-brand-blue"
+                      className="sf-btn-nav glass-liquid-item inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold text-ink hover:text-brand-blue"
                     >
                       <MessageSquare className="h-3.5 w-3.5 text-brand-blue" />
                       <span>{t("rfq.buyer.viewBids")}{quoteCount})</span>
@@ -244,12 +244,12 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                           <div className="flex flex-wrap items-center gap-2">
                             <Link
                               href={`/messages?with=${quote.manufacturer.slug}`}
-                              className="rounded-full border border-line px-3 py-1 text-[11px] font-semibold text-ink hover:text-brand-blue"
+                              className="sf-btn-soft rounded-full border border-line px-3 py-1 text-[11px] font-semibold text-ink hover:text-brand-blue"
                             >
                               {t("common.chat")}
                             </Link>
                             {quote.status === "ACCEPTED" && quote.orderId && (
-                              <Link href={`/orders#${quote.orderId}`} className="rounded-full bg-brand-blue px-3 py-1 text-[11px] font-bold text-white">
+                              <Link href={`/orders#${quote.orderId}`} className="sf-btn-nav rounded-full bg-brand-blue px-3 py-1 text-[11px] font-bold text-white">
                                 {t("rfq.buyer.viewOrder")}
                               </Link>
                             )}
@@ -259,7 +259,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                                   type="button"
                                   disabled={busy}
                                   onClick={() => setAcceptingQuote(quote)}
-                                  className="rounded-full bg-brand-blue px-3 py-1 text-[11px] font-bold text-white hover:bg-brand-blue-dark disabled:opacity-50"
+                                  className="sf-btn-commit rounded-full bg-brand-blue px-3 py-1 text-[11px] font-bold text-white hover:bg-brand-blue-dark disabled:opacity-50"
                                 >
                                   {t("rfq.buyer.acceptOrder")}
                                 </button>
@@ -269,7 +269,7 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
                                   onClick={() =>
                                     void act(() => getApi().rfq.rejectQuote(rfq.id, quote.id), `Declined ${quote.manufacturer.name}'s quote`)
                                   }
-                                  className="rounded-full border border-line px-3 py-1 text-[11px] font-semibold text-ink-muted hover:text-rose-600 disabled:opacity-50"
+                                  className="sf-btn-danger rounded-full border border-line px-3 py-1 text-[11px] font-semibold text-ink-muted hover:text-rose-600 disabled:opacity-50"
                                 >
                                   {t("common.decline")}
                                 </button>

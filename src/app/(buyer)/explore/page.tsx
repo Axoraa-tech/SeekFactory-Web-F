@@ -4,6 +4,9 @@ import { Card } from "@/components/ui/card";
 import { ProductImageCarousel } from "@/components/products/product-image-carousel";
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { VerifiedManufacturersSection } from "@/features/explore/verified-manufacturers-section";
+import { RecordSearch } from "@/features/explore/record-search";
+import { ProductSortMenu } from "@/features/explore/product-sort-menu";
+import { parseProductSort, sortProducts } from "@/features/explore/product-sort";
 import { getApi } from "@/shared/api";
 import { buildCategoryTree } from "@/features/categories/category-tree";
 import { Package, ShieldCheck } from "lucide-react";
@@ -12,12 +15,13 @@ import { getTranslations } from "next-intl/server";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams: Promise<{ q?: string; category?: string; sub?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; sub?: string; sort?: string }>;
 };
 
 export default async function ExplorePage({ searchParams }: Props) {
   const t = await getTranslations();
-  const { q = "", category = "", sub = "" } = await searchParams;
+  const { q = "", category = "", sub = "", sort: sortParam } = await searchParams;
+  const sort = parseProductSort(sortParam);
   const api = getApi();
   const { roots, childrenByRoot } = buildCategoryTree(await api.categories.list());
 
@@ -27,14 +31,17 @@ export default async function ExplorePage({ searchParams }: Props) {
   const selected = selectedSub ?? selectedRoot;
 
   // The backend searches name/description/location and includes every subcategory of the selection
-  const { manufacturers: visibleManufacturers, products: visibleProducts } = await api.search.query({
+  const { manufacturers: visibleManufacturers, products: foundProducts } = await api.search.query({
     q: q.trim(),
     category: selected?.id ?? "",
     limit: 60,
   });
+  const visibleProducts = sortProducts(foundProducts, sort, q);
 
   return (
     <section className="space-y-6">
+      {/* Remembered in this browser: the home feed's product panel follows recent searches */}
+      <RecordSearch term={q} />
       {/* 2. Subcategory Quick Filter Chips (if Root Selected) */}
       {selectedRoot ? (
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs space-y-3">
@@ -56,8 +63,8 @@ export default async function ExplorePage({ searchParams }: Props) {
               href={`/explore?category=${selectedRoot.slug}`}
               className={
                 !selectedSub
-                  ? "rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
-                  : "rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
+                  ? "sf-btn-soft rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
+                  : "sf-btn-soft rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
               }
             >
               {t("common.all")} {selectedRoot.name}
@@ -71,8 +78,8 @@ export default async function ExplorePage({ searchParams }: Props) {
                   href={href}
                   className={
                     active
-                      ? "flex items-center gap-1.5 rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
-                      : "flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
+                      ? "sf-btn-soft flex items-center gap-1.5 rounded-full bg-brand-orange px-3.5 py-1 text-xs font-bold text-white shadow-xs"
+                      : "sf-btn-soft flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink transition"
                   }
                 >
                   <CategoryIcon icon={child.icon} size={14} className="opacity-80" />
@@ -89,14 +96,17 @@ export default async function ExplorePage({ searchParams }: Props) {
 
       {/* 4. Machinery Products Section */}
       <div className="space-y-3 pt-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-ink flex items-center gap-2">
-            <Package className="h-4 w-4 text-brand-orange" />
-            <span>{t("explore.featuredMachineryProducts")}</span>
-            <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-bold text-brand-orange">
-              {visibleProducts.length}
-            </span>
-          </h2>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h2 className="text-base font-bold text-ink flex items-center gap-2">
+              <Package className="h-4 w-4 text-brand-orange" />
+              <span>{t("explore.featuredMachineryProducts")}</span>
+              <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-bold text-brand-orange">
+                {visibleProducts.length}
+              </span>
+            </h2>
+            {visibleProducts.length > 1 && <ProductSortMenu current={sort} />}
+          </div>
           <span className="text-xs text-neutral-500">{t("explore.directFactoryPricing")}</span>
         </div>
 
@@ -146,7 +156,7 @@ export default async function ExplorePage({ searchParams }: Props) {
           <p className="text-xs text-neutral-500">{t("explore.tryBrowsingAllCategoriesOr")}</p>
           <Link
             href="/explore"
-            className="inline-flex h-8 items-center rounded-full bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors mt-2"
+            className="sf-btn-nav inline-flex h-8 items-center rounded-full bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors mt-2"
           >
             {t("explore.exploreAllCategories")}
           </Link>

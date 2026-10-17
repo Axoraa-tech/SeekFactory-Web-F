@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl";
 const input =
   "h-11 sm:h-12 w-full rounded-lg border border-[#8c8c8c] px-3 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue";
 const primary =
-  "flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:opacity-70";
+  "sf-btn-commit flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:opacity-70";
 
 function Card({ children }: { children: React.ReactNode }) {
   return (

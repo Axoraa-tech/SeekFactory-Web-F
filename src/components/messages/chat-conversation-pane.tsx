@@ -148,7 +148,7 @@ export function ChatConversationPane({
               href={`/manufacturers/${activeThread.manufacturer.slug}`}
               title={t("chat.visitPlant")}
               aria-label={t("chat.visitPlant")}
-              className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 xl:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors shadow-2xs"
+              className="sf-btn-nav hidden sm:inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 xl:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors shadow-2xs"
             >
               <Building2 className="h-3.5 w-3.5" />
               <span className="hidden xl:inline">{t("chat.visitPlant")}</span>
@@ -157,7 +157,7 @@ export function ChatConversationPane({
               href="/rfq/new"
               title={t("nav.postRfq")}
               aria-label={t("nav.postRfq")}
-              className="inline-flex items-center gap-1 rounded-xl bg-brand-blue px-2.5 xl:px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
+              className="sf-btn-commit inline-flex items-center gap-1 rounded-xl bg-brand-blue px-2.5 xl:px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs"
             >
               <FileText className="h-3.5 w-3.5" />
               <span className="hidden xl:inline">{t("nav.postRfq")}</span>
@@ -250,7 +250,7 @@ export function ChatConversationPane({
               key={idx}
               type="button"
               onClick={() => onSendMessage(undefined, template)}
-              className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 hover:border-brand-blue hover:bg-blue-50 hover:text-brand-blue transition-colors shadow-2xs whitespace-nowrap"
+              className="sf-btn-commit shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-700 hover:border-brand-blue hover:bg-blue-50 hover:text-brand-blue transition-colors shadow-2xs whitespace-nowrap"
             >
               {template}
             </button>
@@ -282,7 +282,7 @@ export function ChatConversationPane({
             <button
               type="button"
               onClick={onClearAttachment}
-              className="font-bold text-red-500 hover:underline text-[11px] ml-2 inline-flex items-center gap-0.5"
+              className="sf-btn-danger font-bold text-red-500 hover:underline text-[11px] ml-2 inline-flex items-center gap-0.5"
             >
               <X className="h-3 w-3" /> {t("common.remove")}
             </button>
@@ -332,7 +332,7 @@ export function ChatConversationPane({
         <button
           type="submit"
           disabled={!canSend}
-          className="h-10 shrink-0 px-4 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs disabled:opacity-50"
+          className="sf-btn-commit h-10 shrink-0 px-4 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs disabled:opacity-50"
         >
           <Send className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{t("common.send")}</span>

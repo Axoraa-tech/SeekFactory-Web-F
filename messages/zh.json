@@ -164,8 +164,7 @@
     "search": {
       "clearSearch": "清除搜索",
       "matchingCategories": "匹配的类目",
-      "openSearch": "打开搜索",
-      "listingCount": "{count} 个商品"
+      "openSearch": "打开搜索"
     },
     "topNav": {
       "seekfactoryHome": "SeekFactory 首页"
@@ -324,8 +323,16 @@
       "exportsTo": "出口至",
       "viewFactoryProfile": "查看工厂主页",
       "rfq": "询价",
-      "seekPhotos": "希克图片",
-      "noProductPhotosForThis": "此希克暂无产品图片"
+      "productsForYou": "为你推荐",
+      "productsForYouHint": "根据你的搜索和浏览记录",
+      "trendingProducts": "热门产品",
+      "trendingProductsHint": "买家近期关注",
+      "viewAllProducts": "查看全部产品",
+      "seenAllProducts": "以上为精选的 {count} 款产品",
+      "noProductsYet": "暂无可展示的产品",
+      "couldNotLoadProducts": "产品加载失败",
+      "tryAgain": "重试",
+      "productsPanel": "产品"
     },
     "spotlight": {
       "established": "成立时间",
@@ -358,7 +365,17 @@
     "inquire": "咨询 →",
     "noMachineryMatchingThisCategory": "没有符合该类目或搜索条件的机械。",
     "tryBrowsingAllCategoriesOr": "试试浏览全部类目，或换个关键词搜索。",
-    "exploreAllCategories": "浏览全部类目"
+    "exploreAllCategories": "浏览全部类目",
+    "sort": {
+      "label": "排序",
+      "options": {
+        "relevance": "最佳匹配",
+        "price-asc": "价格：从低到高",
+        "price-desc": "价格：从高到低",
+        "newest": "最新上架",
+        "moq": "起订量最低"
+      }
+    }
   },
   "profile": {
     "page": {
@@ -781,10 +798,12 @@
     },
     "onlineWorkAnimation": "在线办公动画",
     "verifyBanner": {
-      "message": "请验证您的邮箱。我们已向 {email} 发送确认链接。",
       "resend": "重新发送",
       "sent": "验证链接已发送至 {email}，请查看收件箱和垃圾邮件。",
-      "dismiss": "隐藏此提醒"
+      "dismiss": "隐藏此提醒",
+      "title": "请验证您的邮箱",
+      "detail": "确认链接已发送至 {email}",
+      "linkSent": "已发送"
     }
   },
   "notFound": {

@@ -18,8 +18,49 @@
   display: none;
 }
 
+/* ...and the left menu narrows so the seek and the products column get the room:
+   220px from 1280px, an icon-only rail between 1024px and 1279px. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] {
+    width: 64px;
+  }
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] [data-left-sidebar-link] {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] [data-left-sidebar-label],
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] [data-left-sidebar-extras] {
+    display: none;
+  }
+  /* The unread count becomes a corner badge on the icon */
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] [data-left-sidebar-badge] {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    margin-left: 0;
+  }
+}
+@media (min-width: 1280px) {
+  [data-app-shell]:has([data-showcase-sidebar]) [data-left-sidebar] {
+    width: 220px;
+  }
+}
+
 .scrollbar-none {
   scrollbar-width: none;
+}
+
+/* Side panels and the seek column: a slim scrollbar that only shows while the pointer is over
+   the panel (the standard properties win over ::-webkit-scrollbar in current browsers) */
+.scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s;
+}
+.scrollbar-subtle:hover,
+.scrollbar-subtle:focus-within {
+  scrollbar-color: #d0d5dd transparent;
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
@@ -882,5 +923,130 @@ a.hover\:bg-brand-blue:hover,
     box-shadow:
       0 1px 1px rgba(28, 22, 22, 0.03),
       0 14px 34px -22px rgba(28, 22, 22, 0.32);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Button motion. Movement only: every button keeps its own colours and shape.
+   One class per button, chosen by what it does (see the groups below), so a
+   motion change is made here once. Transform/opacity only; hover motion only
+   with a real pointer; reduced motion keeps colour changes and drops movement.
+   Curves: --sf-ease-out (strong ease-out for UI), --sf-ease-back (easeOutBack,
+   a small overshoot for the "it took" release of add / toggle buttons).
+   Hover/press selectors double the class: Tailwind emits its hover:/active: variants
+   (e.g. an existing active:scale-95) after this block, and these must win.
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  --sf-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --sf-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sf-btn-commit,
+.sf-btn-add,
+.sf-btn-toggle,
+.sf-btn-nav,
+.sf-btn-soft,
+.sf-btn-danger {
+  transition-property: transform, color, background-color, border-color, box-shadow, opacity, filter;
+  transition-duration: 160ms, 150ms, 150ms, 150ms, 150ms, 150ms, 150ms;
+  transition-timing-function: var(--sf-ease-out), ease, ease, ease, ease, ease, ease;
+}
+
+/* Release of add / toggle: a small overshoot back to rest, so the action reads as "done" */
+.sf-btn-add,
+.sf-btn-toggle {
+  transition-duration: 280ms, 150ms, 150ms, 150ms, 150ms, 150ms, 150ms;
+  transition-timing-function: var(--sf-ease-back), ease, ease, ease, ease, ease, ease;
+}
+
+/* Pressing is always fast; only the way back differs per group */
+.sf-btn-commit.sf-btn-commit:active,
+.sf-btn-add.sf-btn-add:active,
+.sf-btn-toggle.sf-btn-toggle:active,
+.sf-btn-nav.sf-btn-nav:active,
+.sf-btn-soft.sf-btn-soft:active,
+.sf-btn-danger.sf-btn-danger:active {
+  transition-duration: 100ms, 150ms, 150ms, 150ms, 150ms, 150ms, 150ms;
+  transition-timing-function: var(--sf-ease-out), ease, ease, ease, ease, ease, ease;
+}
+
+/* commit: purchase, submit, post, sign in. Lifts toward the pointer; a firm press */
+.sf-btn-commit.sf-btn-commit:active { transform: translateY(0) scale(0.97); }
+/* add: collect into cart / list. A deeper press that pops back on release */
+.sf-btn-add.sf-btn-add:active { transform: translateY(0) scale(0.94); }
+/* toggle: follow, save, like, tabs. Clicked often: no hover motion, just press and pop */
+.sf-btn-toggle.sf-btn-toggle:active { transform: scale(0.95); }
+/* nav: takes you somewhere. Light press; the trailing arrow leads the way on hover */
+.sf-btn-nav.sf-btn-nav:active { transform: scale(0.98); }
+/* soft: secondary and neutral actions. Press only */
+.sf-btn-soft.sf-btn-soft:active { transform: scale(0.97); }
+/* danger: delete, remove, cancel, log out. Deliberately calm */
+.sf-btn-danger.sf-btn-danger:active { transform: scale(0.98); }
+
+.sf-btn-nav > svg:last-child {
+  transition: transform 200ms var(--sf-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sf-btn-commit.sf-btn-commit:hover,
+  .sf-btn-add.sf-btn-add:hover {
+    transform: translateY(-1px);
+  }
+  .sf-btn-commit.sf-btn-commit:active,
+  .sf-btn-add.sf-btn-add:active {
+    transform: translateY(0) scale(0.97);
+  }
+  .sf-btn-add.sf-btn-add:active {
+    transform: translateY(0) scale(0.94);
+  }
+  .sf-btn-nav.sf-btn-nav:hover > svg:last-child {
+    transform: translateX(2px);
+  }
+}
+
+/* Disabled buttons don't respond */
+:is(.sf-btn-commit, .sf-btn-add, .sf-btn-toggle, .sf-btn-nav, .sf-btn-soft, .sf-btn-danger):is(:disabled, [aria-disabled="true"]) {
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.sf-btn-commit, .sf-btn-add, .sf-btn-toggle, .sf-btn-nav, .sf-btn-soft, .sf-btn-danger),
+  :is(.sf-btn-commit, .sf-btn-add, .sf-btn-toggle, .sf-btn-nav, .sf-btn-soft, .sf-btn-danger):is(:hover, :active),
+  .sf-btn-nav > svg:last-child {
+    transform: none !important;
+  }
+}
+
+/* Page notices (e.g. verify-email): arrive with a short fade-down instead of popping in.
+   Shown once per page view, so a standard entrance; reduced motion keeps only the fade. */
+@keyframes sf-notice-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.sf-notice-in {
+  animation: sf-notice-in 220ms var(--sf-ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes sf-notice-in-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .sf-notice-in {
+    animation-name: sf-notice-in-fade;
+  }
+}
+
+/* Menus that drop from a button (e.g. Explore's Sort): scale out of the trigger, not from nothing.
+   Opens with motion, closes instantly (unmount). Reduced motion: fade only. */
+@keyframes sf-menu-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+.sf-menu-in {
+  animation: sf-menu-in 200ms var(--sf-ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-menu-in {
+    animation-name: sf-notice-in-fade;
   }
 }

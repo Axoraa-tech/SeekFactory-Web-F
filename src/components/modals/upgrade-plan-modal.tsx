@@ -236,7 +236,7 @@ export function UpgradePlanModal() {
                 type="button"
                 onClick={() => setRegion("india")}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all cursor-pointer",
+                  "sf-btn-toggle flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all cursor-pointer",
                   region === "india"
                     ? "bg-blue-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
@@ -257,7 +257,7 @@ export function UpgradePlanModal() {
                 type="button"
                 onClick={() => setRegion("china")}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all cursor-pointer",
+                  "sf-btn-toggle flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all cursor-pointer",
                   region === "china"
                     ? "bg-rose-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
@@ -343,7 +343,7 @@ export function UpgradePlanModal() {
                   <button
                     type="button"
                     onClick={() => handleUpgrade("free")}
-                    className="w-full rounded-xl border border-slate-300 bg-white py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition active:scale-95 cursor-pointer"
+                    className="sf-btn-commit w-full rounded-xl border border-slate-300 bg-white py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition active:scale-95 cursor-pointer"
                   >
                     {t("upgrade.switchToFreeTestLocked")}
                   </button>
@@ -453,7 +453,7 @@ export function UpgradePlanModal() {
                   disabled={upgradeFeedback !== null || !!pendingPayment || tier === "pro" || tier === "enterprise"}
                   onClick={() => handleUpgrade("pro")}
                   className={cn(
-                    "w-full inline-flex items-center justify-center gap-2 rounded-xl py-2 px-3 sm:px-4 text-xs font-bold text-white shadow-md transition-all active:scale-[0.98] cursor-pointer disabled:opacity-75",
+                    "sf-btn-commit w-full inline-flex items-center justify-center gap-2 rounded-xl py-2 px-3 sm:px-4 text-xs font-bold text-white shadow-md transition-all active:scale-[0.98] cursor-pointer disabled:opacity-75",
                     region === "china"
                       ? "bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 shadow-rose-500/25"
                       : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/25"
@@ -487,7 +487,7 @@ export function UpgradePlanModal() {
           <button
             type="button"
             onClick={handleClose}
-            className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200/70 hover:text-slate-900 cursor-pointer active:scale-95"
+            className="sf-btn-soft shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200/70 hover:text-slate-900 cursor-pointer active:scale-95"
           >
             {t("upgrade.dismiss")}
           </button>

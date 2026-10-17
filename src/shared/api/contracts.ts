@@ -41,6 +41,17 @@ export type ProductDetail = {
   related: Product[];
 };
 
+/** The factory behind a recommended product: just what a product card shows. */
+export type RecommendedFactory = Pick<Manufacturer, "id" | "slug" | "name" | "logoUrl" | "country" | "verified">;
+
+/** Feed side-panel products: the viewer's interests first, topped up with trending. */
+export type RecommendedProducts = {
+  /** false when nothing matched the viewer's activity or searches (plain trending). */
+  personalized: boolean;
+  products: Product[];
+  manufacturers: RecommendedFactory[];
+};
+
 export type SearchResult = {
   products: Product[];
   manufacturers: Manufacturer[];
@@ -105,6 +116,11 @@ export interface ProductRepository {
   toggleSave(productId: string): Promise<{ saved: boolean }>;
   /** Products the signed-in user saved. */
   listSaved(): Promise<Product[]>;
+  /**
+   * Products for the viewer: matched to their orders, cart, saves, RFQs, product views and recent
+   * searches (newest first), then trending. A factory's own products are left out.
+   */
+  listRecommended(options: { limit?: number; viewerId?: string; searchTerms?: string[] }): Promise<RecommendedProducts>;
   addProduct(product: Product): Promise<void>;
   /** Product detail view for seller analytics; viewerId dedupes guests. Never throws for tracking failures. */
   recordView(productId: string, viewerId?: string): Promise<void>;

@@ -129,7 +129,7 @@ export function MobileNav({ messageCount, notificationCount, isManufacturer = fa
               <Link
                 href="/factory?tab=seeks&new=seek"
                 onClick={openComposer("seek")}
-                className="flex flex-col items-center gap-2 rounded-xl bg-brand-orange px-3 py-4 text-sm font-bold text-white active:scale-95 transition"
+                className="sf-btn-add flex flex-col items-center gap-2 rounded-xl bg-brand-orange px-3 py-4 text-sm font-bold text-white active:scale-95 transition"
               >
                 <Video className="h-6 w-6" />
                 {t("seller.uploadSeek")}
@@ -137,7 +137,7 @@ export function MobileNav({ messageCount, notificationCount, isManufacturer = fa
               <Link
                 href="/factory?tab=products&new=product"
                 onClick={openComposer("product")}
-                className="flex flex-col items-center gap-2 rounded-xl bg-brand-blue px-3 py-4 text-sm font-bold text-white active:scale-95 transition"
+                className="sf-btn-add flex flex-col items-center gap-2 rounded-xl bg-brand-blue px-3 py-4 text-sm font-bold text-white active:scale-95 transition"
               >
                 <Package className="h-6 w-6" />
                 {t("seller.postProduct")}

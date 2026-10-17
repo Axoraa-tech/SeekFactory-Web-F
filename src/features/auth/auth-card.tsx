@@ -308,7 +308,7 @@ export function AuthCard({
         <button
           type="submit"
           disabled={saving}
-          className="h-10 sm:h-10.5 w-full rounded-full bg-brand-orange font-bold text-white hover:bg-[#d85b17] disabled:opacity-60 transition-all shadow-xs active:scale-[0.99] cursor-pointer text-sm"
+          className="sf-btn-commit h-10 sm:h-10.5 w-full rounded-full bg-brand-orange font-bold text-white hover:bg-[#d85b17] disabled:opacity-60 transition-all shadow-xs active:scale-[0.99] cursor-pointer text-sm"
         >
           {saving
             ? t("auth.card.pleaseWait")
@@ -322,7 +322,7 @@ export function AuthCard({
 
       <button
         type="button"
-        className="mt-2 w-full text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline text-center"
+        className="sf-btn-toggle mt-2 w-full text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline text-center"
         onClick={() => {
           setMethod((value) => (value === "email" ? "phone" : "email"));
           setOtpSent(false);
@@ -343,7 +343,7 @@ export function AuthCard({
         <button
           type="button"
           onClick={() => setNotice(t("auth.card.wechatLoginWillConnectWhen"))}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-300 font-semibold hover:bg-slate-50 transition-colors text-xs sm:text-sm cursor-pointer"
+          className="sf-btn-soft flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-300 font-semibold hover:bg-slate-50 transition-colors text-xs sm:text-sm cursor-pointer"
         >
           {t("auth.card.continueWithWechat")}
         </button>
@@ -357,7 +357,7 @@ export function AuthCard({
         <button
           type="button"
           onClick={() => setNotice(t("auth.card.googleLoginWillConnectWhen"))}
-          className="flex h-10 w-full items-center justify-center gap-2.5 rounded-full border border-slate-300 font-semibold hover:bg-slate-50 transition-colors text-xs sm:text-sm text-slate-700 shadow-2xs cursor-pointer"
+          className="sf-btn-soft flex h-10 w-full items-center justify-center gap-2.5 rounded-full border border-slate-300 font-semibold hover:bg-slate-50 transition-colors text-xs sm:text-sm text-slate-700 shadow-2xs cursor-pointer"
         >
           <GoogleMark />
           {t("auth.card.continueWithGoogle")}
@@ -393,7 +393,7 @@ export function AuthCard({
           <button
             type="button"
             onClick={onClose}
-            className="text-xs font-medium text-slate-400 hover:text-slate-700 transition-colors cursor-pointer hover:underline"
+            className="sf-btn-soft text-xs font-medium text-slate-400 hover:text-slate-700 transition-colors cursor-pointer hover:underline"
           >
             {t("auth.card.continueAsGuest")}
           </button>

@@ -115,7 +115,7 @@ export function MessagesDropdown({
               <button
                 type="button"
                 onClick={handleMarkAllRead}
-                className="flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline"
+                className="sf-btn-toggle flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 {t("layout.messages.markRead")}

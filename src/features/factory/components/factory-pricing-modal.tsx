@@ -261,7 +261,7 @@ export function FactoryPricingModal({
               type="button"
               onClick={() => setActiveView("cards")}
               className={cn(
-                "rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+                "sf-btn-toggle rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
                 activeView === "cards"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "bg-white/10 text-white hover:bg-white/20"
@@ -273,7 +273,7 @@ export function FactoryPricingModal({
               type="button"
               onClick={() => setActiveView("matrix")}
               className={cn(
-                "rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+                "sf-btn-toggle rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
                 activeView === "matrix"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "bg-white/10 text-white hover:bg-white/20"
@@ -351,7 +351,7 @@ export function FactoryPricingModal({
                         type="button"
                         onClick={() => handleSelect(t.id, t.title)}
                         className={cn(
-                          "w-full py-2.5 px-4 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer",
+                          "sf-btn-commit w-full py-2.5 px-4 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer",
                           t.btnClass
                         )}
                       >
@@ -490,7 +490,7 @@ export function FactoryPricingModal({
             <button
               type="button"
               onClick={() => setRemarksOpen((v) => !v)}
-              className="w-full flex items-center justify-between text-left font-bold text-sm text-slate-900 cursor-pointer"
+              className="sf-btn-toggle w-full flex items-center justify-between text-left font-bold text-sm text-slate-900 cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-[#1A73E8]" />
@@ -543,7 +543,7 @@ export function FactoryPricingModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+            className="sf-btn-soft rounded-xl border border-slate-300 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
           >
             {tr("common.close")}
           </button>

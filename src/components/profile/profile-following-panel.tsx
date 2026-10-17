@@ -35,7 +35,7 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
           </p>
           <Link
             href="/explore"
-            className="inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white"
+            className="sf-btn-nav inline-block mt-2 rounded-full bg-brand-blue px-4 py-1.5 text-xs font-bold text-white"
           >
             {t("profile.following.exploreFactories")}
           </Link>
@@ -72,7 +72,7 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
               <button
                 type="button"
                 onClick={() => onToggleFollow(m.id)}
-                className="text-[11px] font-semibold text-ink-faint hover:text-red-600 transition-colors"
+                className="sf-btn-toggle text-[11px] font-semibold text-ink-faint hover:text-red-600 transition-colors"
               >
                 {t("common.unfollow")}
               </button>
@@ -80,14 +80,14 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
               <div className="flex items-center gap-1.5">
                 <Link
                   href={`/messages?with=${m.slug}`}
-                  className="glass-liquid-item inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold text-brand-blue"
+                  className="sf-btn-soft glass-liquid-item inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold text-brand-blue"
                 >
                   <MessageSquare className="h-3 w-3" />
                   <span>{t("common.chat")}</span>
                 </Link>
                 <Link
                   href={`/manufacturers/${m.slug}`}
-                  className="inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-1 text-xs font-bold text-white hover:bg-black transition-colors"
+                  className="sf-btn-nav inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-1 text-xs font-bold text-white hover:bg-black transition-colors"
                 >
                   <span>{t("common.visit")}</span>
                   <ExternalLink className="h-2.5 w-2.5" />

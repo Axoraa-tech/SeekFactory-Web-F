@@ -80,7 +80,7 @@ export function CommentThreadItem({
               type="button"
               onClick={() => onToggleLike(comment.id, comment.likes)}
               className={cn(
-                "flex items-center gap-1 font-semibold transition hover:text-ink",
+                "sf-btn-toggle flex items-center gap-1 font-semibold transition hover:text-ink",
                 commentLikedState.liked && "text-red-500 hover:text-red-600"
               )}
             >
@@ -96,7 +96,7 @@ export function CommentThreadItem({
             <button
               type="button"
               onClick={() => onToggleReply(comment.id)}
-              className="font-semibold hover:text-brand-blue transition"
+              className="sf-btn-soft font-semibold hover:text-brand-blue transition"
             >
               {t("common.reply")}
             </button>
@@ -123,14 +123,14 @@ export function CommentThreadItem({
                 type="button"
                 onClick={() => onPostReply(comment.id)}
                 disabled={!replyText.trim() || isSubmittingReply}
-                className="rounded-lg bg-brand-blue px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-blue-dark transition disabled:opacity-50"
+                className="sf-btn-commit rounded-lg bg-brand-blue px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-blue-dark transition disabled:opacity-50"
               >
                 {t("common.reply")}
               </button>
               <button
                 type="button"
                 onClick={onCancelReply}
-                className="text-xs text-ink-muted hover:text-ink px-1"
+                className="sf-btn-soft text-xs text-ink-muted hover:text-ink px-1"
               >
                 {t("common.cancel")}
               </button>
@@ -142,7 +142,7 @@ export function CommentThreadItem({
               <button
                 type="button"
                 onClick={() => onToggleRepliesExpanded(comment.id)}
-                className="flex items-center gap-1.5 text-[11px] font-bold text-brand-blue hover:text-brand-blue-dark transition"
+                className="sf-btn-nav flex items-center gap-1.5 text-[11px] font-bold text-brand-blue hover:text-brand-blue-dark transition"
               >
                 <div className="h-0.5 w-4 bg-brand-blue/40" />
                 {isRepliesExpanded ? (
@@ -196,7 +196,7 @@ export function CommentThreadItem({
                             type="button"
                             onClick={() => onToggleLike(reply.id, reply.likes)}
                             className={cn(
-                              "flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-ink-muted hover:text-ink transition",
+                              "sf-btn-toggle flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-ink-muted hover:text-ink transition",
                               replyLikedState.liked && "text-red-500 hover:text-red-600"
                             )}
                           >

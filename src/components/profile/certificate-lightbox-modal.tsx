@@ -139,7 +139,7 @@ export function CertificateLightboxModal({
               href={certificate.imageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 font-bold py-2.5 px-4 text-xs transition shadow-lg shadow-amber-500/20"
+              className="sf-btn-nav flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-neutral-950 font-bold py-2.5 px-4 text-xs transition shadow-lg shadow-amber-500/20"
             >
               <ExternalLink className="h-3.5 w-3.5" />
               <span>{t("profile.certModal.openFullResolution")}</span>
@@ -147,7 +147,7 @@ export function CertificateLightboxModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 py-2.5 px-4 text-xs font-semibold transition"
+              className="sf-btn-soft rounded-xl border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 py-2.5 px-4 text-xs font-semibold transition"
             >
               {t("common.close")}
             </button>

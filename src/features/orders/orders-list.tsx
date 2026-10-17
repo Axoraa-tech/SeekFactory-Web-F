@@ -69,7 +69,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
           <p className="text-xs text-slate-500">{t("orders.list.orderRequestsYouSendOr")}</p>
           <Link
             href="/explore"
-            className="inline-flex h-9 items-center rounded-xl bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-sm"
+            className="sf-btn-nav inline-flex h-9 items-center rounded-xl bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#d85b17] transition-all active:scale-95 shadow-sm"
           >
             {t("orders.exploreProducts")}
           </Link>
@@ -163,7 +163,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                   </div>
                   <Link
                     href={`/messages?with=${order.manufacturer.slug}`}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:border-brand-orange hover:text-brand-orange hover:bg-orange-50/50 transition-all active:scale-95 shadow-2xs"
+                    className="sf-btn-soft inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:border-brand-orange hover:text-brand-orange hover:bg-orange-50/50 transition-all active:scale-95 shadow-2xs"
                   >
                     {t("common.chat")}
                   </Link>
@@ -172,7 +172,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                       type="button"
                       disabled={cancelling === order.id}
                       onClick={() => cancel(order)}
-                      className="rounded-xl border border-rose-200 bg-white px-3.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                      className="sf-btn-danger rounded-xl border border-rose-200 bg-white px-3.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                     >
                       {cancelling === order.id ? t("orders.list.cancelling") : t("common.cancel")}
                     </button>

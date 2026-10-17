@@ -281,8 +281,8 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
                     }
                     className={
                       active
-                        ? "flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white"
-                        : "flex items-center gap-1 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-100"
+                        ? "sf-btn-toggle flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white"
+                        : "sf-btn-toggle flex items-center gap-1 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-100"
                     }
                   >
                     {active && <CheckCircle2 className="h-3 w-3" />}
@@ -306,7 +306,7 @@ export function VerificationForm({ initial, factoryName, factoryCountry }: Props
           <button
             type="submit"
             disabled={submitting}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:opacity-70"
+            className="sf-btn-commit flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark disabled:opacity-70"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {submitting ? t("seller.verify.submitting") : verification.submitted ? t("seller.verify.resubmitForVerification") : t("seller.verify.submitForVerification")}
@@ -370,7 +370,7 @@ function StatusCard({
         {detail && <p className={`mt-3 rounded-lg px-3 py-2 text-xs font-semibold ${detailTone}`}>{detail}</p>}
         <Link
           href={continueHref}
-          className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark"
+          className="sf-btn-commit mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand-blue text-sm font-semibold text-white transition-colors hover:bg-brand-blue-dark"
         >
           {continueLabel ?? t("seller.verify.continueToDashboard")}
         </Link>
@@ -378,7 +378,7 @@ function StatusCard({
           <button
             type="button"
             onClick={onEdit}
-            className="mt-3 text-xs font-semibold text-brand-blue hover:underline"
+            className="sf-btn-soft mt-3 text-xs font-semibold text-brand-blue hover:underline"
           >
             {editLabel}
           </button>

@@ -265,7 +265,7 @@ export function CommentsModal({
               <button
                 type="button"
                 onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-                className="rounded-full border border-line bg-canvas px-4 py-1.5 text-xs font-semibold text-ink hover:bg-surface hover:border-brand-blue hover:text-brand-blue shadow-sm transition"
+                className="sf-btn-nav rounded-full border border-line bg-canvas px-4 py-1.5 text-xs font-semibold text-ink hover:bg-surface hover:border-brand-blue hover:text-brand-blue shadow-sm transition"
               >
                 {t("comments.loadMore", {
                   count: Math.min(PAGE_SIZE, comments.length - visibleCount),

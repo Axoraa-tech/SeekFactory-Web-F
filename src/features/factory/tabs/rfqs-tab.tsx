@@ -96,7 +96,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
               key={status}
               type="button"
               onClick={() => setSelectedStatus(status)}
-              className={`rounded-xl px-3 py-2 text-xs font-bold transition shadow-xs ${
+              className={`sf-btn-toggle rounded-xl px-3 py-2 text-xs font-bold transition shadow-xs ${
                 selectedStatus === status
                   ? "bg-brand-blue text-white"
                   : "bg-white border border-line text-neutral-700 hover:bg-canvas"
@@ -204,7 +204,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
                 type="button"
                 onClick={() => void openChat(rfq)}
                 disabled={openingChatId === rfq.id}
-                className="rounded-xl border border-line bg-canvas hover:bg-neutral-200 text-neutral-800 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 disabled:opacity-60"
+                className="sf-btn-soft rounded-xl border border-line bg-canvas hover:bg-neutral-200 text-neutral-800 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 disabled:opacity-60"
               >
                 {openingChatId === rfq.id ? (
                   <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
@@ -227,7 +227,7 @@ export function RfqsTab({ rfqs, onOpenQuoteModal, onOpenChatWithBuyer }: Props) 
                 <button
                   type="button"
                   onClick={() => onOpenQuoteModal(rfq)}
-                  className="rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5"
+                  className="sf-btn-commit rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 flex items-center gap-1.5"
                 >
                   <Send className="h-4 w-4" />
                   <span>{rfq.status === "Quoted" ? t("seller.rfqs.editQuotation") : t("seller.rfqs.submitQuotation")}</span>

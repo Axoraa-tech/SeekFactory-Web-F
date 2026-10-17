@@ -84,7 +84,7 @@ export function FeedPostComposer({ author, categories }: Props) {
           <button
             type="button"
             onClick={() => open("seek")}
-            className="flex h-10 min-w-0 flex-1 items-center rounded-full border border-slate-300 px-4 text-left text-sm font-semibold text-ink-muted transition hover:bg-canvas"
+            className="sf-btn-commit flex h-10 min-w-0 flex-1 items-center rounded-full border border-slate-300 px-4 text-left text-sm font-semibold text-ink-muted transition hover:bg-canvas"
           >
             <span className="truncate">{t("seller.composer.startAPost")}</span>
           </button>
@@ -93,7 +93,7 @@ export function FeedPostComposer({ author, categories }: Props) {
           <button
             type="button"
             onClick={() => open("seek")}
-            className="flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold text-ink-muted transition hover:bg-canvas"
+            className="sf-btn-soft flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold text-ink-muted transition hover:bg-canvas"
           >
             <Video className="h-5 w-5 text-emerald-600" />
             {t("seller.composer.video")}
@@ -101,7 +101,7 @@ export function FeedPostComposer({ author, categories }: Props) {
           <button
             type="button"
             onClick={() => open("product")}
-            className="flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold text-ink-muted transition hover:bg-canvas"
+            className="sf-btn-soft flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold text-ink-muted transition hover:bg-canvas"
           >
             <ImageIcon className="h-5 w-5 text-brand-blue" />
             {t("seller.composer.photo")}

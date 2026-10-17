@@ -286,7 +286,7 @@ export function SalesproSidebar({
             <button
               type="button"
               onClick={onOpenUpgradeModal}
-              className="mt-2.5 w-full block text-center rounded-xl bg-white text-[#F26B21] py-1.5 text-xs font-extrabold shadow-sm hover:bg-amber-50 active:scale-[0.98] transition cursor-pointer"
+              className="sf-btn-commit mt-2.5 w-full block text-center rounded-xl bg-white text-[#F26B21] py-1.5 text-xs font-extrabold shadow-sm hover:bg-amber-50 active:scale-[0.98] transition cursor-pointer"
             >
               {t("seller.nav.upgradeTier")}
             </button>

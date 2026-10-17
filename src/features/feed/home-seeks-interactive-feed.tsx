@@ -3,15 +3,7 @@
 import { useState, useMemo, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  X,
-  SlidersHorizontal,
-  Video,
-  ImageIcon,
-  Plus,
-  ChevronDown,
-} from "lucide-react";
-import { OPEN_COMPOSER_EVENT, type ComposerMode } from "@/features/factory/post-composer/events";
+import { X, SlidersHorizontal } from "lucide-react";
 import { ReelsFeed } from "@/components/reels/reels-feed";
 import { SingleSeekShowcase } from "@/components/reels/single-seek-showcase";
 import { FeedListShowcase } from "@/components/reels/feed-list-showcase";
@@ -63,10 +55,8 @@ export function HomeSeeksInteractiveFeed({
   const searchParams = useSearchParams();
   const { t, translateCategory } = useRegionalSettings();
 
-  // Single-seek layouts: the composer's actions sit in the Seeks bar on desktop (see below)
+  // Single-seek layouts fit one seek to the window: slimmer Seeks bar, header inside the showcase
   const compactComposer = showcase.mode === "SINGLE" || showcase.mode === "SIDEBAR";
-  const openComposer = (mode: ComposerMode) =>
-    window.dispatchEvent(new CustomEvent(OPEN_COMPOSER_EVENT, { detail: mode }));
 
   // Active view states
   const [tab, setTab] = useState<FeedTab>(
@@ -230,9 +220,10 @@ export function HomeSeeksInteractiveFeed({
         {/* 3. Seeks Header with Controls */}
         <div
           className={cn(
-            "md:sticky md:top-[76px] z-30 -mx-1 px-3 py-2.5 bg-canvas/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs rounded-xl flex items-center justify-between gap-3",
+            // A card like the panels beside it (left menu, products), not a see-through strip
+            "md:sticky md:top-[76px] z-30 flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-2.5 shadow-card",
             // Single-seek layouts on desktop: a slim bar so the seek video gets the height
-            compactComposer && "lg:py-1",
+            compactComposer ? "lg:py-1.5" : "-mx-1",
           )}
         >
           {/* Left: Heading + For You / Following Tabs */}
@@ -250,7 +241,7 @@ export function HomeSeeksInteractiveFeed({
                   updateUrl(expandedCategorySlug, selectedSubcategorySlug, "for-you", viewMode, searchQuery);
                 }}
                 className={cn(
-                  "rounded-lg px-2.5 py-1 transition cursor-pointer",
+                  "sf-btn-toggle rounded-lg px-2.5 py-1 transition cursor-pointer",
                   tab === "for-you"
                     ? "bg-brand-blue text-white shadow-xs"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -265,7 +256,7 @@ export function HomeSeeksInteractiveFeed({
                   updateUrl(expandedCategorySlug, selectedSubcategorySlug, "following", viewMode, searchQuery);
                 }}
                 className={cn(
-                  "rounded-lg px-2.5 py-1 transition cursor-pointer",
+                  "sf-btn-toggle rounded-lg px-2.5 py-1 transition cursor-pointer",
                   tab === "following"
                     ? "bg-brand-blue text-white shadow-xs"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -275,13 +266,6 @@ export function HomeSeeksInteractiveFeed({
               </button>
             </div>
           </div>
-
-          {/* Right: one "Start a post" button (desktop, single-seek layouts), above the card's Send RFQ */}
-          {composer && compactComposer && (
-            <div className="hidden lg:block shrink-0">
-              <StartPostMenu onPick={openComposer} />
-            </div>
-          )}
         </div>
 
         {/* 4. Active Filter Indicator Bar (shown when subcategory or search query is applied) */}
@@ -332,7 +316,7 @@ export function HomeSeeksInteractiveFeed({
             <button
               type="button"
               onClick={handleClearFilter}
-              className="text-brand-blue hover:text-brand-blue-dark font-bold underline cursor-pointer shrink-0 ml-2"
+              className="sf-btn-soft text-brand-blue hover:text-brand-blue-dark font-bold underline cursor-pointer shrink-0 ml-2"
             >
               {t("feed.clearFilter", "Clear filter")}
             </button>
@@ -349,7 +333,9 @@ export function HomeSeeksInteractiveFeed({
   const headerInShowcase = compactComposer && !loading;
 
   return (
-    <section className="space-y-3.5">
+    // flex + gap rather than space-y: the composer wrapper below can then drop out of the layout
+    // entirely on desktop, so the first visible block starts level with the side columns
+    <section className="flex flex-col gap-3.5">
       {/* Subcategories Panel (Matches Explore page style and shows all subcategories) */}
       {expandedRoot && subcategories.length > 0 && (
         <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs space-y-3 animate-in fade-in-50 slide-in-from-top-2 duration-200">
@@ -366,7 +352,7 @@ export function HomeSeeksInteractiveFeed({
                 <button
                   type="button"
                   onClick={handleClearFilter}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 transition cursor-pointer"
+                  className="sf-btn-soft inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 transition cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                   <span>{t("feed.clearFilter", "Clear filter")}</span>
@@ -387,7 +373,7 @@ export function HomeSeeksInteractiveFeed({
             <Link
               href={`/explore?category=${expandedRoot.slug}`}
               className={cn(
-                "rounded-full px-3.5 py-1 text-xs font-bold transition cursor-pointer",
+                "sf-btn-soft rounded-full px-3.5 py-1 text-xs font-bold transition cursor-pointer",
                 !selectedSub
                   ? "bg-brand-blue text-white shadow-xs"
                   : "border border-neutral-200 bg-neutral-50 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink"
@@ -407,7 +393,7 @@ export function HomeSeeksInteractiveFeed({
                   key={child.id}
                   href={href}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs transition cursor-pointer",
+                    "sf-btn-soft flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs transition cursor-pointer",
                     isActive
                       ? "bg-brand-blue font-bold text-white shadow-xs"
                       : "border border-neutral-200 bg-neutral-50 font-medium text-neutral-700 hover:bg-neutral-100 hover:text-ink"
@@ -427,10 +413,10 @@ export function HomeSeeksInteractiveFeed({
         </div>
       )}
 
-      {/* The single-seek layouts fit one seek to the window, so on desktop the composer card gives its
-          height back and its actions move into the Seeks bar. Only the card hides: the composer stays
-          mounted and its modals (siblings of the card, not portalled) must still show. */}
-      {composer && (compactComposer ? <div className="lg:[&>[data-post-composer]]:hidden">{composer}</div> : composer)}
+      {/* On desktop "Start a post" lives in the TopNav, so the composer card gives its height back.
+          Only the card hides: the composer stays mounted and its modals (siblings of the card, not
+          portalled) must still show, opened by the TopNav button through OPEN_COMPOSER_EVENT. */}
+      {composer && <div className="lg:contents lg:[&>[data-post-composer]]:hidden">{composer}</div>}
 
       {!headerInShowcase && seeksHeader}
 
@@ -441,9 +427,9 @@ export function HomeSeeksInteractiveFeed({
           <LandscapeReelSkeleton />
         </div>
       ) : showcase.mode === "SINGLE" ? (
-        <SingleSeekShowcase items={filteredItems} settings={showcase} header={seeksHeader} productGroups={productGroups} />
+        <SingleSeekShowcase items={filteredItems} settings={showcase} header={seeksHeader} productGroups={productGroups} productsKey={searchQuery} />
       ) : showcase.mode === "SIDEBAR" ? (
-        <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" header={seeksHeader} productGroups={productGroups} />
+        <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" header={seeksHeader} productGroups={productGroups} productsKey={searchQuery} />
       ) : LIST_MODES.has(showcase.mode) ? (
         <ListScroller enabled={filteredItems.length > 0}>
           {showcase.mode === "FEED" ? (
@@ -460,81 +446,6 @@ export function HomeSeeksInteractiveFeed({
         <ReelsFeed items={filteredItems} />
       )}
     </section>
-  );
-}
-
-/** "Start a post" with a two-item menu: post a video seek or a product. */
-function StartPostMenu({ onPick }: { onPick: (mode: ComposerMode) => void }) {
-  const { t } = useRegionalSettings();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Close on a click outside or Escape
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  const pick = (mode: ComposerMode) => {
-    setOpen(false);
-    onPick(mode);
-  };
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg bg-brand-blue px-3 text-sm font-bold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95"
-      >
-        <Plus className="h-4 w-4" />
-        {t("seller.composer.startAPost")}
-        <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
-      </button>
-
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full z-40 mt-1.5 w-52 overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-card"
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => pick("seek")}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-ink transition hover:bg-canvas"
-          >
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-50">
-              <Video className="h-4 w-4 text-emerald-600" />
-            </span>
-            {t("seller.composer.postVideo")}
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => pick("product")}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-ink transition hover:bg-canvas"
-          >
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-blue-soft">
-              <ImageIcon className="h-4 w-4 text-brand-blue" />
-            </span>
-            {t("seller.composer.postProduct")}
-          </button>
-        </div>
-      )}
-    </div>
   );
 }
 

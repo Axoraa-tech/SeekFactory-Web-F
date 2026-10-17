@@ -152,7 +152,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 href={product.datasheetUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-800 hover:border-brand-blue hover:text-brand-blue transition-colors"
+                className="sf-btn-soft mt-3 flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-800 hover:border-brand-blue hover:text-brand-blue transition-colors"
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <FileText className="h-4 w-4 shrink-0 text-red-600" />
@@ -175,7 +175,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                   <>
                     <Link
                       href={categoryHref}
-                      className="rounded-md bg-brand-blue/10 px-2 py-0.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue/15"
+                      className="sf-btn-soft rounded-md bg-brand-blue/10 px-2 py-0.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue/15"
                     >
                       {localizeCategoryName(category.name, locale)}
                     </Link>

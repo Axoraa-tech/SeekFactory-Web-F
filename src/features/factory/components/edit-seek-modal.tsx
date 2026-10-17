@@ -152,7 +152,7 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
               <button
                 type="button"
                 onClick={() => coverInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs font-bold text-ink hover:border-brand-blue hover:text-brand-blue transition"
+                className="sf-btn-soft inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-xs font-bold text-ink hover:border-brand-blue hover:text-brand-blue transition"
               >
                 <ImageIcon className="h-4 w-4" />
                 {coverFile ? t("seller.seek.chooseAnother") : t("seller.seek.replaceCover")}
@@ -214,14 +214,14 @@ export function EditSeekModal({ seek, products, onClose, onSave }: Props) {
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="rounded-lg border border-line px-4 py-2 text-xs font-bold text-ink hover:bg-canvas transition disabled:opacity-50"
+              className="sf-btn-soft rounded-lg border border-line px-4 py-2 text-xs font-bold text-ink hover:bg-canvas transition disabled:opacity-50"
             >
               {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={busy}
-              className="rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-70"
+              className="sf-btn-commit rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2 text-xs font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-70"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               <span>{status === "uploading" ? t("seller.seek.status.uploadingCover") : status === "saving" ? t("common.saving") : t("common.saveChanges")}</span>

@@ -66,7 +66,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             type="button"
             onClick={() => setRegion("india")}
             className={cn(
-              "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
+              "sf-btn-toggle flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
               region === "india"
                 ? "bg-brand-blue text-white shadow-xs"
                 : "text-ink-muted hover:text-ink hover:bg-slate-50"
@@ -87,7 +87,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             type="button"
             onClick={() => setRegion("china")}
             className={cn(
-              "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
+              "sf-btn-toggle flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
               region === "china"
                 ? "bg-rose-600 text-white shadow-xs"
                 : "text-ink-muted hover:text-ink hover:bg-slate-50"
@@ -145,7 +145,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             type="button"
             disabled={currentTier === "free"}
             onClick={() => onUpgradeTier("free")}
-            className="glass-liquid-item mt-auto w-full h-9 rounded-full text-xs font-bold text-ink disabled:opacity-60 cursor-pointer"
+            className="sf-btn-commit glass-liquid-item mt-auto w-full h-9 rounded-full text-xs font-bold text-ink disabled:opacity-60 cursor-pointer"
           >
             {currentTier === "free" ? t("membership.currentPlan") : t("membership.switchToFree")}
           </button>
@@ -196,7 +196,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             type="button"
             disabled={currentTier === "pro"}
             onClick={() => onUpgradeTier("pro")}
-            className="mt-auto w-full h-10 rounded-full bg-brand-blue text-xs font-bold text-white hover:bg-brand-blue-dark shadow-sm active:scale-95 disabled:opacity-60 transition-all cursor-pointer"
+            className="sf-btn-commit mt-auto w-full h-10 rounded-full bg-brand-blue text-xs font-bold text-white hover:bg-brand-blue-dark shadow-sm active:scale-95 disabled:opacity-60 transition-all cursor-pointer"
           >
             {currentTier === "pro"
               ? t("membership.currentPlanActive")
@@ -246,7 +246,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             type="button"
             disabled={currentTier === "enterprise"}
             onClick={() => onUpgradeTier("enterprise")}
-            className="mt-auto w-full h-9 rounded-full bg-ink text-xs font-bold text-white hover:bg-black active:scale-95 disabled:opacity-60 transition-all shadow-sm cursor-pointer"
+            className="sf-btn-commit mt-auto w-full h-9 rounded-full bg-ink text-xs font-bold text-white hover:bg-black active:scale-95 disabled:opacity-60 transition-all shadow-sm cursor-pointer"
           >
             {currentTier === "enterprise"
               ? t("membership.currentPlanActive")

@@ -18,7 +18,7 @@ export function LogoutButton() {
       type="button"
       disabled={loggingOut}
       aria-label={t("userMenu.signOut")}
-      className="mt-4 text-sm font-semibold text-brand-blue disabled:opacity-60 disabled:cursor-not-allowed"
+      className="sf-btn-danger mt-4 text-sm font-semibold text-brand-blue disabled:opacity-60 disabled:cursor-not-allowed"
       onClick={async () => {
         if (loggingOut) return;
         setLoggingOut(true);
