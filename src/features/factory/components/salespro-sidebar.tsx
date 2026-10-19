@@ -73,7 +73,7 @@ export function SalesproSidebar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] shrink-0 flex flex-col border-r border-[#E6E8EB] bg-[#FFFFFF] h-screen transition-transform duration-200 ease-out",
+          "fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] shrink-0 flex flex-col border-r border-[#E6E8EB] bg-[#FFFFFF] h-screen h-[100dvh] transition-transform duration-200 ease-out",
           "lg:w-64 lg:max-w-none lg:translate-x-0",
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
@@ -295,7 +295,7 @@ export function SalesproSidebar({
       </div>
 
       {/* User Profile Footer */}
-      <div className="p-3 border-t border-[#E6E8EB] bg-[#FFFFFF] flex items-center justify-between">
+      <div className="shrink-0 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] border-t border-[#E6E8EB] bg-[#FFFFFF] flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative h-9 w-9 rounded-full overflow-hidden border border-[#E6E8EB] shrink-0 bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
             {profile.logoUrl && !profile.logoUrl.includes('default.png') ? (
