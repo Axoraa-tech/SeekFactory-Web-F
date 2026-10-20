@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import { useEffect } from "react";
 import Link from "next/link";
 import { ShieldCheck, Award, ArrowUpRight, Plus, Check } from "lucide-react";
@@ -97,13 +98,13 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img loading="lazy" decoding="async" src={m.logoUrl}
-                      alt={m.name}
+                      alt=""
                       className="h-10 w-10 shrink-0 rounded-xl border border-slate-200 object-cover shadow-2xs transition-transform group-hover:scale-105"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <p className="truncate text-xs font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
-                          {m.name}
+                          <SupplierName name={m.name} />
                         </p>
                         {m.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
                       </div>

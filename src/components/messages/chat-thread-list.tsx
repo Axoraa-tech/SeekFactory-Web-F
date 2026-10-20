@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/cn";
 import type { ThreadWithMessages } from "./chat-types";
 import { formatRelativeTime } from "@/shared/lib/format";
 import { useTranslations, useLocale } from "next-intl";
+import { useSupplierName } from "@/features/subscription";
 
 type Props = {
   threads: ThreadWithMessages[];
@@ -30,6 +31,7 @@ export function ChatThreadList({
 }: Props) {
   const locale = useLocale();
   const t = useTranslations();
+  const supplierName = useSupplierName();
   return (
     <div
       className={cn(
@@ -64,7 +66,7 @@ export function ChatThreadList({
           const isSelected = thread.id === selectedThreadId;
           const displayName = isSupplier
             ? thread.buyerName || thread.buyerCompany || t("chat.buyer")
-            : thread.manufacturer.name;
+            : supplierName(thread.manufacturer.name);
           const displayAvatar = isSupplier
             ? thread.buyerAvatarUrl
             : thread.manufacturer.logoUrl;

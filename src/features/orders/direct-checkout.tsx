@@ -11,7 +11,9 @@ import type { OrderContact } from "@/entities/order";
 import type { BuyerProfile } from "@/entities/user";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import { ShippingForm } from "@/features/orders/shipping-form";
-import { PAYMENT_NOTE, formatMoney } from "@/features/orders/order-status";
+import { Price } from "@/components/ui/price";
+import { SupplierName } from "@/features/subscription";
+import { PAYMENT_NOTE } from "@/features/orders/order-status";
 import { useTranslations } from "next-intl";
 
 type Props = {
@@ -76,10 +78,10 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
               {product.name}
             </Link>
             <Link href={`/manufacturers/${manufacturer.slug}`} className="block text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
-              {manufacturer.name}
+              <SupplierName name={manufacturer.name} />
             </Link>
             <p className="text-xs text-ink-muted">
-              {unitPrice !== null ? `${formatMoney(unitPrice, "INR")} / ${product.unit || "unit"}` : tr("product.actions.priceOnRequest")}
+              {unitPrice !== null ? <><Price inr={unitPrice} /> / {product.unit || "unit"}</> : tr("product.actions.priceOnRequest")}
               {minQty > 1 ? ` • MOQ ${minQty}` : ""}
             </p>
           </div>
@@ -119,7 +121,7 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
         {(product.priceTiers?.length ?? 0) > 0 && (
           <p className="text-[11px] text-ink-muted">
             {tr("orders.checkout.bulkPricing")}{" "}
-            {product.priceTiers!.map((t) => `${t.minQty}+ at ${formatMoney(t.priceInr, "INR")}`).join(" • ")}
+            {product.priceTiers!.map((t, i) => <span key={t.minQty}>{i > 0 && " • "}{t.minQty}+ at <Price inr={t.priceInr} /></span>)}
           </p>
         )}
       </section>
@@ -127,7 +129,7 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
       <aside className="rounded-2xl border border-line bg-white p-5 shadow-2xs space-y-4 lg:sticky lg:top-24">
         <div className="flex items-baseline justify-between">
           <span className="text-sm font-bold text-ink">{tr("orders.estimatedTotal")}</span>
-          <span className="text-xl sm:text-2xl font-black text-brand-orange tabular-nums">{total !== null ? formatMoney(total, "INR") : tr("orders.checkout.onRequest")}</span>
+          <span className="text-xl sm:text-2xl font-black text-brand-orange tabular-nums">{total !== null ? <Price inr={total} /> : tr("orders.checkout.onRequest")}</span>
         </div>
         <p className="flex gap-2 rounded-lg bg-orange-50/70 border border-orange-100/90 px-3 py-2 text-[11px] text-slate-700">
           <Info className="h-3.5 w-3.5 shrink-0 text-brand-orange mt-0.5" />

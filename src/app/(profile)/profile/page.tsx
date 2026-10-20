@@ -21,11 +21,13 @@ export default async function ProfilePage({
     api.feed.listSaved(),
     api.manufacturers.listFollowing(),
     api.rfq.listMyRfqs(),
+    // Direct orders count under "My RFQs & Orders"; a failure there must not break the profile
+    api.orders.listMine().catch(() => []),
     api.categories.list(),
   ]);
   data.catch(() => {}); // a guest's 401s are dropped when requireUser redirects
   const user = await requireUser("/profile");
-  const [savedProducts, savedSeeks, following, myRfqs, categories] = await data;
+  const [savedProducts, savedSeeks, following, myRfqs, myOrders, categories] = await data;
 
   return (
     <section className="space-y-4">
@@ -44,6 +46,7 @@ export default async function ProfilePage({
         initialSavedSeeks={savedSeeks}
         initialFollowing={following}
         initialRfqs={myRfqs}
+        initialOrders={myOrders}
         categories={categories}
       />
       <div id="account-security" className="space-y-3 pt-2">

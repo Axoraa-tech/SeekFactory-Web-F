@@ -10,6 +10,7 @@ import type { Product } from "@/entities/product";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Category } from "@/entities/category";
 import type { RfqItem } from "@/entities/rfq";
+import type { OrderRequest } from "@/entities/order";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { MembershipTier, ProfileFormData, ProfileTab } from "./profile-types";
 import { ProfileHero } from "./profile-hero";
@@ -29,6 +30,8 @@ type Props = {
   initialSavedSeeks: FeedItem[];
   initialFollowing: Manufacturer[];
   initialRfqs: RfqItem[];
+  /** The buyer's direct orders: listed and counted under "My RFQs & Orders" with the RFQs. */
+  initialOrders?: OrderRequest[];
   categories: Category[];
 };
 
@@ -40,6 +43,7 @@ export function UserProfileDashboard({
   initialSavedSeeks,
   initialFollowing,
   initialRfqs,
+  initialOrders = [],
   categories,
 }: Props) {
   const t = useTranslations();
@@ -198,7 +202,7 @@ export function UserProfileDashboard({
           <ProfileTabNav
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            rfqCount={rfqs.length}
+            rfqCount={rfqs.length + initialOrders.length}
             savedCount={savedCount}
             followingCount={followedSuppliers.length}
           />
@@ -217,6 +221,7 @@ export function UserProfileDashboard({
             <ProfileRfqsPanel
               user={user}
               rfqs={rfqs}
+              orders={initialOrders}
               categories={categories}
               focusRfqId={searchParams.get("rfq") ?? undefined}
               onChange={(updated) => setRfqs((prev) => prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)))}

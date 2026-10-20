@@ -1,3 +1,5 @@
+import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
+import { SupplierName } from "@/features/subscription";
 import { Price } from "@/components/ui/price";
 import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
@@ -105,18 +107,19 @@ export default async function ProductPage({ params, searchParams }: Props) {
             />
           </Card>
 
-          {/* Supplier Mini Profile Bar */}
+          {/* Supplier Mini Profile Bar: locked (blurred, generic name) for buyers without supplier access */}
           <Card className="p-4 border-slate-200/90 shadow-2xs">
+            <SupplierLockOverlay>
             <Link
               href={`/manufacturers/${manufacturer.slug}`}
               className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
             >
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-200 shadow-2xs">
-                <SafeImage src={manufacturer.logoUrl} alt={manufacturer.name} className="h-full w-full object-cover" />
+                <SafeImage src={manufacturer.logoUrl} alt="" className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="font-bold text-sm text-slate-900 truncate hover:text-brand-blue transition-colors">{manufacturer.name}</p>
+                  <p className="font-bold text-sm text-slate-900 truncate hover:text-brand-blue transition-colors"><SupplierName name={manufacturer.name} /></p>
                   {manufacturer.verified && <VerifiedBadge className="h-4 w-4 shrink-0" />}
                 </div>
                 <p className="text-xs text-slate-500 truncate">
@@ -125,6 +128,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 </p>
               </div>
             </Link>
+            </SupplierLockOverlay>
           </Card>
 
           {/* Technical Specifications Sheet */}

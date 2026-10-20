@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -129,7 +130,7 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
-                      {shortName(manufacturer.name)}
+                      <SupplierName name={shortName(manufacturer.name)} />
                     </p>
 
                     <div className="flex min-w-0 items-center gap-1">
@@ -203,7 +204,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
               <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden bg-neutral-100 mb-2.5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={m.coverUrl || m.logoUrl}
-                  alt={m.name}
+                  alt=""
                   loading="lazy"
                   decoding="async"
                   className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -221,7 +222,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
               <div className="space-y-1">
                 <div className="flex items-center gap-1">
                   <p className="font-bold text-xs sm:text-sm text-neutral-900 group-hover:text-brand-orange transition truncate">
-                    {m.name}
+                    <SupplierName name={m.name} />
                   </p>
                   {m.verified && <VerifiedBadge className="h-3.5 w-3.5 flex-shrink-0" />}
                 </div>
@@ -232,7 +233,10 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                 </div>
 
                 <div className="flex items-center justify-between pt-1 border-t border-neutral-100 text-[11px]">
-                  <span className="text-neutral-500 font-medium">{m.yearsEstablished || 8}{t("manufacturers.list.yrsExp")}</span>
+                  {/* yearsEstablished is the founding year (e.g. 2012), not a duration */}
+                  <span className="text-neutral-500 font-medium">
+                    {m.yearsEstablished > 0 ? `${Math.max(0, new Date().getFullYear() - m.yearsEstablished)}${t("manufacturers.list.yrsExp")}` : ""}
+                  </span>
                   <span className="font-bold text-brand-orange flex items-center gap-0.5 group-hover:underline">
                     {t("manufacturers.list.visit")} <ExternalLink className="h-2.5 w-2.5" />
                   </span>

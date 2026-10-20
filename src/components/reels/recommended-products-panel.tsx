@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -190,7 +191,7 @@ function RecommendedProductCard({
             <Link href={`/manufacturers/${factory.slug}`} className="flex min-w-0 items-center gap-1.5 text-xs text-ink-muted hover:text-ink">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={factory.logoUrl} alt="" loading="lazy" className="h-5 w-5 shrink-0 rounded-md border border-line object-cover" />
-              <span className="truncate font-semibold text-slate-700">{factory.name}</span>
+              <span className="truncate font-semibold text-slate-700"><SupplierName name={factory.name} /></span>
               {factory.verified && <VerifiedBadge />}
               {factory.country && <span className="shrink-0 text-ink-faint">· {factory.country}</span>}
             </Link>

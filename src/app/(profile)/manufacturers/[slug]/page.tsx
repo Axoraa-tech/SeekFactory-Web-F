@@ -7,14 +7,11 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: Props) {
+// Supplier identity (name, full description) is reserved for buyers who unlocked it, and page
+// metadata is shown to everyone (browser tab, link previews, search results), so it stays generic.
+export async function generateMetadata() {
   const t = await getTranslations();
-  const { slug } = await params;
-  const detail = await getApi().manufacturers.getBySlug(slug);
-  return {
-    title: detail?.manufacturer.name ?? t("pages.manufacturer.manufacturerProfile"),
-    description: detail?.manufacturer.description,
-  };
+  return { title: t("pages.manufacturer.manufacturerProfile") };
 }
 
 export default async function ManufacturerPage({ params }: Props) {

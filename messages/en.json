@@ -510,6 +510,11 @@
       "tooLarge": "Photo must be 5 MB or smaller.",
       "welcomeTitle": "Welcome to SeekFactory!",
       "welcomeBody": "We filled in your name, email and photo from Google. Add your company details below, and tap the camera to change your photo."
+    },
+    "orders": {
+      "directOrders": "Direct orders ({count})",
+      "viewAll": "View in My Orders",
+      "qty": "Qty {qty}"
     }
   },
   "membership": {
@@ -677,7 +682,9 @@
     "qualityCertifications": "Quality Certifications",
     "seekfactoryVerification": "SeekFactory Verification",
     "businessDetailsVerified": "Business details verified",
-    "notVerified": "Not verified"
+    "notVerified": "Not verified",
+    "lockedName": "Verified supplier",
+    "thisSupplier": "this supplier"
   },
   "legal": {
     "accessibility": {
@@ -1310,7 +1317,7 @@
       "couldNotSendYourOrder": "Could not send your order requests",
       "yourCartIsEmpty": "Your cart is empty",
       "addProductsFromAFactory": "Add products from a factory page or a seek to order them here.",
-      "sentToThisFactory": "Sent to this factory",
+      "sentToThisFactory": "Will be sent to this factory",
       "sendsOrderRequestsOnePer": "Sends {length} order requests, one per product.",
       "selectAll": "Select all ({count})",
       "selectItem": "Send {product}",

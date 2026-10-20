@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { Bookmark, Eye, Heart, ImageOff, MapPin, MessageCircle, Play, Repeat2 } from "lucide-react";
@@ -93,7 +94,7 @@ export function FactoryLine({ item, size = "md" }: { item: FeedItem; size?: "sm"
           href={`/manufacturers/${manufacturer.slug}`}
           className="flex items-center gap-1.5 truncate text-sm font-semibold text-ink hover:text-brand-blue hover:underline"
         >
-          <span className="truncate">{manufacturer.name}</span>
+          <span className="truncate"><SupplierName name={manufacturer.name} /></span>
           {manufacturer.verified && <VerifiedBadge />}
         </Link>
         <p className="flex items-center gap-1 truncate text-xs text-ink-muted">

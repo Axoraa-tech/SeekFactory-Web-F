@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
@@ -203,10 +204,10 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                   <div className={cn("flex items-center gap-1.5", fill ? "flex-nowrap overflow-hidden" : "flex-wrap")}>
                     <p
                       // Showcase: one line so every card is the same height
-                      title={fill ? manufacturer.name : undefined}
+                      
                       className={cn("min-w-0 break-words text-sm font-bold text-ink hover:text-brand-orange transition", fill ? "truncate" : "line-clamp-2")}
                     >
-                      {manufacturer.name}
+                      <SupplierName name={manufacturer.name} />
                     </p>
                     <SeekTrustBadge manufacturer={manufacturer} />
                   </div>

@@ -106,8 +106,9 @@ export function SupplierProfileView({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={manufacturer.logoUrl} alt="" className="w-20 h-20 rounded-2xl" />
               <div>
-                <h1 className="text-2xl font-black">{manufacturer.name}</h1>
-                <p className="text-sm">{manufacturer.location}, {manufacturer.country}</p>
+                {/* Locked: the real name never enters the page, not even blurred */}
+                <h1 className="text-2xl font-black">{t("supplier.lockedName")}</h1>
+                <p className="text-sm">{manufacturer.country}</p>
               </div>
             </div>
           </div>
@@ -131,7 +132,7 @@ export function SupplierProfileView({
             </h2>
 
             <p className="mt-2 text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-              {t("supplier.fullPlantInspectionReportsMachine")} <strong className="text-slate-900 font-bold">{manufacturer.name}</strong> {t("supplier.areReservedForVerifiedPro")}
+              {t("supplier.fullPlantInspectionReportsMachine")} <strong className="text-slate-900 font-bold">{t("supplier.thisSupplier")}</strong> {t("supplier.areReservedForVerifiedPro")}
             </p>
 
             {/* 3 Value Pillars */}
