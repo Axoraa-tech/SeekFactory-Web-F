@@ -49,18 +49,18 @@ export function StartPostMenu() {
         aria-expanded={open}
         aria-label={t("seller.composer.startAPost")}
         title={t("seller.composer.startAPost")}
-        className="sf-btn-commit inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-xl bg-brand-blue px-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95 xl:gap-1.5 xl:px-3"
+        className="sf-btn-commit inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-lg bg-brand-blue px-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95"
       >
-        <Plus className="h-4 w-4" />
+        <Plus className="h-3.5 w-3.5" />
         {/* Icon-only on small laptops so the search bar keeps its width */}
         <span className="hidden xl:inline">{t("seller.composer.startAPost")}</span>
-        <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-card"
+          className="absolute left-1/2 top-full z-50 mt-1.5 w-52 -translate-x-1/2 overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-card"
         >
           <Link
             href="/factory?tab=seeks&new=seek"

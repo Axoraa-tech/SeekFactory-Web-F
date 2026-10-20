@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/shared/lib/cn";
 import { useState, useEffect, useRef,useMemo  } from "react";
 import Link from "next/link";
 import { Plus, Building2 } from "lucide-react";
@@ -235,33 +236,43 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
         {/* Tier 1: Logo, Search, Actions */}
         <div
           data-header-content
-          className="mx-auto flex h-14 sm:h-[70px] max-w-[1440px] items-center gap-2 sm:gap-4 lg:gap-5 px-3 sm:px-6"
+          className={cn(
+            "mx-auto h-14 sm:h-[70px] max-w-[1440px] items-center gap-2 sm:gap-4 lg:gap-5 px-3 sm:px-6",
+            // Manufacturers: [logo + search] [Start a post] [actions]; the two outer columns share the
+            // width equally, so Start a post sits in the exact middle of the bar
+            isManufacturer ? "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]" : "flex",
+          )}
         >
-          {/* Brand Logo */}
-          <Link
-            data-logo
-            href="/"
-            className="flex shrink-0 items-center py-1 group"
-            aria-label={t("layout.topNav.seekfactoryHome")}
-          >
-            <BrandLogo
-              priority
-              className="h-8 sm:h-12 md:h-14 w-auto max-w-[130px] sm:max-w-[220px] md:max-w-[280px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]"
-            />
-          </Link>
+          <div className={cn("flex min-w-0 items-center gap-2 sm:gap-4", isManufacturer ? "" : "contents")}>
+            {/* Brand Logo */}
+            <Link
+              data-logo
+              href="/"
+              className="flex shrink-0 items-center py-1 group"
+              aria-label={t("layout.topNav.seekfactoryHome")}
+            >
+              <BrandLogo
+                priority
+                className={cn(
+                  "h-8 sm:h-12 md:h-14 w-auto max-w-[130px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]",
+                  isManufacturer ? "sm:max-w-[180px] xl:max-w-[220px]" : "sm:max-w-[220px] md:max-w-[280px]",
+                )}
+              />
+            </Link>
 
-          {/* Search Bar */}
-          <SearchBar categories={categories} compact={isManufacturer} />
+            {/* Search Bar */}
+            <SearchBar categories={categories} compact={isManufacturer} />
+          </div>
 
-          {/* Manufacturers only; below lg the bottom MobileNav has the Post button */}
+          {/* Manufacturers only, centred; below lg the bottom MobileNav has the Post button */}
           {isManufacturer && (
-            <div className="hidden lg:block shrink-0">
+            <div className="hidden lg:block justify-self-center">
               <StartPostMenu />
             </div>
           )}
 
           {/* Right Actions */}
-          <div data-actions className="ml-auto flex min-w-0 items-center gap-1 sm:gap-2.5 shrink-0">
+          <div data-actions className={cn("flex min-w-0 items-center gap-1 sm:gap-2.5 shrink-0", isManufacturer ? "justify-self-end" : "ml-auto")}>
             {user ? (
               <>
                 <LanguageCurrencyDropdown compact={isManufacturer} />
