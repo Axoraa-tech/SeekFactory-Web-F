@@ -19,6 +19,7 @@ import type { Category } from "@/entities/category";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedTab } from "@/entities/reel";
 import { getApi } from "@/shared/api";
+import { orderForThisVisit } from "@/features/feed/seen-seeks";
 import { LandscapeReelSkeleton } from "@/components/skeletons";
 import { feedSourceKey } from "@/features/feed/load-feed";
 import { useViewportLock } from "@/components/reels/use-viewport-lock";
@@ -202,7 +203,14 @@ export function HomeSeeksInteractiveFeed({
     };
   }, [sourceKey, searchQuery, selectedSub, tab, t]);
 
-  const filteredItems = items;
+  // Every visit (and every new tab, category or search) gets a fresh random order with unwatched
+  // seeks first. Done after mount, not during render, so the server HTML and hydration match;
+  // the order then stays put while scrolling.
+  const [visitOrder, setVisitOrder] = useState<FeedItem[] | null>(null);
+  useEffect(() => {
+    setVisitOrder(orderForThisVisit(items, (item) => item.reel.id));
+  }, [items]);
+  const filteredItems = visitOrder ?? items;
 
   // Single-seek layouts mix factories' products in between the seeks, from the same source
   const productGroups = useShowcaseProducts({
