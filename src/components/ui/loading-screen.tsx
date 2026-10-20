@@ -106,11 +106,11 @@ export function LoadingScreen() {
       }`}
       style={{
         background:
-          "linear-gradient(135deg, #1E40AF 0%, #1D4ED8 25%, #2563EB 50%, #C2410C 82%, #EA580C 100%)",
+          "linear-gradient(135deg, #DCEAFD 0%, #E8F1FD 30%, #F8FAFF 52%, #FFF1E6 74%, #FFE2CC 100%)",
       }}
     >
       {/* ── Top Ambient Progress Bar ── */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-brand-blue/10 overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-[#F26B21] to-[#60A5FA] transition-all duration-75 ease-linear"
           style={{ width: `${progress}%` }}
@@ -119,7 +119,7 @@ export function LoadingScreen() {
 
       {/* ── Top Header Bar (Clean SeekFactory Logo & Skip) ── */}
       <div className="w-full max-w-5xl flex items-center justify-between pt-2">
-        <div className="flex items-center gap-3 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm">
+        <div className="flex items-center gap-3 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm ring-1 ring-slate-200/70">
           <Image
             src="/brand/seekfactory-logo.png"
             alt="SeekFactory — Green Factories Worldwide"
@@ -133,7 +133,7 @@ export function LoadingScreen() {
         <button
           type="button"
           onClick={handleDismiss}
-          className="sf-btn-soft px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/25 flex items-center gap-1.5 transition-all cursor-pointer"
+          className="sf-btn-soft px-3 py-1.5 rounded-full text-xs font-semibold bg-white/70 hover:bg-white text-slate-700 backdrop-blur-md border border-slate-200 flex items-center gap-1.5 transition-all cursor-pointer"
         >
           <span>Skip ({secondsRemaining}s)</span>
           <X className="w-3.5 h-3.5" />
@@ -143,31 +143,31 @@ export function LoadingScreen() {
       {/* ── Center Content: Verified Title & Subtitle ── */}
       <div className="flex-1 flex flex-col items-center justify-center text-center max-w-3xl px-4 py-8">
         {/* Verified Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs sm:text-sm font-semibold tracking-wide mb-6 shadow-sm">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-brand-blue/15 text-brand-blue text-xs sm:text-sm font-semibold tracking-wide mb-6 shadow-sm">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           <span>Verified Cross-Border B2B Marketplace</span>
         </div>
 
         {/* Main Title */}
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.14] drop-shadow-md">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.14]">
           Connect with Verified Chinese Machinery Manufacturers
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-6 text-base sm:text-lg md:text-xl text-white/95 font-medium leading-relaxed max-w-2xl drop-shadow-xs">
+        <p className="mt-6 text-base sm:text-lg md:text-xl text-slate-600 font-medium leading-relaxed max-w-2xl">
           India&apos;s premium cross-border B2B marketplace for manufacturing machineries. Find quality
           machineries, connect with trusted manufacturers, and grow your business.
         </p>
 
         {/* Loading Indicator */}
-        <div className="mt-8 flex items-center gap-2 text-white/80 text-xs font-medium tracking-wider uppercase">
-          <span className="inline-block w-2 h-2 rounded-full bg-white animate-ping" />
+        <div className="mt-8 flex items-center gap-2 text-brand-orange text-xs font-semibold tracking-wider uppercase">
+          <span className="inline-block w-2 h-2 rounded-full bg-brand-orange animate-ping" />
           <span>Opening Marketplace in {secondsRemaining}s</span>
         </div>
       </div>
 
       {/* ── Footer ── */}
-      <div className="w-full max-w-5xl flex items-center justify-center pb-2 text-white/60 text-xs font-medium">
+      <div className="w-full max-w-5xl flex items-center justify-center pb-2 text-slate-500 text-xs font-medium">
         <span>SeekFactory · Green Factories Worldwide · India–China Trade</span>
       </div>
     </div>
