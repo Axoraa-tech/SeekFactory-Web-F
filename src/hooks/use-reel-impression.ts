@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { getApi } from "@/shared/api";
 import { getViewerId } from "@/shared/lib/viewer-id";
+import { markSeekSeen } from "@/features/feed/seen-seeks";
 
 /** Seconds of actual playback before a seek counts as an impression (or half of a shorter clip). */
 const IMPRESSION_SECONDS = 2;
@@ -22,6 +23,8 @@ export function useReelImpression(reelId: string | undefined) {
       const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : IMPRESSION_SECONDS;
       if (video.currentTime < Math.min(IMPRESSION_SECONDS, duration / 2)) return;
       reported.add(reelId);
+      // Watched: the next visits show this seek after the ones the viewer has not seen yet
+      markSeekSeen(reelId);
       getApi()
         .feed.recordView(reelId, getViewerId())
         .catch(() => reported.delete(reelId));
