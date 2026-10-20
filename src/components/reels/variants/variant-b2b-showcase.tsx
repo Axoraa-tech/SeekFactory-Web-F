@@ -59,6 +59,11 @@ type Props = {
  */
 const SPEC_ICONS = [PackageCheck, Layers, Clock, FileSpreadsheet];
 
+/** Wraps the chips in the supplier lock only when they show supplier detail. */
+function ChipsLock({ locked, label, children }: { locked: boolean; label: string; children: React.ReactNode }) {
+  return locked ? <SupplierLockOverlay badgeLabel={label} compact>{children}</SupplierLockOverlay> : <>{children}</>;
+}
+
 export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product, eager, fill }: Props) {
   const t = useTranslations();
   const { following, toggleFollow } = useFollow(manufacturer.id, followingManufacturer, manufacturer.followerCount);
@@ -85,7 +90,10 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
     { label: t("showcase.single.exportsTo"), value: manufacturer.exportCountries?.slice(0, 2).join(", ") ?? "" },
     { label: t("showcase.spotlight.factorySize"), value: manufacturer.factorySize },
   ].filter((chip) => chip.value);
-  const specChips = (productChips.length === 0 && fill ? factoryChips : productChips).slice(0, 4);
+  // Product facts (MOQ, tags, country of origin) are public; the factory's own facts are supplier
+  // detail, so only those sit behind the supplier lock
+  const showingFactoryChips = productChips.length === 0 && !!fill;
+  const specChips = (showingFactoryChips ? factoryChips : productChips).slice(0, 4);
 
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
@@ -115,19 +123,8 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
     pingControls,
   });
 
-  const handleMouseEnter = useCallback(() => {
-    pingControls();
-    if (videoRef.current) {
-      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-    }
-  }, [pingControls, setIsPlaying]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    }
-  }, [setIsPlaying]);
+  // Playback follows scrolling only (useSeekAutoplay: the seek in view plays, the rest pause).
+  // The cursor no longer starts or stops a video; hovering just shows the controls.
 
   const handleSeek = useCallback(
     (newTimeSec: number) => {
@@ -178,100 +175,26 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
       >
 
         <div
-          // Showcase: every block has a fixed height and the video takes the rest (at most 16:9 of the
-          // card's width, via container units), so every seek's video is the same size
+          // Showcase: the video stage takes all the height the price and engagement bars leave
           className={cn(
-            "p-3.5 sm:p-4 pb-2 sm:pb-2.5",
-            fill ? "flex min-h-0 flex-1 flex-col space-y-2 [container-type:inline-size] [&>*]:shrink-0" : "space-y-2.5",
+            "p-2.5 sm:p-3 pb-2 sm:pb-2.5",
+            fill ? "flex min-h-0 flex-1 flex-col space-y-2 [&>*]:shrink-0" : "space-y-2",
           )}
         >
-          {/* Header with SupplierLockOverlay */}
-          <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
-            {/* On narrow phones the actions wrap under the name instead of squeezing it */}
-            {/* Showcase (desktop only): one fixed row, the name truncates instead of pushing the buttons down */}
-            <div className={cn("flex items-center justify-between gap-x-3 gap-y-2", fill ? "h-10 flex-nowrap" : "flex-wrap")}>
-              <Link
-                href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
-                className="flex flex-1 basis-[200px] items-center gap-3 hover:opacity-90 transition min-w-0"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img loading="lazy" decoding="async"
-                  src={manufacturer.logoUrl}
-                  alt=""
-                  className="h-10 w-10 rounded-lg border border-neutral-200 object-cover shadow-xs flex-shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className={cn("flex items-center gap-1.5", fill ? "flex-nowrap overflow-hidden" : "flex-wrap")}>
-                    <p
-                      // Showcase: one line so every card is the same height
-                      
-                      className={cn("min-w-0 break-words text-sm font-bold text-ink hover:text-brand-orange transition", fill ? "truncate" : "line-clamp-2")}
-                    >
-                      <SupplierName name={manufacturer.name} />
-                    </p>
-                    <SeekTrustBadge manufacturer={manufacturer} />
-                  </div>
-                  <p className="text-xs text-ink-muted mt-0.5">
-                    {manufacturer.country} • {t("seek.viewCount", { count: formatCount(reel.views) })}
-                  </p>
-                </div>
-              </Link>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={toggleFollow}
-                  className={cn(
-                    "sf-btn-toggle rounded-lg px-3 py-1 text-xs font-semibold transition border",
-                    following
-                      ? "border-neutral-200 bg-neutral-100 text-neutral-700"
-                      : "border-brand-blue/30 bg-brand-blue-soft text-brand-blue hover:bg-brand-blue hover:text-white"
-                  )}
-                >
-                  {following ? t("common.following") : t("common.follow")}
-                </button>
-                <Link
-                  href="/rfq/new"
-                  className="sf-btn-commit inline-flex h-7 items-center gap-1 rounded-lg bg-brand-blue px-3 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-dark transition active:scale-95"
-                >
-                  <Send className="h-3 w-3" />
-                  <span>{t("feed.sendRfq")}</span>
-                </Link>
-              </div>
-            </div>
-          </SupplierLockOverlay>
-
-          {/* Hairline between the manufacturer row and the seek's title */}
-          {!fill && <div aria-hidden="true" className="h-px bg-gradient-to-r from-slate-200 via-slate-200/70 to-transparent" />}
-
-          {/* Title & Description (showcase: one line, the description trailing the title) */}
-          <div className={cn(fill && "flex h-6 min-w-0 items-baseline gap-2")}>
-            <h3 className={cn("text-base font-bold text-ink leading-snug", fill && "shrink-0 max-w-[60%] truncate")} title={fill ? reel.title : undefined}>
-              {reel.title}
-            </h3>
-            {/* Showcase skips a description that only repeats the title */}
-            {(!fill || (reel.description && reel.description !== reel.title)) && (
-              <p className={cn("text-xs sm:text-sm text-neutral-600 leading-relaxed", fill ? "min-w-0 truncate" : "mt-0.5")}>
-                {reel.description}
-              </p>
-            )}
-          </div>
-
-                    {/* Video Player */}
+          {/* Video stage (Reels-style): the video fills the card; supplier, actions, title and product
+              facts float over it on soft gradients */}
           <div
             ref={videoWrapperRef}
             onMouseMove={pingControls}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={pingControls}
             onClick={handleTogglePlay}
             className={cn(
-              "relative overflow-hidden rounded-xl bg-black cursor-pointer shadow-sm group select-none",
-              // Showcase: always 16:9 — as tall as the fixed blocks leave room for, narrowing (centred) rather than flattening
-              fill ? "!flex-1 min-h-[160px] max-h-[56.25cqw] aspect-[16/9] w-auto max-w-full self-center" : "aspect-[16/9] w-full",
+              "relative overflow-hidden rounded-2xl bg-black cursor-pointer shadow-sm group select-none",
+              fill ? "!flex-1 min-h-[300px] w-full" : "aspect-[4/5] sm:aspect-[4/3] w-full",
             )}
           >
-            {/* Blurred poster fills the frame; the video itself is shown whole on top, so it keeps its own
-                aspect ratio however the window (or browser zoom) resizes the box */}
+            {/* Blurred copy of the poster fills the frame; the video is shown whole on top, so a wide
+                factory video is never cropped or stretched, whatever the card's shape */}
             {reel.posterUrl && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img src={reel.posterUrl} alt="" aria-hidden loading="lazy"
@@ -299,7 +222,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 onPause={() => setIsBuffering(false)}
                 onCanPlay={() => setIsBuffering(false)}
                 onError={() => setIsBuffering(false)}
-                className="relative h-full w-full object-contain"
+                className="absolute inset-0 h-full w-full object-contain"
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
@@ -307,10 +230,9 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 alt={reel.title}
                 loading={eager ? "eager" : "lazy"}
                 decoding="async"
-                className="relative h-full w-full object-contain"
+                className="absolute inset-0 h-full w-full object-contain"
               />
             )}
-            
 
             {isBuffering && (
               <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
@@ -320,108 +242,138 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               </div>
             )}
 
-            {/* Top Right Controls */}
-            <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 pointer-events-auto">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleMute();
-                }}
-                className="h-7 w-7 rounded bg-black/70 text-white flex items-center justify-center hover:bg-black/90"
-              >
-                {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onExpand?.();
-                }}
-                className="h-7 w-7 rounded bg-black/70 text-white flex items-center justify-center hover:bg-black/90"
-                aria-label={t("seek.openReelPopup")}
-              >
-                <Maximize2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
-
-            {/* Bottom Scrubber */}
+            {/* TOP: supplier + Follow / Send RFQ */}
             <div
-              className={cn(
-                "absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-3 pb-2 pt-4 transition-opacity",
-                !isControlsVisible && isPlaying ? "opacity-0" : "opacity-100"
-              )}
+              className="absolute inset-x-0 top-0 z-20 bg-gradient-to-b from-black/75 via-black/35 to-transparent px-3 pt-3 pb-8"
               onClick={(e) => e.stopPropagation()}
             >
-              <div
-                ref={progressBarRef}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  setIsScrubbing(true);
-                  handleSeek(getTimeFromEvent(e));
-                }}
-                className="relative flex h-3 w-full cursor-pointer items-center"
-              >
-                <div className="relative h-1 w-full rounded-full bg-white/30">
-                  <div className="h-full rounded-full bg-brand-blue" style={{ width: `${progressPercent}%` }} />
+              <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
+                <div className="flex items-center justify-between gap-2">
+                  <Link
+                    href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+                    className="flex min-w-0 flex-1 items-center gap-2.5 hover:opacity-90 transition"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img loading="lazy" decoding="async"
+                      src={manufacturer.logoUrl}
+                      alt=""
+                      className="h-9 w-9 shrink-0 rounded-full border-2 border-white/80 bg-white object-cover shadow-sm"
+                    />
+                    <div className="min-w-0 flex-1 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.45)]">
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <p className="min-w-0 truncate text-sm font-bold"><SupplierName name={manufacturer.name} /></p>
+                        <SeekTrustBadge manufacturer={manufacturer} />
+                      </div>
+                      <p className="truncate text-[11px] text-white/80">
+                        {manufacturer.country} • {t("seek.viewCount", { count: formatCount(reel.views) })}
+                      </p>
+                    </div>
+                  </Link>
+
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={toggleFollow}
+                      className={cn(
+                        "sf-btn-toggle rounded-lg border px-3 py-1 text-xs font-semibold backdrop-blur-sm transition",
+                        following
+                          ? "border-white/40 bg-white/15 text-white"
+                          : "border-white/70 bg-white/90 text-brand-blue hover:bg-white",
+                      )}
+                    >
+                      {following ? t("common.following") : t("common.follow")}
+                    </button>
+                    <Link
+                      href="/rfq/new"
+                      className="sf-btn-commit inline-flex h-7 items-center gap-1 rounded-lg bg-brand-orange px-3 text-xs font-bold text-white shadow-sm hover:brightness-110 transition active:scale-95"
+                    >
+                      <Send className="h-3 w-3" />
+                      <span>{t("feed.sendRfq")}</span>
+                    </Link>
+                  </div>
+                </div>
+              </SupplierLockOverlay>
+            </div>
+
+            {/* BOTTOM: title, description, product facts, then the scrubber */}
+            <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-3 pt-12 pb-2">
+              <div className="flex items-end gap-2">
+                <div className="min-w-0 flex-1 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+                  <h3 className="line-clamp-1 text-[15px] font-bold leading-snug" title={reel.title}>{reel.title}</h3>
+                  {reel.description && reel.description !== reel.title && (
+                    <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-white/85">{reel.description}</p>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={handleToggleMute}
+                    aria-label={isMuted ? "Unmute" : "Mute"}
+                    className="grid h-8 w-8 place-items-center rounded-full bg-black/45 text-white backdrop-blur-sm hover:bg-black/70"
+                  >
+                    {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onExpand?.()}
+                    className="grid h-8 w-8 place-items-center rounded-full bg-black/45 text-white backdrop-blur-sm hover:bg-black/70"
+                    aria-label={t("seek.openReelPopup")}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-[11px] text-white/90 pt-0.5 font-mono">
-                <span>{formatDuration(currentTime)} / {formatDuration(duration)}</span>
+
+              {/* Product facts as see-through chips: min. order, tags, country of origin... */}
+              {specChips.length > 0 && (
+                <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                  <ChipsLock locked={showingFactoryChips} label={t("seek.viewFactorySpecs")}>
+                    <div className="flex min-w-0 flex-wrap gap-1.5 overflow-hidden max-h-[26px]">
+                      {specChips.map((chip, index) => {
+                        const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
+                        return (
+                          <span
+                            key={chip.label}
+                            title={`${chip.label}: ${chip.value}`}
+                            className="inline-flex max-w-[60%] min-w-0 items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[11px] text-white backdrop-blur-md"
+                          >
+                            <Icon className="h-3 w-3 shrink-0 text-white/80" strokeWidth={2} />
+                            <span className="shrink-0 text-white/75">{chip.label.charAt(0).toUpperCase() + chip.label.slice(1).toLowerCase()}</span>
+                            <span className="min-w-0 truncate font-semibold">{chip.value}</span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </ChipsLock>
+                </div>
+              )}
+
+              {/* Scrubber */}
+              <div
+                className={cn("mt-2 transition-opacity", !isControlsVisible && isPlaying ? "opacity-60" : "opacity-100")}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div
+                  ref={progressBarRef}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    setIsScrubbing(true);
+                    handleSeek(getTimeFromEvent(e));
+                  }}
+                  className="relative flex h-3 w-full cursor-pointer items-center"
+                >
+                  <div className="relative h-1 w-full rounded-full bg-white/30">
+                    <div className="h-full rounded-full bg-white" style={{ width: `${progressPercent}%` }} />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-0.5 font-mono text-[10px] text-white/80">
+                  <span>{formatDuration(currentTime)} / {formatDuration(duration)}</span>
+                </div>
               </div>
             </div>
           </div>
 
-
-
-
-
-          {/* Technical Spec Sheet Chips with SupplierLockOverlay: the product's MOQ plus the factory's own specs */}
-          {/* Showcase: the row is always there (fixed height) so every card has the same shape */}
-          {(specChips.length > 0 || fill) && (
-            <SupplierLockOverlay badgeLabel={t("seek.viewFactorySpecs")} compact>
-              {fill ? (
-                // Showcase: one slim row of "label value" chips instead of tall tiles
-                <div className="flex h-8 min-w-0 gap-2 overflow-hidden">
-                  {specChips.map((chip, index) => {
-                    const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
-                    return (
-                      <div
-                        key={chip.label}
-                        className="glass-tile flex h-8 min-w-0 flex-1 items-center gap-1.5 rounded-xl px-2.5 text-xs"
-                        title={`${chip.label}: ${chip.value}`}
-                      >
-                        <Icon className="h-3.5 w-3.5 shrink-0 text-brand-blue" strokeWidth={2} />
-                        <span className="shrink-0 text-ink-muted">{chip.label.charAt(0).toUpperCase() + chip.label.slice(1).toLowerCase()}</span>
-                        <span className="min-w-0 truncate font-semibold text-ink">{chip.value}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {specChips.map((chip, index) => {
-                  const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
-                  return (
-                    <div key={chip.label} className="glass-tile min-w-0 rounded-2xl px-3 py-2.5">
-                      <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-ink-muted">
-                        <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-white shadow-[0_1px_2px_rgba(28,22,22,0.08)] ring-1 ring-[rgba(28,22,22,0.05)]">
-                          <Icon className={cn("h-3 w-3", "text-brand-blue")} strokeWidth={2} />
-                        </span>
-                        <span className="truncate">{chip.label.charAt(0).toUpperCase() + chip.label.slice(1).toLowerCase()}</span>
-                      </div>
-                      <p className="mt-1.5 truncate text-[13px] font-semibold tracking-[-0.01em] text-ink" title={chip.value}>
-                        {chip.value}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-              )}
-            </SupplierLockOverlay>
-          )}
-
-          {/* B2B Instant Commercial Bar: Price, Buy Now, Add to Cart, Chat */}
+          {/* BELOW the video: price and order actions */}
           <div className={cn("glass-tile rounded-2xl px-3", fill ? "flex h-[52px] items-center [&>*]:w-full" : "py-2.5")}>
             <ProductActionBar
               productId={product?.id}
