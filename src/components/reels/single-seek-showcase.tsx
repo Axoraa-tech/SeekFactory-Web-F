@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName, useBuyerPlan, useSupplierName } from "@/features/subscription";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
@@ -318,14 +319,16 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
 
 function ProfilePanel({ manufacturer: m }: { manufacturer: Manufacturer }) {
   const t = useTranslations();
+  const supplierName = useSupplierName();
+  const { isSupplierLocked } = useBuyerPlan();
   return (
     <div key={m.id} className="rounded-2xl border border-line bg-surface p-5 shadow-2xs transition-opacity duration-300">
       <SupplierLockOverlay>
       <Link href={`/manufacturers/${m.slug}`} className="flex items-center gap-3 hover:opacity-90">
-        <Logo url={m.logoUrl} name={m.name} size="lg" />
+        <Logo url={m.logoUrl} name={supplierName(m.name)} size="lg" />
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 font-bold text-ink">
-            <span className="truncate">{m.name}</span>
+            <span className="truncate"><SupplierName name={m.name} /></span>
             {m.verified && <VerifiedBadge />}
           </p>
           {(m.location || m.country) && (
@@ -344,7 +347,8 @@ function ProfilePanel({ manufacturer: m }: { manufacturer: Manufacturer }) {
         <Stat label={t("showcase.single.staff")} value={m.employees || "—"} />
       </dl>
 
-      {m.description && <p className="mt-4 text-sm text-ink-muted line-clamp-4">{m.description}</p>}
+      {/* The full description is supplier detail: only for buyers who unlocked it */}
+      {m.description && !isSupplierLocked && <p className="mt-4 text-sm text-ink-muted line-clamp-4">{m.description}</p>}
 
       {m.exportCountries?.length > 0 && (
         <div className="mt-4">
@@ -371,14 +375,15 @@ function ProfilePanel({ manufacturer: m }: { manufacturer: Manufacturer }) {
 
 function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
   const t = useTranslations();
+  const supplierName = useSupplierName();
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3">
       <SupplierLockOverlay compact className="flex min-w-0 flex-1">
       <Link href={`/manufacturers/${m.slug}`} className="flex min-w-0 flex-1 items-center gap-3">
-      <Logo url={m.logoUrl} name={m.name} />
+      <Logo url={m.logoUrl} name={supplierName(m.name)} />
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-1.5 text-sm font-bold text-ink">
-          <span className="truncate">{m.name}</span>
+          <span className="truncate"><SupplierName name={m.name} /></span>
           {m.verified && <VerifiedBadge />}
         </p>
         <p className="flex items-center gap-2 text-xs text-ink-muted">

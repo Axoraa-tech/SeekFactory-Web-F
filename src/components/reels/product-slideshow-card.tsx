@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Clock, FileSpreadsheet, Layers, PackageCheck, Send, ShoppingBag } from "lucide-react";
@@ -104,8 +105,8 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 overflow-hidden">
-                  <p title={manufacturer.name} className="min-w-0 truncate text-sm font-bold text-ink transition hover:text-brand-orange">
-                    {manufacturer.name}
+                  <p  className="min-w-0 truncate text-sm font-bold text-ink transition hover:text-brand-orange">
+                    <SupplierName name={manufacturer.name} />
                   </p>
                   <SeekTrustBadge manufacturer={manufacturer} />
                 </div>
@@ -259,7 +260,7 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
 
         {/* Bottom bar, the same height as a seek's engagement bar */}
         <div className="glass-tile flex h-[34px] items-center justify-between rounded-2xl px-3 text-xs">
-          <span className="truncate text-ink-muted">{manufacturer.name}</span>
+          <span className="truncate text-ink-muted"><SupplierName name={manufacturer.name} /></span>
           <Link href={`/products/${product.slug}`} className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-brand-blue hover:underline">
             {t("showcase.products.viewProduct")}
             <ChevronRight className="h-3.5 w-3.5" />

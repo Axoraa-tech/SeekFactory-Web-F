@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import { Price } from "@/components/ui/price";
 import Link from "next/link";
 import { Bookmark, Trash2, ShoppingCart, Zap, Eye, Heart } from "lucide-react";
@@ -135,7 +136,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                       href={`/manufacturers/${manufacturer.slug}`}
                       className="text-xs text-brand-blue font-semibold hover:underline line-clamp-1"
                     >
-                      {manufacturer.name}
+                      <SupplierName name={manufacturer.name} />
                     </Link>
                     <p className="mt-1 flex items-center gap-2 text-[11px] text-ink-faint">
                       <span className="inline-flex items-center gap-0.5"><Eye className="h-3 w-3" />{formatCount(reel.views)}</span>

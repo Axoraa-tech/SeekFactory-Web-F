@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName, useSupplierName } from "@/features/subscription";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, FileText, Loader2, MessageSquare, Plus } from "lucide-react";
@@ -49,6 +50,7 @@ const QUOTE_STATUS: Record<string, string> = {
 export function ProfileRfqsPanel({ user, rfqs, orders = [], categories, focusRfqId, onChange, onToast }: Props) {
   const locale = useLocale();
   const t = useTranslations();
+  const supplierName = useSupplierName();
   const [openId, setOpenId] = useState<string | null>(focusRfqId ?? null);
   const [details, setDetails] = useState<Record<string, RfqItem>>({});
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -106,7 +108,7 @@ export function ProfileRfqsPanel({ user, rfqs, orders = [], categories, focusRfq
   };
 
   const accept = (rfq: RfqItem, quote: RfqQuote, contact: OrderContact) =>
-    act(() => getApi().rfq.acceptQuote(rfq.id, quote.id, contact), t("rfq.buyer.quoteAcceptedOrderRequestSent", { name: quote.manufacturer.name }));
+    act(() => getApi().rfq.acceptQuote(rfq.id, quote.id, contact), t("rfq.buyer.quoteAcceptedOrderRequestSent", { name: supplierName(quote.manufacturer.name) }));
 
   return (
     <div className="space-y-4 glass-fade-in">
@@ -260,7 +262,7 @@ export function ProfileRfqsPanel({ user, rfqs, orders = [], categories, focusRfq
                                 href={`/manufacturers/${quote.manufacturer.slug}`}
                                 className="text-xs font-bold text-ink hover:text-brand-blue"
                               >
-                                {quote.manufacturer.name}
+                                <SupplierName name={quote.manufacturer.name} />
                               </Link>
                               <p className="text-[11px] text-ink-muted">
                                 {formatMoney(quote.quotePrice, quote.currency)} {t("rfq.buyer.total")} {quote.leadTimeDays} {t("rfq.buyer.daysLeadTime")}{" "}
@@ -299,7 +301,7 @@ export function ProfileRfqsPanel({ user, rfqs, orders = [], categories, focusRfq
                                   type="button"
                                   disabled={busy}
                                   onClick={() =>
-                                    void act(() => getApi().rfq.rejectQuote(rfq.id, quote.id), `Declined ${quote.manufacturer.name}'s quote`)
+                                    void act(() => getApi().rfq.rejectQuote(rfq.id, quote.id), `Declined ${supplierName(quote.manufacturer.name)}'s quote`)
                                   }
                                   className="sf-btn-danger rounded-full border border-line px-3 py-1 text-[11px] font-semibold text-ink-muted hover:text-rose-600 disabled:opacity-50"
                                 >
@@ -312,7 +314,7 @@ export function ProfileRfqsPanel({ user, rfqs, orders = [], categories, focusRfq
                           {acceptingQuote?.id === quote.id && (
                             <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-3 space-y-2">
                               <p className="text-xs font-semibold text-ink">
-                                {t("rfq.buyer.deliveryDetailsForTheOrder")} {quote.manufacturer.name}
+                                {t("rfq.buyer.deliveryDetailsForTheOrder")} <SupplierName name={quote.manufacturer.name} />
                               </p>
                               <ShippingForm
                                 user={user}

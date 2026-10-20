@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -60,7 +61,7 @@ export function RecentMessages({ messages: initialMessages }: Props) {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-semibold">{message.manufacturer.name}</p>
+                  <p className="truncate text-sm font-semibold"><SupplierName name={message.manufacturer.name} /></p>
                   <span className="shrink-0 text-[11px] text-ink-faint">{formatRelativeTime(message.lastMessageAt, locale)}</span>
                 </div>
                 <p className="truncate text-xs text-ink-muted">{message.lastMessage}</p>

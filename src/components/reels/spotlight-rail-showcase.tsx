@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName, useBuyerPlan } from "@/features/subscription";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -21,6 +22,7 @@ type Props = { items: FeedItem[]; settings: FeedShowcase };
  */
 export function SpotlightRailShowcase({ items, settings }: Props) {
   const t = useTranslations();
+  const { isSupplierLocked } = useBuyerPlan();
   const [active, setActive] = useState(0);
   const railRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +73,7 @@ export function SpotlightRailShowcase({ items, settings }: Props) {
           <aside className="hidden xl:block">
             <div className="rounded-xl border border-line p-4">
               <FactoryLine item={hero} />
-              {hero.manufacturer.description && (
+              {hero.manufacturer.description && !isSupplierLocked && (
                 <p className="mt-3 line-clamp-4 text-xs text-ink-muted">{hero.manufacturer.description}</p>
               )}
               <dl className="mt-3 space-y-1.5 text-xs">
@@ -110,7 +112,7 @@ export function SpotlightRailShowcase({ items, settings }: Props) {
                 <Poster src={item.reel.posterUrl} alt="" className="aspect-video w-full" />
                 <div className="space-y-1 p-2.5">
                   <p className="line-clamp-2 text-xs font-semibold leading-snug text-ink">{item.reel.title}</p>
-                  <p className="truncate text-[11px] text-ink-muted">{item.manufacturer.name}</p>
+                  <p className="truncate text-[11px] text-ink-muted"><SupplierName name={item.manufacturer.name} /></p>
                 </div>
               </button>
             ))}

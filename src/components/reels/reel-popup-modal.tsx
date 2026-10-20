@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import React, {
   useEffect,
   useRef,
@@ -402,7 +403,7 @@ export function ReelPopupModal({ items }: Props) {
                 />
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
-                    <p className="text-sm font-bold text-slate-900 truncate">{manufacturer.name}</p>
+                    <p className="text-sm font-bold text-slate-900 truncate"><SupplierName name={manufacturer.name} /></p>
                     {manufacturer.verified && <VerifiedBadge className="h-3.5 w-3.5 flex-shrink-0" />}
                   </div>
                   <p className="text-[11px] text-slate-500">{manufacturer.country}</p>

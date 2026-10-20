@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import Link from "next/link";
 import { MessageSquare, ExternalLink } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -51,12 +52,12 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
             <div className="flex items-start gap-3 min-w-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img loading="lazy" decoding="async" src={m.logoUrl}
-                alt={m.name}
+                alt=""
                 className="h-12 w-12 rounded-xl object-cover border border-white/80 shrink-0 shadow-sm"
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
-                  <p className="font-bold text-xs sm:text-sm text-ink truncate">{m.name}</p>
+                  <p className="font-bold text-xs sm:text-sm text-ink truncate"><SupplierName name={m.name} /></p>
                   {m.verified && <VerifiedBadge className="h-3.5 w-3.5 shrink-0" />}
                 </div>
                 <p className="text-[11px] text-ink-muted truncate">

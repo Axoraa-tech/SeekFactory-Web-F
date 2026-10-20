@@ -1,5 +1,6 @@
 "use client";
 
+import { SupplierName } from "@/features/subscription";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { MessageCircle, CheckCheck, ChevronRight, MessageSquare } from "lucide-react";
@@ -141,14 +142,14 @@ export function MessagesDropdown({
                 >
                   <Avatar
                     src={item.buyerAvatarUrl || item.manufacturer.logoUrl}
-                    alt={item.buyerName || item.manufacturer.name}
+                    alt=""
                     size={40}
                     className="shrink-0 ring-1 ring-slate-200"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
                       <p className="truncate text-xs font-bold text-ink">
-                        {item.buyerName || item.manufacturer.name}
+                        {item.buyerName || <SupplierName name={item.manufacturer.name} />}
                       </p>
                       <span className="text-[10px] text-ink-faint shrink-0 ml-2">
                         {formatRelativeTime(item.lastMessageAt, locale)}
