@@ -7,13 +7,16 @@ import { getApi } from "@/shared/api";
 import type { OrderRequest } from "@/entities/order";
 import { cn } from "@/shared/lib/cn";
 import { formatRelativeTime } from "@/shared/lib/format";
+import type { ReactNode } from "react";
+import { Price } from "@/components/ui/price";
+import { SupplierName } from "@/features/subscription";
 import { ORDER_STATUS_META, ORDER_STEPS, PAYMENT_NOTE, formatMoney } from "@/features/orders/order-status";
 import { useTranslations, useLocale } from "next-intl";
 
 /** What the buyer is expected to pay: the quoted total, the listing estimate, or nothing yet. */
-function orderTotal(order: OrderRequest): string {
+function orderTotal(order: OrderRequest): ReactNode {
   if (order.quotedTotal != null) return formatMoney(order.quotedTotal, order.currency || "INR");
-  if (order.estimatedTotalInr != null) return formatMoney(order.estimatedTotalInr, "INR");
+  if (order.estimatedTotalInr != null) return <Price inr={order.estimatedTotalInr} />;
   return "Price on request";
 }
 
@@ -86,7 +89,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                   <p className="text-[11px] text-slate-500 mt-0.5">
                     {formatRelativeTime(order.createdAt, locale)} •{" "}
                     <Link href={`/manufacturers/${order.manufacturer.slug}`} className="font-bold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
-                      {order.manufacturer.name}
+                      <SupplierName name={order.manufacturer.name} />
                     </Link>
                     {order.source === "RFQ_QUOTE" ? ` • ${t("orders.list.fromAnAcceptedRfqQuote")}` : ""}
                   </p>
@@ -116,7 +119,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                   <p className="text-xs text-slate-500">
                     <span className="font-semibold text-slate-700">{order.quantity} {order.unit}</span>
                     {order.unitPriceInr != null && order.quotedTotal == null ? (
-                      <span> × <strong className="text-brand-orange font-bold">{formatMoney(order.unitPriceInr, "INR")}</strong></span>
+                      <span> × <strong className="text-brand-orange font-bold"><Price inr={order.unitPriceInr} /></strong></span>
                     ) : ""}
                   </p>
                 </div>
@@ -124,7 +127,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
 
               {order.sellerNote && (
                 <div className="mx-4 mb-2 sm:mx-5 rounded-xl bg-orange-50/60 border border-orange-100/90 px-3.5 py-2 text-xs text-slate-700">
-                  <span className="font-bold text-slate-900">{order.manufacturer.name}:</span> {order.sellerNote}
+                  <span className="font-bold text-slate-900"><SupplierName name={order.manufacturer.name} />:</span> {order.sellerNote}
                 </div>
               )}
 

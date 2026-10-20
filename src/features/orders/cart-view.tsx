@@ -9,6 +9,8 @@ import { cn } from "@/shared/lib/cn";
 import type { Cart, CartItem, CheckoutLine, OrderContact } from "@/entities/order";
 import type { BuyerProfile } from "@/entities/user";
 import { ShippingForm } from "@/features/orders/shipping-form";
+import { Price } from "@/components/ui/price";
+import { SupplierName } from "@/features/subscription";
 import { PAYMENT_NOTE, formatMoney } from "@/features/orders/order-status";
 import { useTranslations } from "next-intl";
 
@@ -129,7 +131,7 @@ export function CartView({ user, initialCart }: Props) {
                 href={`/manufacturers/${items[0].manufacturer.slug}`}
                 className="text-xs font-bold text-ink hover:text-brand-orange transition-colors truncate"
               >
-                {items[0].manufacturer.name}
+                <SupplierName name={items[0].manufacturer.name} />
               </Link>
               <span className="text-[11px] text-ink-muted shrink-0">{t("orders.cart.sentToThisFactory")}</span>
             </header>
@@ -162,7 +164,7 @@ export function CartView({ user, initialCart }: Props) {
                         {item.product.name}
                       </Link>
                       <p className="text-[11px] text-ink-muted">
-                        {item.unitPrice != null ? `${formatMoney(item.unitPrice, "INR")} / ${item.product.unit || "unit"}` : t("product.actions.priceOnRequest")}
+                        {item.unitPrice != null ? <><Price inr={item.unitPrice} /> / {item.product.unit || "unit"}</> : t("product.actions.priceOnRequest")}
                         {item.minQuantity > 1 ? ` • MOQ ${item.minQuantity}` : ""}
                       </p>
                       <div className="flex items-center justify-between gap-3">
@@ -189,7 +191,7 @@ export function CartView({ user, initialCart }: Props) {
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-sm font-extrabold text-ink tabular-nums">
-                            {item.lineTotal != null ? formatMoney(item.lineTotal, "INR") : "—"}
+                            {item.lineTotal != null ? <Price inr={item.lineTotal} /> : "—"}
                           </span>
                           <button
                             type="button"
@@ -236,7 +238,7 @@ export function CartView({ user, initialCart }: Props) {
       <aside className="rounded-2xl border border-line bg-white p-5 shadow-2xs space-y-4 lg:sticky lg:top-24">
         <div className="flex items-baseline justify-between">
           <span className="text-sm font-bold text-ink">{allSelected ? t("orders.estimatedTotal") : t("orders.cart.selectedTotal")}</span>
-          <span className="text-xl sm:text-2xl font-black text-brand-orange tabular-nums">{formatMoney(selectedTotal, cart.currency)}</span>
+          <span className="text-xl sm:text-2xl font-black text-brand-orange tabular-nums">{cart.currency === "INR" ? <Price inr={selectedTotal} /> : formatMoney(selectedTotal, cart.currency)}</span>
         </div>
         <p className="flex gap-2 rounded-lg bg-orange-50/70 border border-orange-100/90 px-3 py-2 text-[11px] text-slate-700">
           <Info className="h-3.5 w-3.5 shrink-0 text-brand-orange mt-0.5" />

@@ -7,16 +7,18 @@ import { cn } from "@/shared/lib/cn";
 import { getApi } from "@/shared/api";
 import { formatRelativeTime } from "@/shared/lib/format";
 import type { RfqItem, RfqQuote } from "@/entities/rfq";
-import type { OrderContact } from "@/entities/order";
+import type { OrderContact, OrderRequest } from "@/entities/order";
 import type { BuyerProfile } from "@/entities/user";
 import type { Category } from "@/entities/category";
 import { ShippingForm } from "@/features/orders/shipping-form";
-import { formatMoney } from "@/features/orders/order-status";
+import { ORDER_STATUS_META, formatMoney } from "@/features/orders/order-status";
 import { useTranslations, useLocale } from "next-intl";
 
 type Props = {
   user: BuyerProfile;
   rfqs: RfqItem[];
+  /** Direct orders, shown above the RFQs. */
+  orders?: OrderRequest[];
   categories: Category[];
   /** RFQ to open on load (from a notification link). */
   focusRfqId?: string;
@@ -44,7 +46,7 @@ const QUOTE_STATUS: Record<string, string> = {
   EXPIRED: "text-slate-500 bg-slate-100 border-slate-200",
 };
 
-export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange, onToast }: Props) {
+export function ProfileRfqsPanel({ user, rfqs, orders = [], categories, focusRfqId, onChange, onToast }: Props) {
   const locale = useLocale();
   const t = useTranslations();
   const [openId, setOpenId] = useState<string | null>(focusRfqId ?? null);
@@ -129,6 +131,36 @@ export function ProfileRfqsPanel({ user, rfqs, categories, focusRfqId, onChange,
         <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700">
           {error}
         </p>
+      )}
+
+      {/* Direct orders (Buy Now / cart) belong to this tab too; they are managed on My Orders */}
+      {orders.length > 0 && (
+        <div className="glass-panel-liquid p-4 sm:p-5 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-bold text-ink">{t("profile.orders.directOrders", { count: orders.length })}</h3>
+            <Link href="/orders" className="text-xs font-bold text-brand-blue hover:underline">{t("profile.orders.viewAll")}</Link>
+          </div>
+          <ul className="divide-y divide-line">
+            {orders.map((order) => {
+              const meta = ORDER_STATUS_META[order.status];
+              return (
+                <li key={order.id}>
+                  <Link href="/orders" className="flex items-center justify-between gap-3 py-2.5 hover:opacity-80">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-ink">{order.productName}</p>
+                      <p className="text-[11px] text-ink-muted">
+                        {order.referenceNumber} · {t("profile.orders.qty", { qty: order.quantity })} · {formatRelativeTime(order.createdAt, locale)}
+                      </p>
+                    </div>
+                    {meta && (
+                      <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold", meta.className)}>{t(meta.label)}</span>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
 
       {rfqs.length === 0 ? (

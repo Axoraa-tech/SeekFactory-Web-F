@@ -53,8 +53,8 @@ export function SupplierLockOverlay({
         }
       }}
     >
-      {/* Blurred Content Container */}
-      <div className="filter blur-[6px] pointer-events-none select-none opacity-50 transition-all duration-300 group-hover/lock:opacity-40 group-hover/lock:blur-[7px]">
+      {/* Blurred Content Container: decorative only, so screen readers and text selection skip it */}
+      <div aria-hidden inert className="filter blur-[6px] pointer-events-none select-none opacity-50 transition-all duration-300 group-hover/lock:opacity-40 group-hover/lock:blur-[7px]">
         {children}
       </div>
 

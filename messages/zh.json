@@ -510,6 +510,11 @@
       "tooLarge": "图片大小不能超过 5 MB。",
       "welcomeTitle": "欢迎加入 SeekFactory！",
       "welcomeBody": "我们已从 Google 获取您的姓名、邮箱和头像。请在下方补充公司信息，点击相机图标可更换头像。"
+    },
+    "orders": {
+      "directOrders": "直接订单（{count}）",
+      "viewAll": "在我的订单中查看",
+      "qty": "数量 {qty}"
     }
   },
   "membership": {
@@ -677,7 +682,9 @@
     "qualityCertifications": "质量认证",
     "seekfactoryVerification": "SeekFactory 认证",
     "businessDetailsVerified": "企业信息已核验",
-    "notVerified": "未认证"
+    "notVerified": "未认证",
+    "lockedName": "认证供应商",
+    "thisSupplier": "该供应商"
   },
   "legal": {
     "accessibility": {

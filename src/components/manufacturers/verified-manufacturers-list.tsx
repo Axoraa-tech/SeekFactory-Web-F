@@ -232,7 +232,10 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                 </div>
 
                 <div className="flex items-center justify-between pt-1 border-t border-neutral-100 text-[11px]">
-                  <span className="text-neutral-500 font-medium">{m.yearsEstablished || 8}{t("manufacturers.list.yrsExp")}</span>
+                  {/* yearsEstablished is the founding year (e.g. 2012), not a duration */}
+                  <span className="text-neutral-500 font-medium">
+                    {m.yearsEstablished > 0 ? `${Math.max(0, new Date().getFullYear() - m.yearsEstablished)}${t("manufacturers.list.yrsExp")}` : ""}
+                  </span>
                   <span className="font-bold text-brand-orange flex items-center gap-0.5 group-hover:underline">
                     {t("manufacturers.list.visit")} <ExternalLink className="h-2.5 w-2.5" />
                   </span>

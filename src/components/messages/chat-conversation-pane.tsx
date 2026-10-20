@@ -11,6 +11,7 @@ import type { OrderRequest } from "@/entities/order";
 import type { ThreadWithMessages } from "./chat-types";
 import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "./message-extras";
 import { useLocale, useTranslations } from "next-intl";
+import { useSupplierName } from "@/features/subscription";
 import { formatRelativeTime } from "@/shared/lib/format";
 
 import type { BuyerProfile } from "@/entities/user";
@@ -63,13 +64,14 @@ export function ChatConversationPane({
   sendError,
 }: Props) {
   const t = useTranslations();
+  const supplierName = useSupplierName();
   const locale = useLocale();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canSend = (inputMessage.trim().length > 0 || attachment !== null) && !attachmentUploading;
 
   const counterpartName = isSupplier
     ? activeThread.buyerName || activeThread.buyerCompany || t("chat.buyer")
-    : activeThread.manufacturer.name;
+    : supplierName(activeThread.manufacturer.name);
   const counterpartAvatar = isSupplier
     ? activeThread.buyerAvatarUrl
     : activeThread.manufacturer.logoUrl;
@@ -174,7 +176,7 @@ export function ChatConversationPane({
             <p className="mt-1 text-xs">
               {isSupplier
                 ? t("seller.messages.sendAMessageToStart")
-                : `${t("chat.ask")} ${activeThread.manufacturer.name} ${t("chat.aboutPricingSpecsOrDelivery")}`}
+                : `${t("chat.ask")} ${counterpartName} ${t("chat.aboutPricingSpecsOrDelivery")}`}
             </p>
           </div>
         )}
@@ -325,7 +327,7 @@ export function ChatConversationPane({
           value={inputMessage}
           onChange={(e) => onInputChange(e.target.value)}
           maxLength={5000}
-          placeholder={`Message ${activeThread.manufacturer.name}...`}
+          placeholder={`Message ${counterpartName}...`}
           className="flex-1 min-w-0 h-10 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs sm:text-sm outline-none focus:border-brand-blue focus:bg-white transition-colors"
         />
 
