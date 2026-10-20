@@ -123,19 +123,8 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
     pingControls,
   });
 
-  const handleMouseEnter = useCallback(() => {
-    pingControls();
-    if (videoRef.current) {
-      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-    }
-  }, [pingControls, setIsPlaying]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    }
-  }, [setIsPlaying]);
+  // Playback follows scrolling only (useSeekAutoplay: the seek in view plays, the rest pause).
+  // The cursor no longer starts or stops a video; hovering just shows the controls.
 
   const handleSeek = useCallback(
     (newTimeSec: number) => {
@@ -197,8 +186,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
           <div
             ref={videoWrapperRef}
             onMouseMove={pingControls}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={pingControls}
             onClick={handleTogglePlay}
             className={cn(
               "relative overflow-hidden rounded-2xl bg-black cursor-pointer shadow-sm group select-none",
