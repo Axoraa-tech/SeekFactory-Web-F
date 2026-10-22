@@ -16,6 +16,8 @@ type ProductActionBarProps = {
   priceInr?: number;
   unit?: string;
   moq?: string | number;
+  /** Still used for the cart minimum, but not shown (seek cards: the product page shows it). */
+  hideMoq?: boolean;
   productSlug?: string;
   productName?: string;
   manufacturerSlug?: string;
@@ -34,6 +36,7 @@ export function ProductActionBar({
   priceInr,
   unit = "",
   moq,
+  hideMoq = false,
   productSlug,
   productName,
   manufacturerSlug,
@@ -97,7 +100,7 @@ export function ProductActionBar({
               <span className={cn("font-bold text-slate-700", isSmall ? "text-xs" : "text-sm")}>{t("product.actions.priceOnRequest")}</span>
             )}
           </div>
-          {moq !== undefined && moq !== "" && (
+          {!hideMoq && moq !== undefined && moq !== "" && (
             <p className="whitespace-nowrap text-[11px] text-slate-500 font-medium">
               {t("product.actions.minOrder")} <span className="font-semibold text-slate-700">{typeof moq === "number" ? `${moq} ${unit}` : moq}</span>
             </p>

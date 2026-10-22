@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { getApi } from "@/shared/api";
 import { ApiError } from "@/shared/api/http-api";
 import { setFollowed, useFollowedState } from "@/features/engagement/follow-store";
-import type { Reel } from "@/entities/reel";
+import type { Reel, ReelReaction } from "@/entities/reel";
 
 /** Sends a guest to sign in and back to the current page. */
 export function useRequireSignIn() {
@@ -28,7 +28,8 @@ const isUnauthorized = (err: unknown) => err instanceof ApiError && err.status =
 export function useReelEngagement(reel: Reel | undefined) {
   const requireSignIn = useRequireSignIn();
 
-  const [liked, setLiked] = useState(Boolean(reel?.likedByMe));
+  const [reaction, setReaction] = useState<ReelReaction | null>(reel?.myReaction ?? (reel?.likedByMe ? "LIKE" : null));
+  const liked = reaction !== null;
   const [likes, setLikes] = useState(reel?.likes ?? 0);
   const [saved, setSaved] = useState(Boolean(reel?.savedByMe));
   const [saves, setSaves] = useState(reel?.saves ?? 0);
@@ -37,29 +38,33 @@ export function useReelEngagement(reel: Reel | undefined) {
 
   // A different seek (e.g. popup navigation) resets to its own server state
   useEffect(() => {
-    setLiked(Boolean(reel?.likedByMe));
+    setReaction(reel?.myReaction ?? (reel?.likedByMe ? "LIKE" : null));
     setLikes(reel?.likes ?? 0);
     setSaved(Boolean(reel?.savedByMe));
     setSaves(reel?.saves ?? 0);
     setShares(reel?.shares ?? 0);
     setShared(false);
-  }, [reel?.id, reel?.likedByMe, reel?.likes, reel?.savedByMe, reel?.saves, reel?.shares]);
+  }, [reel?.id, reel?.likedByMe, reel?.myReaction, reel?.likes, reel?.savedByMe, reel?.saves, reel?.shares]);
 
-  const toggleLike = useCallback(async () => {
+  /** React with LIKE / LOVE / STAR: the same one again takes it back, another one replaces it. */
+  const react = useCallback(async (choice: ReelReaction = "LIKE") => {
     if (!reel) return;
-    const next = !liked;
-    setLiked(next);
-    setLikes((n) => Math.max(0, n + (next ? 1 : -1)));
+    const before = reaction;
+    const next = before === choice ? null : choice;
+    const delta = (next ? 1 : 0) - (before ? 1 : 0);
+    setReaction(next);
+    setLikes((n) => Math.max(0, n + delta));
     try {
-      const res = await getApi().feed.likeReel(reel.id);
-      setLiked(res.liked);
+      const res = await getApi().feed.likeReel(reel.id, choice);
+      setReaction(res.liked ? (res.reaction ?? choice) : null);
       setLikes(res.likesCount);
     } catch (err) {
-      setLiked(!next);
-      setLikes((n) => Math.max(0, n + (next ? -1 : 1)));
+      setReaction(before);
+      setLikes((n) => Math.max(0, n - delta));
       if (isUnauthorized(err)) requireSignIn();
     }
-  }, [liked, reel, requireSignIn]);
+  }, [reaction, reel, requireSignIn]);
+  const toggleLike = useCallback(() => react("LIKE"), [react]);
 
   const toggleSave = useCallback(async () => {
     if (!reel) return;
@@ -100,7 +105,7 @@ export function useReelEngagement(reel: Reel | undefined) {
     }
   }, [reel, shared]);
 
-  return { liked, likes, saved, saves, shares, shared, toggleLike, toggleSave, share };
+  return { liked, reaction, react, likes, saved, saves, shares, shared, toggleLike, toggleSave, share };
 }
 
 /**
