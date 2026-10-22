@@ -500,7 +500,8 @@
       "enterprise": "Enterprise",
       "loadingProfile": "Loading profile…",
       "nameIsRequired": "Please enter your name.",
-      "companyNameIsRequired": "Please enter your company name."
+      "companyNameIsRequired": "Please enter your company name.",
+      "phoneAlreadyUsed": "That phone number is already used by another SeekFactory account. Use a different number."
     },
     "avatar": {
       "change": "Change profile photo",
@@ -1257,7 +1258,28 @@
     },
     "online": "Online",
     "offline": "Offline",
-    "lastSeen": "Last seen {time}"
+    "lastSeen": "Last seen {time}",
+    "messageActions": "Message options",
+    "edit": "Edit",
+    "deleteForEveryone": "Delete for everyone",
+    "deleteConfirm": "Delete this message for everyone? It will be removed for you and {name}.",
+    "edited": "Edited",
+    "youDeletedThisMessage": "You deleted this message",
+    "thisMessageWasDeleted": "This message was deleted",
+    "editingMessage": "Editing message",
+    "cancelEdit": "Cancel editing",
+    "saveEdit": "Save",
+    "couldNotEdit": "Could not edit the message: {message}",
+    "couldNotDelete": "Could not delete the message: {message}",
+    "editWindowHint": "Messages can be edited for 15 minutes after sending",
+    "photoReadyToSend": "Photo ready to send",
+    "uploadingPhoto": "Uploading photo…",
+    "addCaptionOrSend": "Add a caption or press send",
+    "viewer": {
+      "close": "Close",
+      "openInNewTab": "Open in new tab",
+      "download": "Download"
+    }
   },
   "upgrade": {
     "upgradeToUnlockDirectSupplier": "Upgrade to Unlock Direct Supplier Contacts & Audits",

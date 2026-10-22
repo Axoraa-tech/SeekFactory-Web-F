@@ -126,6 +126,10 @@ export type SellerChatMessage = {
   attachment?: import("@/shared/api/contracts").MessageAttachment;
   /** The order this message is about, if the sender picked one. */
   order?: import("@/entities/message").MessageOrderContext;
+  /** ISO time of the sender's last edit. */
+  editedAt?: string;
+  /** Deleted for everyone by the sender. */
+  deleted?: boolean;
 };
 
 export type SellerConversation = {

@@ -328,6 +328,8 @@ interface BackendMessage {
   attachmentUrl?: string;
   is_read?: boolean;
   isRead?: boolean;
+  editedAt?: string | null;
+  deleted?: boolean;
   created_at?: string;
   createdAt?: string;
 }
@@ -1168,6 +1170,22 @@ export function createHttpApi(
         counterpartLastSeenAt: item.counterpartLastSeenAt || undefined,
         manufacturer: normalizeManufacturer(item.manufacturer || {}),
       };
+    },
+
+    async editMessage(conversationId: string, messageId: string, text: string): Promise<MessageItem> {
+      const m = await fetchJson<BackendMessage>(
+        `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages/${encodeURIComponent(messageId)}`,
+        { method: "PUT", body: JSON.stringify({ messageText: text }) },
+      );
+      return normalizeMessage(m, conversationId);
+    },
+
+    async deleteMessage(conversationId: string, messageId: string): Promise<MessageItem> {
+      const m = await fetchJson<BackendMessage>(
+        `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages/${encodeURIComponent(messageId)}`,
+        { method: "DELETE" },
+      );
+      return normalizeMessage(m, conversationId);
     },
 
     async markAsRead(conversationId: string): Promise<void> {
@@ -2177,5 +2195,7 @@ function normalizeMessage(m: BackendMessage, conversationId: string): MessageIte
         }
       : undefined,
     isRead: m.isRead ?? m.is_read ?? false,
+    editedAt: m.editedAt || undefined,
+    deleted: Boolean(m.deleted),
   };
 }

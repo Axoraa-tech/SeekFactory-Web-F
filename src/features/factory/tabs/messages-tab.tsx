@@ -1,13 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Search, Package, FileText, Sparkles, Paperclip, Loader2, X, MessageSquare } from "lucide-react";
+import { ArrowLeft, Send, Search, Package, FileText, Sparkles, Paperclip, Loader2, X, MessageSquare, Check } from "lucide-react";
 import type { OrderRequest } from "@/entities/order";
 import type { MessageAttachment } from "@/shared/api/contracts";
 import { useChatAttachment } from "@/hooks/use-chat-attachment";
 import { CHAT_ATTACHMENT_ACCEPT, formatChatTime } from "@/shared/lib/chat";
-import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "@/components/messages/message-extras";
-import type { SellerConversation } from "../types";
+import { MessageAttachmentView, MessageOrderTag, OrderContextPicker, PendingAttachmentPreview } from "@/components/messages/message-extras";
+import {
+  DeletedMessageBubble,
+  EditingBar,
+  MessageActionsMenu,
+  canDeleteMessage,
+  canEditMessage,
+} from "@/components/messages/message-actions";
+import type { SellerChatMessage, SellerConversation } from "../types";
 import { useTranslations } from "next-intl";
 
 type Props = {
@@ -16,6 +23,9 @@ type Props = {
   onSelectConversation: (id: string) => void;
   /** Rejects with a user-facing message if the message could not be sent. */
   onSendMessage: (conversationId: string, text: string, attachment?: MessageAttachment, orderId?: string) => Promise<void>;
+  /** Reject with a user-facing message on failure (the change is rolled back). */
+  onEditMessage?: (conversationId: string, message: SellerChatMessage, text: string) => Promise<void>;
+  onDeleteMessage?: (conversationId: string, message: SellerChatMessage) => Promise<void>;
   /** All of this factory's order requests; the picker shows the ones from the active buyer. */
   orders: OrderRequest[];
   /** Pre-selected order context when arriving from the Orders tab. */
@@ -54,6 +64,8 @@ export function MessagesTab({
   activeConversationId,
   onSelectConversation,
   onSendMessage,
+  onEditMessage,
+  onDeleteMessage,
   orders,
   initialContext,
   onContextConsumed,
@@ -64,6 +76,7 @@ export function MessagesTab({
   const [contextOrderId, setContextOrderId] = useState("");
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<SellerChatMessage | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Phones show the list or the open chat, never both; arriving with context opens the chat directly
   const [mobileThreadOpen, setMobileThreadOpen] = useState(Boolean(initialContext));
@@ -87,6 +100,7 @@ export function MessagesTab({
   useEffect(() => {
     clearUpload();
     setSendError(null);
+    setEditing(null);
     if (initialContext && initialContext.conversationId === activeConv?.id) {
       setContextOrderId(initialContext.orderId ?? "");
       if (initialContext.draft) setInputText(initialContext.draft);
@@ -123,12 +137,53 @@ export function MessagesTab({
     }
   }
 
+  async function saveEdit(target: SellerChatMessage, text: string) {
+    setEditing(null);
+    setInputText("");
+    if (!activeConv || !onEditMessage || !text || text === target.text) return;
+    setSendError(null);
+    try {
+      await onEditMessage(activeConv.id, target, text);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : t("chat.messageNotSentPleaseRetry"));
+    }
+  }
+
+  async function deleteMessage(target: SellerChatMessage) {
+    if (!activeConv || !onDeleteMessage) return;
+    if (!window.confirm(t("chat.deleteConfirm", { name: activeConv.buyerName || activeConv.buyerCompany }))) return;
+    if (editing?.id === target.id) {
+      setEditing(null);
+      setInputText("");
+    }
+    setSendError(null);
+    try {
+      await onDeleteMessage(activeConv.id, target);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : t("chat.messageNotSentPleaseRetry"));
+    }
+  }
+
+  function startEdit(target: SellerChatMessage) {
+    upload.clear();
+    setContextOrderId("");
+    setEditing(target);
+    setInputText(target.text);
+  }
+
   function handleSend(e: React.FormEvent) {
     e.preventDefault();
+    if (editing) {
+      void saveEdit(editing, inputText.trim());
+      return;
+    }
     void send(inputText.trim(), true);
   }
 
-  const canSend = (inputText.trim().length > 0 || upload.attachment !== null) && !upload.uploading && !sending;
+  const canSend = editing
+    ? inputText.trim().length > 0
+    : (inputText.trim().length > 0 || upload.attachment !== null) && !upload.uploading && !sending;
+  const showPhotoPreview = Boolean(upload.previewUrl);
 
   return (
     <div className="rounded-2xl border border-line bg-white shadow-xs overflow-hidden flex flex-col md:flex-row h-[calc(100dvh-140px)] min-h-[460px] md:h-[750px]">
@@ -254,14 +309,26 @@ export function MessagesTab({
             )}
             {activeConv.messages.map((msg) => {
               const isSeller = msg.sender === "seller";
+              if (msg.deleted) {
+                return (
+                  <div key={msg.id} className={`flex flex-col ${isSeller ? "items-end" : "items-start"}`}>
+                    <div className="max-w-[80%]">
+                      <DeletedMessageBubble own={isSeller} />
+                    </div>
+                    <span className="text-[10px] text-neutral-400 mt-1 px-1">{formatChatTime(msg.timestamp)}</span>
+                  </div>
+                );
+              }
+              const actionable = { id: msg.id, text: msg.text, time: msg.timestamp, deleted: msg.deleted };
               return (
                 <div key={msg.id} className={`flex flex-col ${isSeller ? "items-end" : "items-start"}`}>
+                  <div className={`group flex max-w-[85%] items-start gap-1 ${isSeller ? "flex-row-reverse" : ""}`}>
                   <div
-                    className={`max-w-[80%] rounded-2xl p-3.5 text-xs leading-relaxed shadow-2xs ${
+                    className={`min-w-0 rounded-2xl p-3.5 text-xs leading-relaxed shadow-2xs ${
                       isSeller
                         ? "bg-brand-blue text-white rounded-br-xs"
                         : "bg-white text-neutral-900 border border-line rounded-bl-xs"
-                    }`}
+                    } ${editing?.id === msg.id ? "ring-2 ring-brand-blue/40 ring-offset-1" : ""}`}
                   >
                     {msg.order && <MessageOrderTag order={msg.order} tone={isSeller ? "own" : "other"} />}
                     {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
@@ -289,7 +356,18 @@ export function MessagesTab({
                       </div>
                     )}
                   </div>
-                  <span className="text-[10px] text-neutral-400 mt-1 px-1">{formatChatTime(msg.timestamp)}</span>
+                  {isSeller && onDeleteMessage && canDeleteMessage(actionable) && (
+                    <MessageActionsMenu
+                      canEdit={Boolean(onEditMessage) && canEditMessage(actionable)}
+                      onEdit={() => startEdit(msg)}
+                      onDelete={() => void deleteMessage(msg)}
+                    />
+                  )}
+                  </div>
+                  <span className="text-[10px] text-neutral-400 mt-1 px-1">
+                    {msg.editedAt ? `${t("chat.edited")} · ` : ""}
+                    {formatChatTime(msg.timestamp)}
+                  </span>
                 </div>
               );
             })}
@@ -319,13 +397,32 @@ export function MessagesTab({
           </div>
 
           {/* Context: which order this message is about */}
-          {buyerOrders.length > 0 && (
+          {buyerOrders.length > 0 && !editing && (
             <div className="px-4 py-1.5 bg-white border-t border-line">
               <OrderContextPicker orders={buyerOrders} value={contextOrderId} onChange={setContextOrderId} />
             </div>
           )}
 
-          {(upload.attachment || upload.uploading || upload.error || sendError) && (
+          {showPhotoPreview && !editing && (
+            <PendingAttachmentPreview
+              attachment={upload.attachment}
+              localPreviewUrl={upload.previewUrl}
+              uploading={upload.uploading}
+              onRemove={upload.clear}
+            />
+          )}
+
+          {editing && (
+            <EditingBar
+              original={editing.text}
+              onCancel={() => {
+                setEditing(null);
+                setInputText("");
+              }}
+            />
+          )}
+
+          {((!showPhotoPreview && (upload.attachment || upload.uploading)) || upload.error || sendError) && (
             <div
               className={`px-4 py-1.5 border-t flex items-center justify-between text-xs ${
                 upload.error || sendError ? "bg-red-50 border-red-100 text-red-700" : "bg-blue-50/60 border-blue-100 text-brand-blue"
@@ -367,7 +464,7 @@ export function MessagesTab({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              disabled={upload.uploading}
+              disabled={upload.uploading || Boolean(editing)}
               title={t("chat.attachAnImageOrPdf")}
               aria-label={t("chat.attachAnImageOrPdf")}
               className={`flex items-center justify-center h-9 w-9 rounded-xl border shrink-0 transition disabled:opacity-50 ${
@@ -391,7 +488,7 @@ export function MessagesTab({
               title={t("seller.messages.sendMessage")}
               aria-label={t("seller.messages.sendMessage2")}
             >
-              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : editing ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
             </button>
           </form>
         </div>

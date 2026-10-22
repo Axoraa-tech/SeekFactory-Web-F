@@ -71,6 +71,8 @@ function toSellerMessage(m: MessageItem): SellerChatMessage {
     timestamp: m.time,
     attachment: m.attachment,
     order: m.order,
+    editedAt: m.editedAt,
+    deleted: m.deleted,
   };
 }
 import type { Category } from "@/entities/category";
@@ -412,6 +414,42 @@ export function FactoryDashboard({
     }
   }
 
+  function replaceSellerMessage(conversationId: string, id: string, next: SellerChatMessage) {
+    setConversations((prev) =>
+      prev.map((c) => (c.id === conversationId ? { ...c, messages: c.messages.map((m) => (m.id === id ? next : m)) } : c)),
+    );
+  }
+
+  /** Edits one of our messages; rolls back and rejects with a user-facing message on failure. */
+  async function handleEditMessage(conversationId: string, message: SellerChatMessage, text: string) {
+    replaceSellerMessage(conversationId, message.id, { ...message, text, editedAt: new Date().toISOString() });
+    try {
+      const saved = await getApi().messages.editMessage(conversationId, message.id, text);
+      replaceSellerMessage(conversationId, message.id, toSellerMessage(saved));
+    } catch (err) {
+      replaceSellerMessage(conversationId, message.id, message);
+      throw new Error(t("chat.couldNotEdit", { message: err instanceof Error ? err.message : "" }));
+    }
+  }
+
+  /** Deletes one of our messages for everyone; rolls back on failure. */
+  async function handleDeleteMessage(conversationId: string, message: SellerChatMessage) {
+    replaceSellerMessage(conversationId, message.id, {
+      ...message,
+      deleted: true,
+      text: "",
+      attachment: undefined,
+      order: undefined,
+    });
+    try {
+      const saved = await getApi().messages.deleteMessage(conversationId, message.id);
+      replaceSellerMessage(conversationId, message.id, toSellerMessage(saved));
+    } catch (err) {
+      replaceSellerMessage(conversationId, message.id, message);
+      throw new Error(t("chat.couldNotDelete", { message: err instanceof Error ? err.message : "" }));
+    }
+  }
+
   /** Orders tab → chat: opens (or creates) the conversation with that order's buyer. */
   const [pendingContext, setPendingContext] = useState<
     { conversationId: string; orderId?: string; draft?: string } | null
@@ -516,8 +554,9 @@ export function FactoryDashboard({
       setConversations((prev) =>
         prev.map((c) => {
           if (c.id === activeConversationId) {
+            // A message we already have came back edited or deleted: update it in place
             if (c.messages.some(m => m.id === newMsg.id)) {
-              return c;
+              return { ...c, messages: c.messages.map((m) => (m.id === newMsg.id ? toSellerMessage(newMsg) : m)) };
             }
             // Our own message can arrive over the stream before the send request returns:
             // swap it in for the pending optimistic copy instead of showing it twice.
@@ -717,6 +756,8 @@ export function FactoryDashboard({
                 activeConversationId={activeConversationId}
                 onSelectConversation={setActiveConversationId}
                 onSendMessage={handleSendMessage}
+                onEditMessage={handleEditMessage}
+                onDeleteMessage={handleDeleteMessage}
                 orders={orders}
                 initialContext={pendingContext}
                 onContextConsumed={() => setPendingContext(null)}

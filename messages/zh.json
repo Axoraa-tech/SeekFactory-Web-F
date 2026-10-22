@@ -500,7 +500,8 @@
       "enterprise": "企业版",
       "loadingProfile": "正在加载资料…",
       "nameIsRequired": "请输入您的姓名。",
-      "companyNameIsRequired": "请输入公司名称。"
+      "companyNameIsRequired": "请输入公司名称。",
+      "phoneAlreadyUsed": "该手机号已被其他 SeekFactory 账户使用，请换一个号码。"
     },
     "avatar": {
       "change": "更换头像",
@@ -1257,7 +1258,28 @@
     },
     "online": "在线",
     "offline": "离线",
-    "lastSeen": "最后在线 {time}"
+    "lastSeen": "最后在线 {time}",
+    "messageActions": "消息选项",
+    "edit": "编辑",
+    "deleteForEveryone": "为所有人删除",
+    "deleteConfirm": "要为所有人删除这条消息吗？你和{name}都将无法再看到它。",
+    "edited": "已编辑",
+    "youDeletedThisMessage": "你删除了这条消息",
+    "thisMessageWasDeleted": "此消息已被删除",
+    "editingMessage": "正在编辑消息",
+    "cancelEdit": "取消编辑",
+    "saveEdit": "保存",
+    "couldNotEdit": "无法编辑消息：{message}",
+    "couldNotDelete": "无法删除消息：{message}",
+    "editWindowHint": "消息发送后15分钟内可以编辑",
+    "photoReadyToSend": "照片已准备好发送",
+    "uploadingPhoto": "正在上传照片…",
+    "addCaptionOrSend": "添加说明或直接发送",
+    "viewer": {
+      "close": "关闭",
+      "openInNewTab": "在新标签页中打开",
+      "download": "下载"
+    }
   },
   "upgrade": {
     "upgradeToUnlockDirectSupplier": "升级解锁供应商直接联系方式与验厂报告",
