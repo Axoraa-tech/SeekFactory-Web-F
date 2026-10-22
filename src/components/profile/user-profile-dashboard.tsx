@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
 import { getApi } from "@/shared/api";
+import { ApiError } from "@/shared/api/http-api";
 import { resetFollowStore, setFollowed } from "@/features/engagement/follow-store";
 import type { BuyerProfile } from "@/entities/user";
 import type { Product } from "@/entities/product";
@@ -90,20 +91,23 @@ export function UserProfileDashboard({
       return;
     }
     setIsSaving(true);
+    const phone = formData.phone.trim();
     try {
       await getApi().session.updateProfile({
         name: formData.name,
         companyName: formData.companyName,
         industry: formData.industry,
         country: formData.country,
-        phone: formData.phone,
+        // Phone is unique per account: an empty string would collide with every other account without one
+        phone: phone || undefined,
         taxId: formData.taxId,
         address: formData.address,
       });
       toast.success(t("profile.dashboard.companyProfileContactDetailsSaved"));
       router.refresh();
     } catch (err) {
-      toast.error(errorText(err, t("profile.dashboard.couldNotSaveYourProfile")));
+      const phoneTaken = err instanceof ApiError && err.status === 409 && phone !== (user.phone ?? "");
+      toast.error(phoneTaken ? t("profile.dashboard.phoneAlreadyUsed") : errorText(err, t("profile.dashboard.couldNotSaveYourProfile")));
     } finally {
       setIsSaving(false);
     }

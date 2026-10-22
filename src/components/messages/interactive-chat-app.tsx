@@ -27,6 +27,8 @@ function toChatMessage(m: MessageItem): ChatMessage {
     time: m.time,
     attachment: m.attachment,
     order: m.order,
+    editedAt: m.editedAt,
+    deleted: m.deleted,
   };
 }
 
@@ -130,9 +132,9 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
       setThreads((prev) =>
         prev.map((t) => {
           if (t.id === selectedThreadId) {
-            // Check if message already exists
+            // A message we already have came back edited or deleted: update it in place
             if (t.messages.some(m => m.id === newMsg.id)) {
-              return t;
+              return { ...t, messages: t.messages.map((m) => (m.id === newMsg.id ? toChatMessage(newMsg) : m)) };
             }
             // Our own message can arrive over the stream before the send request returns:
             // swap it in for the pending optimistic copy instead of showing it twice.
@@ -274,6 +276,66 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
     }
   }, [withSlug, allManufacturers, threads, searchParams, tr]);
 
+  // The message whose text the input is changing; null while composing a new one
+  const [editing, setEditing] = useState<ChatMessage | null>(null);
+  useEffect(() => {
+    setEditing(null);
+  }, [selectedThreadId]);
+
+  const replaceMessage = (threadId: string, id: string, update: (m: ChatMessage) => ChatMessage) =>
+    setThreads((prev) =>
+      prev.map((t) => (t.id === threadId ? { ...t, messages: t.messages.map((m) => (m.id === id ? update(m) : m)) } : t)),
+    );
+
+  const handleStartEdit = (msg: ChatMessage) => {
+    upload.clear();
+    setContextOrderId("");
+    setEditing(msg);
+    setInputMessage(msg.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditing(null);
+    setInputMessage("");
+  };
+
+  const saveEdit = async (target: ChatMessage, text: string) => {
+    const threadId = selectedThreadId;
+    setEditing(null);
+    setInputMessage("");
+    if (!threadId || !text || text === target.text) return;
+    replaceMessage(threadId, target.id, (m) => ({ ...m, text, editedAt: new Date().toISOString() }));
+    setSendError(null);
+    try {
+      const saved = await getApi().messages.editMessage(threadId, target.id, text);
+      replaceMessage(threadId, target.id, () => toChatMessage(saved));
+    } catch (err) {
+      replaceMessage(threadId, target.id, () => target);
+      setSendError(tr("chat.couldNotEdit", { message: err instanceof Error ? err.message : "" }));
+    }
+  };
+
+  const handleDeleteMessage = async (target: ChatMessage) => {
+    const threadId = selectedThreadId;
+    if (!threadId) return;
+    const name = activeThread
+      ? isSupplier
+        ? activeThread.buyerName || activeThread.buyerCompany || tr("seller.messages.buyer")
+        : activeThread.manufacturer.name
+      : "";
+    if (!window.confirm(tr("chat.deleteConfirm", { name }))) return;
+    if (editing?.id === target.id) handleCancelEdit();
+    replaceMessage(threadId, target.id, (m) => ({ ...m, deleted: true, text: "", attachment: undefined, order: undefined }));
+    setSendError(null);
+    try {
+      const saved = await getApi().messages.deleteMessage(threadId, target.id);
+      replaceMessage(threadId, target.id, () => toChatMessage(saved));
+    } catch (err) {
+      replaceMessage(threadId, target.id, () => target);
+      setSendError(tr("chat.couldNotDelete", { message: err instanceof Error ? err.message : "" }));
+    }
+  };
+
   const handleSelectThread = (id: string) => {
     // Marking read happens in the effect that loads the selected chat
     setSelectedThreadId(id);
@@ -283,6 +345,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
   const handleSendMessage = async (e?: React.FormEvent, customText?: string) => {
     if (e) e.preventDefault();
     const textToSend = (customText ?? inputMessage).trim();
+    if (editing && !customText) return void saveEdit(editing, textToSend);
     const fileToSend = customText ? null : upload.attachment;
     if ((!textToSend && !fileToSend) || upload.uploading) return;
 
@@ -398,6 +461,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
           inputMessage={inputMessage}
           onInputChange={setInputMessage}
           attachment={upload.attachment}
+          attachmentPreviewUrl={upload.previewUrl}
           attachmentUploading={upload.uploading}
           attachmentError={upload.error}
           onPickFile={upload.pick}
@@ -406,6 +470,10 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
           contextOrderId={contextOrderId}
           onContextChange={setContextOrderId}
           sendError={sendError}
+          editing={editing}
+          onStartEdit={handleStartEdit}
+          onCancelEdit={handleCancelEdit}
+          onDeleteMessage={handleDeleteMessage}
         />
       ) : (
         <div className="flex-1 flex items-center justify-center p-8 text-center text-slate-400 text-sm">

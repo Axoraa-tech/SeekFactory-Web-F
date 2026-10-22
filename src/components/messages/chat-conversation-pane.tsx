@@ -2,14 +2,15 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { Send, Paperclip, Building2, FileText, CheckCheck, ChevronLeft, Loader2, X, MessageSquare } from "lucide-react";
+import { Send, Paperclip, Building2, FileText, CheckCheck, ChevronLeft, Loader2, X, MessageSquare, Check } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { cn } from "@/shared/lib/cn";
 import { CHAT_ATTACHMENT_ACCEPT, formatChatTime } from "@/shared/lib/chat";
 import type { MessageAttachment } from "@/shared/api/contracts";
 import type { OrderRequest } from "@/entities/order";
-import type { ThreadWithMessages } from "./chat-types";
-import { MessageAttachmentView, MessageOrderTag, OrderContextPicker } from "./message-extras";
+import type { ChatMessage, ThreadWithMessages } from "./chat-types";
+import { MessageAttachmentView, MessageOrderTag, OrderContextPicker, PendingAttachmentPreview } from "./message-extras";
+import { DeletedMessageBubble, EditingBar, MessageActionsMenu, canDeleteMessage, canEditMessage } from "./message-actions";
 import { useLocale, useTranslations } from "next-intl";
 import { useSupplierName } from "@/features/subscription";
 import { formatRelativeTime } from "@/shared/lib/format";
@@ -30,6 +31,8 @@ type Props = {
   onInputChange: (value: string) => void;
   /** Uploaded (not yet sent) attachment. */
   attachment: MessageAttachment | null;
+  /** Local preview of a picked photo while it uploads. */
+  attachmentPreviewUrl?: string | null;
   attachmentUploading: boolean;
   attachmentError: string | null;
   onPickFile: (file: File | undefined) => void;
@@ -39,6 +42,11 @@ type Props = {
   contextOrderId: string;
   onContextChange: (orderId: string) => void;
   sendError: string | null;
+  /** Your own message being edited in the input, if any. */
+  editing?: ChatMessage | null;
+  onStartEdit?: (message: ChatMessage) => void;
+  onCancelEdit?: () => void;
+  onDeleteMessage?: (message: ChatMessage) => void;
 };
 
 export function ChatConversationPane({
@@ -54,6 +62,7 @@ export function ChatConversationPane({
   inputMessage,
   onInputChange,
   attachment,
+  attachmentPreviewUrl,
   attachmentUploading,
   attachmentError,
   onPickFile,
@@ -62,15 +71,22 @@ export function ChatConversationPane({
   contextOrderId,
   onContextChange,
   sendError,
+  editing,
+  onStartEdit,
+  onCancelEdit,
+  onDeleteMessage,
 }: Props) {
   const t = useTranslations();
   const supplierName = useSupplierName();
   const locale = useLocale();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canSend = (inputMessage.trim().length > 0 || attachment !== null) && !attachmentUploading;
+  const canSend = editing
+    ? inputMessage.trim().length > 0
+    : (inputMessage.trim().length > 0 || attachment !== null) && !attachmentUploading;
+  const showPhotoPreview = Boolean(attachmentPreviewUrl);
 
   const counterpartName = isSupplier
-    ? activeThread.buyerName || activeThread.buyerCompany || t("chat.buyer")
+    ? activeThread.buyerName || activeThread.buyerCompany || t("seller.messages.buyer")
     : supplierName(activeThread.manufacturer.name);
   const counterpartAvatar = isSupplier
     ? activeThread.buyerAvatarUrl
@@ -209,18 +225,32 @@ export function ChatConversationPane({
               )}
 
               <div className="space-y-1 min-w-0">
+                {msg.deleted ? (
+                  <DeletedMessageBubble own={isOwn} />
+                ) : (
+                <div className={cn("group flex items-start gap-1", isOwn && "flex-row-reverse")}>
                 <div
                   className={cn(
-                    "rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-xs",
+                    "min-w-0 rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-xs",
                     isOwn
                       ? "bg-brand-blue text-white rounded-br-xs"
-                      : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs"
+                      : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs",
+                    editing?.id === msg.id && "ring-2 ring-brand-blue/40 ring-offset-1"
                   )}
                 >
                   {msg.order && <MessageOrderTag order={msg.order} tone={isOwn ? "own" : "other"} />}
                   {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
                   {msg.attachment && <MessageAttachmentView attachment={msg.attachment} tone={isOwn ? "own" : "other"} />}
                 </div>
+                {isOwn && onDeleteMessage && canDeleteMessage(msg) && (
+                  <MessageActionsMenu
+                    canEdit={Boolean(onStartEdit) && canEditMessage(msg)}
+                    onEdit={() => onStartEdit?.(msg)}
+                    onDelete={() => onDeleteMessage(msg)}
+                  />
+                )}
+                </div>
+                )}
 
                 <div
                   className={cn(
@@ -228,8 +258,9 @@ export function ChatConversationPane({
                     isOwn ? "justify-end" : "justify-start"
                   )}
                 >
+                  {msg.editedAt && !msg.deleted && <span>{t("chat.edited")} ·</span>}
                   <span>{formatChatTime(msg.time)}</span>
-                  {isOwn && <CheckCheck className="h-3 w-3 text-brand-blue" />}
+                  {isOwn && !msg.deleted && <CheckCheck className="h-3 w-3 text-brand-blue" />}
                 </div>
               </div>
             </div>
@@ -260,13 +291,24 @@ export function ChatConversationPane({
         </div>
       )}
 
-      {orders.length > 0 && (
+      {orders.length > 0 && !editing && (
         <div className="px-4 py-1.5 bg-white border-t border-slate-100">
           <OrderContextPicker orders={orders} value={contextOrderId} onChange={onContextChange} />
         </div>
       )}
 
-      {(attachment || attachmentUploading || attachmentError || sendError) && (
+      {showPhotoPreview && !editing && (
+        <PendingAttachmentPreview
+          attachment={attachment}
+          localPreviewUrl={attachmentPreviewUrl}
+          uploading={attachmentUploading}
+          onRemove={onClearAttachment}
+        />
+      )}
+
+      {editing && onCancelEdit && <EditingBar original={editing.text} onCancel={onCancelEdit} />}
+
+      {((!showPhotoPreview && (attachment || attachmentUploading)) || attachmentError || sendError) && (
         <div
           className={cn(
             "px-4 py-1.5 border-t flex items-center justify-between text-xs",
@@ -309,7 +351,7 @@ export function ChatConversationPane({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          disabled={attachmentUploading}
+          disabled={attachmentUploading || Boolean(editing)}
           title={t("chat.attachAnImageOrPdf")}
           aria-label={t("chat.attachAnImageOrPdf")}
           className={cn(
@@ -336,8 +378,8 @@ export function ChatConversationPane({
           disabled={!canSend}
           className="sf-btn-commit h-10 shrink-0 px-4 rounded-xl bg-brand-blue text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-brand-blue-dark transition-all active:scale-95 shadow-xs disabled:opacity-50"
         >
-          <Send className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">{t("common.send")}</span>
+          {editing ? <Check className="h-3.5 w-3.5" /> : <Send className="h-3.5 w-3.5" />}
+          <span className="hidden sm:inline">{editing ? t("chat.saveEdit") : t("common.send")}</span>
         </button>
       </form>
     </div>

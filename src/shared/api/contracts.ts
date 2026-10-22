@@ -149,6 +149,10 @@ export type MessageItem = {
   /** The order this message is about, if the sender picked one. */
   order?: MessageOrderContext;
   isRead?: boolean;
+  /** ISO time of the sender's last edit; absent when never edited. */
+  editedAt?: string;
+  /** The sender deleted it for everyone: text and attachment are gone. */
+  deleted?: boolean;
 };
 
 export interface MessageRepository {
@@ -166,6 +170,10 @@ export interface MessageRepository {
   listConversationOrders(conversationId: string): Promise<OrderRequest[]>;
   startConversation(manufacturerId: string, initialMessage?: string): Promise<Conversation & { manufacturer: Manufacturer }>;
   markAsRead(conversationId: string): Promise<void>;
+  /** Sender only, within 15 minutes of sending. */
+  editMessage(conversationId: string, messageId: string, text: string): Promise<MessageItem>;
+  /** Sender only: deletes it for everyone; it stays in the thread as deleted. */
+  deleteMessage(conversationId: string, messageId: string): Promise<MessageItem>;
   /** Unread messages across all of the viewer's conversations (0 for guests). */
   unreadCount(): Promise<number>;
   onMessageStream(conversationId: string, callback: (message: MessageItem) => void): () => void;

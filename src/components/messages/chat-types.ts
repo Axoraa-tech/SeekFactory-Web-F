@@ -14,6 +14,10 @@ export type ChatMessage = {
   attachment?: MessageAttachment;
   /** The order this message is about, if the sender picked one. */
   order?: MessageOrderContext;
+  /** ISO time of the sender's last edit. */
+  editedAt?: string;
+  /** Deleted for everyone by the sender. */
+  deleted?: boolean;
 };
 
 export type ThreadWithMessages = Conversation & {

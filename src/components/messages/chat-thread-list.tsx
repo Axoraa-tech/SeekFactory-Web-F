@@ -65,7 +65,7 @@ export function ChatThreadList({
         {filteredThreads.map((thread) => {
           const isSelected = thread.id === selectedThreadId;
           const displayName = isSupplier
-            ? thread.buyerName || thread.buyerCompany || t("chat.buyer")
+            ? thread.buyerName || thread.buyerCompany || t("seller.messages.buyer")
             : supplierName(thread.manufacturer.name);
           const displayAvatar = isSupplier
             ? thread.buyerAvatarUrl
