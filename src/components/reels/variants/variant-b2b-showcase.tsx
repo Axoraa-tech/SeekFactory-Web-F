@@ -8,14 +8,9 @@ import {
   Volume2,
   VolumeX,
   Maximize2,
-  Layers,
-  Clock,
-  PackageCheck,
-  FileSpreadsheet,
   Send,
   MessageCircle,
   Repeat2,
-  Heart,
   BarChart2,
   Bookmark,
 } from "lucide-react";
@@ -24,6 +19,7 @@ import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { SeekTrustBadge } from "@/components/reels/seek-trust-strip";
+import { ReactionButton } from "@/components/reels/reaction-button";
 import { formatCount, formatDuration } from "@/shared/lib/format";
 
 import { cn } from "@/shared/lib/cn";
@@ -57,12 +53,6 @@ type Props = {
 /**
  * VARIANT 3: B2B Industrial Showcase & Technical Spec Sheet (Industrial Segmented 5-Button Bar)
  */
-const SPEC_ICONS = [PackageCheck, Layers, Clock, FileSpreadsheet];
-
-/** Wraps the chips in the supplier lock only when they show supplier detail. */
-function ChipsLock({ locked, label, children }: { locked: boolean; label: string; children: React.ReactNode }) {
-  return locked ? <SupplierLockOverlay badgeLabel={label} compact>{children}</SupplierLockOverlay> : <>{children}</>;
-}
 
 export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product, eager, fill }: Props) {
   const t = useTranslations();
@@ -75,25 +65,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(reel.comments);
 
-  const { liked, likes, saved, shares, shared, toggleLike, toggleSave, share } = useReelEngagement(reel);
-
-  const productChips = [
-    ...(product?.moq ? [{ label: t("common.minOrder"), value: product.moq }] : []),
-    ...Object.entries(product?.specs ?? {}).map(([label, value]) => ({ label, value })),
-  ];
-  // Showcase: every seek gets the same rows, so a seek without product specs shows its factory's facts
-  const factoryChips = [
-    { label: t("seller.verify.country"), value: [manufacturer.location, manufacturer.country].filter(Boolean).join(", ") },
-    { label: t("showcase.spotlight.established"), value: manufacturer.yearsEstablished ? String(manufacturer.yearsEstablished) : "" },
-    { label: t("showcase.spotlight.employees"), value: manufacturer.employees },
-    { label: t("supplier.certification"), value: manufacturer.certifications?.[0] ?? "" },
-    { label: t("showcase.single.exportsTo"), value: manufacturer.exportCountries?.slice(0, 2).join(", ") ?? "" },
-    { label: t("showcase.spotlight.factorySize"), value: manufacturer.factorySize },
-  ].filter((chip) => chip.value);
-  // Product facts (MOQ, tags, country of origin) are public; the factory's own facts are supplier
-  // detail, so only those sit behind the supplier lock
-  const showingFactoryChips = productChips.length === 0 && !!fill;
-  const specChips = (showingFactoryChips ? factoryChips : productChips).slice(0, 4);
+  const { reaction, react, likes, saved, shares, shared, toggleSave, share } = useReelEngagement(reel);
 
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
@@ -324,29 +296,6 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 </div>
               </div>
 
-              {/* Product facts as see-through chips: min. order, tags, country of origin... */}
-              {specChips.length > 0 && (
-                <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-                  <ChipsLock locked={showingFactoryChips} label={t("seek.viewFactorySpecs")}>
-                    <div className="flex min-w-0 flex-wrap gap-1.5 overflow-hidden max-h-[26px]">
-                      {specChips.map((chip, index) => {
-                        const Icon = SPEC_ICONS[index % SPEC_ICONS.length];
-                        return (
-                          <span
-                            key={chip.label}
-                            title={`${chip.label}: ${chip.value}`}
-                            className="inline-flex max-w-[60%] min-w-0 items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[11px] text-white backdrop-blur-md"
-                          >
-                            <Icon className="h-3 w-3 shrink-0 text-white/80" strokeWidth={2} />
-                            <span className="shrink-0 text-white/75">{chip.label.charAt(0).toUpperCase() + chip.label.slice(1).toLowerCase()}</span>
-                            <span className="min-w-0 truncate font-semibold">{chip.value}</span>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </ChipsLock>
-                </div>
-              )}
 
               {/* Scrubber */}
               <div
@@ -382,6 +331,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               priceInr={product?.priceInr ?? (fill ? 0 : undefined)}
               unit={product?.unit}
               moq={product?.moq}
+              hideMoq
               productSlug={product?.slug ?? productSlug}
               manufacturerSlug={manufacturer.slug}
               stockStatus={product?.stockStatus}
@@ -420,19 +370,8 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
 
             <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
 
-            {/* 3. Like */}
-            <button
-              type="button"
-              onClick={toggleLike}
-              aria-label={liked ? t("seek.unlikeSeek") : t("seek.likeSeek")}
-              className={cn(
-                "sf-btn-toggle flex-1 flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-ink-muted hover:bg-white/90 hover:text-rose-600 hover:shadow-xs transition",
-                liked && "text-rose-600 bg-white shadow-xs"
-              )}
-            >
-              <Heart className={cn("h-3.5 w-3.5", liked && "fill-rose-500")} />
-              <span className="font-medium text-[11px]">{formatCount(likes)}</span>
-            </button>
+            {/* 3. Reactions: 👍 ❤️ ⭐ */}
+            <ReactionButton reaction={reaction} count={likes} onReact={react} />
 
             <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
 

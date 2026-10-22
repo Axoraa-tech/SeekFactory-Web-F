@@ -3,7 +3,7 @@ import type { Conversation, MessageOrderContext } from "@/entities/message";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { AppNotification } from "@/entities/notification";
 import type { Product, StockStatus } from "@/entities/product";
-import type { FeedTab, Reel } from "@/entities/reel";
+import type { FeedTab, Reel, ReelReaction } from "@/entities/reel";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
 import type { Cart, CheckoutLine, NewOrderRequest, OrderContact, OrderRequest, OrderStatus } from "@/entities/order";
@@ -89,7 +89,8 @@ export interface SessionRepository {
 export interface FeedRepository {
   list(tab: FeedTab): Promise<FeedItem[]>;
   addReel(reel: Reel): Promise<void>;
-  likeReel(reelId: string): Promise<{ liked: boolean; likesCount: number }>;
+  /** Same reaction again removes it; another one replaces it. */
+  likeReel(reelId: string, reaction?: ReelReaction): Promise<{ liked: boolean; likesCount: number; reaction?: ReelReaction | null }>;
   saveReel(reelId: string): Promise<{ saved: boolean; savesCount: number }>;
   /** Counts a share (link copy / native share); works for guests. */
   shareReel(reelId: string): Promise<{ sharesCount: number }>;

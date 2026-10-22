@@ -238,8 +238,8 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
           data-header-content
           className={cn(
             "mx-auto h-14 sm:h-[70px] max-w-[1440px] items-center gap-2 sm:gap-4 lg:gap-5 px-3 sm:px-6",
-            // Manufacturers: [logo + search] [Start a post] [actions]; the two outer columns share the
-            // width equally, so Start a post sits in the exact middle of the bar
+            // Manufacturers: [logo + Start a post] [search] [actions]; the two outer columns share the
+            // width equally, so the search sits in the exact middle of the bar
             isManufacturer ? "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]" : "flex",
           )}
         >
@@ -260,14 +260,20 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
               />
             </Link>
 
-            {/* Search Bar */}
-            <SearchBar categories={categories} compact={isManufacturer} />
+            {/* Buyers: search next to the logo. Manufacturers: Start a post here (below lg the bottom
+                MobileNav has the Post button) and the search in the centre column */}
+            {isManufacturer ? (
+              <div className="hidden lg:block shrink-0">
+                <StartPostMenu />
+              </div>
+            ) : (
+              <SearchBar categories={categories} />
+            )}
           </div>
 
-          {/* Manufacturers only, centred; below lg the bottom MobileNav has the Post button */}
           {isManufacturer && (
-            <div className="hidden lg:block justify-self-center">
-              <StartPostMenu />
+            <div className="flex w-[clamp(220px,36vw,560px)] min-w-0 justify-self-center">
+              <SearchBar categories={categories} compact />
             </div>
           )}
 

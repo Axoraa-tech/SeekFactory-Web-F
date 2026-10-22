@@ -41,7 +41,7 @@ import type { RfqQuote } from "@/entities/rfq";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
 import type { Category, CategoryIconKey } from "@/entities/category";
 import type { ReelComment, ReelCommentReply } from "@/entities/comment";
-import type { FeedTab, Reel } from "@/entities/reel";
+import type { FeedTab, Reel, ReelReaction } from "@/entities/reel";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product, StockStatus } from "@/entities/product";
 import type { AppNotification } from "@/entities/notification";
@@ -161,6 +161,7 @@ interface BackendReel {
   productIds?: string[];
   listed?: boolean;
   likedByMe?: boolean;
+  myReaction?: string;
   savedByMe?: boolean;
 }
 
@@ -262,6 +263,7 @@ interface BackendCommentReply {
   createdAt?: string;
   likes?: number;
   likedByMe?: boolean;
+  myReaction?: string;
 }
 
 interface BackendComment extends BackendCommentReply {
@@ -768,8 +770,8 @@ export function createHttpApi(
       throw new Error("Use factory.addSeek to publish a seek");
     },
 
-    async likeReel(reelId: string) {
-      return fetchJson<{ liked: boolean; likesCount: number }>(`/api/v1/feed/${encodeURIComponent(reelId)}/like`, {
+    async likeReel(reelId: string, reaction: ReelReaction = "LIKE") {
+      return fetchJson<{ liked: boolean; likesCount: number; reaction?: ReelReaction | null }>(`/api/v1/feed/${encodeURIComponent(reelId)}/like?reaction=${reaction}`, {
         method: "POST",
       });
     },
@@ -1767,6 +1769,7 @@ function normalizeReel(r: BackendReel, fallbackManufacturerId = "", tab: FeedTab
     productIds: r.productIds || r.product_ids || [],
     listed: r.listed ?? true,
     likedByMe: r.likedByMe,
+    myReaction: (r.myReaction as Reel["myReaction"]) ?? undefined,
     savedByMe: r.savedByMe,
   };
 }
