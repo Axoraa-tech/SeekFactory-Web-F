@@ -393,6 +393,9 @@
       "accountSecurity": "账户与安全"
     },
     "certs": {
+      "businessDocuments": "工商登记文件",
+      "otherDocuments": "其他文件",
+      "businessDocumentBadge": "工商登记",
       "yearFounded": "成立年份",
       "yearsInIndustry": "从业年限",
       "floorSpace": "厂房面积",
@@ -413,6 +416,10 @@
       "deleteCertificate": "删除证书"
     },
     "certModal": {
+      "document": "文件",
+      "unverifiedDocument": "未经核实的文件",
+      "documentReviewed": "本文件已由 SeekFactory 审核。此状态不代表已进行工厂现场检查。",
+      "documentNotVerified": "本文件由制造商提供，未经 SeekFactory 核实，不代表产品质量认证或工厂现场检查。",
       "closeCertificatePreview": "关闭证书预览",
       "officialVerifiedCredential": "官方认证资质",
       "certifiedAccreditations": "认证资质",

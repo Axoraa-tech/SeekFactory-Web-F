@@ -7,5 +7,5 @@ export type FactoryCertificate = {
   expiryDate?: string;
   imageUrl: string;
   verified: boolean;
-  category?: "Quality" | "Safety & CE" | "Environmental" | "Audit Report" | "Honor";
+  category?: "Quality" | "Safety & CE" | "Environmental" | "Audit Report" | "Honor" | "Business Registration" | "Other";
 };

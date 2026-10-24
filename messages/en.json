@@ -393,6 +393,9 @@
       "accountSecurity": "Account & Security"
     },
     "certs": {
+      "businessDocuments": "Business registration documents",
+      "otherDocuments": "Other documents",
+      "businessDocumentBadge": "Business",
       "yearFounded": "Year founded",
       "yearsInIndustry": "Years in industry",
       "floorSpace": "Floor space",
@@ -413,6 +416,10 @@
       "deleteCertificate": "Delete Certificate"
     },
     "certModal": {
+      "document": "Document",
+      "unverifiedDocument": "Unverified document",
+      "documentReviewed": "This document has been reviewed by SeekFactory. This status does not establish an on-site factory inspection.",
+      "documentNotVerified": "This document was supplied by the manufacturer and has not been verified by SeekFactory. It does not establish product quality or an on-site factory inspection.",
       "closeCertificatePreview": "Close certificate preview",
       "officialVerifiedCredential": "Official Verified Credential",
       "certifiedAccreditations": "Certified Accreditations",
