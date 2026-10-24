@@ -305,6 +305,8 @@
       "viewManufacturers": "View Manufacturers",
       "directOemOdmAuditedFactories": "Direct OEM / ODM audited factories",
       "showFewerManufacturers": "Show fewer manufacturers",
+      "catalogProgress": "Showing {count} of {total} matching manufacturers",
+      "loadMoreManufacturers": "Load more manufacturers",
       "viewAllManufacturers": "View all {length} manufacturers",
       "viewAll": "View All ({length})",
       "viewVerifiedManufacturers": "View Verified Manufacturers",

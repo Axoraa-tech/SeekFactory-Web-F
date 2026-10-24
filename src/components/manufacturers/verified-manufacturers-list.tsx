@@ -21,6 +21,7 @@ import { loadFollowedFactories } from "@/features/engagement/follow-store";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import type { Manufacturer } from "@/entities/manufacturer";
+import { MANUFACTURER_BATCH_SIZE } from "@/features/explore/manufacturer-results";
 import { useTranslations } from "next-intl";
 
 type Layout = "rail" | "explore";
@@ -154,11 +155,16 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
 function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
   const t = useTranslations();
   const [isExpanded, setIsExpanded] = useState(false);
-  const visibleManufacturers = isExpanded ? manufacturers : manufacturers.slice(0, 4);
+  const [visibleCount, setVisibleCount] = useState(MANUFACTURER_BATCH_SIZE);
+  const visibleManufacturers = manufacturers.slice(0, isExpanded ? visibleCount : 4);
+  const toggleExpanded = () => {
+    setIsExpanded((prev) => !prev);
+    setVisibleCount(MANUFACTURER_BATCH_SIZE);
+  };
 
   return (
     <section className="w-full rounded-2xl border border-orange-200/80 bg-brand-orange-soft/40 p-4 sm:p-5 shadow-xs transition-all duration-300">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-orange text-white shadow-xs">
             <ShieldCheck className="h-4 w-4" />
@@ -176,7 +182,8 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
 
         <button
           type="button"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={toggleExpanded}
+          aria-expanded={isExpanded}
           title={isExpanded ? t("manufacturers.list.showFewerManufacturers") : t("manufacturers.list.viewAllManufacturers", { length: manufacturers.length })}
           className="sf-btn-nav group flex items-center gap-1.5 rounded-full bg-brand-orange hover:bg-[#d85b17] text-white px-3 py-1.5 text-xs font-bold shadow-md transition-all active:scale-95"
         >
@@ -246,6 +253,20 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
           ))}
         </div>
       </SupplierLockOverlay>
+
+      {isExpanded && (
+        <div className="mt-3 text-center space-y-2">
+          <p className="text-xs text-neutral-500" aria-live="polite">
+            {t("manufacturers.list.catalogProgress", { count: visibleManufacturers.length, total: manufacturers.length })}
+          </p>
+          {visibleManufacturers.length < manufacturers.length && (
+            <button type="button" onClick={() => setVisibleCount((count) => count + MANUFACTURER_BATCH_SIZE)}
+              className="sf-btn-nav rounded-full bg-brand-orange px-4 py-2 text-xs font-bold text-white">
+              {t("manufacturers.list.loadMoreManufacturers")}
+            </button>
+          )}
+        </div>
+      )}
 
       {!isExpanded && manufacturers.length > 4 && (
         <div className="mt-3 text-center">

@@ -5,6 +5,7 @@ import { ProductImageCarousel } from "@/components/products/product-image-carous
 import { CategoryIcon } from "@/components/ui/category-icon";
 import { VerifiedManufacturersSection } from "@/features/explore/verified-manufacturers-section";
 import { RecordSearch } from "@/features/explore/record-search";
+import { selectManufacturers } from "@/features/explore/manufacturer-results";
 import { ProductSortMenu } from "@/features/explore/product-sort-menu";
 import { parseProductSort, sortProducts } from "@/features/explore/product-sort";
 import { getApi } from "@/shared/api";
@@ -23,19 +24,25 @@ export default async function ExplorePage({ searchParams }: Props) {
   const { q = "", category = "", sub = "", sort: sortParam } = await searchParams;
   const sort = parseProductSort(sortParam);
   const api = getApi();
-  const { roots, childrenByRoot } = buildCategoryTree(await api.categories.list());
+  const categories = await api.categories.list();
+  const { roots, childrenByRoot } = buildCategoryTree(categories);
 
   const selectedRoot = roots.find((item) => item.slug === category) ?? null;
   const children = selectedRoot ? childrenByRoot[selectedRoot.id] ?? [] : [];
   const selectedSub = children.find((item) => item.slug === sub) ?? null;
   const selected = selectedSub ?? selectedRoot;
 
-  // The backend searches name/description/location and includes every subcategory of the selection
-  const { manufacturers: visibleManufacturers, products: foundProducts } = await api.search.query({
-    q: q.trim(),
-    category: selected?.id ?? "",
-    limit: 60,
-  });
+  // Search is a capped preview. Load approved manufacturers from the complete public list;
+  // keep the existing product preview and its sorting independent of manufacturer paging.
+  const [allManufacturers, { products: foundProducts }] = await Promise.all([
+    api.manufacturers.listAll(),
+    api.search.query({
+      q: q.trim(),
+      category: selected?.id ?? "",
+      limit: 60,
+    }),
+  ]);
+  const visibleManufacturers = selectManufacturers(allManufacturers, categories, selected?.id ?? "", q);
   const visibleProducts = sortProducts(foundProducts, sort, q);
 
   return (
@@ -92,7 +99,7 @@ export default async function ExplorePage({ searchParams }: Props) {
       ) : null}
 
       {/* 3. Verified Manufacturers Section (Light Orange Container with Expand Button) */}
-      <VerifiedManufacturersSection manufacturers={visibleManufacturers} />
+      <VerifiedManufacturersSection key={`${selected?.id ?? ""}:${q.trim()}`} manufacturers={visibleManufacturers} />
 
       {/* 4. Machinery Products Section */}
       <div className="space-y-3 pt-2">
