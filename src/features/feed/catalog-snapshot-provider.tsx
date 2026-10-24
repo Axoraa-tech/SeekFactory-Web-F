@@ -4,16 +4,18 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { useTranslations } from "next-intl";
 import { getApi } from "@/shared/api";
 import { readBrowserCookie } from "@/features/auth/session-cookie";
+import { useProductLikes } from "@/features/engagement/use-product-likes";
 import { loadCatalogSnapshot, shuffleCatalog, type CatalogSnapshot } from "./catalog-snapshot";
 
-type CatalogState = { status: "loading" | "ready" | "error"; snapshot: CatalogSnapshot | null; retry: () => void };
+type CatalogState = { status: "loading" | "ready" | "error"; snapshot: CatalogSnapshot | null; retry: () => void; productLikes: ReturnType<typeof useProductLikes> };
 const CatalogContext = createContext<CatalogState | null>(null);
 
 /** One in-memory snapshot for this mounted browse page, shared by LINE/SIDE photos and factory
  * cards. Never global, localStorage or server cached: product flags can be viewer-specific. */
 export function CatalogSnapshotProvider({ enabled, children }: { enabled: boolean; children: ReactNode }) {
   const t = useTranslations();
-  const [state, setState] = useState<Omit<CatalogState, "retry">>({ status: "loading", snapshot: null });
+  const [state, setState] = useState<Omit<CatalogState, "retry" | "productLikes">>({ status: "loading", snapshot: null });
+  const productLikes = useProductLikes(state.snapshot);
   const [attempt, setAttempt] = useState(0);
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
   useEffect(() => {
@@ -38,7 +40,7 @@ export function CatalogSnapshotProvider({ enabled, children }: { enabled: boolea
     window.addEventListener("focus", checkViewer);
     return () => { cancelled = true; window.clearTimeout(timeout); window.removeEventListener("focus", checkViewer); };
   }, [enabled, attempt, retry]);
-  return <CatalogContext.Provider value={{ ...state, retry }}>
+  return <CatalogContext.Provider value={{ ...state, retry, productLikes }}>
     {enabled && state.status === "loading" && <p role="status" className="mb-3 text-sm text-ink-muted">{t("showcase.single.catalogLoading")}</p>}
     {enabled && state.status === "error" && <div role="alert" className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
       {t("showcase.single.catalogLoadError")}{" "}

@@ -191,6 +191,8 @@ interface BackendProduct {
   listed?: boolean;
   priceTiers?: PriceTier[];
   savedByMe?: boolean;
+  likesCount?: number;
+  likedByMe?: boolean;
 }
 
 interface BackendManufacturer {
@@ -899,6 +901,10 @@ export function createHttpApi(
 
     async toggleSave(productId: string) {
       return fetchJson<{ saved: boolean }>(`/api/v1/products/${encodeURIComponent(productId)}/save`, { method: "POST" });
+    },
+
+    async toggleLike(productId: string) {
+      return fetchJson<{ liked: boolean; likesCount: number }>(`/api/v1/products/${encodeURIComponent(productId)}/like`, { method: "POST" });
     },
 
     async listSaved(): Promise<Product[]> {
@@ -1885,6 +1891,8 @@ function normalizeProduct(p: BackendProduct): Product {
     stockStatus: p.stockStatus ?? "IN_STOCK",
     priceTiers: (p.priceTiers || []).map((t) => ({ minQty: Number(t.minQty), priceInr: Number(t.priceInr) })),
     savedByMe: p.savedByMe,
+    likesCount: p.likesCount,
+    likedByMe: p.likedByMe,
   };
 }
 
