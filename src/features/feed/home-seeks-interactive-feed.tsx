@@ -18,13 +18,15 @@ import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import type { Category } from "@/entities/category";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedTab } from "@/entities/reel";
-import { getApi } from "@/shared/api";
-import { orderForThisVisit } from "@/features/feed/seen-seeks";
 import { LandscapeReelSkeleton } from "@/components/skeletons";
 import { feedSourceKey } from "@/features/feed/load-feed";
+import { usePagedFeed } from "@/features/feed/use-paged-feed";
+import { CatalogSnapshotProvider } from "@/features/feed/catalog-snapshot-provider";
 import { useViewportLock } from "@/components/reels/use-viewport-lock";
 
 type Props = {
+  /** Server-verified viewer identity; resets viewer-specific catalog state after auth changes. */
+  viewerId?: string;
   /** Server-loaded seeks for the initial tab / subcategory / search (see feedSourceKey). */
   initialItems: FeedItem[];
   roots: Category[];
@@ -40,7 +42,16 @@ type Props = {
   composer?: React.ReactNode;
 };
 
-export function HomeSeeksInteractiveFeed({
+export function HomeSeeksInteractiveFeed(props: Props) {
+  const mode = props.showcase?.mode ?? DEFAULT_SHOWCASE.mode;
+  return (
+    <CatalogSnapshotProvider key={props.viewerId ?? "guest"} enabled={mode === "SINGLE" || mode === "SIDEBAR"}>
+      <HomeSeeksInteractiveFeedContent {...props} />
+    </CatalogSnapshotProvider>
+  );
+}
+
+function HomeSeeksInteractiveFeedContent({
   initialItems,
   roots,
   allCategories,
@@ -169,48 +180,21 @@ export function HomeSeeksInteractiveFeed({
   // - a subcategory or search query → search API (category includes its subcategories)
   // - otherwise the tab feed (Following = factories the signed-in buyer follows)
   // Expanding a root category alone keeps the current seeks visible until a subcategory is chosen.
-  const sourceKey = feedSourceKey(tab, selectedSub?.id ?? "", searchQuery);
-  const [items, setItems] = useState<FeedItem[]>(initialItems);
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const loadedKey = useRef(feedSourceKey(initialTab, initialSubcategoryId(initialSubcategorySlug, allCategories), initialQuery));
-
-  useEffect(() => {
-    if (sourceKey === loadedKey.current) return;
-    let cancelled = false;
-    const q = searchQuery.trim();
-    const subId = selectedSub?.id ?? "";
-    setLoading(true);
-    setLoadError(null);
-    const request =
-      q || subId
-        ? getApi().search.query({ q, category: subId, limit: 50 }).then((res) => res.reels)
-        : getApi().feed.list(tab);
-    request
-      .then((next) => {
-        if (cancelled) return;
-        loadedKey.current = sourceKey;
-        setItems(next);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : t("feed.home.couldNotLoadSeeks"));
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [sourceKey, searchQuery, selectedSub, tab, t]);
-
-  // Every visit (and every new tab, category or search) gets a fresh random order with unwatched
-  // seeks first. Done after mount, not during render, so the server HTML and hydration match;
-  // the order then stays put while scrolling.
-  const [visitOrder, setVisitOrder] = useState<FeedItem[] | null>(null);
-  useEffect(() => {
-    setVisitOrder(orderForThisVisit(items, (item) => item.reel.id));
-  }, [items]);
-  const filteredItems = visitOrder ?? items;
+  const {
+    items: filteredItems,
+    loading,
+    loadingMore,
+    error: loadError,
+    hasMore,
+    loadMore,
+    retry: retryFeed,
+  } = usePagedFeed(
+    initialItems,
+    feedSourceKey(initialTab, initialSubcategoryId(initialSubcategorySlug, allCategories), initialQuery),
+    tab,
+    selectedSub?.id ?? "",
+    searchQuery,
+  );
 
   // Single-seek layouts mix factories' products in between the seeks, from the same source
   const productGroups = useShowcaseProducts({
@@ -331,9 +315,32 @@ export function HomeSeeksInteractiveFeed({
           </div>
         )}
 
+        {!loading && hasMore && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3.5 py-2 text-xs">
+            <span className="text-ink-muted" aria-live="polite">
+              {t("feed.home.loadedSeeks", "{count} seeks loaded", { count: filteredItems.length }).replace("{count}", String(filteredItems.length))}
+            </span>
+            <button
+              type="button"
+              onClick={() => void loadMore()}
+              disabled={loadingMore}
+              className="sf-btn-soft rounded-lg border border-line px-3 py-1.5 font-semibold text-brand-blue disabled:opacity-50"
+            >
+              {loadingMore ? t("feed.home.loadingMore", "Loading…") : t("feed.home.loadMoreSeeks", "Load more seeks")}
+            </button>
+          </div>
+        )}
         {loadError && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-semibold text-rose-700">
+          <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-semibold text-rose-700">
             {loadError}
+            <button type="button" onClick={hasMore ? () => void loadMore() : retryFeed} disabled={loadingMore} className="ml-3 underline disabled:opacity-50">
+              {t("showcase.single.tryAgain", "Try again")}
+            </button>
+            {hasMore && (
+              <button type="button" onClick={retryFeed} className="ml-3 underline">
+                {t("feed.home.refreshFeed", "Refresh feed")}
+              </button>
+            )}
           </div>
         )}
     </>
@@ -435,9 +442,9 @@ export function HomeSeeksInteractiveFeed({
           <LandscapeReelSkeleton />
         </div>
       ) : showcase.mode === "SINGLE" ? (
-        <SingleSeekShowcase items={filteredItems} settings={showcase} header={seeksHeader} productGroups={productGroups} productsKey={searchQuery} />
+        <SingleSeekShowcase items={filteredItems} settings={showcase} header={seeksHeader} productGroups={productGroups} productsKey={searchQuery} productsCategoryId={selectedSub?.id ?? ""} />
       ) : showcase.mode === "SIDEBAR" ? (
-        <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" header={seeksHeader} productGroups={productGroups} productsKey={searchQuery} />
+        <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" header={seeksHeader} productGroups={productGroups} productsKey={searchQuery} productsCategoryId={selectedSub?.id ?? ""} />
       ) : LIST_MODES.has(showcase.mode) ? (
         <ListScroller enabled={filteredItems.length > 0}>
           {showcase.mode === "FEED" ? (

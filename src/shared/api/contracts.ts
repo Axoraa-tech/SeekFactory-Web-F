@@ -87,7 +87,10 @@ export interface SessionRepository {
 }
 
 export interface FeedRepository {
+  /** First page, for server-rendered discovery. */
   list(tab: FeedTab): Promise<FeedItem[]>;
+  /** Backend pages are at most 50 items; a short page marks the end. */
+  listPage(tab: FeedTab, page: number, size?: number): Promise<FeedItem[]>;
   addReel(reel: Reel): Promise<void>;
   /** Same reaction again removes it; another one replaces it. */
   likeReel(reelId: string, reaction?: ReelReaction): Promise<{ liked: boolean; likesCount: number; reaction?: ReelReaction | null }>;

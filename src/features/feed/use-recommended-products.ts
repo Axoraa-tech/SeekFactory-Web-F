@@ -1,49 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { getApi } from "@/shared/api";
-import type { RecommendedProducts } from "@/shared/api/contracts";
-import { getViewerId } from "@/shared/lib/viewer-id";
-import { addRecentSearch, getRecentSearches } from "@/shared/lib/recent-searches";
+import { useCallback, useMemo, useState } from "react";
+import { useCatalogSnapshot } from "./catalog-snapshot-provider";
+import { CATALOG_PAGE_SIZE, selectCatalogProducts } from "./catalog-snapshot";
 
-/** The panel shows at most this many; "View all" leads on to Explore. */
-export const RECOMMENDED_LIMIT = 60;
-
-type State = { status: "loading" | "ready" | "error"; data: RecommendedProducts | null };
-
-/**
- * Products for the feed's side panel, independent of the seek in view: the viewer's interests
- * (activity on the server, recent searches from this browser) first, then trending.
- * `searchTerm` is the feed's current search: it is remembered and the products load again for it
- * (the last list stays up meanwhile). `enabled` false (the panel is switched off) loads nothing.
- */
-export function useRecommendedProducts(searchTerm = "", enabled = true) {
-  const [state, setState] = useState<State>({ status: "loading", data: null });
-  const [attempt, setAttempt] = useState(0);
-
-  useEffect(() => {
-    if (!enabled) return;
-    let cancelled = false;
-    // Recorded here, not by the feed: a child's effects run before its parent's
-    addRecentSearch(searchTerm);
-    setState((s) => ({ status: "loading", data: s.data }));
-    getApi()
-      .products.listRecommended({
-        limit: RECOMMENDED_LIMIT,
-        viewerId: getViewerId(),
-        searchTerms: getRecentSearches(),
-      })
-      .then((data) => {
-        if (!cancelled) setState({ status: "ready", data });
-      })
-      .catch(() => {
-        if (!cancelled) setState((s) => ({ status: "error", data: s.data }));
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [searchTerm, attempt, enabled]);
-
-  const retry = useCallback(() => setAttempt((a) => a + 1), []);
-  return { ...state, retry };
+/** Random catalog order for this visit, not the capped recommendation endpoint. Both desktop
+ * and narrow-strip variants share this hook. Loading another page never changes prior cards. */
+export function useRecommendedProducts(searchTerm = "", enabled = true, categoryId = "") {
+  const { status, snapshot, retry } = useCatalogSnapshot();
+  const source = `${categoryId}\u0000${searchTerm.trim()}`;
+  const [page, setPage] = useState({ source, count: CATALOG_PAGE_SIZE });
+  const count = page.source === source ? page.count : CATALOG_PAGE_SIZE;
+  const products = useMemo(() => snapshot && enabled
+    ? selectCatalogProducts(snapshot, categoryId, searchTerm) : [], [snapshot, enabled, categoryId, searchTerm]);
+  const loadMore = useCallback(() => setPage((previous) => ({
+    source, count: (previous.source === source ? previous.count : CATALOG_PAGE_SIZE) + CATALOG_PAGE_SIZE,
+  })), [source]);
+  const data = snapshot && enabled ? { personalized: false, manufacturers: snapshot.manufacturers, products: products.slice(0, count) } : null;
+  return { status, data, retry, loadMore, hasMore: count < products.length, total: products.length };
 }

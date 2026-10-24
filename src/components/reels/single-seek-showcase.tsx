@@ -37,8 +37,9 @@ type Props = {
   header?: ReactNode;
   /** Factories' products, mixed in between the seeks as auto-sliding cards (see interleave). */
   productGroups?: ProductGroup[];
-  /** The feed's current search: remembered, and the products panel reloads for it. */
+  /** Current search/category filter the same stable catalog snapshot. */
   productsKey?: string;
+  productsCategoryId?: string;
 };
 
 type Entry =
@@ -85,16 +86,16 @@ function interleave(items: FeedItem[], groups: ProductGroup[]): Entry[] {
  *   ≥1280px  [factory profile 280] [seek card, max space] [products 360, 400 from 1400px]
  *   ≥1024px  profile drops out → [seek card] [products 340]
  *   <1024px  cards full width with a horizontal row of product cards above
- * The seek in view drives the profile panel; the products panel is the viewer's own (searches,
- * activity, trending) and never follows the seek. The card plays itself when mostly in view.
+ * The seek in view drives the profile panel; the products panel is a randomly ordered catalog snapshot for this visit
+ * and never follows the seek. The card plays itself when mostly in view.
  *
  * In the "sidebar" variant the factory profile panel is never shown: the site's
  * own left menu occupies that column instead.
  */
-export function SingleSeekShowcase({ items, settings, variant = "single", header, productGroups, productsKey }: Props) {
+export function SingleSeekShowcase({ items, settings, variant = "single", header, productGroups, productsKey, productsCategoryId }: Props) {
   const t = useTranslations();
   // One load for both the desktop column and the small-screen row
-  const recommended = useRecommendedProducts(productsKey, settings.showPhotos);
+  const recommended = useRecommendedProducts(productsKey, settings.showPhotos, productsCategoryId);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const entries = useMemo(() => interleave(items, productGroups ?? []), [items, productGroups]);
   // Side by side from lg on a tall enough window: the page stays put and the seek column fills the
