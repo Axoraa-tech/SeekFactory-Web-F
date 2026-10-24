@@ -691,7 +691,9 @@ export function createHttpApi(
               body: JSON.stringify({ email: input.email, password: input.password }),
             });
       rememberSession(res, portal);
-      const profile = (await currentUserFor(portal)) ?? authResponseToProfile(res);
+      // Login already returns identity. The destination loads the complete profile with the
+      // new HttpOnly session; waiting for /me here adds a serial backend round trip.
+      const profile = authResponseToProfile(res);
       return { ...profile, firstLogin: res.firstLogin === true };
     },
 
@@ -702,7 +704,7 @@ export function createHttpApi(
         body: JSON.stringify({ idToken, role: "Buyer" }),
       });
       rememberSession(res, "buyer");
-      const profile = (await currentUserFor("buyer")) ?? authResponseToProfile(res);
+      const profile = authResponseToProfile(res);
       return { ...profile, firstLogin: res.firstLogin === true };
     },
 
@@ -1921,7 +1923,7 @@ function toProfile(user: BackendUser): BuyerProfile {
   };
 }
 
-/** Fallback when /auth/me cannot be read right after sign-in: only what the auth response carried. */
+/** Identity returned by successful sign-in; destination pages load the complete profile. */
 function authResponseToProfile(res: BackendAuthResponse): BuyerProfile {
   return {
     id: res.user?.id || res.userId || res.user_id || "",
