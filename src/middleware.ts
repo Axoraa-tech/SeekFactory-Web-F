@@ -24,6 +24,10 @@ import {
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  // Admin has its own HttpOnly cookie and backend password/TOTP flow. An unrelated
+  // expired marketplace session must not hold admin login or admin API calls up.
+  const isAdminContext = pathname === "/admin" || pathname.startsWith("/admin/") ||
+    pathname === "/api/admin" || pathname.startsWith("/api/admin/");
 
   // Protect Admin routes.
   if (
@@ -63,7 +67,7 @@ export async function middleware(request: NextRequest) {
   let tokens: TokenPair | null = null;
   let sessionEnded = false;
   const refreshToken = request.cookies.get(names.refresh)?.value;
-  if (refreshToken && isExpired(request.cookies.get(names.access)?.value)) {
+  if (!isAdminContext && refreshToken && isExpired(request.cookies.get(names.access)?.value)) {
     tokens = await refreshTokens(refreshToken);
     sessionEnded = !tokens;
     // Make the outcome visible to server components rendering this same request
