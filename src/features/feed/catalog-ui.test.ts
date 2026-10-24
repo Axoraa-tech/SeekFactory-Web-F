@@ -38,6 +38,18 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
 describe("catalog photo panel", () => {
+  it("shares a product from a separate button without following its card link", async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "share", { configurable: true, value: share });
+    render(h(Browse));
+    await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(24));
+    const control = screen.getAllByRole("button", { name: "showcase.single.shareProduct" })[0];
+    expect(control.closest("a")).toBeNull();
+    const href = control.closest("article")!.querySelector("a")!.getAttribute("href");
+    fireEvent.click(control);
+    await waitFor(() => expect(share).toHaveBeenCalledWith({ title: expect.any(String), url: `${window.location.origin}${href}` }));
+    await waitFor(() => expect(screen.getByText("showcase.single.productShared")).toBeTruthy());
+  });
   it("reaches all634 unique products in stable24-card pages and survives LINE/SIDE variant changes", async () => {
     const view = render(h(Browse));
     await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(24));

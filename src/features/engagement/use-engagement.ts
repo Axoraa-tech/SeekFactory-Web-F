@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getApi } from "@/shared/api";
 import { ApiError } from "@/shared/api/http-api";
+import { shareLink } from "@/shared/lib/share-link";
 import { setFollowed, useFollowedState } from "@/features/engagement/follow-store";
 import type { Reel, ReelReaction } from "@/entities/reel";
 
@@ -87,11 +88,7 @@ export function useReelEngagement(reel: Reel | undefined) {
     if (!reel) return;
     const url = window.location.href;
     try {
-      if (navigator.share) {
-        await navigator.share({ title: reel.title, url });
-      } else {
-        await navigator.clipboard.writeText(url);
-      }
+      await shareLink(reel.title, url);
     } catch {
       return; // share sheet dismissed
     }
