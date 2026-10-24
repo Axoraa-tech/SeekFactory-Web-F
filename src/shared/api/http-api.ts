@@ -761,7 +761,14 @@ export function createHttpApi(
   // ── 2. FEED REPOSITORY ─────────────────────────────────────────
   const feed: FeedRepository = {
     async list(tab: FeedTab) {
-      const data = await fetchJson<BackendFeedItem[]>(`/api/v1/feed?tab=${tab}`, { cache: "no-store" });
+      return feed.listPage(tab, 0);
+    },
+
+    async listPage(tab: FeedTab, page: number, size = 50) {
+      const safePage = Number.isFinite(page) ? Math.max(0, Math.floor(page)) : 0;
+      const safeSize = Number.isFinite(size) ? Math.max(1, Math.min(50, Math.floor(size))) : 50;
+      const params = new URLSearchParams({ tab, page: String(safePage), size: String(safeSize) });
+      const data = await fetchJson<BackendFeedItem[]>(`/api/v1/feed?${params}`, { cache: "no-store" });
       return data.map((item) => normalizeFeedItem(item, tab));
     },
 

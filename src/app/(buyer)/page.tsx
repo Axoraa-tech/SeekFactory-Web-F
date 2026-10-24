@@ -41,6 +41,7 @@ export default async function HomePage({ searchParams }: Props) {
 
   return (
     <HomeSeeksInteractiveFeed
+      viewerId={user?.id ?? ""}
       initialItems={items}
       roots={roots}
       allCategories={allCategories}

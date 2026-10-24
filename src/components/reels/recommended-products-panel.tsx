@@ -4,7 +4,7 @@ import { SupplierName } from "@/features/subscription";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Sparkles, TrendingUp, Zap, FileText } from "lucide-react";
+import { PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Shuffle, Zap, FileText } from "lucide-react";
 import { ProductImageCarousel } from "@/components/products/product-image-carousel";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -28,19 +28,26 @@ type Props = {
 };
 
 /**
- * Products for the viewer, unrelated to the seek in view: matched to their searches and activity
- * first, then trending. Up to 60, then a link on to Explore.
+ * Random catalog snapshot with stable client-side pages. No top-60 stopping point.
  */
 export function RecommendedProductsPanel({ variant, recommended }: Props) {
   const { t } = useRegionalSettings();
-  const { status, data, retry } = recommended;
+  const { status, data, retry, loadMore, hasMore, total } = recommended;
   const products = data?.products ?? [];
   const factories = new Map((data?.manufacturers ?? []).map((m) => [m.id, m]));
-  const personalized = data?.personalized ?? false;
-
-  const title = personalized ? t("showcase.single.productsForYou") : t("showcase.single.trendingProducts");
-  const hint = personalized ? t("showcase.single.productsForYouHint") : t("showcase.single.trendingProductsHint");
-  const TitleIcon = personalized ? Sparkles : TrendingUp;
+  const title = t("showcase.single.catalogProducts");
+  const hint = t("showcase.single.catalogProductsHint");
+  const TitleIcon = Shuffle;
+  const pagination = status === "ready" && products.length > 0 ? (
+    <div className="shrink-0 space-y-2 p-2 text-center" aria-live="polite">
+      <p className="text-[11px] text-ink-muted">{t("showcase.single.catalogProgress", { count: products.length, total })}</p>
+      {hasMore ? (
+        <button type="button" onClick={loadMore} className="sf-btn-soft inline-flex h-10 items-center justify-center rounded-xl border border-brand-orange/30 bg-brand-orange-soft px-4 text-sm font-semibold text-brand-orange">
+          {t("showcase.single.loadMoreProducts")}
+        </button>
+      ) : <p className="text-[11px] text-ink-muted">{t("showcase.single.catalogComplete")}</p>}
+    </div>
+  ) : null;
 
   const body =
     products.length > 0 ? (
@@ -81,7 +88,7 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
             {t("showcase.single.viewAllProducts")}
           </Link>
         </div>
-        <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none">{body}</div>
+        <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none">{body}{pagination}</div>
       </section>
     );
   }
@@ -110,20 +117,7 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
         className="scrollbar-subtle min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain p-3"
       >
         {body}
-        {products.length > 0 && (
-          <div className="pt-1 pb-0.5 text-center">
-            <p className="mb-2 text-[11px] text-ink-muted">
-              {t("showcase.single.seenAllProducts", { count: products.length })}
-            </p>
-            <Link
-              href="/explore"
-              className="sf-btn-nav inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-brand-orange/30 bg-brand-orange-soft text-sm font-semibold text-brand-orange transition hover:bg-brand-orange hover:text-white"
-            >
-              {t("showcase.single.viewAllProducts")}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        )}
+        {pagination}
       </div>
     </section>
   );
