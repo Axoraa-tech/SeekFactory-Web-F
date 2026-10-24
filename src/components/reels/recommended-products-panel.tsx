@@ -4,7 +4,9 @@ import { SupplierName } from "@/features/subscription";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Shuffle, Zap, FileText } from "lucide-react";
+import { PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Shuffle, Zap, FileText, Pause, Play, Repeat2 } from "lucide-react";
+import { usePhotoPanelMotion } from "@/hooks/use-photo-panel-motion";
+import { useProductShare } from "@/features/engagement/use-product-share";
 import { ProductImageCarousel } from "@/components/products/product-image-carousel";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
@@ -34,6 +36,14 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
   const { t } = useRegionalSettings();
   const { status, data, retry, loadMore, hasMore, total } = recommended;
   const products = data?.products ?? [];
+  const motion = usePhotoPanelMotion(variant === "strip", products.length, hasMore);
+  const motionControl = products.length > 1 ? (
+    <button type="button" onClick={motion.togglePaused} aria-pressed={motion.paused}
+      aria-label={t(motion.paused ? "showcase.single.resumePhotos" : "showcase.single.pausePhotos")}
+      className="sf-btn-toggle ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line text-ink-muted hover:text-brand-orange">
+      {motion.paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+    </button>
+  ) : null;
   const factories = new Map((data?.manufacturers ?? []).map((m) => [m.id, m]));
   const title = t("showcase.single.catalogProducts");
   const hint = t("showcase.single.catalogProductsHint");
@@ -84,11 +94,12 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
             <TitleIcon className="h-4 w-4 text-brand-orange" />
             {title}
           </h2>
+          {motionControl}
           <Link href="/explore" className="shrink-0 text-xs font-semibold text-brand-orange hover:underline">
             {t("showcase.single.viewAllProducts")}
           </Link>
         </div>
-        <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none">{body}{pagination}</div>
+        <div ref={motion.ref} className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-none">{body}{pagination}</div>
       </section>
     );
   }
@@ -109,10 +120,12 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
           <h2 className="truncate text-sm font-bold text-ink">{title}</h2>
           <p className="truncate text-[11px] text-ink-muted">{hint}</p>
         </div>
+        {motionControl}
       </header>
 
       {/* overscroll-contain: the wheel scrolls only the products, never the seeks or the page */}
       <div
+        ref={motion.ref}
         data-prevent-seek-wheel
         className="scrollbar-subtle min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain p-3"
       >
@@ -138,6 +151,7 @@ function RecommendedProductCard({
   const { t, formatPrice, translateUnit } = useRegionalSettings();
   const router = useRouter();
   const [cartOpen, setCartOpen] = useState(false);
+  const sharing = useProductShare(p.slug, p.name);
   const href = `/products/${p.slug}`;
   const images = p.imageUrls?.length ? p.imageUrls : [p.imageUrl];
   const hasPrice = p.priceInr > 0;
@@ -145,6 +159,7 @@ function RecommendedProductCard({
 
   return (
     <article
+      data-photo-interaction={cartOpen || sharing.pending || undefined}
       className={cn(
         "group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white transition-all hover:border-brand-orange/40 hover:shadow-md",
         compact && "w-64 shrink-0 snap-start",
@@ -172,6 +187,16 @@ function RecommendedProductCard({
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-3">
+        <div className="flex items-center gap-2">
+          <button type="button" disabled={sharing.pending} onClick={(event) => { event.stopPropagation(); void sharing.share(); }}
+            aria-label={t("showcase.single.shareProduct")} title={t("showcase.single.shareProduct")}
+            className="sf-btn-toggle inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-ink-muted hover:bg-canvas disabled:opacity-50">
+            <Repeat2 className="h-4 w-4" />{t("showcase.single.shareProduct")}
+          </button>
+          <span role="status" className="text-[11px] text-ink-muted">
+            {sharing.status === "shared" ? t("showcase.single.productShared") : sharing.status === "error" ? t("showcase.single.productShareFailed") : ""}
+          </span>
+        </div>
         <Link
           href={href}
           className="line-clamp-2 text-sm font-bold leading-snug text-ink transition group-hover:text-brand-orange"
