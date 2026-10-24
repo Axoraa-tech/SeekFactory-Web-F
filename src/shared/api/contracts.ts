@@ -118,6 +118,7 @@ export interface ProductRepository {
   /** Products in the category or any of its subcategories (id or slug). */
   listByCategory(categoryId: string): Promise<Product[]>;
   toggleSave(productId: string): Promise<{ saved: boolean }>;
+  toggleLike(productId: string): Promise<{ liked: boolean; likesCount: number }>;
   /** Products the signed-in user saved. */
   listSaved(): Promise<Product[]>;
   /**

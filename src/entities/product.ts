@@ -32,4 +32,7 @@ export type Product = {
   priceTiers?: PriceTier[];
   /** Signed-in viewer's own state; undefined for guests. */
   savedByMe?: boolean;
+  /** Persisted product engagement, supplied by the product API (never seek IDs). */
+  likesCount?: number;
+  likedByMe?: boolean;
 };

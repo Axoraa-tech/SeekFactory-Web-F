@@ -4,7 +4,9 @@ import { SupplierName } from "@/features/subscription";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Shuffle, Zap, FileText, Pause, Play, Repeat2 } from "lucide-react";
+import { PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Shuffle, Zap, FileText, Pause, Play, Repeat2, Heart } from "lucide-react";
+import { useCatalogSnapshot } from "@/features/feed/catalog-snapshot-provider";
+import { formatCount } from "@/shared/lib/format";
 import { usePhotoPanelMotion } from "@/hooks/use-photo-panel-motion";
 import { useProductShare } from "@/features/engagement/use-product-share";
 import { ProductImageCarousel } from "@/components/products/product-image-carousel";
@@ -152,6 +154,8 @@ function RecommendedProductCard({
   const router = useRouter();
   const [cartOpen, setCartOpen] = useState(false);
   const sharing = useProductShare(p.slug, p.name);
+  const { productLikes } = useCatalogSnapshot();
+  const like = productLikes.getState(p);
   const href = `/products/${p.slug}`;
   const images = p.imageUrls?.length ? p.imageUrls : [p.imageUrl];
   const hasPrice = p.priceInr > 0;
@@ -159,7 +163,7 @@ function RecommendedProductCard({
 
   return (
     <article
-      data-photo-interaction={cartOpen || sharing.pending || undefined}
+      data-photo-interaction={cartOpen || sharing.pending || like.pending || undefined}
       className={cn(
         "group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white transition-all hover:border-brand-orange/40 hover:shadow-md",
         compact && "w-64 shrink-0 snap-start",
@@ -188,6 +192,14 @@ function RecommendedProductCard({
 
       <div className="flex flex-1 flex-col gap-2 p-3">
         <div className="flex items-center gap-2">
+          <button type="button" disabled={like.pending || like.likes === undefined}
+            onClick={(event) => { event.stopPropagation(); void productLikes.toggleLike(p); }}
+            aria-pressed={like.liked} aria-label={t(like.liked ? "showcase.single.unlikeProduct" : "showcase.single.likeProduct")}
+            title={t(like.likes === undefined ? "showcase.single.productLikesUnavailable" : like.liked ? "showcase.single.unlikeProduct" : "showcase.single.likeProduct")}
+            className={cn("sf-btn-toggle inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold hover:bg-canvas disabled:opacity-50", like.liked ? "text-rose-600" : "text-ink-muted")}>
+            <Heart className={cn("h-4 w-4", like.liked && "fill-rose-500")} />
+            {like.likes !== undefined && <span className="tabular-nums">{formatCount(like.likes)}</span>}
+          </button>
           <button type="button" disabled={sharing.pending} onClick={(event) => { event.stopPropagation(); void sharing.share(); }}
             aria-label={t("showcase.single.shareProduct")} title={t("showcase.single.shareProduct")}
             className="sf-btn-toggle inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-ink-muted hover:bg-canvas disabled:opacity-50">
@@ -197,6 +209,7 @@ function RecommendedProductCard({
             {sharing.status === "shared" ? t("showcase.single.productShared") : sharing.status === "error" ? t("showcase.single.productShareFailed") : ""}
           </span>
         </div>
+        {like.error && <p role="alert" className="text-[11px] text-rose-600">{t("showcase.single.productLikeFailed")}</p>}
         <Link
           href={href}
           className="line-clamp-2 text-sm font-bold leading-snug text-ink transition group-hover:text-brand-orange"

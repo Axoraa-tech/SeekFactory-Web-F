@@ -6,19 +6,19 @@ import { CatalogSnapshotProvider } from "./catalog-snapshot-provider";
 import { useRecommendedProducts } from "./use-recommended-products";
 import { RecommendedProductsPanel } from "@/components/reels/recommended-products-panel";
 
-const mocks = vi.hoisted(() => ({ viewer: "", api: { categories: { list: vi.fn() }, products: { listByCategory: vi.fn() }, manufacturers: { listAll: vi.fn() } } }));
+const mocks = vi.hoisted(() => ({ viewer: "", api: { categories: { list: vi.fn() }, products: { listByCategory: vi.fn(), toggleLike: vi.fn() }, manufacturers: { listAll: vi.fn() } } }));
 vi.mock("@/shared/api", () => ({ getApi: () => mocks.api }));
 vi.mock("@/features/auth/session-cookie", () => ({ readBrowserCookie: () => mocks.viewer ? { id: mocks.viewer } : null }));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("@/shared/i18n/regional-context", () => ({ useRegionalSettings: () => ({ t: (key: string, args?: unknown) => key + (args && typeof args === "object" ? JSON.stringify(args) : ""), formatPrice: () => "100", translateUnit: (unit: string) => unit }) }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("next/link", () => ({ default: ({ children, ...props }: { children: ReactNode }) => h("a", props, children) }));
 vi.mock("@/features/subscription", () => ({ SupplierName: ({ name }: { name: string }) => name }));
 vi.mock("@/components/reels/supplier-lock-overlay", () => ({ SupplierLockOverlay: ({ children }: { children: ReactNode }) => children }));
 vi.mock("@/components/products/product-image-carousel", () => ({ ProductImageCarousel: () => null }));
 vi.mock("@/features/orders/add-to-cart-modal", () => ({ AddToCartModal: () => null }));
 
-const products = Array.from({ length: 634 }, (_, i) => ({ id: `p${i}`, slug: `product-${i}`, name: `Product ${i}`, description: "machine", categoryId: `c${i % 20}`, manufacturerId: "m", imageUrl: "/image.svg", priceInr: 100, unit: "piece", listed: true }));
+const products = Array.from({ length: 634 }, (_, i) => ({ id: `p${i}`, slug: `product-${i}`, name: `Product ${i}`, description: "machine", categoryId: `c${i % 20}`, manufacturerId: "m", imageUrl: "/image.svg", priceInr: 100, unit: "piece", listed: true, likesCount: 5, likedByMe: false }));
 function Panel({ variant = "column", query = "" }: { variant?: "column" | "strip"; query?: string }) {
   const recommended = useRecommendedProducts(query);
   return h(RecommendedProductsPanel, { variant, recommended });
@@ -34,10 +34,24 @@ beforeEach(() => {
   mocks.api.categories.list.mockReset().mockResolvedValue(Array.from({ length: 20 }, (_, i) => ({ id: `c${i}`, slug: `c${i}`, parentId: null })));
   mocks.api.manufacturers.listAll.mockReset().mockResolvedValue([{ id: "m", slug: "m", name: "Factory", verified: true }]);
   mocks.api.products.listByCategory.mockReset().mockImplementation(async (id: string) => products.filter((p) => p.categoryId === id));
+  mocks.api.products.toggleLike.mockReset().mockResolvedValue({ liked: true, likesCount: 8 });
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
 describe("catalog photo panel", () => {
+  it("shares product likes between desktop and strip layouts without reshuffling or link navigation", async () => {
+    const view = render(h(Browse));
+    await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(24));
+    const order = ids();
+    const control = screen.getAllByRole("button", { name: "showcase.single.likeProduct" })[0];
+    expect(control.closest("a")).toBeNull();
+    fireEvent.click(control);
+    await waitFor(() => expect(screen.getByRole("button", { name: "showcase.single.unlikeProduct" }).textContent).toBe("8"));
+    view.rerender(h(Browse, { variant: "strip" }));
+    expect(screen.getByRole("button", { name: "showcase.single.unlikeProduct" }).getAttribute("aria-pressed")).toBe("true");
+    expect(ids()).toEqual(order);
+    expect(mocks.api.products.toggleLike).toHaveBeenCalledTimes(1);
+  });
   it("shares a product from a separate button without following its card link", async () => {
     const share = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "share", { configurable: true, value: share });
