@@ -38,48 +38,6 @@ export function AlibabaCertSection({
   onInspect,
 }: AlibabaCertSectionProps) {
   const t = useTranslations();
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [startIndex, setStartIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(3);
-
-  // Responsive visible count
-  React.useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setVisibleCount(1);
-      } else if (window.innerWidth < 1024) {
-        setVisibleCount(2);
-      } else {
-        setVisibleCount(3);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const canGoPrev = startIndex > 0;
-  const canGoNext = startIndex + visibleCount < certificates.length;
-
-  const handleCopy = (e: React.MouseEvent, certNumber: string, id: string) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(certNumber);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 1500);
-  };
-
-  const handlePrev = () => {
-    if (canGoPrev) {
-      setStartIndex((prev) => Math.max(0, prev - 1));
-    }
-  };
-
-  const handleNext = () => {
-    if (canGoNext) {
-      setStartIndex((prev) => Math.min(certificates.length - visibleCount, prev + 1));
-    }
-  };
-
   const founded = manufacturer.yearsEstablished || null;
   const yearsInIndustry = founded ? Math.max(0, new Date().getFullYear() - founded) : null;
   const exportMarkets = manufacturer.exportCountries?.filter(Boolean) ?? [];
@@ -144,11 +102,71 @@ export function AlibabaCertSection({
         </div>
       </div>
 
-      {/* Certifications Row: Left Label "Certifications", Right Certificate Document Cards */}
+      {([
+        { headingKey: "profile.certs.businessDocuments", items: certificates.filter((cert) => cert.category === "Business Registration") },
+        { headingKey: "profile.certs.certifications", items: certificates.filter((cert) => CERTIFICATION_CATEGORIES.has(cert.category ?? "")) },
+        { headingKey: "profile.certs.otherDocuments", items: certificates.filter((cert) => cert.category !== "Business Registration" && !CERTIFICATION_CATEGORIES.has(cert.category ?? "")) },
+      ]).filter((group) => group.items.length > 0 || (certificates.length === 0 && group.headingKey === "profile.certs.certifications")).map((group) => (
+        <CertificateRow key={group.headingKey} certificates={group.items} headingKey={group.headingKey} isOwner={isOwner} onDeleteCertificate={onDeleteCertificate} onInspect={onInspect} />
+      ))}
+    </div>
+  );
+}
+
+
+const CERTIFICATION_CATEGORIES = new Set(["Quality", "Safety & CE", "Environmental", "Audit Report", "Honor"]);
+
+function CertificateRow({ certificates, headingKey, isOwner, onDeleteCertificate, onInspect }: Pick<AlibabaCertSectionProps, "certificates" | "isOwner" | "onDeleteCertificate" | "onInspect"> & { headingKey: string }) {
+  const t = useTranslations();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [startIndex, setStartIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
+
+  // Responsive visible count
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCount(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCount(2);
+      } else {
+        setVisibleCount(3);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const displayStart = Math.min(startIndex, Math.max(0, certificates.length - visibleCount));
+  const canGoPrev = displayStart > 0;
+  const canGoNext = displayStart + visibleCount < certificates.length;
+
+  const handleCopy = (e: React.MouseEvent, certNumber: string, id: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(certNumber);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
+  };
+
+  const handlePrev = () => {
+    if (canGoPrev) {
+      setStartIndex(Math.max(0, displayStart - 1));
+    }
+  };
+
+  const handleNext = () => {
+    if (canGoNext) {
+      setStartIndex(Math.min(certificates.length - visibleCount, displayStart + 1));
+    }
+  };
+
+
+  return (
       <div className="pt-6">
         <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
           <div className="text-sm font-bold text-slate-900 pt-2">
-            {t("profile.certs.certifications")}
+            {t(headingKey)}
           </div>
 
           <div className="relative">
@@ -187,8 +205,9 @@ export function AlibabaCertSection({
 
             {/* Certificate Cards Container */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {certificates.slice(startIndex, startIndex + visibleCount).map((cert) => {
-                const shortCertTitle = cert.title.split(" ")[0] + " " + (cert.title.split(" ")[1] || "");
+              {certificates.slice(displayStart, displayStart + visibleCount).map((cert) => {
+                const title = cert.title?.trim() || t("profile.certModal.document");
+                const shortCertTitle = title;
                 const isCopied = copiedId === cert.id;
 
                 return (
@@ -201,7 +220,7 @@ export function AlibabaCertSection({
                     <div className="relative aspect-[3/4] w-full rounded-md overflow-hidden bg-white border border-slate-200 shadow-2xs flex items-center justify-center p-1.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img loading="lazy" decoding="async" src={cert.imageUrl}
-                        alt={cert.title}
+                        alt={title}
                         className="h-full w-full object-contain rounded-xs transition-transform duration-200 group-hover:scale-102"
                       />
 
@@ -219,21 +238,22 @@ export function AlibabaCertSection({
                       {/* Logo Badge + Short Name */}
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="rounded bg-[#0052cc]/10 px-1.5 py-0.5 text-[10px] font-extrabold text-[#0052cc]">
-                          {cert.title.toUpperCase().startsWith("ISO") ? "ISO" : "CERT"}
+                          {headingKey === "profile.certs.businessDocuments" ? t("profile.certs.businessDocumentBadge") : t("profile.certModal.document")}
                         </span>
                         <h4 className="text-xs font-bold text-slate-900 truncate">
                           {shortCertTitle}
                         </h4>
                       </div>
 
+                      <p className="text-[11px] text-slate-500">{t(cert.verified === true ? "profile.certs.verifiedBySeekfactory" : "profile.certModal.unverifiedDocument")}</p>
                       {/* Certificate Number + Copy Icon */}
                       <div className="flex items-center justify-between text-slate-500 text-[11px] pt-1">
                         <span className="truncate max-w-[140px] font-mono text-[11px]">
-                          {cert.certNumber || t("profile.certs.declaredByFactory")}
+                          {cert.certNumber?.trim() || t("common.notProvided")}
                         </span>
 
                         <div className="flex items-center gap-1">
-                          {cert.certNumber && (
+                          {cert.certNumber?.trim() && (
                           <button
                             type="button"
                             onClick={(e) => handleCopy(e, cert.certNumber, cert.id)}
@@ -271,7 +291,6 @@ export function AlibabaCertSection({
           </div>
         </div>
       </div>
-    </div>
+
   );
 }
-
