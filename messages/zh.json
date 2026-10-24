@@ -305,6 +305,8 @@
       "viewManufacturers": "查看制造商",
       "directOemOdmAuditedFactories": "直连经审核的 OEM / ODM 工厂",
       "showFewerManufacturers": "收起制造商",
+      "catalogProgress": "已显示 {count} / {total} 家匹配制造商",
+      "loadMoreManufacturers": "加载更多制造商",
       "viewAllManufacturers": "查看全部 {length} 家制造商",
       "viewAll": "查看全部（{length}）",
       "viewVerifiedManufacturers": "查看认证制造商",

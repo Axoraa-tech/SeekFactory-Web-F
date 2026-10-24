@@ -819,7 +819,7 @@ export function createHttpApi(
   // ── 3. MANUFACTURER REPOSITORY ─────────────────────────────────
   const manufacturers: ManufacturerRepository = {
     async listAll(): Promise<Manufacturer[]> {
-      const list = await fetchJson<BackendManufacturer[]>("/api/v1/manufacturers");
+      const list = await fetchJson<BackendManufacturer[]>("/api/v1/manufacturers", { cache: "no-store" });
       return list.map(normalizeManufacturer);
     },
 
