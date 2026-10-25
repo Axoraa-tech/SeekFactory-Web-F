@@ -117,6 +117,11 @@ export interface ProductRepository {
   getBySlug(slug: string): Promise<ProductDetail | null>;
   /** Products in the category or any of its subcategories (id or slug). */
   listByCategory(categoryId: string): Promise<Product[]>;
+  /**
+   * Every buyer-visible product in one request (the feed's complete catalogue). Optional so
+   * callers can fall back to one listByCategory per top-level category on an older backend.
+   */
+  listCatalog?(): Promise<Product[]>;
   toggleSave(productId: string): Promise<{ saved: boolean }>;
   toggleLike(productId: string): Promise<{ liked: boolean; likesCount: number }>;
   /** Products the signed-in user saved. */
@@ -220,7 +225,8 @@ export interface CommentRepository {
 
 export interface SearchRepository {
   /** Searches products, factories and seeks. category = id or slug and includes subcategories. */
-  query(params: { q?: string; category?: string; limit?: number }): Promise<SearchResult>;
+  /** `types` limits what is searched (e.g. Explore shows no seeks); omitted means everything. */
+  query(params: { q?: string; category?: string; limit?: number; types?: ("products" | "manufacturers" | "reels")[] }): Promise<SearchResult>;
 }
 
 export type UploadKind = "image" | "document";

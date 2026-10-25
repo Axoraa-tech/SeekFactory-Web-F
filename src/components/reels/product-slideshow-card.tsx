@@ -12,6 +12,7 @@ import { useFollow } from "@/features/engagement/use-engagement";
 import { cn } from "@/shared/lib/cn";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
+import { mediaThumb } from "@/shared/api/http-api";
 
 /** How long each product stays up before the next one slides in. */
 const SLIDE_MS = 3500;
@@ -94,12 +95,12 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
         {/* Header: the factory, as on a seek */}
         <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
           <div className={cn("flex items-center justify-between gap-x-3 gap-y-2", fill ? "h-10 flex-nowrap" : "flex-wrap")}>
-            <Link href={`/manufacturers/${manufacturer.slug}`} className="flex min-w-0 flex-1 items-center gap-3 transition hover:opacity-90">
+            <Link prefetch={false} href={`/manufacturers/${manufacturer.slug}`} className="flex min-w-0 flex-1 items-center gap-3 transition hover:opacity-90">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 loading="lazy"
                 decoding="async"
-                src={manufacturer.logoUrl}
+                src={mediaThumb(manufacturer.logoUrl, 160)}
                 alt=""
                 className="h-10 w-10 shrink-0 rounded-lg border border-neutral-200 object-cover shadow-xs"
               />
@@ -145,7 +146,7 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
             <ShoppingBag className="h-3 w-3" />
             {t("showcase.products.badge")}
           </span>
-          <Link href={`/products/${product.slug}`} title={product.name} className="min-w-0 truncate text-base font-bold leading-snug text-ink hover:underline">
+          <Link prefetch={false} href={`/products/${product.slug}`} title={product.name} className="min-w-0 truncate text-base font-bold leading-snug text-ink hover:underline">
             {product.name}
           </Link>
         </div>
@@ -157,8 +158,12 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
             fill ? "!flex-1 min-h-[160px] max-h-[56.25cqw]" : "aspect-[16/9]",
           )}
         >
-          {products.map((p, i) => (
-            <Link
+          {products.map((p, i) => {
+            // Only the photo on show and its neighbours are rendered: a card far down the
+            // feed must not download every product photo up front
+            const near = i === safeIndex || i === (safeIndex + 1) % count || i === (safeIndex - 1 + count) % count;
+            return (
+            <Link prefetch={false}
               key={p.id}
               href={`/products/${p.slug}`}
               tabIndex={i === safeIndex ? 0 : -1}
@@ -166,20 +171,26 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
               className={cn("absolute inset-0 transition-opacity duration-500", i === safeIndex ? "opacity-100" : "pointer-events-none opacity-0")}
             >
               {/* Blurred copy fills the frame; the product itself is shown whole on top */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.imageUrl} alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={p.imageUrl}
-                alt={p.name}
-                loading={Math.abs(i - safeIndex) <= 1 ? "eager" : "lazy"}
-                className="relative h-full w-full object-contain"
-              />
+              {near && (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={mediaThumb(p.imageUrl, 160)} alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={mediaThumb(p.imageUrl, 1280)}
+                    alt={p.name}
+                    // Up front only while this card is the one in view (the next slide is ready to fade in)
+                    loading={visible ? "eager" : "lazy"}
+                    className="relative h-full w-full object-contain"
+                  />
+                </>
+              )}
               {p.stockStatus === "OUT_OF_STOCK" && (
                 <span className="absolute left-3 top-6 rounded-full bg-rose-600/90 px-2 py-0.5 text-[10px] font-bold text-white">{t("stock.outOfStock")}</span>
               )}
             </Link>
-          ))}
+            );
+          })}
 
           {/* Progress: one bar per product, the current one filling up */}
           {count > 1 && (
@@ -261,7 +272,7 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
         {/* Bottom bar, the same height as a seek's engagement bar */}
         <div className="glass-tile flex h-[34px] items-center justify-between rounded-2xl px-3 text-xs">
           <span className="truncate text-ink-muted"><SupplierName name={manufacturer.name} /></span>
-          <Link href={`/products/${product.slug}`} className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-brand-blue hover:underline">
+          <Link prefetch={false} href={`/products/${product.slug}`} className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-brand-blue hover:underline">
             {t("showcase.products.viewProduct")}
             <ChevronRight className="h-3.5 w-3.5" />
           </Link>

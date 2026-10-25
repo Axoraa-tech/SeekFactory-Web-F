@@ -19,6 +19,7 @@ import { cn } from "@/shared/lib/cn";
 import { LogoutButton } from "@/features/auth/logout-button";
 import type { SellerTab, SellerFactoryProfile } from "../types";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   activeTab: SellerTab;
@@ -299,7 +300,7 @@ export function SalesproSidebar({
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative h-9 w-9 rounded-full overflow-hidden border border-[#E6E8EB] shrink-0 bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
             {profile.logoUrl && !profile.logoUrl.includes('default.png') ? (
-              <img loading="lazy" decoding="async" src={profile.logoUrl} alt={profile.name} className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={mediaThumb(profile.logoUrl, 160)} alt={profile.name} className="h-full w-full object-cover" />
             ) : (
               <span>{profile.name.charAt(0).toUpperCase()}</span>
             )}

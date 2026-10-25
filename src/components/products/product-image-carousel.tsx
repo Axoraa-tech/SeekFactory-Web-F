@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/lib/cn";
 import { SafeImage } from "@/components/ui/safe-image";
+import { mediaThumb, type MediaThumbWidth } from "@/shared/api/http-api";
 
 type Props = {
   images: string[];
@@ -14,6 +15,10 @@ type Props = {
   className?: string;
   /** false: photos only move with the arrows, dots or a swipe (e.g. a long list of cards). */
   autoplay?: boolean;
+  /** Photo size to load: cards show ~400 px, so a 640 px copy instead of the full original. */
+  thumbWidth?: MediaThumbWidth;
+  /** Time each photo stays up while sliding by itself. */
+  intervalMs?: number;
 };
 
 const AUTOPLAY_MS = 3200;
@@ -24,7 +29,15 @@ const SWIPE_PX = 40;
  * be moved with the arrows, the dots or a swipe. Moving the photos never opens the product; a
  * plain click still does. Only the first photo loads up front; each next one loads as it comes up.
  */
-export function ProductImageCarousel({ images, alt, index = 0, className, autoplay = true }: Props) {
+export function ProductImageCarousel({
+  images,
+  alt,
+  index = 0,
+  className,
+  autoplay = true,
+  thumbWidth = 640,
+  intervalMs = AUTOPLAY_MS,
+}: Props) {
   const t = useTranslations();
   const photos = images.filter(Boolean);
   const count = photos.length;
@@ -55,13 +68,13 @@ export function ProductImageCarousel({ images, alt, index = 0, className, autopl
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let timer: number | undefined;
     const delay = window.setTimeout(() => {
-      timer = window.setInterval(() => setCurrent((i) => (i + 1) % count), AUTOPLAY_MS);
+      timer = window.setInterval(() => setCurrent((i) => (i + 1) % count), intervalMs);
     }, (index % 4) * 600);
     return () => {
       window.clearTimeout(delay);
       if (timer !== undefined) window.clearInterval(timer);
     };
-  }, [inView, paused, count, index]);
+  }, [inView, paused, count, index, intervalMs]);
 
   if (count === 0) return <div className={cn("h-full w-full bg-neutral-100", className)} />;
 
@@ -116,7 +129,7 @@ export function ProductImageCarousel({ images, alt, index = 0, className, autopl
             {/* A dead photo link shows a neutral tile instead of an empty box or raw alt text */}
             {i <= reached + 1 || i === count - 1 ? (
               <SafeImage
-                src={src}
+                src={mediaThumb(src, thumbWidth)}
                 alt={i === 0 ? alt : `${alt} (${i + 1}/${count})`}
                 className="pointer-events-none h-full w-full object-cover"
               />

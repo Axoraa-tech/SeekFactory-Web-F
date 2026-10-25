@@ -13,6 +13,7 @@ import { Price } from "@/components/ui/price";
 import { SupplierName } from "@/features/subscription";
 import { PAYMENT_NOTE, formatMoney } from "@/features/orders/order-status";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   user: BuyerProfile;
@@ -127,7 +128,7 @@ export function CartView({ user, initialCart }: Props) {
         {groups.map((items) => (
           <section key={items[0].manufacturer.id} className="rounded-2xl border border-line bg-white shadow-2xs overflow-hidden">
             <header className="flex items-center justify-between gap-3 border-b border-line bg-canvas/60 px-4 py-2.5">
-              <Link
+              <Link prefetch={false}
                 href={`/manufacturers/${items[0].manufacturer.slug}`}
                 className="text-xs font-bold text-ink hover:text-brand-orange transition-colors truncate"
               >
@@ -152,12 +153,12 @@ export function CartView({ user, initialCart }: Props) {
                     />
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={item.product.imageUrl}
+                      src={mediaThumb(item.product.imageUrl, 160)}
                       alt={item.product.name}
                       className="h-20 w-20 shrink-0 rounded-xl border border-line object-cover bg-canvas"
                     />
                     <div className="min-w-0 flex-1 space-y-1.5">
-                      <Link
+                      <Link prefetch={false}
                         href={`/products/${item.product.slug}`}
                         className="block text-sm font-bold text-ink hover:text-brand-orange transition-colors line-clamp-1"
                       >

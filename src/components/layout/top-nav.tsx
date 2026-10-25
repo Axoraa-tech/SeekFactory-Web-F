@@ -236,55 +236,39 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
         {/* Tier 1: Logo, Search, Actions */}
         <div
           data-header-content
-          className={cn(
-            "mx-auto h-14 sm:h-[70px] max-w-[1440px] items-center gap-2 sm:gap-4 lg:gap-5 px-3 sm:px-6",
-            // Manufacturers: [logo + Start a post] [search] [actions]; the two outer columns share the
-            // width equally, so the search sits in the exact middle of the bar
-            isManufacturer ? "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]" : "flex",
-          )}
+          className="mx-auto flex h-14 sm:h-[70px] max-w-[1440px] items-center gap-2 sm:gap-4 lg:gap-5 px-3 sm:px-6"
         >
-          <div className={cn("flex min-w-0 items-center gap-2 sm:gap-4", isManufacturer ? "" : "contents")}>
-            {/* Brand Logo */}
-            <Link
-              data-logo
-              href="/"
-              className="flex shrink-0 items-center py-1 group"
-              aria-label={t("layout.topNav.seekfactoryHome")}
-            >
-              <BrandLogo
-                priority
-                className={cn(
-                  "h-8 sm:h-12 md:h-14 w-auto max-w-[130px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]",
-                  isManufacturer ? "sm:max-w-[180px] xl:max-w-[220px]" : "sm:max-w-[220px] md:max-w-[280px]",
-                )}
-              />
-            </Link>
+          {/* Brand Logo */}
+          <Link
+            data-logo
+            href="/"
+            className="flex shrink-0 items-center py-1 group"
+            aria-label={t("layout.topNav.seekfactoryHome")}
+          >
+            <BrandLogo
+              priority
+              className={cn(
+                "h-8 sm:h-12 md:h-14 w-auto max-w-[130px] object-contain object-left transition-transform duration-200 group-hover:scale-[1.02]",
+                isManufacturer ? "sm:max-w-[180px] xl:max-w-[220px]" : "sm:max-w-[220px] md:max-w-[280px]",
+              )}
+            />
+          </Link>
 
-            {/* Buyers: search next to the logo. Manufacturers: Start a post here (below lg the bottom
-                MobileNav has the Post button) and the search in the centre column */}
-            {isManufacturer ? (
-              <div className="hidden lg:block shrink-0">
-                <StartPostMenu />
-              </div>
-            ) : (
-              <SearchBar categories={categories} />
-            )}
-          </div>
-
-          {isManufacturer && (
-            <div className="flex w-[clamp(220px,36vw,560px)] min-w-0 justify-self-center">
-              <SearchBar categories={categories} compact />
-            </div>
-          )}
+          {/* Search for everyone. Manufacturers get "Start a post" inside the bar, where buyers
+              have the Search button (Enter still searches; below lg the bottom bar has Post) */}
+          <SearchBar
+            categories={categories}
+            action={isManufacturer ? <StartPostMenu inline /> : undefined}
+          />
 
           {/* Right Actions */}
-          <div data-actions className={cn("flex min-w-0 items-center gap-1 sm:gap-2.5 shrink-0", isManufacturer ? "justify-self-end" : "ml-auto")}>
+          <div data-actions className="ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-2.5">
             {user ? (
               <>
                 <LanguageCurrencyDropdown compact={isManufacturer} />
                 <Link
                   href="/rfq/new"
-                  className="sf-btn-commit inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand-orange px-3 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition hover:bg-[#d85b17] active:scale-95"
+                  className="sf-btn-commit inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition hover:bg-[#d85b17] active:scale-95"
                 >
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">{t("nav.postRfq", "Post RFQ")}</span>

@@ -2,6 +2,7 @@ import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { ApiClient } from "@/shared/api/contracts";
+import { ApiError } from "@/shared/api/http-api";
 
 export const CATALOG_PAGE_SIZE = 24;
 export const CATALOG_CONCURRENCY = 4;
@@ -53,6 +54,21 @@ export function categoryIdsWithDescendants(categories: Category[], selected: str
  * has no limit and already excludes inactive/unlisted products and unapproved manufacturers.
  * Any failed partition rejects the whole snapshot: a truncated list must never look complete. */
 export async function loadCatalogSnapshot(api: CatalogApi, cancelled = () => false): Promise<CatalogSnapshot> {
+  // One request for the whole catalogue when the backend has it (cached there); older backends
+  // answer 404 and the snapshot is assembled from one request per top-level category instead
+  if (api.products.listCatalog) {
+    try {
+      const [categories, manufacturers, products] = await Promise.all([
+        api.categories.list(),
+        api.manufacturers.listAll(),
+        api.products.listCatalog(),
+      ]);
+      if (cancelled()) throw new Error("Catalog request cancelled");
+      return { categories, manufacturers, products: products.filter((p) => p.listed !== false) };
+    } catch (error) {
+      if (!(error instanceof ApiError && error.status === 404)) throw error;
+    }
+  }
   const [categories, manufacturers] = await Promise.all([api.categories.list(), api.manufacturers.listAll()]);
   const partitions = catalogPartitions(categories);
   const pages: Product[][] = new Array(partitions.length);
@@ -74,6 +90,35 @@ export async function loadCatalogSnapshot(api: CatalogApi, cancelled = () => fal
   const unique = new Map<string, Product>();
   for (const page of pages) for (const p of page) if (p.listed !== false) unique.set(p.id, p);
   return { categories, manufacturers, products: [...unique.values()] };
+}
+
+/** How long a loaded catalogue is reused within this tab (e.g. leaving the feed and coming back). */
+export const CATALOG_REUSE_MS = 2 * 60_000;
+let reusable: { viewer: string; loadedAt: number; snapshot: Promise<CatalogSnapshot> } | null = null;
+
+/**
+ * The catalogue for this viewer, reused for a short while within this tab: going to the seller
+ * hub or a product and back no longer downloads all ~21 lists again, and pages that ask at the
+ * same time share one download. Kept in memory only and keyed by account, because product flags
+ * (saved, liked) belong to the viewer; a like clears it (see invalidateCatalogSnapshot).
+ */
+export function loadCatalogSnapshotShared(api: CatalogApi, viewer: string): Promise<CatalogSnapshot> {
+  if (reusable && reusable.viewer === viewer && Date.now() - reusable.loadedAt < CATALOG_REUSE_MS) {
+    return reusable.snapshot;
+  }
+  const snapshot = loadCatalogSnapshot(api);
+  const entry = { viewer, loadedAt: Date.now(), snapshot };
+  reusable = entry;
+  // A failed load is never reused; the next visit tries again
+  snapshot.catch(() => {
+    if (reusable === entry) reusable = null;
+  });
+  return snapshot;
+}
+
+/** Drop the reusable catalogue (after the viewer changes something it shows, such as a like). */
+export function invalidateCatalogSnapshot() {
+  reusable = null;
 }
 
 /** A new immutable order once per completed browse snapshot; slicing never reshuffles it. */

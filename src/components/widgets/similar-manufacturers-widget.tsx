@@ -11,6 +11,7 @@ import { cn } from "@/shared/lib/cn";
 import { useTranslations } from "next-intl";
 import { useFollow } from "@/features/engagement/use-engagement";
 import { loadFollowedFactories } from "@/features/engagement/follow-store";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   currentManufacturer: Manufacturer;
@@ -92,12 +93,12 @@ export function SimilarManufacturersWidget({ currentManufacturer, allManufacture
             return (
               <div key={m.id} className="group py-3 first:pt-0 last:pb-0">
                 <div className="flex items-start justify-between gap-3">
-                  <Link
+                  <Link prefetch={false}
                     href={`/manufacturers/${m.slug}`}
                     className="flex items-start gap-2.5 min-w-0 flex-1"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img loading="lazy" decoding="async" src={m.logoUrl}
+                    <img loading="lazy" decoding="async" src={mediaThumb(m.logoUrl, 160)}
                       alt=""
                       className="h-10 w-10 shrink-0 rounded-xl border border-slate-200 object-cover shadow-2xs transition-transform group-hover:scale-105"
                     />

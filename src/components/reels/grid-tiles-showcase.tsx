@@ -31,7 +31,7 @@ export function GridTilesShowcase({ items, settings }: Props) {
             data-feed-reel-id={item.reel.id}
             className="group flex flex-col overflow-hidden rounded-card border border-line bg-surface shadow-sm transition-shadow hover:shadow-md"
           >
-            <Link href={href} className="block">
+            <Link prefetch={false} href={href} className="block">
               {settings.autoplay ? (
                 <HoverPlayMedia item={item} className="aspect-video w-full" />
               ) : (
@@ -40,7 +40,7 @@ export function GridTilesShowcase({ items, settings }: Props) {
             </Link>
 
             <div className="flex flex-1 flex-col gap-2 p-3">
-              <Link href={href} className="line-clamp-2 text-sm font-semibold leading-snug text-ink hover:text-brand-blue hover:underline">
+              <Link prefetch={false} href={href} className="line-clamp-2 text-sm font-semibold leading-snug text-ink hover:text-brand-blue hover:underline">
                 {item.reel.title}
               </Link>
 

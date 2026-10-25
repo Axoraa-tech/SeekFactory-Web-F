@@ -175,7 +175,7 @@ function OrderCard({
               {order.referenceNumber} {t("seller.orders.received")} {formatDate(order.createdAt)}
             </p>
             {order.productSlug ? (
-              <Link
+              <Link prefetch={false}
                 href={`/products/${order.productSlug}`}
                 target="_blank"
                 className="text-sm font-bold text-neutral-900 hover:text-brand-blue hover:underline"

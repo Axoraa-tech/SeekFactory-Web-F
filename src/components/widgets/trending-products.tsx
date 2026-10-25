@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import type { Product } from "@/entities/product";
 import { cn } from "@/shared/lib/cn";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   products: Product[];
@@ -53,14 +54,14 @@ export function TrendingProducts({ products, intervalMs = 3500 }: Props) {
       </div>
 
       {currentProduct && (
-        <Link
+        <Link prefetch={false}
           key={currentProduct.id}
           href={`/products/${currentProduct.slug}`}
           className="group block animate-in fade-in duration-300"
         >
           <div className="h-32 sm:h-36 w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-50 relative">
             <SafeImage
-              src={currentProduct.imageUrl}
+              src={mediaThumb(currentProduct.imageUrl, 640)}
               alt={translateProduct(currentProduct.name)}
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />

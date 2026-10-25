@@ -36,6 +36,7 @@ import { useReelImpression } from "@/hooks/use-reel-impression";
 import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
 import { useTranslations } from "next-intl";
 import { createWheelStepper } from "@/hooks/wheel-stepper";
+import { mediaThumb } from "@/shared/api/http-api";
 
 interface Props {
   items: FeedItem[];
@@ -226,7 +227,7 @@ export function ReelPopupModal({ items }: Props) {
                 key={reel.id}
                 ref={videoRef}
                 src={reel.videoUrl}
-                poster={reel.posterUrl}
+                poster={mediaThumb(reel.posterUrl, 1280)}
                 loop
                 playsInline
                 muted={isMuted}
@@ -244,7 +245,7 @@ export function ReelPopupModal({ items }: Props) {
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img loading="lazy" decoding="async" src={reel.posterUrl}
+              <img loading="lazy" decoding="async" src={mediaThumb(reel.posterUrl, 1280)}
                 alt={reel.title}
                 className="h-full w-full object-cover"
               />
@@ -391,13 +392,13 @@ export function ReelPopupModal({ items }: Props) {
           <div className="shrink-0 bg-white px-3.5 pt-3 pb-2 space-y-2.5">
             {/* Manufacturer row */}
             <div className="flex items-center justify-between gap-2">
-              <Link
+              <Link prefetch={false}
                 href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
                 className="flex items-center gap-2.5 hover:opacity-80 transition min-w-0"
                 onClick={close}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={manufacturer.logoUrl}
+                <img src={mediaThumb(manufacturer.logoUrl, 160)}
                   alt=""
                   className="h-9 w-9 rounded-lg border border-neutral-200 object-cover flex-shrink-0"
                 />

@@ -35,7 +35,7 @@ export function CompactListShowcase({ items, settings }: Props) {
             data-feed-reel-id={item.reel.id}
             className="flex gap-4 p-4 transition-colors hover:bg-canvas"
           >
-            <Link href={href} className="relative shrink-0 overflow-hidden rounded-lg" aria-hidden tabIndex={-1}>
+            <Link prefetch={false} href={href} className="relative shrink-0 overflow-hidden rounded-lg" aria-hidden tabIndex={-1}>
               <Poster src={item.reel.posterUrl} alt="" className="h-[72px] w-[108px] sm:h-20 sm:w-32" />
               {item.reel.videoUrl && (
                 <span className="absolute bottom-1 right-1 flex items-center gap-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white tabular-nums">
@@ -46,7 +46,7 @@ export function CompactListShowcase({ items, settings }: Props) {
             </Link>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <Link href={href} className="line-clamp-1 text-[15px] font-semibold text-ink hover:text-brand-blue hover:underline">
+              <Link prefetch={false} href={href} className="line-clamp-1 text-[15px] font-semibold text-ink hover:text-brand-blue hover:underline">
                 {item.reel.title}
               </Link>
 

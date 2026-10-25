@@ -1,4 +1,5 @@
 import { cn } from "@/shared/lib/cn";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   src: string;
@@ -31,7 +32,7 @@ export function Avatar({ src, alt, size = 36, className }: Props) {
   }
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img loading="lazy" decoding="async" referrerPolicy="no-referrer" src={src}
+    <img loading="lazy" decoding="async" referrerPolicy="no-referrer" src={mediaThumb(src, 160)}
       alt={alt}
       width={size}
       height={size}

@@ -11,6 +11,7 @@ import { formatRelativeTime } from "@/shared/lib/format";
 import { useEffect, useRef, useState } from "react";
 import { getApi } from "@/shared/api";
 import { useUnreadCounts } from "@/features/inbox/unread-store";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   messages: (Conversation & { manufacturer: Manufacturer })[];
@@ -55,7 +56,7 @@ export function RecentMessages({ messages: initialMessages }: Props) {
           <li key={message.id}>
             <Link href={`/messages?conversation=${encodeURIComponent(message.id)}`} className="flex items-start gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img loading="lazy" decoding="async" src={message.manufacturer.logoUrl}
+              <img loading="lazy" decoding="async" src={mediaThumb(message.manufacturer.logoUrl, 160)}
                 alt=""
                 className="h-9 w-9 rounded-full object-cover"
               />

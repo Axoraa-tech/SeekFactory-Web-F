@@ -23,6 +23,7 @@ import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { MANUFACTURER_BATCH_SIZE } from "@/features/explore/manufacturer-results";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Layout = "rail" | "explore";
 
@@ -120,12 +121,12 @@ function RailLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
           {manufacturers.slice(0, 4).map((manufacturer) => {
             return (
               <li key={manufacturer.id} className="flex items-center gap-2.5">
-                <Link
+                <Link prefetch={false}
                   href={`/manufacturers/${manufacturer.slug}`}
                   className="flex items-center gap-2.5 min-w-0 flex-1 group"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img loading="lazy" decoding="async" src={manufacturer.logoUrl}
+                  <img loading="lazy" decoding="async" src={mediaThumb(manufacturer.logoUrl, 160)}
                     alt=""
                     className="h-9 w-9 rounded-full object-cover border border-slate-200 shrink-0 group-hover:scale-105 transition-transform"
                   />
@@ -203,14 +204,14 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
       <SupplierLockOverlay badgeLabel={t("manufacturers.list.viewVerifiedManufacturers")}>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {visibleManufacturers.map((m) => (
-            <Link
+            <Link prefetch={false}
               key={m.id}
               href={`/manufacturers/${m.slug}`}
               className="group flex flex-col justify-between overflow-hidden rounded-xl border border-orange-100 bg-white p-3 shadow-xs hover:border-brand-orange/50 hover:shadow-md transition-all active:scale-[0.98]"
             >
               <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden bg-neutral-100 mb-2.5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.coverUrl || m.logoUrl}
+                <img src={mediaThumb(m.coverUrl || m.logoUrl, 640)}
                   alt=""
                   loading="lazy"
                   decoding="async"
@@ -222,7 +223,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                 </div>
                 <div className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-lg overflow-hidden border border-white shadow-xs bg-white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={m.logoUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={mediaThumb(m.logoUrl, 160)} alt="" className="h-full w-full object-cover" />
                 </div>
               </div>
 

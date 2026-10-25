@@ -162,7 +162,7 @@ export function ChatConversationPane({
 
         {!isSupplier && (
           <div className="flex items-center gap-1.5 shrink-0">
-            <Link
+            <Link prefetch={false}
               href={`/manufacturers/${activeThread.manufacturer.slug}`}
               title={t("chat.visitPlant")}
               aria-label={t("chat.visitPlant")}

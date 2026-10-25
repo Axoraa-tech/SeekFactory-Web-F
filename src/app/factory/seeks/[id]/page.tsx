@@ -4,6 +4,7 @@ import { ArrowLeft, Eye, TrendingUp, Clock } from "lucide-react";
 import { getApi } from "@/shared/api";
 import { requireSupplier } from "@/features/auth/require-user";
 import { getTranslations } from "next-intl/server";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -34,7 +35,7 @@ export default async function SeekDetailPage({ params }: Props) {
           <div className="aspect-video w-full bg-black flex items-center justify-center">
             <video
               src={seek.videoUrl}
-              poster={seek.posterUrl}
+              poster={mediaThumb(seek.posterUrl, 1280)}
               className="h-full w-full object-contain"
               autoPlay
               controls

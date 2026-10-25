@@ -146,7 +146,18 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     // Session cookies are set by this route only; never pass backend cookies through to our origin
     responseHeaders.delete("set-cookie");
 
-    const response = new NextResponse(backendRes.body, {
+    // Next.js does not compress route handler responses, so JSON (the catalogue alone is ~1.4 MB)
+    // would reach the browser uncompressed: gzip it here, streaming. Event streams and media pass through.
+    let body = backendRes.body;
+    const isJson = (backendRes.headers.get("content-type") ?? "").includes("json");
+    if (body && isJson && /\bgzip\b/.test(req.headers.get("accept-encoding") ?? "")
+        && !TOKEN_ISSUING_PATHS.some((p) => path.endsWith(p))) {
+      body = body.pipeThrough(new CompressionStream("gzip"));
+      responseHeaders.set("content-encoding", "gzip");
+      responseHeaders.append("vary", "Accept-Encoding");
+    }
+
+    const response = new NextResponse(body, {
       status: backendRes.status,
       headers: responseHeaders,
     });

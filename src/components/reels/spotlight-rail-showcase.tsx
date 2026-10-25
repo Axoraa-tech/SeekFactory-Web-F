@@ -9,6 +9,7 @@ import { cn } from "@/shared/lib/cn";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = { items: FeedItem[]; settings: FeedShowcase };
 
@@ -130,7 +131,7 @@ function HeroMedia({ item, autoplay }: { item: FeedItem; autoplay: boolean }) {
   return (
     <video
       src={item.reel.videoUrl}
-      poster={item.reel.posterUrl}
+      poster={mediaThumb(item.reel.posterUrl, 1280)}
       autoPlay={autoplay}
       muted
       loop
@@ -148,13 +149,13 @@ function HeroProducts({ item }: { item: FeedItem }) {
   return (
     <div className="flex gap-2 overflow-x-auto border-t border-line pt-3 scrollbar-none">
       {products.map((p) => (
-        <Link
+        <Link prefetch={false}
           key={p.id}
           href={`/products/${p.slug}`}
           title={p.name}
           className="shrink-0 overflow-hidden rounded-lg border border-line hover:border-brand-blue"
         >
-          <Poster src={p.imageUrl} alt={p.name} className="h-16 w-16" />
+          <Poster src={p.imageUrl} alt={p.name} width={160} className="h-16 w-16" />
         </Link>
       ))}
     </div>

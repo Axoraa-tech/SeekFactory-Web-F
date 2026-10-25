@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type ReactNode } from "react";
 import { Search, X, Command } from "lucide-react";
 import type { Category } from "@/entities/category";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
@@ -9,9 +9,14 @@ type SearchBarProps = {
   categories?: Category[];
   /** Slimmer bar, leaving room for the manufacturers' "Start a post" button in the TopNav. */
   compact?: boolean;
+  /**
+   * Shown in place of the Search button from lg up (manufacturers' "Start a post"); Enter still
+   * searches. Below lg the Search button stays (the bottom bar has its own Post button).
+   */
+  action?: ReactNode;
 };
 
-export function SearchBar({ categories = [], compact = false }: SearchBarProps) {
+export function SearchBar({ categories = [], compact = false, action }: SearchBarProps) {
   const { t, translateCategory } = useRegionalSettings();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -32,7 +37,10 @@ export function SearchBar({ categories = [], compact = false }: SearchBarProps) 
   }, []);
 
   return (
-    <div className={`relative min-w-0 flex-1 mx-2 ${compact ? "max-w-lg lg:mx-1" : "max-w-xl lg:mx-4"}`}>
+    // With an action inside (Start a post) the bar gets a little more room for the placeholder.
+    // z-30: the bar's blur makes its own stacking context, so its menus (Start a post, suggestions)
+    // would otherwise open behind the category row drawn after it
+    <div className={`relative z-30 min-w-0 flex-1 mx-2 ${compact ? "max-w-lg lg:mx-1" : action ? "max-w-2xl lg:mx-4" : "max-w-xl lg:mx-4"}`}>
       {/* Desktop & Tablet Minimalist Search Bar */}
       <form
         action="/explore"
@@ -76,10 +84,11 @@ export function SearchBar({ categories = [], compact = false }: SearchBarProps) 
 
         <button
           type="submit"
-          className="sf-btn-commit ml-2 flex h-7 px-3 items-center justify-center gap-1 rounded-full bg-brand-orange text-xs font-semibold text-white transition-all hover:bg-[#d85b17] active:scale-95 shadow-xs"
+          className={`sf-btn-commit ml-2 flex h-7 px-3 items-center justify-center gap-1 rounded-full bg-brand-orange text-xs font-semibold text-white transition-all hover:bg-[#d85b17] active:scale-95 shadow-xs ${action ? "lg:hidden" : ""}`}
         >
           <span>{t("nav.search", "Search")}</span>
         </button>
+        {action && <div className="ml-2 hidden shrink-0 lg:block">{action}</div>}
       </form>
 
       {/* Real-time Category Search Suggestions */}

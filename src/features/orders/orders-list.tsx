@@ -88,7 +88,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                   <p className="text-xs font-bold text-slate-900 font-mono tracking-tight">{order.referenceNumber}</p>
                   <p className="text-[11px] text-slate-500 mt-0.5">
                     {formatRelativeTime(order.createdAt, locale)} •{" "}
-                    <Link href={`/manufacturers/${order.manufacturer.slug}`} className="font-bold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
+                    <Link prefetch={false} href={`/manufacturers/${order.manufacturer.slug}`} className="font-bold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
                       <SupplierName name={order.manufacturer.name} />
                     </Link>
                     {order.source === "RFQ_QUOTE" ? ` • ${t("orders.list.fromAnAcceptedRfqQuote")}` : ""}
@@ -110,7 +110,7 @@ export function OrdersList({ initialOrders, placed }: Props) {
                 )}
                 <div className="min-w-0 flex-1 space-y-1">
                   {order.productSlug ? (
-                    <Link href={`/products/${order.productSlug}`} className="block text-sm font-bold text-slate-900 hover:text-brand-orange transition-colors line-clamp-1">
+                    <Link prefetch={false} href={`/products/${order.productSlug}`} className="block text-sm font-bold text-slate-900 hover:text-brand-orange transition-colors line-clamp-1">
                       {order.productName}
                     </Link>
                   ) : (

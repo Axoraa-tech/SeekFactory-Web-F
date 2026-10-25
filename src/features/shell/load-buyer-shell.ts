@@ -3,11 +3,11 @@ import { buildCategoryTree } from "@/features/categories/category-tree";
 
 export async function loadBuyerShellData() {
   const api = getApi();
-  const [user, allCategories, manufacturers, products, messages, notificationCount] = await Promise.all([
+  // Every buyer page renders this shell: keep it to what the shell actually shows
+  const [user, allCategories, manufacturers, messages, notificationCount] = await Promise.all([
     api.session.getCurrentUser(),
     api.categories.list(),
     api.manufacturers.listVerified(4),
-    api.products.listTrending(6),
     api.messages.listRecent(3),
     api.notifications.unreadCount(),
   ]);
@@ -26,7 +26,6 @@ export async function loadBuyerShellData() {
     categories,
     allCategories,
     manufacturers,
-    products,
     messages,
     messageCount,
     notificationCount: visibleNotificationCount,

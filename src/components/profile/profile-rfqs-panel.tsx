@@ -258,7 +258,7 @@ export function ProfileRfqsPanel({ user, rfqs, orders = [], categories, focusRfq
                         <div key={quote.id} className="rounded-xl border border-line bg-white/70 p-3 space-y-2">
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <Link
+                              <Link prefetch={false}
                                 href={`/manufacturers/${quote.manufacturer.slug}`}
                                 className="text-xs font-bold text-ink hover:text-brand-blue"
                               >

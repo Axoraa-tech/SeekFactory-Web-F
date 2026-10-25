@@ -1,7 +1,7 @@
 "use client";
 
 import { SupplierName } from "@/features/subscription";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Shuffle, Zap, FileText, Pause, Play, Repeat2, Heart } from "lucide-react";
@@ -19,6 +19,7 @@ import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import { cn } from "@/shared/lib/cn";
 import type { Product } from "@/entities/product";
 import type { RecommendedFactory } from "@/shared/api/contracts";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   /**
@@ -39,6 +40,21 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
   const { status, data, retry, loadMore, hasMore, total } = recommended;
   const products = data?.products ?? [];
   const motion = usePhotoPanelMotion(variant === "strip", products.length, hasMore);
+  const [listEl, setListEl] = useState<HTMLDivElement | null>(null);
+  const setListRef = useCallback((el: HTMLDivElement | null) => {
+    motion.ref.current = el;
+    setListEl(el);
+  }, [motion.ref]);
+  const [scrollbarWidth, setScrollbarWidth] = useState(0);
+  useEffect(() => {
+    if (!listEl) return;
+    const measure = () => setScrollbarWidth(listEl.offsetWidth - listEl.clientWidth);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;  // test environments
+    const observer = new ResizeObserver(measure);
+    observer.observe(listEl);
+    return () => observer.disconnect();
+  }, [listEl, products.length]);
   const motionControl = products.length > 1 ? (
     <button type="button" onClick={motion.togglePaused} aria-pressed={motion.paused}
       aria-label={t(motion.paused ? "showcase.single.resumePhotos" : "showcase.single.pausePhotos")}
@@ -64,7 +80,14 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
   const body =
     products.length > 0 ? (
       products.map((p, i) => (
-        <RecommendedProductCard key={p.id} product={p} factory={factories.get(p.manufacturerId)} index={i} compact={variant === "strip"} />
+        <RecommendedProductCard
+          key={p.id}
+          product={p}
+          factory={factories.get(p.manufacturerId)}
+          index={i}
+          compact={variant === "strip"}
+          photosMoving={!motion.paused}
+        />
       ))
     ) : status === "loading" ? (
       <>
@@ -107,14 +130,12 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
   }
 
   return (
-    // data-lock-fill: while the page is locked to the window this panel is stretched to its bottom,
-    // like the left menu, so it ends level with the seek card
-    <section
-      data-lock-fill
-      aria-label={title}
-      className="flex max-h-[calc(100vh-156px)] flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card"
-    >
-      <header className="flex items-center gap-2.5 border-b border-line px-4 py-3">
+    // data-lock-fill: while the page is locked to the window this column is stretched to its bottom,
+    // like the left menu, so it ends level with the seek card. Laid out like the seek column: a
+    // header card on top and the product cards scrolling below it, the scrollbar outside the cards.
+    <section data-lock-fill aria-label={title} className="flex max-h-[calc(100vh-156px)] flex-col gap-2">
+      <div className="shrink-0" style={{ paddingRight: 4 + scrollbarWidth }}>
+      <header className="flex items-center gap-2.5 rounded-xl border border-line bg-surface px-4 py-2.5 shadow-card">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-orange-soft text-brand-orange">
           <TitleIcon className="h-4 w-4" />
         </span>
@@ -124,12 +145,13 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
         </div>
         {motionControl}
       </header>
+      </div>
 
       {/* overscroll-contain: the wheel scrolls only the products, never the seeks or the page */}
       <div
-        ref={motion.ref}
+        ref={setListRef}
         data-prevent-seek-wheel
-        className="scrollbar-subtle min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain p-3"
+        className="scrollbar-subtle min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pr-1"
       >
         {body}
         {pagination}
@@ -144,11 +166,14 @@ function RecommendedProductCard({
   factory,
   index,
   compact,
+  photosMoving,
 }: {
   product: Product;
   factory?: RecommendedFactory;
   index: number;
   compact: boolean;
+  /** Photos slide by themselves (only while the card is on screen); off when the panel is paused. */
+  photosMoving: boolean;
 }) {
   const { t, formatPrice, translateUnit } = useRegionalSettings();
   const router = useRouter();
@@ -169,9 +194,10 @@ function RecommendedProductCard({
         compact && "w-64 shrink-0 snap-start",
       )}
     >
-      <Link href={href} className="relative block aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+      <Link prefetch={false} href={href} className="relative block aspect-[16/10] w-full overflow-hidden bg-neutral-100">
         {/* Arrows and dots move the photos; only a plain click opens the product */}
-        <ProductImageCarousel images={images} alt={p.name} index={index} autoplay={false} />
+        {/* Same pace as the product cards in the seek column; only cards at least half on screen move */}
+        <ProductImageCarousel images={images} alt={p.name} index={index} autoplay={photosMoving} intervalMs={3500} />
         {factory?.verified && (
           <span className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs">
             <ShieldCheck className="h-3 w-3 text-emerald-400" />
@@ -210,7 +236,7 @@ function RecommendedProductCard({
           </span>
         </div>
         {like.error && <p role="alert" className="text-[11px] text-rose-600">{t("showcase.single.productLikeFailed")}</p>}
-        <Link
+        <Link prefetch={false}
           href={href}
           className="line-clamp-2 text-sm font-bold leading-snug text-ink transition group-hover:text-brand-orange"
           title={p.name}
@@ -220,9 +246,9 @@ function RecommendedProductCard({
 
         {factory && (
           <SupplierLockOverlay compact className="flex min-w-0">
-            <Link href={`/manufacturers/${factory.slug}`} className="flex min-w-0 items-center gap-1.5 text-xs text-ink-muted hover:text-ink">
+            <Link prefetch={false} href={`/manufacturers/${factory.slug}`} className="flex min-w-0 items-center gap-1.5 text-xs text-ink-muted hover:text-ink">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={factory.logoUrl} alt="" loading="lazy" className="h-5 w-5 shrink-0 rounded-md border border-line object-cover" />
+              <img src={mediaThumb(factory.logoUrl, 160)} alt="" loading="lazy" className="h-5 w-5 shrink-0 rounded-md border border-line object-cover" />
               <span className="truncate font-semibold text-slate-700"><SupplierName name={factory.name} /></span>
               {factory.verified && <VerifiedBadge />}
               {factory.country && <span className="shrink-0 text-ink-faint">· {factory.country}</span>}
