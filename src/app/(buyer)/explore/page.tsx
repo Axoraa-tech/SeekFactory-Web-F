@@ -40,6 +40,8 @@ export default async function ExplorePage({ searchParams }: Props) {
       q: q.trim(),
       category: selected?.id ?? "",
       limit: 60,
+      // Explore lists products and factories only
+      types: ["products", "manufacturers"],
     }),
   ]);
   const visibleManufacturers = selectManufacturers(allManufacturers, categories, selected?.id ?? "", q);
@@ -119,7 +121,7 @@ export default async function ExplorePage({ searchParams }: Props) {
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {visibleProducts.map((product, index) => (
-            <Link key={product.id} href={`/products/${product.slug}`} className="group">
+            <Link prefetch={false} key={product.id} href={`/products/${product.slug}`} className="group">
               <Card className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white hover:border-brand-orange/40 hover:shadow-md transition-all flex flex-col h-full">
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
                   <ProductImageCarousel

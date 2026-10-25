@@ -21,6 +21,7 @@ import type { StockStatus } from "@/entities/product";
 import { SafeImage } from "@/components/ui/safe-image";
 import { useTranslations } from "next-intl";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   products: SellerProduct[];
@@ -152,13 +153,13 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
           >
             {/* Left: Thumbnail & Details */}
             <div className="flex items-start gap-4 flex-1 min-w-0">
-              <Link
+              <Link prefetch={false}
                 href={`/products/${product.slug}`}
                 className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 bg-canvas border border-line block group/img"
                 title={`View ${product.name}`}
               >
                 <SafeImage
-                  src={product.imageUrl}
+                  src={mediaThumb(product.imageUrl, 160)}
                   alt={product.name}
                   className="h-full w-full object-cover group-hover/img:scale-110 transition-transform duration-300"
                 />
@@ -206,7 +207,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                   )}
                 </div>
 
-                <Link
+                <Link prefetch={false}
                   href={`/products/${product.slug}`}
                   className="block font-bold text-sm text-neutral-900 hover:text-brand-blue transition truncate"
                   title={`View ${product.name}`}
@@ -248,7 +249,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
 
               <div className="flex w-full sm:w-auto items-center gap-2">
                 {product.status === "Active" && (
-                  <Link
+                  <Link prefetch={false}
                     href={`/products/${product.slug}`}
                     className="sf-btn-nav flex-1 sm:flex-none justify-center inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
                     title={t("seller.products.viewPublicMarketplaceListing")}

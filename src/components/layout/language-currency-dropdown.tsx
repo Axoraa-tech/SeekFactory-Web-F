@@ -106,7 +106,7 @@ export function LanguageCurrencyDropdown({
           <Globe className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
         </div>
         <span className="hidden sm:block text-left leading-tight">
-          <span className="block text-xs font-semibold text-ink group-hover:text-brand-blue transition-colors">
+          <span className="block whitespace-nowrap text-xs font-semibold text-ink group-hover:text-brand-blue transition-colors">
             {selectedLanguage.code} <span className="text-ink-faint font-normal">/</span> {selectedCurrency.code}
           </span>
         </span>

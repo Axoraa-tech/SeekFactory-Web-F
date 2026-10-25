@@ -11,7 +11,6 @@ export default async function BuyerLayout({ children }: { children: ReactNode })
       categories={shell.categories}
       allCategories={shell.allCategories}
       manufacturers={shell.manufacturers}
-      products={shell.products}
       messages={shell.messages}
       messageCount={shell.messageCount}
       notificationCount={shell.notificationCount}

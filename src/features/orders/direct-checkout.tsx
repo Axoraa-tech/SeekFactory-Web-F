@@ -15,6 +15,7 @@ import { Price } from "@/components/ui/price";
 import { SupplierName } from "@/features/subscription";
 import { PAYMENT_NOTE } from "@/features/orders/order-status";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   user: BuyerProfile;
@@ -69,15 +70,15 @@ export function DirectCheckout({ user, product, manufacturer, initialQuantity }:
         <div className="flex gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={product.imageUrl}
+            src={mediaThumb(product.imageUrl, 160)}
             alt={product.name}
             className="h-28 w-28 shrink-0 rounded-xl border border-line object-cover bg-canvas"
           />
           <div className="min-w-0 space-y-1">
-            <Link href={`/products/${product.slug}`} className="block text-base font-bold text-ink hover:text-brand-orange transition-colors">
+            <Link prefetch={false} href={`/products/${product.slug}`} className="block text-base font-bold text-ink hover:text-brand-orange transition-colors">
               {product.name}
             </Link>
-            <Link href={`/manufacturers/${manufacturer.slug}`} className="block text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
+            <Link prefetch={false} href={`/manufacturers/${manufacturer.slug}`} className="block text-xs font-semibold text-brand-orange hover:text-[#d85b17] hover:underline transition-colors">
               <SupplierName name={manufacturer.name} />
             </Link>
             <p className="text-xs text-ink-muted">

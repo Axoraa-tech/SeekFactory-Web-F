@@ -5,6 +5,7 @@ import type { Product } from "@/entities/product";
 import type { ApiClient } from "@/shared/api/contracts";
 import { CATALOG_CONCURRENCY, CATALOG_PAGE_SIZE, catalogPartitions, loadCatalogSnapshot, selectCatalogProducts, shuffleCatalog } from "./catalog-snapshot";
 import { groupCatalogProducts } from "./use-showcase-products";
+import { ApiError } from "@/shared/api/http-api";
 
 const category = (id: string, parentId: string | null = null) => ({ id, slug: id, parentId } as Category);
 const product = (id: string, categoryId = "root", manufacturerId = "factory") => ({
@@ -17,6 +18,30 @@ function apiFor(categories: Category[], get: (id: string) => Promise<Product[]>)
 }
 
 describe("complete public catalog snapshot", () => {
+  it("loads the whole catalogue in one request when the backend offers it", async () => {
+    const categories = Array.from({ length: 20 }, (_, i) => category(`root${i}`));
+    const perCategory = vi.fn(async () => [] as Product[]);
+    const api = apiFor(categories, perCategory) as ApiClient;
+    api.products.listCatalog = vi.fn(async () => [product("1", "root0"), { ...product("2", "root1"), listed: false }]);
+    const snapshot = await loadCatalogSnapshot(api);
+    expect(snapshot.products.map((p) => p.id)).toEqual(["1"]);
+    expect(snapshot.manufacturers).toEqual([manufacturer]);
+    expect(perCategory).not.toHaveBeenCalled();
+  });
+  it("falls back to one request per category on a backend without the catalogue endpoint", async () => {
+    const categories = [category("a"), category("b")];
+    const perCategory = vi.fn(async (id: string) => [product(id, id)]);
+    const api = apiFor(categories, perCategory) as ApiClient;
+    api.products.listCatalog = vi.fn(async () => { throw new ApiError("Not found", 404); });
+    const snapshot = await loadCatalogSnapshot(api);
+    expect(snapshot.products.map((p) => p.id).sort()).toEqual(["a", "b"]);
+    expect(perCategory).toHaveBeenCalledTimes(2);
+  });
+  it("does not hide real failures of the catalogue endpoint", async () => {
+    const api = apiFor([category("a")], async () => []) as ApiClient;
+    api.products.listCatalog = vi.fn(async () => { throw new ApiError("Server error", 500); });
+    await expect(loadCatalogSnapshot(api)).rejects.toThrow("Server error");
+  });
   it("covers roots, descendants, orphan and cyclic components without duplicate partitions", () => {
     expect(catalogPartitions([category("root"), category("child", "root"), category("leaf", "child"),
       category("orphan", "missing"), category("a", "b"), category("b", "a")])).toEqual(["root", "orphan", "a"]);

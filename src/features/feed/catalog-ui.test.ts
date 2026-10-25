@@ -3,6 +3,7 @@ import { createElement as h, type ReactNode } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CatalogSnapshotProvider } from "./catalog-snapshot-provider";
+import { invalidateCatalogSnapshot } from "./catalog-snapshot";
 import { useRecommendedProducts } from "./use-recommended-products";
 import { RecommendedProductsPanel } from "@/components/reels/recommended-products-panel";
 
@@ -30,6 +31,7 @@ const button = () => screen.getByRole("button", { name: "showcase.single.loadMor
 const ids = () => [...document.querySelectorAll("article")].map((article) => article.querySelector("a")?.getAttribute("href"));
 
 beforeEach(() => {
+  invalidateCatalogSnapshot();  // each test brings its own catalogue
   mocks.viewer = "";
   mocks.api.categories.list.mockReset().mockResolvedValue(Array.from({ length: 20 }, (_, i) => ({ id: `c${i}`, slug: `c${i}`, parentId: null })));
   mocks.api.manufacturers.listAll.mockReset().mockResolvedValue([{ id: "m", slug: "m", name: "Factory", verified: true }]);

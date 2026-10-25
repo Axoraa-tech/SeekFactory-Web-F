@@ -25,6 +25,7 @@ import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import type { Product } from "@/entities/product";
 import { getLocale, getTranslations } from "next-intl/server";
 import { localizeCategoryName } from "@/i18n/zh-terms";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type PriceBand = { label: string; priceInr: number; savingPercent: number };
 
@@ -110,12 +111,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
           {/* Supplier Mini Profile Bar: locked (blurred, generic name) for buyers without supplier access */}
           <Card className="p-4 border-slate-200/90 shadow-2xs">
             <SupplierLockOverlay>
-            <Link
+            <Link prefetch={false}
               href={`/manufacturers/${manufacturer.slug}`}
               className="flex items-center gap-3 hover:opacity-90 transition min-w-0"
             >
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-slate-200 shadow-2xs">
-                <SafeImage src={manufacturer.logoUrl} alt="" className="h-full w-full object-cover" />
+                <SafeImage src={mediaThumb(manufacturer.logoUrl, 160)} alt="" className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">

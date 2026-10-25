@@ -12,6 +12,7 @@ import { formatCount } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/cn";
 import type { FeedItem } from "@/shared/api/contracts";
 import { useTranslations } from "next-intl";
+import { mediaThumb, type MediaThumbWidth } from "@/shared/api/http-api";
 
 /**
  * Shared building blocks for the seek showcase layouts (feed / compact / grid / spotlight).
@@ -23,7 +24,18 @@ import { useTranslations } from "next-intl";
  * Poster image with a graceful fallback. Media URLs in this product are free-text and
  * some point nowhere, so a broken poster must not leave an empty hole in the grid.
  */
-export function Poster({ src, alt, className }: { src?: string; alt: string; className?: string }) {
+export function Poster({
+  src,
+  alt,
+  className,
+  width = 640,
+}: {
+  src?: string;
+  alt: string;
+  className?: string;
+  /** Photo size to load (posters and thumbnails are shown well below the original size). */
+  width?: MediaThumbWidth;
+}) {
   const [broken, setBroken] = useState(false);
   if (!src || broken) {
     return (
@@ -34,7 +46,7 @@ export function Poster({ src, alt, className }: { src?: string; alt: string; cla
   }
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} loading="lazy" decoding="async" onError={() => setBroken(true)} className={cn("object-cover", className)} />
+    <img src={mediaThumb(src, width)} alt={alt} loading="lazy" decoding="async" onError={() => setBroken(true)} className={cn("object-cover", className)} />
   );
 }
 
@@ -88,9 +100,9 @@ export function FactoryLine({ item, size = "md" }: { item: FeedItem; size?: "sm"
   return (
     <SupplierLockOverlay compact={size === "sm"}>
     <div className="flex min-w-0 items-center gap-2.5">
-      <Poster src={manufacturer.logoUrl} alt="" className={cn(avatar, "shrink-0 rounded-full")} />
+      <Poster src={manufacturer.logoUrl} alt="" width={160} className={cn(avatar, "shrink-0 rounded-full")} />
       <div className="min-w-0">
-        <Link
+        <Link prefetch={false}
           href={`/manufacturers/${manufacturer.slug}`}
           className="flex items-center gap-1.5 truncate text-sm font-semibold text-ink hover:text-brand-blue hover:underline"
         >
@@ -200,14 +212,14 @@ export function SeekActions({ item }: { item: FeedItem }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       {productHref && (
-        <Link
+        <Link prefetch={false}
           href={productHref}
           className="sf-btn-nav rounded-full bg-brand-blue px-3.5 py-1.5 text-xs font-medium text-white hover:bg-brand-blue-dark"
         >
           {t("feed.viewProducts")}
         </Link>
       )}
-      <Link
+      <Link prefetch={false}
         href={`/manufacturers/${item.manufacturer.slug}`}
         className="sf-btn-nav rounded-full border border-line px-3.5 py-1.5 text-xs font-medium text-ink hover:border-brand-orange hover:text-brand-orange transition-colors"
       >

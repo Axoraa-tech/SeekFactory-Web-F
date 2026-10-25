@@ -16,7 +16,8 @@ type Props = {
   categories: Category[];
   allCategories?: Category[];
   manufacturers: Manufacturer[];
-  products: Product[];
+  /** Only the optional right aside uses these. */
+  products?: Product[];
   messages: (Conversation & { manufacturer: Manufacturer })[];
   messageCount: number;
   notificationCount: number;
@@ -29,7 +30,7 @@ export function AppShell({
   categories,
   allCategories,
   manufacturers,
-  products,
+  products = [],
   messages,
   messageCount,
   notificationCount,

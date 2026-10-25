@@ -5,6 +5,7 @@ import Link from "next/link";
 import { EmptyShowcase, FactoryLine, Hashtags, Poster, SeekActions, Stats } from "@/components/reels/showcase-parts";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = { items: FeedItem[]; settings: FeedShowcase };
 
@@ -96,7 +97,7 @@ function SeekMedia({ item, play, eager }: { item: FeedItem; play: boolean; eager
     <video
       ref={ref}
       src={item.reel.videoUrl}
-      poster={item.reel.posterUrl}
+      poster={mediaThumb(item.reel.posterUrl, 1280)}
       muted
       loop
       playsInline
@@ -115,13 +116,13 @@ function ProductStrip({ item }: { item: FeedItem }) {
   return (
     <div className="flex gap-2 overflow-x-auto border-t border-line p-3 px-4 scrollbar-none">
       {products.map((p) => (
-        <Link
+        <Link prefetch={false}
           key={p.id}
           href={`/products/${p.slug}`}
           title={p.name}
           className="shrink-0 overflow-hidden rounded-lg border border-line hover:border-brand-blue"
         >
-          <Poster src={p.imageUrl} alt={p.name} className="h-16 w-16" />
+          <Poster src={p.imageUrl} alt={p.name} width={160} className="h-16 w-16" />
         </Link>
       ))}
     </div>

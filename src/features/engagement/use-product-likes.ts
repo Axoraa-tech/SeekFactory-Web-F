@@ -6,6 +6,7 @@ import type { Product } from "@/entities/product";
 import { getApi } from "@/shared/api";
 import { ApiError } from "@/shared/api/http-api";
 import { useRequireSignIn } from "./use-engagement";
+import { invalidateCatalogSnapshot } from "@/features/feed/catalog-snapshot";
 
 type LikeState = { liked: boolean; likes: number | undefined; pending: boolean; error: boolean };
 
@@ -34,6 +35,8 @@ export function useProductLikes(source: unknown) {
     update(product.id, { liked: !before.liked, likes: Math.max(0, before.likes + (before.liked ? -1 : 1)), pending: true, error: false });
     try {
       const response = await getApi().products.toggleLike(product.id);
+      // The reusable catalogue still has the old like: the next visit loads a fresh one
+      invalidateCatalogSnapshot();
       if (current()) update(product.id, { liked: response.liked, likes: response.likesCount, pending: false, error: false });
     } catch (error) {
       if (current()) {

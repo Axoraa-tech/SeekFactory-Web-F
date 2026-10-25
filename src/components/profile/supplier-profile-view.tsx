@@ -42,6 +42,7 @@ import { AlibabaCertSection } from "@/components/profile/alibaba-cert-section";
 import { cn } from "@/shared/lib/cn";
 import { useFollow } from "@/features/engagement/use-engagement";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 
 type Props = {
@@ -104,7 +105,7 @@ export function SupplierProfileView({
           <div className="p-8 space-y-4 bg-slate-50">
             <div className="flex items-center gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={manufacturer.logoUrl} alt="" className="w-20 h-20 rounded-2xl" />
+              <img src={mediaThumb(manufacturer.logoUrl, 160)} alt="" className="w-20 h-20 rounded-2xl" />
               <div>
                 {/* Locked: the real name never enters the page, not even blurred */}
                 <h1 className="text-2xl font-black">{t("supplier.lockedName")}</h1>
@@ -258,7 +259,7 @@ export function SupplierProfileView({
             <div className="flex items-end gap-4 min-w-0">
               <div className="relative shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={manufacturer.logoUrl}
+                <img src={mediaThumb(manufacturer.logoUrl, 160)}
                   alt={manufacturer.name}
                   className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl border-4 border-white object-cover shadow-lg bg-white"
                 />
@@ -480,12 +481,12 @@ export function SupplierProfileView({
                   >
                     <div>
                       {/* Product Image Link */}
-                      <Link
+                      <Link prefetch={false}
                         href={`/products/${product.slug}`}
                         className="relative block h-48 sm:h-52 w-full overflow-hidden bg-slate-100"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={product.imageUrl}
+                        <img src={mediaThumb(product.imageUrl, 640)}
                           alt={product.name}
                           loading="lazy"
                           decoding="async"
@@ -498,7 +499,7 @@ export function SupplierProfileView({
 
                       {/* Product Information */}
                       <div className="p-4 pb-2">
-                        <Link
+                        <Link prefetch={false}
                           href={`/products/${product.slug}`}
                           className="font-bold text-sm text-slate-900 hover:text-brand-blue transition-colors line-clamp-1"
                         >

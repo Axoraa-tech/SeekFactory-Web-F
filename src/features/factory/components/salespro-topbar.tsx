@@ -99,7 +99,7 @@ export function SalesproTopbar({
           <LanguageCurrencyDropdown align="right" />
         </div>
 
-        <Link
+        <Link prefetch={false}
           href={`/manufacturers/${profile.slug}`}
           className="sf-btn-nav flex items-center gap-1.5 rounded-lg border border-[#E6E8EB] bg-white px-3.5 py-2 text-xs font-semibold text-[#1C1C1C] hover:bg-[#F3F4F6] hover:text-[#1A73E8] transition shadow-2xs"
         >

@@ -11,7 +11,10 @@ import { OPEN_COMPOSER_EVENT, type ComposerMode } from "./events";
  * Manufacturers' "Start a post" button with a two-item menu: post a video seek or a product.
  * On the feed the composer opens in place; anywhere else the items link to the Seller Hub forms.
  */
-export function StartPostMenu() {
+export function StartPostMenu({ inline = false }: {
+  /** Sized to sit inside the search bar, where the Search button is for buyers. */
+  inline?: boolean;
+} = {}) {
   const { t } = useRegionalSettings();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -49,7 +52,10 @@ export function StartPostMenu() {
         aria-expanded={open}
         aria-label={t("seller.composer.startAPost")}
         title={t("seller.composer.startAPost")}
-        className="sf-btn-commit inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-lg bg-brand-blue px-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95"
+        className={cn(
+          "sf-btn-commit inline-flex items-center gap-1 whitespace-nowrap bg-brand-blue text-xs font-semibold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95",
+          inline ? "h-7 rounded-full px-3" : "h-8 rounded-lg px-2.5",
+        )}
       >
         <Plus className="h-3.5 w-3.5" />
         {/* Icon-only on small laptops so the search bar keeps its width */}
@@ -60,7 +66,11 @@ export function StartPostMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute left-1/2 top-full z-50 mt-1.5 w-52 -translate-x-1/2 overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-card"
+          className={cn(
+            "absolute top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-card",
+            // Inside the search bar it sits at the right end: open leftwards, under the button
+            inline ? "right-0" : "left-1/2 -translate-x-1/2",
+          )}
         >
           <Link
             href="/factory?tab=seeks&new=seek"

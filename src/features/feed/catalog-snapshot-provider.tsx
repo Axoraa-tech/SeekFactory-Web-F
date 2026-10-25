@@ -5,13 +5,14 @@ import { useTranslations } from "next-intl";
 import { getApi } from "@/shared/api";
 import { readBrowserCookie } from "@/features/auth/session-cookie";
 import { useProductLikes } from "@/features/engagement/use-product-likes";
-import { loadCatalogSnapshot, shuffleCatalog, type CatalogSnapshot } from "./catalog-snapshot";
+import { loadCatalogSnapshotShared, shuffleCatalog, type CatalogSnapshot } from "./catalog-snapshot";
 
 type CatalogState = { status: "loading" | "ready" | "error"; snapshot: CatalogSnapshot | null; retry: () => void; productLikes: ReturnType<typeof useProductLikes> };
 const CatalogContext = createContext<CatalogState | null>(null);
 
 /** One in-memory snapshot for this mounted browse page, shared by LINE/SIDE photos and factory
- * cards. Never global, localStorage or server cached: product flags can be viewer-specific. */
+ * cards. Never localStorage or server cached: product flags can be viewer-specific. Reused only
+ * briefly within the tab and per account (loadCatalogSnapshotShared), freshly shuffled per visit. */
 export function CatalogSnapshotProvider({ enabled, children }: { enabled: boolean; children: ReactNode }) {
   const t = useTranslations();
   const [state, setState] = useState<Omit<CatalogState, "retry" | "productLikes">>({ status: "loading", snapshot: null });
@@ -27,7 +28,7 @@ export function CatalogSnapshotProvider({ enabled, children }: { enabled: boolea
       cancelled = true;
       setState({ status: "error", snapshot: null });
     }, 45_000);
-    loadCatalogSnapshot(getApi(), () => cancelled)
+    loadCatalogSnapshotShared(getApi(), viewer)
       .then((snapshot) => {
         if (cancelled) return;
         if ((readBrowserCookie()?.id ?? "") !== viewer) { retry(); return; }

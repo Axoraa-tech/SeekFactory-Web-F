@@ -894,6 +894,11 @@ export function createHttpApi(
       }
     },
 
+    async listCatalog(): Promise<Product[]> {
+      const list = await fetchJson<BackendProduct[]>("/api/v1/products/catalog", { cache: "no-store" });
+      return list.map(normalizeProduct);
+    },
+
     async listByCategory(categoryId: string): Promise<Product[]> {
       const list = await fetchJson<BackendProduct[]>(`/api/v1/products/category/${encodeURIComponent(categoryId)}`);
       return list.map(normalizeProduct);
@@ -1284,8 +1289,9 @@ export function createHttpApi(
 
   // ── 11. SEARCH REPOSITORY ──────────────────────────────────────
   const search: SearchRepository = {
-    async query({ q = "", category = "", limit = 30 }): Promise<SearchResult> {
+    async query({ q = "", category = "", limit = 30, types }): Promise<SearchResult> {
       const params = new URLSearchParams({ q, category, limit: String(limit) });
+      if (types?.length) params.set("types", types.join(","));
       const res = await fetchJson<{
         products?: BackendProduct[];
         manufacturers?: BackendManufacturer[];
@@ -1744,6 +1750,29 @@ export function resolveMediaUrl(url: string | undefined): string | undefined {
   }
   if (MEDIA_ORIGIN) return MEDIA_ORIGIN + url;
   return url;
+}
+
+/** Sizes the backend can serve a photo at (longest side, px): logos/avatars, cards/lists, large views. */
+export type MediaThumbWidth = 160 | 640 | 1280;
+const RESIZABLE_MEDIA = /\/media\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(?:png|jpg))(?:\?.*)?$/;
+
+/**
+ * A smaller copy of an uploaded photo (/api/v1/media/<key>?w=640) for places that show it small:
+ * originals are up to 2048 px, often multi-MB PNGs. Always asks the API, which serves or
+ * redirects to the stored copy (CDN included) and falls back to the original, so an older
+ * backend that ignores ?w= still shows the photo. Anything else (WebP, GIF, video, local
+ * previews, external links) is returned unchanged.
+ */
+export function mediaThumb(url: string, width: MediaThumbWidth): string;
+export function mediaThumb(url: string | undefined, width: MediaThumbWidth): string | undefined;
+export function mediaThumb(url: string | undefined, width: MediaThumbWidth): string | undefined {
+  const match = url?.match(RESIZABLE_MEDIA);
+  if (!match) return url;
+  const path = `${BACKEND_MEDIA_PREFIX}${match[1]}?w=${width}`;
+  if (typeof window !== "undefined" && window.location.protocol === "https:" && MEDIA_ORIGIN.startsWith("http://")) {
+    return `/api/proxy${path}`;
+  }
+  return MEDIA_ORIGIN ? MEDIA_ORIGIN + path : path;
 }
 
 /** Inverse of resolveMediaUrl: store backend media as relative paths. */

@@ -21,6 +21,7 @@ import type { ProductGroup } from "@/features/feed/use-showcase-products";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { useTranslations } from "next-intl";
 import { createWheelStepper } from "@/hooks/wheel-stepper";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   items: FeedItem[];
@@ -325,7 +326,7 @@ function ProfilePanel({ manufacturer: m }: { manufacturer: Manufacturer }) {
   return (
     <div key={m.id} className="rounded-2xl border border-line bg-surface p-5 shadow-2xs transition-opacity duration-300">
       <SupplierLockOverlay>
-      <Link href={`/manufacturers/${m.slug}`} className="flex items-center gap-3 hover:opacity-90">
+      <Link prefetch={false} href={`/manufacturers/${m.slug}`} className="flex items-center gap-3 hover:opacity-90">
         <Logo url={m.logoUrl} name={supplierName(m.name)} size="lg" />
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 font-bold text-ink">
@@ -366,7 +367,7 @@ function ProfilePanel({ manufacturer: m }: { manufacturer: Manufacturer }) {
         <Link href="/rfq/new" className="sf-btn-commit rounded-xl bg-orange-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-orange-400">
           {t("feed.sendRfq")}
         </Link>
-        <Link href={`/manufacturers/${m.slug}`} className="sf-btn-nav rounded-xl border border-line px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-slate-50">
+        <Link prefetch={false} href={`/manufacturers/${m.slug}`} className="sf-btn-nav rounded-xl border border-line px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-slate-50">
           {t("showcase.single.viewFactoryProfile")}
         </Link>
       </div>
@@ -380,7 +381,7 @@ function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3">
       <SupplierLockOverlay compact className="flex min-w-0 flex-1">
-      <Link href={`/manufacturers/${m.slug}`} className="flex min-w-0 flex-1 items-center gap-3">
+      <Link prefetch={false} href={`/manufacturers/${m.slug}`} className="flex min-w-0 flex-1 items-center gap-3">
       <Logo url={m.logoUrl} name={supplierName(m.name)} />
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-1.5 text-sm font-bold text-ink">
@@ -394,7 +395,7 @@ function ProfileBar({ manufacturer: m }: { manufacturer: Manufacturer }) {
       </div>
       </Link>
       </SupplierLockOverlay>
-      <Link href={`/manufacturers/${m.slug}`} className="sf-btn-nav shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink">{t("nav.profile")}</Link>
+      <Link prefetch={false} href={`/manufacturers/${m.slug}`} className="sf-btn-nav shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink">{t("nav.profile")}</Link>
       <Link href="/rfq/new" className="sf-btn-commit shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white">{t("showcase.single.rfq")}</Link>
     </div>
   );
@@ -404,7 +405,7 @@ function Logo({ url, name, size }: { url?: string; name: string; size?: "lg" }) 
   const cls = size === "lg" ? "h-12 w-12" : "h-10 w-10";
   return url ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt="" className={`${cls} shrink-0 rounded-xl border border-line object-cover`} />
+    <img src={mediaThumb(url, 160)} alt="" className={`${cls} shrink-0 rounded-xl border border-line object-cover`} />
   ) : (
     <span className={`${cls} flex shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-600`}>{name.charAt(0)}</span>
   );

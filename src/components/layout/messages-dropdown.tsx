@@ -12,6 +12,7 @@ import { getApi } from "@/shared/api";
 import { patchUnreadCounts, refreshUnreadCounts, useUnreadCounts } from "@/features/inbox/unread-store";
 import { formatRelativeTime } from "@/shared/lib/format";
 import { useTranslations, useLocale } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type MessagesDropdownProps = {
   initialCount: number;
@@ -141,7 +142,7 @@ export function MessagesDropdown({
                   }`}
                 >
                   <Avatar
-                    src={item.buyerAvatarUrl || item.manufacturer.logoUrl}
+                    src={mediaThumb(item.buyerAvatarUrl || item.manufacturer.logoUrl, 160)}
                     alt=""
                     size={40}
                     className="shrink-0 ring-1 ring-slate-200"

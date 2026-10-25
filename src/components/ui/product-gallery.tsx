@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 /** A seek video shown in the gallery after the product photos. */
 export type GalleryVideo = { id: string; videoUrl: string; posterUrl?: string; title: string };
@@ -60,7 +61,7 @@ export function ProductGallery({ images, alt, badge, videos = [] }: Props) {
           <img
             key={current.src}
             decoding="async"
-            src={current.src}
+            src={mediaThumb(current.src, 1280)}
             alt={many ? `${alt} (${safeIndex + 1} / ${slides.length})` : alt}
             className={cn(FADE_IN, "h-full w-full object-cover transition-transform duration-300 hover:scale-105")}
           />
@@ -69,7 +70,7 @@ export function ProductGallery({ images, alt, badge, videos = [] }: Props) {
           <video
             key={current.video.id}
             src={current.video.videoUrl}
-            poster={current.video.posterUrl}
+            poster={mediaThumb(current.video.posterUrl, 1280)}
             controls
             autoPlay
             muted
@@ -132,7 +133,7 @@ export function ProductGallery({ images, alt, badge, videos = [] }: Props) {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src={slide.kind === "photo" ? slide.src : slide.video.posterUrl}
+                  src={mediaThumb(slide.kind === "photo" ? slide.src : slide.video.posterUrl, 160)}
                   alt=""
                   className="h-full w-full object-cover"
                 />

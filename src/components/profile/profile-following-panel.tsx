@@ -6,6 +6,7 @@ import { MessageSquare, ExternalLink } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/verified-badge";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   followedSuppliers: Manufacturer[];
@@ -51,7 +52,7 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
           >
             <div className="flex items-start gap-3 min-w-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img loading="lazy" decoding="async" src={m.logoUrl}
+              <img loading="lazy" decoding="async" src={mediaThumb(m.logoUrl, 160)}
                 alt=""
                 className="h-12 w-12 rounded-xl object-cover border border-white/80 shrink-0 shadow-sm"
               />
@@ -86,7 +87,7 @@ export function ProfileFollowingPanel({ followedSuppliers, onToggleFollow }: Pro
                   <MessageSquare className="h-3 w-3" />
                   <span>{t("common.chat")}</span>
                 </Link>
-                <Link
+                <Link prefetch={false}
                   href={`/manufacturers/${m.slug}`}
                   className="sf-btn-nav inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-1 text-xs font-bold text-white hover:bg-black transition-colors"
                 >

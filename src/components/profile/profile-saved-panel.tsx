@@ -9,6 +9,7 @@ import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import type { Product } from "@/entities/product";
 import type { FeedItem } from "@/shared/api/contracts";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   savedProducts: Product[];
@@ -56,12 +57,12 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
             >
               <div className="flex items-start gap-3 min-w-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img loading="lazy" decoding="async" src={p.imageUrl}
+                <img loading="lazy" decoding="async" src={mediaThumb(p.imageUrl, 640)}
                   alt={p.name}
                   className="h-20 w-20 rounded-xl object-cover border border-white/80 shrink-0 shadow-sm"
                 />
                 <div className="min-w-0 flex-1">
-                  <Link
+                  <Link prefetch={false}
                     href={`/products/${p.slug}`}
                     className="font-bold text-xs sm:text-sm text-ink hover:text-brand-blue transition-colors line-clamp-1"
                   >
@@ -94,7 +95,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                 </button>
 
                 <div className="flex items-center gap-1.5">
-                  <Link
+                  <Link prefetch={false}
                     href={`/products/${p.slug}?order=1`}
                     className="sf-btn-add inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >
@@ -126,13 +127,13 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
               >
                 <div className="flex items-start gap-3 min-w-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img loading="lazy" decoding="async" src={reel.posterUrl}
+                  <img loading="lazy" decoding="async" src={mediaThumb(reel.posterUrl, 640)}
                     alt={reel.title}
                     className="h-20 w-28 rounded-xl object-cover border border-white/80 shrink-0 shadow-sm"
                   />
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-xs sm:text-sm text-ink line-clamp-2">{reel.title}</p>
-                    <Link
+                    <Link prefetch={false}
                       href={`/manufacturers/${manufacturer.slug}`}
                       className="text-xs text-brand-blue font-semibold hover:underline line-clamp-1"
                     >
@@ -154,7 +155,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                     <Trash2 className="h-3 w-3" />
                     <span>{t("common.remove")}</span>
                   </button>
-                  <Link
+                  <Link prefetch={false}
                     href={`/manufacturers/${manufacturer.slug}`}
                     className="sf-btn-nav inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm"
                   >

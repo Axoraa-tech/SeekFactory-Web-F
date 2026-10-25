@@ -29,6 +29,7 @@ import { useReelImpression } from "@/hooks/use-reel-impression";
 import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
 import type { Product } from "@/entities/product";
 import { useTranslations } from "next-intl";
+import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
   reel: Reel;
@@ -169,14 +170,14 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 factory video is never cropped or stretched, whatever the card's shape */}
             {reel.posterUrl && (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={reel.posterUrl} alt="" aria-hidden loading="lazy"
+              <img src={mediaThumb(reel.posterUrl, 160)} alt="" aria-hidden loading="lazy"
                 className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
             )}
             {reel.videoUrl ? (
               <video
                 ref={videoRef}
                 src={reel.videoUrl}
-                poster={reel.posterUrl}
+                poster={mediaThumb(reel.posterUrl, 1280)}
                 loop
                 playsInline
                 muted={isMuted}
@@ -198,7 +199,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={reel.posterUrl}
+              <img src={mediaThumb(reel.posterUrl, 1280)}
                 alt={reel.title}
                 loading={eager ? "eager" : "lazy"}
                 decoding="async"
@@ -221,13 +222,13 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             >
               <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
                 <div className="flex items-center justify-between gap-2">
-                  <Link
+                  <Link prefetch={false}
                     href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
                     className="flex min-w-0 flex-1 items-center gap-2.5 hover:opacity-90 transition"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img loading="lazy" decoding="async"
-                      src={manufacturer.logoUrl}
+                      src={mediaThumb(manufacturer.logoUrl, 160)}
                       alt=""
                       className="h-9 w-9 shrink-0 rounded-full border-2 border-white/80 bg-white object-cover shadow-sm"
                     />
