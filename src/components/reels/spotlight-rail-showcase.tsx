@@ -58,7 +58,6 @@ export function SpotlightRailShowcase({ items, settings }: Props) {
 
           <div>
             <h2 className="text-lg font-bold leading-snug text-ink">{hero.reel.title}</h2>
-            {hero.reel.description && <p className="mt-1 line-clamp-2 text-sm text-ink-muted">{hero.reel.description}</p>}
             <Hashtags item={hero} />
           </div>
 

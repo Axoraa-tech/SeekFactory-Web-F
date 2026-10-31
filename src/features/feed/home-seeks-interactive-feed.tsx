@@ -23,6 +23,7 @@ import { feedSourceKey } from "@/features/feed/load-feed";
 import { usePagedFeed } from "@/features/feed/use-paged-feed";
 import { CatalogSnapshotProvider } from "@/features/feed/catalog-snapshot-provider";
 import { useViewportLock } from "@/components/reels/use-viewport-lock";
+import { StartPostMenu } from "@/features/factory/post-composer/start-post-menu";
 
 type Props = {
   /** Server-verified viewer identity; resets viewer-specific catalog state after auth changes. */
@@ -221,7 +222,7 @@ function HomeSeeksInteractiveFeedContent({
           {/* Left: Heading + For You / Following Tabs */}
           <div className="flex items-center gap-4 shrink-0">
             <h1 className={cn("text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-1.5", compactComposer && "lg:text-xl")}>
-              <span>{t("common.seeks")}</span>
+              <span>{t("common.seeksVideos")}</span>
               <span className="flex h-2 w-2 rounded-full bg-emerald-500" title={t("feed.home.liveVideoMarketplace")} />
             </h1>
 
@@ -258,6 +259,14 @@ function HomeSeeksInteractiveFeedContent({
               </button>
             </div>
           </div>
+
+          {/* Manufacturers: LinkedIn-style "Start a post" beside the tabs (desktop; below lg the
+              composer card and the bottom bar's Post button cover it) */}
+          {composer && (
+            <div className="hidden min-w-0 flex-1 lg:flex">
+              <StartPostMenu pill />
+            </div>
+          )}
         </div>
 
         {/* 4. Active Filter Indicator Bar (shown when subcategory or search query is applied) */}

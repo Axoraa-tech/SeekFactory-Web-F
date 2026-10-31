@@ -65,6 +65,8 @@
     "save": "Save",
     "subcategories": "Subcategories",
     "seeks": "Seeks",
+    "seeksVideos": "Seek Videos",
+    "seeksProducts": "Seek Products",
     "showLess": "Show Less",
     "reply": "Reply",
     "cancel": "Cancel",
@@ -367,6 +369,7 @@
     "products": {
       "badge": "Products",
       "viewProduct": "View product",
+      "askFactory": "Ask the factory about this product",
       "previous": "Previous product",
       "next": "Next product",
       "count": "{count, plural, one {# product} other {# products}}"

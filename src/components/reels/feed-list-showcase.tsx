@@ -59,9 +59,6 @@ export function FeedListShowcase({ items, settings }: Props) {
 
           <div className="px-4 pb-3">
             <h3 className="text-[15px] font-semibold leading-snug text-ink">{item.reel.title}</h3>
-            {item.reel.description && (
-              <p className="mt-1 line-clamp-2 text-sm text-ink-muted">{item.reel.description}</p>
-            )}
             <Hashtags item={item} />
           </div>
 

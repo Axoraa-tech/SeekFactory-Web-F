@@ -3,6 +3,7 @@
 import { cn } from "@/shared/lib/cn";
 import { useState, useEffect, useRef,useMemo  } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Plus, Building2 } from "lucide-react";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { SearchBar } from "@/components/layout/search-bar";
@@ -201,6 +202,7 @@ function UnifiedHeaderBackground({ hasCategories }: { hasCategories: boolean }) 
 export function TopNav({ user, messageCount, notificationCount, categories, allCategories }: Props) {
   const { t } = useRegionalSettings();
   const isManufacturer = user?.role === "Supplier";
+  const pathname = usePathname();
 
   // The buyer plan lives on the account; keep the (root-level) plan provider in step with it
   const { syncPlan } = useBuyerPlan();
@@ -255,10 +257,11 @@ export function TopNav({ user, messageCount, notificationCount, categories, allC
           </Link>
 
           {/* Search for everyone. Manufacturers get "Start a post" inside the bar, where buyers
-              have the Search button (Enter still searches; below lg the bottom bar has Post) */}
+              have the Search button (Enter still searches; below lg the bottom bar has Post).
+              On the home feed it sits in the Seeks bar instead, so the bar keeps its Search button. */}
           <SearchBar
             categories={categories}
-            action={isManufacturer ? <StartPostMenu inline /> : undefined}
+            action={isManufacturer && pathname !== "/" ? <StartPostMenu inline /> : undefined}
           />
 
           {/* Right Actions */}

@@ -368,7 +368,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               {gallery.map((item, index) => (
                 <div
                   key={item.key}
-                  className={`group relative aspect-4/3 rounded-lg overflow-hidden border-2 ${
+                  className={`group relative aspect-[4/3] rounded-lg overflow-hidden border-2 ${
                     index === 0 ? "border-brand-blue" : "border-line"
                   }`}
                 >
@@ -408,7 +408,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                 <button
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
-                  className="sf-btn-add aspect-4/3 rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas flex flex-col items-center justify-center gap-1 text-brand-blue transition"
+                  className="sf-btn-add aspect-[4/3] rounded-lg border-2 border-dashed border-line hover:border-brand-blue bg-canvas flex flex-col items-center justify-center gap-1 text-brand-blue transition"
                 >
                   <ImageIcon className="h-5 w-5" />
                   <span className="text-[10px] font-bold">{t("seller.product.addPhotos")}</span>

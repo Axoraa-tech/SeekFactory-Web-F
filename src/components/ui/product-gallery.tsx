@@ -54,17 +54,23 @@ export function ProductGallery({ images, alt, badge, videos = [] }: Props) {
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative aspect-4/3 w-full overflow-hidden bg-slate-900"
+        className="relative aspect-[4/3] w-full overflow-hidden bg-slate-900"
       >
+        {/* Every photo sits in the same fixed 4:3 frame: shown whole, never cropped or stretched,
+            on a blurred copy of itself so tall or wide photos don't leave bare bars */}
         {current?.kind === "photo" && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={current.src}
-            decoding="async"
-            src={mediaThumb(current.src, 1280)}
-            alt={many ? `${alt} (${safeIndex + 1} / ${slides.length})` : alt}
-            className={cn(FADE_IN, "h-full w-full object-cover transition-transform duration-300 hover:scale-105")}
-          />
+          <div key={current.src} className={cn(FADE_IN, "absolute inset-0")}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={mediaThumb(current.src, 160)} alt="" aria-hidden
+              className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              decoding="async"
+              src={mediaThumb(current.src, 1280)}
+              alt={many ? `${alt} (${safeIndex + 1} / ${slides.length})` : alt}
+              className="relative h-full w-full object-contain transition-transform duration-300 hover:scale-105"
+            />
+          </div>
         )}
         {current?.kind === "video" && (
           <video
@@ -80,7 +86,7 @@ export function ProductGallery({ images, alt, badge, videos = [] }: Props) {
             onEnded={() => go(1)}
             onError={() => many && go(1)}
             aria-label={current.video.title}
-            className={cn(FADE_IN, "h-full w-full bg-black object-contain")}
+            className={cn(FADE_IN, "absolute inset-0 h-full w-full bg-black object-contain")}
           />
         )}
         {badge && current?.kind === "photo" && (
