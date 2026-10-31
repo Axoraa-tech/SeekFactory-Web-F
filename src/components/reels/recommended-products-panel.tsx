@@ -63,8 +63,7 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
     </button>
   ) : null;
   const factories = new Map((data?.manufacturers ?? []).map((m) => [m.id, m]));
-  const title = t("showcase.single.catalogProducts");
-  const hint = t("showcase.single.catalogProductsHint");
+  const title = t("common.seeksProducts");
   const TitleIcon = Shuffle;
   const pagination = status === "ready" && products.length > 0 ? (
     <div className="shrink-0 space-y-2 p-2 text-center" aria-live="polite">
@@ -135,14 +134,12 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
     // header card on top and the product cards scrolling below it, the scrollbar outside the cards.
     <section data-lock-fill aria-label={title} className="flex max-h-[calc(100vh-156px)] flex-col gap-2">
       <div className="shrink-0" style={{ paddingRight: 4 + scrollbarWidth }}>
-      <header className="flex items-center gap-2.5 rounded-xl border border-line bg-surface px-4 py-2.5 shadow-card">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-orange-soft text-brand-orange">
-          <TitleIcon className="h-4 w-4" />
-        </span>
-        <div className="min-w-0">
-          <h2 className="truncate text-sm font-bold text-ink">{title}</h2>
-          <p className="truncate text-[11px] text-ink-muted">{hint}</p>
-        </div>
+      {/* Titled and sized like the "Seeks Videos" bar beside it, so the two columns read as a pair */}
+      <header className="flex items-center gap-2.5 rounded-xl border border-line bg-surface px-4 py-2.5 shadow-card lg:py-0.5">
+        <h2 className="flex min-w-0 items-center gap-1.5 text-xl font-bold text-slate-900">
+          <span className="truncate">{title}</span>
+          <span className="flex h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+        </h2>
         {motionControl}
       </header>
       </div>

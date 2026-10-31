@@ -51,16 +51,36 @@
   scrollbar-width: none;
 }
 
-/* Side panels and the seek column: a slim scrollbar that only shows while the pointer is over
-   the panel (the standard properties win over ::-webkit-scrollbar in current browsers) */
-.scrollbar-subtle {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  transition: scrollbar-color 0.2s;
+/* Side panels and the seek column: an always-visible 10px scrollbar so buyers can see the column
+   scrolls. Chrome, Edge and Safari draw it from ::-webkit-scrollbar (only while the standard
+   scrollbar-width / scrollbar-color are unset, as they would win); Firefox, which has no
+   ::-webkit-scrollbar, gets its regular-width bar in the same colours. */
+.scrollbar-subtle::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
-.scrollbar-subtle:hover,
-.scrollbar-subtle:focus-within {
-  scrollbar-color: #d0d5dd transparent;
+.scrollbar-subtle::-webkit-scrollbar-track {
+  background: #eef0f3;
+  border-radius: 999px;
+}
+.scrollbar-subtle::-webkit-scrollbar-thumb {
+  background: #a3abb8;
+  border-radius: 999px;
+  border: 2px solid #eef0f3;
+  /* The seek column holds hundreds of cards: keep the thumb long enough to see and grab */
+  min-height: 48px;
+}
+.scrollbar-subtle::-webkit-scrollbar-thumb:hover {
+  background: #7b8494;
+}
+.scrollbar-subtle::-webkit-scrollbar-button {
+  display: none;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .scrollbar-subtle {
+    scrollbar-width: auto;
+    scrollbar-color: #a3abb8 #eef0f3;
+  }
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;

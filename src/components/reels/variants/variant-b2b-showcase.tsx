@@ -133,6 +133,9 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
     };
   }, [isScrubbing, getTimeFromEvent, handleSeek]);
 
+  // The seek's title names its product, so it links there
+  const seekProductSlug = product?.slug ?? productSlug;
+
   const totalDuration = duration > 0 ? duration : 1;
   const progressPercent = Math.min(100, Math.max(0, (currentTime / totalDuration) * 100));
 
@@ -223,7 +226,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               <SupplierLockOverlay badgeLabel={t("seek.viewManufacturer")}>
                 <div className="flex items-center justify-between gap-2">
                   <Link prefetch={false}
-                    href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+                    href={`/manufacturers/${manufacturer.slug}`}
                     className="flex min-w-0 flex-1 items-center gap-2.5 hover:opacity-90 transition"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -272,10 +275,14 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-3 pt-12 pb-2">
               <div className="flex items-end gap-2">
                 <div className="min-w-0 flex-1 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-                  <h3 className="line-clamp-1 text-[15px] font-bold leading-snug" title={reel.title}>{reel.title}</h3>
-                  {reel.description && reel.description !== reel.title && (
-                    <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-white/85">{reel.description}</p>
-                  )}
+                  <h3 className="line-clamp-1 text-[15px] font-bold leading-snug" title={reel.title}>
+                    {seekProductSlug ? (
+                      <Link prefetch={false} href={`/products/${seekProductSlug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
+                        {reel.title}
+                      </Link>
+                    ) : reel.title}
+                  </h3>
+                  {/* No description here: buyers read it on the product page */}
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                   <button

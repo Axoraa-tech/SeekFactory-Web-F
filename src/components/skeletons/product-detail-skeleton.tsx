@@ -19,7 +19,7 @@ export function ProductDetailSkeleton() {
         {/* Left Column: Image & Factory Trust */}
         <div className="space-y-4">
           <Card className="overflow-hidden border-slate-200/90 shadow-2xs">
-            <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100">
+            <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
               <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
               <Skeleton className="absolute top-3 left-3 h-5 w-24 rounded-full" />
             </div>

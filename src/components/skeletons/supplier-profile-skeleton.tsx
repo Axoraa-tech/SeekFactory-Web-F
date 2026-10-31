@@ -61,7 +61,7 @@ export function SupplierProfileSkeleton() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white flex flex-col space-y-2">
-                <div className="relative aspect-4/3 w-full bg-slate-100">
+                <div className="relative aspect-[4/3] w-full bg-slate-100">
                   <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
                 </div>
                 <div className="p-3 pt-0 space-y-2">

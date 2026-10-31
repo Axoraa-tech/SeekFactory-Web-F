@@ -65,6 +65,8 @@
     "save": "收藏",
     "subcategories": "子类目",
     "seeks": "希克",
+    "seeksVideos": "希克视频",
+    "seeksProducts": "希克产品",
     "showLess": "收起",
     "reply": "回复",
     "cancel": "取消",
@@ -367,6 +369,7 @@
     "products": {
       "badge": "产品",
       "viewProduct": "查看产品",
+      "askFactory": "向工厂咨询此产品",
       "previous": "上一个产品",
       "next": "下一个产品",
       "count": "{count} 个产品"

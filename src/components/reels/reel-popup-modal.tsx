@@ -393,7 +393,7 @@ export function ReelPopupModal({ items }: Props) {
             {/* Manufacturer row */}
             <div className="flex items-center justify-between gap-2">
               <Link prefetch={false}
-                href={productSlug ? `/products/${productSlug}` : `/manufacturers/${manufacturer.slug}`}
+                href={`/manufacturers/${manufacturer.slug}`}
                 className="flex items-center gap-2.5 hover:opacity-80 transition min-w-0"
                 onClick={close}
               >
@@ -437,8 +437,13 @@ export function ReelPopupModal({ items }: Props) {
 
             {/* Title & description */}
             <div>
-              <h3 className="text-sm font-bold text-slate-900 leading-snug line-clamp-1">{reel.title}</h3>
-              <p className="text-xs text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">{reel.description}</p>
+              <h3 className="text-sm font-bold text-slate-900 leading-snug line-clamp-1">
+                {productSlug ? (
+                  <Link prefetch={false} href={`/products/${productSlug}`} onClick={close} className="hover:underline">
+                    {reel.title}
+                  </Link>
+                ) : reel.title}
+              </h3>
             </div>
 
             {/* Engagement bar */}

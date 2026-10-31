@@ -3,16 +3,33 @@
 import { SupplierName } from "@/features/subscription";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, FileSpreadsheet, Layers, PackageCheck, Send, ShoppingBag } from "lucide-react";
+import {
+  Bookmark,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  FileSpreadsheet,
+  Layers,
+  MessageCircle,
+  PackageCheck,
+  Repeat2,
+  Send,
+  ShoppingBag,
+  ThumbsUp,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { SeekTrustBadge } from "@/components/reels/seek-trust-strip";
-import { useFollow } from "@/features/engagement/use-engagement";
+import { useFollow, useRequireSignIn } from "@/features/engagement/use-engagement";
+import { useProductShare } from "@/features/engagement/use-product-share";
+import { useCatalogSnapshot } from "@/features/feed/catalog-snapshot-provider";
+import { getApi } from "@/shared/api";
 import { cn } from "@/shared/lib/cn";
+import { formatCount } from "@/shared/lib/format";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
-import { mediaThumb } from "@/shared/api/http-api";
+import { ApiError, mediaThumb } from "@/shared/api/http-api";
 
 /** How long each product stays up before the next one slides in. */
 const SLIDE_MS = 3500;
@@ -40,10 +57,16 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
   const [visible, setVisible] = useState(false);
   const [hovered, setHovered] = useState(false);
   const { following, toggleFollow } = useFollow(manufacturer.id, undefined, manufacturer.followerCount);
+  const { productLikes } = useCatalogSnapshot();
+  const requireSignIn = useRequireSignIn();
+  // Saves made here, by product id; the rest come from the product's savedByMe
+  const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
 
   const count = products.length;
   const safeIndex = Math.min(index, count - 1);
   const product = products[safeIndex];
+  // Hooks run before the early return below, so share takes the slide's product or blanks
+  const sharing = useProductShare(product?.slug ?? "", product?.name ?? "");
   const running = visible && !hovered && count > 1;
 
   // Auto-advance only while the card is the one in view
@@ -70,6 +93,20 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
   const go = (next: number) => setSlide({ index: (next + count) % count, elapsed: 0 });
 
   if (!product) return null;
+
+  const like = productLikes.getState(product);
+  const saved = savedOverrides[product.id] ?? Boolean(product.savedByMe);
+  const toggleSave = async () => {
+    const id = product.id;
+    setSavedOverrides((s) => ({ ...s, [id]: !saved }));
+    try {
+      const res = await getApi().products.toggleSave(id);
+      setSavedOverrides((s) => ({ ...s, [id]: res.saved }));
+    } catch (err) {
+      setSavedOverrides((s) => ({ ...s, [id]: saved }));
+      if (err instanceof ApiError && err.status === 401) requireSignIn();
+    }
+  };
 
   const chips = [
     ...(product.moq ? [{ label: t("common.minOrder"), value: product.moq }] : []),
@@ -269,13 +306,66 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
           />
         </div>
 
-        {/* Bottom bar, the same height as a seek's engagement bar */}
-        <div className="glass-tile flex h-[34px] items-center justify-between rounded-2xl px-3 text-xs">
-          <span className="truncate text-ink-muted"><SupplierName name={manufacturer.name} /></span>
-          <Link prefetch={false} href={`/products/${product.slug}`} className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-brand-blue hover:underline">
-            {t("showcase.products.viewProduct")}
-            <ChevronRight className="h-3.5 w-3.5" />
+        {/* Engagement bar for the product on show, styled like a seek's. Products have no comments
+            or view counts, so "comment" asks the factory in chat. */}
+        <div className="glass-tile flex select-none items-center justify-between rounded-2xl p-1 text-xs">
+          <Link
+            href={`/messages?with=${manufacturer.slug}`}
+            aria-label={t("showcase.products.askFactory")}
+            title={t("showcase.products.askFactory")}
+            className="sf-btn-soft flex flex-1 items-center justify-center gap-1 rounded-xl px-2 py-1 text-ink-muted transition hover:bg-white/90 hover:text-brand-blue hover:shadow-xs"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
           </Link>
+
+          <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
+
+          <button
+            type="button"
+            disabled={sharing.pending}
+            onClick={() => void sharing.share()}
+            aria-label={t("showcase.single.shareProduct")}
+            title={sharing.status === "shared" ? t("showcase.single.productShared") : sharing.status === "error" ? t("showcase.single.productShareFailed") : t("showcase.single.shareProduct")}
+            className={cn(
+              "sf-btn-soft flex flex-1 items-center justify-center gap-1 rounded-xl px-2 py-1 text-ink-muted transition hover:bg-white/90 hover:text-brand-blue hover:shadow-xs disabled:opacity-50",
+              sharing.status === "shared" && "bg-white text-brand-blue shadow-xs",
+            )}
+          >
+            <Repeat2 className="h-3.5 w-3.5" />
+          </button>
+
+          <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
+
+          <button
+            type="button"
+            disabled={like.pending || like.likes === undefined}
+            onClick={() => void productLikes.toggleLike(product)}
+            aria-pressed={like.liked}
+            aria-label={t(like.liked ? "showcase.single.unlikeProduct" : "showcase.single.likeProduct")}
+            title={t(like.error ? "showcase.single.productLikeFailed" : like.likes === undefined ? "showcase.single.productLikesUnavailable" : like.liked ? "showcase.single.unlikeProduct" : "showcase.single.likeProduct")}
+            className={cn(
+              "sf-btn-toggle flex flex-1 items-center justify-center gap-1 rounded-xl px-2 py-1 transition hover:bg-white/90 hover:shadow-xs disabled:opacity-50",
+              like.liked ? "bg-white text-brand-blue shadow-xs" : "text-ink-muted hover:text-brand-blue",
+            )}
+          >
+            <ThumbsUp className={cn("h-3.5 w-3.5", like.liked && "fill-brand-blue")} />
+            {like.likes !== undefined && <span className="text-[11px] font-medium">{formatCount(like.likes)}</span>}
+          </button>
+
+          <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
+
+          <button
+            type="button"
+            onClick={() => void toggleSave()}
+            aria-pressed={saved}
+            className={cn(
+              "sf-btn-toggle flex flex-1 items-center justify-center gap-1 rounded-xl px-2 py-1 text-ink-muted transition hover:bg-white/90 hover:text-brand-blue hover:shadow-xs",
+              saved && "bg-white text-brand-blue shadow-xs",
+            )}
+          >
+            <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-brand-blue")} />
+            <span className="text-[11px] font-medium">{saved ? t("common.saved") : t("common.save")}</span>
+          </button>
         </div>
       </div>
     </article>

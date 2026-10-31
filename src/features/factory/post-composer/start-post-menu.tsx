@@ -11,9 +11,11 @@ import { OPEN_COMPOSER_EVENT, type ComposerMode } from "./events";
  * Manufacturers' "Start a post" button with a two-item menu: post a video seek or a product.
  * On the feed the composer opens in place; anywhere else the items link to the Seller Hub forms.
  */
-export function StartPostMenu({ inline = false }: {
+export function StartPostMenu({ inline = false, pill = false }: {
   /** Sized to sit inside the search bar, where the Search button is for buyers. */
   inline?: boolean;
+  /** LinkedIn-style "Start a post" field that fills the space it is given (the feed's Seeks bar). */
+  pill?: boolean;
 } = {}) {
   const { t } = useRegionalSettings();
   const [open, setOpen] = useState(false);
@@ -44,24 +46,38 @@ export function StartPostMenu({ inline = false }: {
   };
 
   return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label={t("seller.composer.startAPost")}
-        title={t("seller.composer.startAPost")}
-        className={cn(
-          "sf-btn-commit inline-flex items-center gap-1 whitespace-nowrap bg-brand-blue text-xs font-semibold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95",
-          inline ? "h-7 rounded-full px-3" : "h-8 rounded-lg px-2.5",
-        )}
-      >
-        <Plus className="h-3.5 w-3.5" />
-        {/* Icon-only on small laptops so the search bar keeps its width */}
-        <span className="hidden xl:inline">{t("seller.composer.startAPost")}</span>
-        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
-      </button>
+    <div ref={ref} className={cn("relative", pill && "min-w-0 flex-1")}>
+      {pill ? (
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          className="sf-btn-soft flex h-10 w-full items-center gap-2 rounded-full border border-slate-300 bg-surface px-4 text-left text-sm font-semibold text-ink-muted transition hover:bg-canvas"
+        >
+          <Plus className="h-4 w-4 shrink-0 text-brand-blue" />
+          <span className="min-w-0 flex-1 truncate">{t("seller.composer.startAPost")}</span>
+          <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", open && "rotate-180")} />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-label={t("seller.composer.startAPost")}
+          title={t("seller.composer.startAPost")}
+          className={cn(
+            "sf-btn-commit inline-flex items-center gap-1 whitespace-nowrap bg-brand-blue text-xs font-semibold text-white shadow-xs transition hover:bg-brand-blue-dark active:scale-95",
+            inline ? "h-7 rounded-full px-3" : "h-8 rounded-lg px-2.5",
+          )}
+        >
+          <Plus className="h-3.5 w-3.5" />
+          {/* Icon-only on small laptops so the search bar keeps its width */}
+          <span className="hidden xl:inline">{t("seller.composer.startAPost")}</span>
+          <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
+        </button>
+      )}
 
       {open && (
         <div
@@ -69,7 +85,7 @@ export function StartPostMenu({ inline = false }: {
           className={cn(
             "absolute top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-card",
             // Inside the search bar it sits at the right end: open leftwards, under the button
-            inline ? "right-0" : "left-1/2 -translate-x-1/2",
+            inline ? "right-0" : pill ? "left-0" : "left-1/2 -translate-x-1/2",
           )}
         >
           <Link
