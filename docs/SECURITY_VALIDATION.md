@@ -20,8 +20,14 @@ The Next patch addresses the relevant App Router / Server Actions denial-of-serv
 [GHSA-2464-fhr4-w9xw](https://github.com/advisories/GHSA-2464-fhr4-w9xw). The other package patches address
 the transitive image/source-map and next-intl findings recorded in the original PR audit.
 
-Regression checks: all 153 web tests, TypeScript checking and a production standalone build passed
+Regression checks: all 154 web tests, TypeScript checking and a production standalone build passed
 locally. The public API URL used for build validation was loopback-only; no production API or cloud
 resource was used. See the PR for the current remote CI status and the backend validation report for
 resource-limited full-stack results, including failures. No production deployment or merge is part
 of this change.
+
+The API proxy now removes hop-by-hop headers in both directions, including headers named by the
+`Connection` field. In particular, Tomcat's `Keep-Alive` metadata must not describe the separate
+browser-to-Next connection. A route-level regression checks request filtering and a206 media response,
+preserving range/cache headers while removing backend cookies and transport framing. See the backend
+burst diagnostic evidence for measured transport outcomes; this correction alone is not a capacity claim.
