@@ -74,7 +74,7 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     const headers = new Headers(req.headers);
     // Hop-by-hop / connection-level headers must not be forwarded. Node's fetch rejects
     // `expect` (curl sends `Expect: 100-continue` for bodies > 1MB) and recomputes length.
-    for (const name of HOP_BY_HOP_HEADERS) headers.delete(name);
+    stripConnectionHeaders(headers);
     // Credentials come only from our HttpOnly cookies, never from the browser
     headers.delete("authorization");
     headers.delete("cookie");
@@ -140,6 +140,7 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
     // brotli response arrives with Content-Length = compressed size, and forwarding that cut the
     // decompressed JSON short ("Unterminated string in JSON"). Next.js sets the right framing.
     const responseHeaders = new Headers(backendRes.headers);
+    stripConnectionHeaders(responseHeaders);
     responseHeaders.delete("content-encoding");
     responseHeaders.delete("content-length");
     responseHeaders.delete("transfer-encoding");
@@ -203,3 +204,13 @@ export const POST = handleProxy;
 export const PUT = handleProxy;
 export const PATCH = handleProxy;
 export const DELETE = handleProxy;
+
+/** Connection options describe one transport hop, never the browser-to-proxy connection. */
+function stripConnectionHeaders(headers: Headers) {
+  const options = headers.get("connection")?.split(",") ?? [];
+  for (const option of options) headers.delete(option.trim());
+  for (const name of HOP_BY_HOP_HEADERS) headers.delete(name);
+  headers.delete("proxy-authenticate");
+  headers.delete("proxy-authorization");
+  headers.delete("trailer");
+}

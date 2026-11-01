@@ -172,7 +172,7 @@ export interface MessageRepository {
     conversationId: string,
     text: string,
     attachment?: MessageAttachment,
-    context?: { orderId?: string }
+    context?: { orderId?: string; clientMessageId?: string }
   ): Promise<MessageItem>;
   /** Upload an image/PDF to this conversation; pass the result to sendMessage. */
   uploadAttachment(conversationId: string, file: File): Promise<MessageAttachment>;

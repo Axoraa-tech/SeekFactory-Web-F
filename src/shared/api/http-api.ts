@@ -301,6 +301,7 @@ interface BackendConversation {
 }
 
 interface BackendMessage {
+  changeRevision?: number;
   attachmentContentType?: string;
   order?: {
     id: string;
@@ -1131,9 +1132,10 @@ export function createHttpApi(
       conversationId: string,
       text: string,
       attachment?: MessageAttachment,
-      context?: { orderId?: string }
+      context?: { orderId?: string; clientMessageId?: string }
     ) {
       const payload = {
+        clientMessageId: context?.clientMessageId ?? crypto.randomUUID(),
         messageText: text,
         attachmentName: attachment?.name,
         attachmentSize: attachment?.size,
@@ -1235,17 +1237,60 @@ export function createHttpApi(
       
       // Same-origin via the proxy so the HttpOnly session cookie is attached
       const evtSource = new EventSource(`/api/proxy/api/v1/conversations/${encodeURIComponent(conversationId)}/stream`);
+      const revisions = new Map<string, number>();
+      const deliver = (m: BackendMessage) => {
+        if (typeof m.changeRevision === "number") {
+          if ((revisions.get(m.id) ?? -1) >= m.changeRevision) return;
+          revisions.set(m.id, m.changeRevision);
+        }
+        callback(normalizeMessage(m, conversationId));
+      };
+
+      // LISTEN/NOTIFY and SSE are hints. Recover committed changes after reconnects and missed hints.
+      let cursor = 0;
+      let stopped = false;
+      let syncing = false;
+      const sync = async () => {
+        if (stopped || syncing) return;
+        syncing = true;
+        try {
+          let more = true;
+          while (more && !stopped) {
+            const page = await fetchJson<{ messages: BackendMessage[]; cursor: number; hasMore: boolean }>(
+              `/api/v1/conversations/${encodeURIComponent(conversationId)}/messages/sync?after=${cursor}`,
+              { cache: "no-store" },
+            );
+            if (stopped) break;
+            page.messages.forEach(deliver);
+            if (page.hasMore && page.cursor <= cursor) throw new Error("Message cursor did not advance");
+            cursor = page.cursor;
+            more = page.hasMore;
+          }
+        } catch {
+          // Keep the cursor: the next wake-up retries the same committed changes.
+        } finally { syncing = false; }
+      };
+      evtSource.addEventListener("INIT", () => void sync());
+      const recoveryTimer = window.setInterval(() => {
+        if (document.visibilityState === "visible") void sync();
+      }, 15_000);
+      const onVisible = () => { if (document.visibilityState === "visible") void sync(); };
+      document.addEventListener("visibilitychange", onVisible);
+      void sync();
       
       evtSource.addEventListener("message", (event) => {
         try {
           const m: BackendMessage = JSON.parse(event.data);
-          callback(normalizeMessage(m, conversationId));
+          deliver(m);
         } catch (e) {
           console.error("Failed to parse SSE message", e);
         }
       });
       
       return () => {
+        stopped = true;
+        window.clearInterval(recoveryTimer);
+        document.removeEventListener("visibilitychange", onVisible);
         evtSource.close();
       };
     },
