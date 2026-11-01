@@ -56,6 +56,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
   }, [currentUser]);
 
   const isSupplier = currentUser?.role === "Supplier";
+  const pendingSend = useRef<{ fingerprint: string; id: string } | null>(null);
 
   const [threads, setThreads] = useState<ThreadWithMessages[]>(() => {
     return initialThreads.map((t) => ({
@@ -109,7 +110,10 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
         setThreads((prev) =>
           prev.map((t) => {
             if (t.id === selectedThreadId) {
-              return { ...t, messages: msgs.map(toChatMessage) };
+              const existing = new Map(t.messages.map(m => [m.id, m]));
+              const merged = msgs.map(m => existing.get(m.id) ?? toChatMessage(m));
+              const loaded = new Set(merged.map(m => m.id));
+              return { ...t, messages: [...merged, ...t.messages.filter(m => !loaded.has(m.id))] };
             }
             return t;
           })
@@ -127,8 +131,16 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
       .messages.markAsRead(selectedThreadId)
       .then(() => refreshUnreadCounts());
 
+    let readTimer: ReturnType<typeof setTimeout> | undefined;
     // Subscribe to SSE stream
     const unsubscribe = getApi().messages.onMessageStream(selectedThreadId, (newMsg) => {
+      if (!isMounted) return;
+      if (document.visibilityState === "visible" && newMsg.sender === (isSupplier ? "user" : "factory") && !readTimer) {
+        readTimer = setTimeout(() => {
+          readTimer = undefined;
+          void getApi().messages.markAsRead(selectedThreadId).then(() => refreshUnreadCounts());
+        }, 250);
+      }
       setThreads((prev) =>
         prev.map((t) => {
           if (t.id === selectedThreadId) {
@@ -162,6 +174,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
 
     return () => {
       isMounted = false;
+      clearTimeout(readTimer);
       unsubscribe();
     };
   }, [selectedThreadId]);
@@ -355,7 +368,11 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
     const order = threadOrders.find((o) => o.id === orderId);
 
     // Optimistic message update
-    const tempId = `temp-${Date.now()}`;
+    const fingerprint = JSON.stringify([currentThreadId, textToSend, fileToSend?.url, orderId]);
+    const attempt = pendingSend.current?.fingerprint === fingerprint
+      ? pendingSend.current : { fingerprint, id: `temp-${crypto.randomUUID()}` };
+    pendingSend.current = attempt;
+    const tempId = attempt.id;
     const optimisticMsg: ChatMessage = {
       id: tempId,
       senderId: currentUser?.id,
@@ -393,7 +410,8 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
     }
 
     try {
-      const savedMsg = await getApi().messages.sendMessage(currentThreadId, textToSend, fileToSend ?? undefined, { orderId });
+      const savedMsg = await getApi().messages.sendMessage(currentThreadId, textToSend, fileToSend ?? undefined, { orderId, clientMessageId: tempId });
+      if (pendingSend.current === attempt) pendingSend.current = null;
       setThreads((prev) =>
         prev.map((t) =>
           t.id === currentThreadId
