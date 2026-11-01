@@ -177,7 +177,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
       clearTimeout(readTimer);
       unsubscribe();
     };
-  }, [selectedThreadId]);
+  }, [selectedThreadId, isSupplier]);
 
   // Other chats' unread counts, last messages and who is online change while the inbox is open:
   // re-read the list every 30s (and when the tab regains focus). The open chat stays read.
