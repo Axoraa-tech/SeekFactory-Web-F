@@ -1,0 +1,52 @@
+# Builds the Next.js site and deploys it to the Azure App Service web app.
+# Repo settings (Settings → Secrets and variables → Actions):
+#   Secret   AZURE_WEBAPP_PUBLISH_PROFILE  contents of the web app's downloaded publish profile
+#   Variable AZURE_WEBAPP_NAME             e.g. seekfactory-web
+#   Variable NEXT_PUBLIC_API_URL           backend origin, baked into the browser bundle at build time
+#   Variable NEXT_PUBLIC_GOOGLE_CLIENT_ID  optional; empty shows the "coming soon" notice
+#   Variable NEXT_PUBLIC_MEDIA_BASE_URL    optional; empty loads media via the API
+name: deploy-azure-web
+
+# Manual only (Actions → deploy-azure-web → Run workflow) while the code is still changing daily
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-azure-web
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+          NEXT_PUBLIC_MEDIA_BASE_URL: ${{ vars.NEXT_PUBLIC_MEDIA_BASE_URL }}
+          NEXT_TELEMETRY_DISABLED: 1
+        run: npm run build
+
+      # The standalone server only contains traced server code; static assets and public/ are copied in
+      - name: Assemble standalone package
+        run: |
+          cp -r public .next/standalone/public
+          mkdir -p .next/standalone/.next
+          cp -r .next/static .next/standalone/.next/static
+          cd .next/standalone && zip -qr ../../site.zip .
+
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: site.zip
