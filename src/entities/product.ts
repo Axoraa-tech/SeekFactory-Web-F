@@ -35,4 +35,6 @@ export type Product = {
   /** Persisted product engagement, supplied by the product API (never seek IDs). */
   likesCount?: number;
   likedByMe?: boolean;
+  /** Recorded views from the product API; undefined when the backend does not send them. */
+  viewsCount?: number;
 };

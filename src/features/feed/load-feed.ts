@@ -1,5 +1,6 @@
 import { getApi } from "@/shared/api";
 import type { FeedTab } from "@/entities/reel";
+import { FEED_PAGE_SIZE } from "./feed-paging";
 
 export function parseFeedTab(value?: string): FeedTab {
   return value === "following" ? "following" : "for-you";
@@ -17,5 +18,7 @@ export async function loadFeed(tab: FeedTab, subcategoryId = "", query = "") {
   if (q || subcategoryId) {
     return (await getApi().search.query({ q, category: subcategoryId, limit: 50 })).reels;
   }
-  return getApi().feed.list(tab);
+  // Same batch size as "Load more seeks" (use-paged-feed): a different first page would make the
+  // client think it already reached the end, or skip seeks when it asks for page 1
+  return getApi().feed.listPage(tab, 0, FEED_PAGE_SIZE);
 }

@@ -1289,6 +1289,7 @@
       "uploadFailedPleaseRetry": "上传失败，请重试。"
     },
     "online": "在线",
+    "manufacturersReplyOnly": "制造商账户只能回复买家。如需联系工厂，请使用买家账户登录。",
     "offline": "离线",
     "lastSeen": "最后在线 {time}",
     "messageActions": "消息选项",

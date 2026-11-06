@@ -20,7 +20,6 @@ import type { FeedShowcase } from "@/features/feed/load-showcase";
 import type { ProductGroup } from "@/features/feed/use-showcase-products";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { useTranslations } from "next-intl";
-import { createWheelStepper } from "@/hooks/wheel-stepper";
 import { mediaThumb } from "@/shared/api/http-api";
 
 type Props = {
@@ -36,6 +35,10 @@ type Props = {
   variant?: "single" | "sidebar";
   /** The feed's Seeks bar: shown at the top of the centre column, so it is only as wide as the seek card. */
   header?: ReactNode;
+  /** The feed has more seeks to fetch (its next page). */
+  moreSeeks?: boolean;
+  loadingMoreSeeks?: boolean;
+  onLoadMoreSeeks?: () => void;
   /** Factories' products, mixed in between the seeks as auto-sliding cards (see interleave). */
   productGroups?: ProductGroup[];
   /** Current search/category filter the same stable catalog snapshot. */
@@ -65,7 +68,15 @@ function useMediaQuery(query: string): boolean {
 /** A product card after every this many seeks; groups left over follow the last seek. */
 const SEEKS_PER_PRODUCT_CARD = 2;
 
-function interleave(items: FeedItem[], groups: ProductGroup[]): Entry[] {
+/** Cards (seeks and product cards together) shown per "Load more" step in the centre column. */
+const CARDS_PER_BATCH = 20;
+
+/**
+ * Seeks with a product card after every second one. Factories left over (no seek, or more
+ * factories than gaps) follow the last seek, but only once every seek is loaded: while the feed
+ * has more pages they would otherwise sit between the loaded seeks and the next ones.
+ */
+function interleave(items: FeedItem[], groups: ProductGroup[], withLeftovers: boolean): Entry[] {
   const out: Entry[] = [];
   let g = 0;
   items.forEach((item, i) => {
@@ -76,7 +87,7 @@ function interleave(items: FeedItem[], groups: ProductGroup[]): Entry[] {
     }
   });
   // Factories without seeks (or more groups than gaps) still get shown
-  for (; g < groups.length; g++) {
+  for (; withLeftovers && g < groups.length; g++) {
     out.push({ kind: "products", key: `products-${groups[g].manufacturer.id}`, group: groups[g] });
   }
   return out;
@@ -93,12 +104,36 @@ function interleave(items: FeedItem[], groups: ProductGroup[]): Entry[] {
  * In the "sidebar" variant the factory profile panel is never shown: the site's
  * own left menu occupies that column instead.
  */
-export function SingleSeekShowcase({ items, settings, variant = "single", header, productGroups, productsKey, productsCategoryId }: Props) {
+export function SingleSeekShowcase({
+  items,
+  settings,
+  variant = "single",
+  header,
+  moreSeeks = false,
+  loadingMoreSeeks = false,
+  onLoadMoreSeeks,
+  productGroups,
+  productsKey,
+  productsCategoryId,
+}: Props) {
   const t = useTranslations();
   // One load for both the desktop column and the small-screen row
   const recommended = useRecommendedProducts(productsKey, settings.showPhotos, productsCategoryId);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const entries = useMemo(() => interleave(items, productGroups ?? []), [items, productGroups]);
+  const productsRef = useRef<HTMLElement>(null);
+  const allEntries = useMemo(
+    () => interleave(items, productGroups ?? [], !moreSeeks),
+    [items, productGroups, moreSeeks],
+  );
+  // The column renders CARDS_PER_BATCH cards at a time; "Load more" shows the next batch, fetching
+  // the feed's next page once every loaded card is on screen
+  const [shown, setShown] = useState(CARDS_PER_BATCH);
+  const entries = useMemo(() => allEntries.slice(0, shown), [allEntries, shown]);
+  const canShowMore = shown < allEntries.length || moreSeeks;
+  const showMore = () => {
+    if (shown >= allEntries.length) onLoadMoreSeeks?.();
+    setShown((s) => s + CARDS_PER_BATCH);
+  };
   // Side by side from lg on a tall enough window: the page stays put and the seek column fills the
   // window below the Seeks bar. A short window (browser zoomed in, small laptop) would squeeze the
   // video into a strip, so it scrolls normally instead, with full-width 16:9 videos as on phones.
@@ -141,11 +176,14 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
     return () => observer.disconnect();
   }, [entries, locked]);
 
-  // A different set of seeks (tab, category or search changed) starts again at the first one
+  // A different set of seeks (tab, category or search changed) starts again at the first one. Keyed
+  // on the first seek, not the list: loading the next page appends and must keep the reader's place.
+  const setKey = `${items[0]?.reel.id ?? ""}|${productsKey ?? ""}|${productsCategoryId ?? ""}`;
   useEffect(() => {
     setActive(0);
+    setShown(CARDS_PER_BATCH);
     scrollerRef.current?.scrollTo({ top: 0 });
-  }, [items]);
+  }, [setKey]);
 
   const scrollToIndex = useCallback((index: number) => {
     const root = scrollerRef.current;
@@ -176,32 +214,36 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
     return () => window.removeEventListener("keydown", onKey);
   }, [active, go]);
 
-  // Controlled single-seek scroll lock on mouse wheel and trackpad two-finger scroll (locked layout only)
+  // Locked layout: the seek column scrolls freely like the products panel (wheel, trackpad and
+  // scrollbar drag); the seek in view still drives playback and the profile panel via the observer.
+  // The page itself never scrolls, so a wheel over the space around the columns (the gap between
+  // them, the margins, the column headers) moves the nearer column instead of doing nothing.
   useEffect(() => {
     const root = scrollerRef.current;
     if (!root || !locked) return;
 
-    const stepper = createWheelStepper((direction) => {
-      setActive((curr) => {
-        const next = Math.max(0, Math.min(entries.length - 1, curr + direction));
-        scrollToIndex(next);
-        return next;
-      });
-    });
-
-    const onWheel = (e: WheelEvent) => {
+    const onGapWheel = (e: WheelEvent) => {
+      if (e.defaultPrevented || document.querySelector('[role="dialog"][aria-modal="true"]')) return;
       const target = e.target as HTMLElement;
-      if (target.closest("[data-prevent-seek-wheel]")) return;
+      if (root.contains(target)) return; // the seek scroller handles its own wheel
+      const products = productsRef.current?.querySelector<HTMLElement>("[data-prevent-seek-wheel]") ?? null;
+      if (products?.contains(target)) return; // already scrolls natively
+      const inProductsColumn = Boolean(productsRef.current?.contains(target));
+      // Everything else with its own content keeps its normal behaviour (top bar, left menu, forms)
+      if (!inProductsColumn && !target.closest("[data-showcase-single], [data-showcase-sidebar]")
+          && target.closest("header, nav, aside, [data-lock-fill], input, textarea, select")) return;
+      const seekRect = root.getBoundingClientRect();
+      const productsRect = products?.getBoundingClientRect();
+      const toProducts = inProductsColumn || (productsRect !== undefined && productsRect.width > 0
+        && Math.abs(e.clientX - (productsRect.left + productsRect.right) / 2)
+          < Math.abs(e.clientX - (seekRect.left + seekRect.right) / 2));
       e.preventDefault();
-      stepper.handle(e.deltaY);
+      (toProducts && products ? products : root).scrollBy({ top: e.deltaY });
     };
 
-    root.addEventListener("wheel", onWheel, { passive: false });
-    return () => {
-      stepper.dispose();
-      root.removeEventListener("wheel", onWheel);
-    };
-  }, [entries.length, scrollToIndex, locked]);
+    window.addEventListener("wheel", onGapWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onGapWheel);
+  }, [locked]);
 
   if (entries.length === 0) {
     return (
@@ -263,7 +305,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
             style={playerHeight ? { height: playerHeight } : undefined}
             className={cn(
               "space-y-4 rounded-2xl scrollbar-subtle",
-              locked && "overflow-y-auto overscroll-contain snap-y snap-mandatory pr-1",
+              locked && "overflow-y-auto overscroll-contain pr-1",
             )}
             aria-label={t("common.seeks")}
           >
@@ -272,9 +314,16 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
                 key={entry.key}
                 data-index={i}
                 {...(entry.kind === "seek" ? { "data-feed-reel-id": entry.item.reel.id } : {})}
-                // While the page is locked each card is exactly one column tall, so no window size cuts one off
-                style={playerHeight ? { height: playerHeight } : undefined}
-                className="snap-start shrink-0"
+                // While the page is locked each card is exactly one column tall, so no window size cuts one off.
+                // content-visibility: cards away from the screen are not laid out or painted (blurred
+                // backdrops, glass tiles), so dragging the scrollbar across many seeks stays smooth; the
+                // intrinsic size keeps the scrollbar accurate (the card's height when locked).
+                style={{
+                  ...(playerHeight ? { height: playerHeight } : {}),
+                  contentVisibility: "auto",
+                  containIntrinsicSize: `auto ${playerHeight ?? 640}px`,
+                }}
+                className="shrink-0"
               >
                 {entry.kind === "seek" ? (
                   <ReelCard
@@ -296,6 +345,22 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
                 )}
               </div>
             ))}
+            {/* Styled like the products panel's "Load more products" */}
+            {canShowMore && (
+              <div className="shrink-0 space-y-2 p-2 text-center" aria-live="polite">
+                <p className="text-[11px] text-ink-muted">
+                  {t("feed.home.loadedSeeks", { count: entries.filter((e) => e.kind === "seek").length })}
+                </p>
+                <button
+                  type="button"
+                  onClick={showMore}
+                  disabled={loadingMoreSeeks}
+                  className="sf-btn-soft inline-flex h-10 items-center justify-center rounded-xl border border-brand-orange/30 bg-brand-orange-soft px-4 text-sm font-semibold text-brand-orange disabled:opacity-50"
+                >
+                  {loadingMoreSeeks ? t("feed.home.loadingMore") : t("feed.home.loadMoreSeeks")}
+                </button>
+              </div>
+            )}
           </div>
           {/* Below 1280px the profile is summarised under the seeks instead */}
           {showProfile && (
@@ -308,7 +373,7 @@ export function SingleSeekShowcase({ items, settings, variant = "single", header
         {/* RIGHT: products for the viewer (≥1024px), one below the other, scrolling on their own */}
         {showPhotos && (
           // top-[88px] as the left menu: a larger offset would push the panel below the other columns
-          <aside className="hidden lg:block sticky top-[88px]">
+          <aside ref={productsRef} className="hidden lg:block sticky top-[88px]">
             <RecommendedProductsPanel variant="column" recommended={recommended} />
           </aside>
         )}

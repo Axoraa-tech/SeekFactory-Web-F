@@ -1,6 +1,7 @@
 import type { FeedItem } from "@/shared/api/contracts";
 
-export const FEED_PAGE_SIZE = 50;
+/** Seeks per batch: the first page and each "Load more seeks" (the backend allows up to 50). */
+export const FEED_PAGE_SIZE = 20;
 
 /** Append only new IDs; never move or replace already visible cards while paging. */
 export function appendFeedPage(

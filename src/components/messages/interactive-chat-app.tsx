@@ -41,7 +41,10 @@ type Props = {
 export function InteractiveChatApp({ initialThreads, allManufacturers = [], currentUser: initialUser }: Props) {
   const tr = useTranslations();
   const searchParams = useSearchParams();
-  const withSlug = searchParams.get("with");
+  // "Chat with this factory" links (?with=) are a buyer action. A manufacturer following one would
+  // open a thread with a factory (possibly its own) shown as an empty, nameless "Buyer" chat.
+  const factoryLinkFromSupplier = initialUser?.role === "Supplier" && Boolean(searchParams.get("with"));
+  const withSlug = factoryLinkFromSupplier ? null : searchParams.get("with");
 
   const [currentUser, setCurrentUser] = useState<BuyerProfile | null>(initialUser ?? null);
   useEffect(() => {
@@ -78,7 +81,9 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
   const [searchQuery, setSearchQuery] = useState("");
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping] = useState(false);
-  const [sendError, setSendError] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<string | null>(() =>
+    factoryLinkFromSupplier ? tr("chat.manufacturersReplyOnly") : null,
+  );
   const [threadOrders, setThreadOrders] = useState<OrderRequest[]>([]);
   const [contextOrderId, setContextOrderId] = useState("");
   const upload = useChatAttachment(selectedThreadId || undefined);
@@ -230,7 +235,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
 
   // Handle direct navigation with ?with=slug parameter
   useEffect(() => {
-    if (!withSlug) return;
+    if (!withSlug || isSupplier) return;
 
     const action = searchParams.get("action");
     const productSlug = searchParams.get("product");
@@ -287,7 +292,7 @@ export function InteractiveChatApp({ initialThreads, allManufacturers = [], curr
           setSendError(err instanceof Error ? err.message : tr("seller.couldNotOpenChat"));
         });
     }
-  }, [withSlug, allManufacturers, threads, searchParams, tr]);
+  }, [withSlug, isSupplier, allManufacturers, threads, searchParams, tr]);
 
   // The message whose text the input is changing; null while composing a new one
   const [editing, setEditing] = useState<ChatMessage | null>(null);

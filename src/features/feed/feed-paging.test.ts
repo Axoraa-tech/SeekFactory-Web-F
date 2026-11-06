@@ -6,8 +6,8 @@ const item = (id: string) => ({ reel: { id } }) as FeedItem;
 const ids = (items: FeedItem[]) => items.map((entry) => entry.reel.id);
 
 describe("video feed paging", () => {
-  it("uses the backend page size rather than a claimed 24-video cap", () => {
-    expect(FEED_PAGE_SIZE).toBe(50);
+  it("loads seeks in batches of 20, within the backend's 50-item page limit", () => {
+    expect(FEED_PAGE_SIZE).toBe(20);
   });
 
   it("makes items beyond the first page reachable", () => {
