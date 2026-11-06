@@ -4,6 +4,7 @@ import { SupplierName } from "@/features/subscription";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
+  BarChart2,
   Bookmark,
   ChevronLeft,
   ChevronRight,
@@ -306,8 +307,8 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
           />
         </div>
 
-        {/* Engagement bar for the product on show, styled like a seek's. Products have no comments
-            or view counts, so "comment" asks the factory in chat. */}
+        {/* Engagement bar for the product on show, styled like a seek's. Products have no comments,
+            so "comment" asks the factory in chat. */}
         <div className="glass-tile flex select-none items-center justify-between rounded-2xl p-1 text-xs">
           <Link
             href={`/messages?with=${manufacturer.slug}`}
@@ -353,6 +354,21 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
           </button>
 
           <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
+
+          {/* Views, like a seek's impressions tile (only once the backend reports them) */}
+          {product.viewsCount !== undefined && (
+            <>
+              <div
+                title={t("seek.viewCount", { count: formatCount(product.viewsCount) })}
+                className="flex flex-1 cursor-default items-center justify-center gap-1 px-2 py-1 text-neutral-500"
+              >
+                <BarChart2 className="h-3.5 w-3.5" />
+                <span className="text-[11px] font-medium">{formatCount(product.viewsCount)}</span>
+              </div>
+
+              <span className="h-4 w-px bg-[rgba(28,22,22,0.08)]" />
+            </>
+          )}
 
           <button
             type="button"

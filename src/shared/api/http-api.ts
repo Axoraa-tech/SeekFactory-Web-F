@@ -193,6 +193,7 @@ interface BackendProduct {
   savedByMe?: boolean;
   likesCount?: number;
   likedByMe?: boolean;
+  viewsCount?: number;
 }
 
 interface BackendManufacturer {
@@ -1967,6 +1968,7 @@ function normalizeProduct(p: BackendProduct): Product {
     savedByMe: p.savedByMe,
     likesCount: p.likesCount,
     likedByMe: p.likedByMe,
+    viewsCount: p.viewsCount,
   };
 }
 

@@ -1289,6 +1289,7 @@
       "uploadFailedPleaseRetry": "Upload failed. Please retry."
     },
     "online": "Online",
+    "manufacturersReplyOnly": "Manufacturer accounts can only reply to buyers. To contact a factory, sign in with a buyer account.",
     "offline": "Offline",
     "lastSeen": "Last seen {time}",
     "messageActions": "Message options",

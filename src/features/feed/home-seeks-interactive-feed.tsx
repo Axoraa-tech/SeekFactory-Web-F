@@ -208,6 +208,25 @@ function HomeSeeksInteractiveFeedContent({
   // Seeks bar, filter and error notices. The single-seek layouts render them inside their centre
   // column (so the bar ends where the seek card ends and the photos panel reaches the top);
   // every other layout, and the loading state, shows them above the feed.
+  // The single-column layouts have their own "Load more" after the last card (it also pages their
+  // product cards); the other layouts keep this one in the Seeks bar
+  const loadMoreAtEnd = showcase.mode === "SINGLE" || showcase.mode === "SIDEBAR";
+  const loadMoreBar = !loading && hasMore && (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3.5 py-2 text-xs">
+      <span className="text-ink-muted" aria-live="polite">
+        {t("feed.home.loadedSeeks", "{count} seeks loaded", { count: filteredItems.length }).replace("{count}", String(filteredItems.length))}
+      </span>
+      <button
+        type="button"
+        onClick={() => void loadMore()}
+        disabled={loadingMore}
+        className="sf-btn-soft rounded-lg border border-line px-3 py-1.5 font-semibold text-brand-blue disabled:opacity-50"
+      >
+        {loadingMore ? t("feed.home.loadingMore", "Loading…") : t("feed.home.loadMoreSeeks", "Load more seeks")}
+      </button>
+    </div>
+  );
+
   const seeksHeader = (
     <>
         {/* 3. Seeks Header with Controls */}
@@ -324,21 +343,7 @@ function HomeSeeksInteractiveFeedContent({
           </div>
         )}
 
-        {!loading && hasMore && (
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3.5 py-2 text-xs">
-            <span className="text-ink-muted" aria-live="polite">
-              {t("feed.home.loadedSeeks", "{count} seeks loaded", { count: filteredItems.length }).replace("{count}", String(filteredItems.length))}
-            </span>
-            <button
-              type="button"
-              onClick={() => void loadMore()}
-              disabled={loadingMore}
-              className="sf-btn-soft rounded-lg border border-line px-3 py-1.5 font-semibold text-brand-blue disabled:opacity-50"
-            >
-              {loadingMore ? t("feed.home.loadingMore", "Loading…") : t("feed.home.loadMoreSeeks", "Load more seeks")}
-            </button>
-          </div>
-        )}
+        {!loadMoreAtEnd && loadMoreBar}
         {loadError && (
           <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-semibold text-rose-700">
             {loadError}
@@ -451,9 +456,9 @@ function HomeSeeksInteractiveFeedContent({
           <LandscapeReelSkeleton />
         </div>
       ) : showcase.mode === "SINGLE" ? (
-        <SingleSeekShowcase items={filteredItems} settings={showcase} header={seeksHeader} productGroups={productGroups} productsKey={searchQuery} productsCategoryId={selectedSub?.id ?? ""} />
+        <SingleSeekShowcase items={filteredItems} settings={showcase} header={seeksHeader} moreSeeks={hasMore} loadingMoreSeeks={loadingMore} onLoadMoreSeeks={() => void loadMore()} productGroups={productGroups} productsKey={searchQuery} productsCategoryId={selectedSub?.id ?? ""} />
       ) : showcase.mode === "SIDEBAR" ? (
-        <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" header={seeksHeader} productGroups={productGroups} productsKey={searchQuery} productsCategoryId={selectedSub?.id ?? ""} />
+        <SingleSeekShowcase items={filteredItems} settings={showcase} variant="sidebar" header={seeksHeader} moreSeeks={hasMore} loadingMoreSeeks={loadingMore} onLoadMoreSeeks={() => void loadMore()} productGroups={productGroups} productsKey={searchQuery} productsCategoryId={selectedSub?.id ?? ""} />
       ) : LIST_MODES.has(showcase.mode) ? (
         <ListScroller enabled={filteredItems.length > 0}>
           {showcase.mode === "FEED" ? (
