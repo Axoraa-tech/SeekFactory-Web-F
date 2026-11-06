@@ -176,6 +176,25 @@ export function SingleSeekShowcase({
     return () => observer.disconnect();
   }, [entries, locked]);
 
+  // Cards far from the screen are not laid out or painted (blurred backdrops, glass tiles), so
+  // dragging the scrollbar across many seeks stays smooth. Only far ones: content-visibility also
+  // clips a card's soft shadow at its edge, which showed as grey corners on the cards in view.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const cards = [...scroller.querySelectorAll<HTMLElement>("[data-index]")];
+    const near = new IntersectionObserver(
+      (list) => {
+        for (const e of list) (e.target as HTMLElement).style.contentVisibility = e.isIntersecting ? "visible" : "auto";
+      },
+      // Half a screen ahead, as the browser's own content-visibility: auto does: a wider margin
+      // would start nearby cards' photos and videos sooner, competing with the catalog request
+      { root: locked ? scroller : null, rootMargin: "50% 0px" },
+    );
+    cards.forEach((el) => near.observe(el));
+    return () => near.disconnect();
+  }, [entries, locked]);
+
   // A different set of seeks (tab, category or search changed) starts again at the first one. Keyed
   // on the first seek, not the list: loading the next page appends and must keep the reader's place.
   const setKey = `${items[0]?.reel.id ?? ""}|${productsKey ?? ""}|${productsCategoryId ?? ""}`;
@@ -315,9 +334,10 @@ export function SingleSeekShowcase({
                 data-index={i}
                 {...(entry.kind === "seek" ? { "data-feed-reel-id": entry.item.reel.id } : {})}
                 // While the page is locked each card is exactly one column tall, so no window size cuts one off.
-                // content-visibility: cards away from the screen are not laid out or painted (blurred
-                // backdrops, glass tiles), so dragging the scrollbar across many seeks stays smooth; the
-                // intrinsic size keeps the scrollbar accurate (the card's height when locked).
+                // Cards start skipped (layout, paint and their lazy photos) from the server-rendered
+                // page on, so the first load does not fetch every card's media at once; the effect
+                // above draws the ones near the screen in full. The intrinsic size keeps the scrollbar
+                // accurate meanwhile (the card's height when locked).
                 style={{
                   ...(playerHeight ? { height: playerHeight } : {}),
                   contentVisibility: "auto",

@@ -71,6 +71,9 @@ export function ProductActionBar({
 
   const isSmall = size === "sm";
   const isLarge = size === "lg";
+  // Phones: the buttons share the card's width instead of running past its edge (each label
+  // truncates rather than overflowing). Larger screens keep their natural widths.
+  const fit = layout === "horizontal" && !isLarge && "max-sm:min-w-0 max-sm:flex-1 max-sm:px-2";
 
   return (
     <div
@@ -112,7 +115,7 @@ export function ProductActionBar({
       <div
         className={cn(
           "flex items-center gap-2.5",
-          layout === "vertical" ? "w-full flex-col sm:flex-row" : "ml-auto shrink-0"
+          layout === "vertical" ? "w-full flex-col sm:flex-row" : "ml-auto shrink-0 max-sm:ml-0 max-sm:w-full max-sm:shrink"
         )}
       >
         {/* 1. Chat with Manufacturer Button */}
@@ -121,12 +124,13 @@ export function ProductActionBar({
           onClick={(e) => e.stopPropagation()}
           className={cn(
             "sf-btn-soft inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 hover:border-brand-blue/40 hover:bg-blue-50/60 hover:text-brand-blue transition-all active:scale-95 shadow-2xs whitespace-nowrap",
-            isSmall ? "h-8 px-2.5 text-xs" : isLarge ? "h-12 px-5 text-sm w-full sm:w-auto" : "h-9 px-3 text-xs"
+            isSmall ? "h-8 px-2.5 text-xs" : isLarge ? "h-12 px-5 text-sm w-full sm:w-auto" : "h-9 px-3 text-xs",
+            fit
           )}
           title={t("product.actions.chatWithFactory")}
         >
           <MessageSquare className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "text-brand-blue")} />
-          <span>{t("common.chat", "Chat")}</span>
+          <span className="truncate">{t("common.chat", "Chat")}</span>
         </Link>
 
         {isOutOfStock && (
@@ -137,11 +141,12 @@ export function ProductActionBar({
             aria-disabled="true"
             className={cn(
               "inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 font-bold text-rose-700 whitespace-nowrap cursor-not-allowed",
-              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs",
+              fit
             )}
           >
             <PackageX className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-            <span>{t("stock.outOfStock")}</span>
+            <span className="truncate">{t("stock.outOfStock")}</span>
           </button>
         )}
 
@@ -153,11 +158,12 @@ export function ProductActionBar({
             className={cn(
               "sf-btn-add inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
               "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
-              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs",
+              fit
             )}
           >
             <ShoppingCart className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-            <span>{t("common.addToCart")}</span>
+            <span className="truncate">{t("common.addToCart")}</span>
           </button>
         )}
 
@@ -169,11 +175,12 @@ export function ProductActionBar({
             className={cn(
               "sf-btn-commit inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap",
               "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 disabled:opacity-75",
-              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs",
+              fit
             )}
           >
             <Zap className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4", "fill-white/80")} />
-            <span>{t("common.buyNow", "Buy Now")}</span>
+            <span className="truncate">{t("common.buyNow", "Buy Now")}</span>
           </button>
         ) : (
           /* No listed price (or no product): the factory quotes on request */
@@ -182,11 +189,12 @@ export function ProductActionBar({
             onClick={(e) => e.stopPropagation()}
             className={cn(
               "sf-btn-commit inline-flex items-center justify-center gap-1.5 rounded-xl font-bold text-white transition-all duration-150 active:scale-95 shadow-sm whitespace-nowrap bg-brand-orange hover:bg-[#d85b17]",
-              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs"
+              isSmall ? "h-8 px-3 text-xs" : isLarge ? "h-12 px-6 text-sm w-full sm:flex-1" : "h-9 px-3.5 text-xs",
+              fit
             )}
           >
             <FileText className={cn(isSmall ? "h-3.5 w-3.5" : "h-4 w-4")} />
-            <span>{t("product.actions.requestQuote")}</span>
+            <span className="truncate">{t("product.actions.requestQuote")}</span>
           </Link>
         )}
       </div>
