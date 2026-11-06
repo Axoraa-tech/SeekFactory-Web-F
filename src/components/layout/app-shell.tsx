@@ -1,3 +1,4 @@
+import { SidebarFooter } from "@/components/layout/sidebar-footer";
 import type { ReactNode } from "react";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -68,6 +69,10 @@ export function AppShell({
             />
           </div>
         ) : null}
+      </div>
+      {/* Below lg the sidebars (and their footer) are hidden, so the footer closes the page instead */}
+      <div className="mx-auto max-w-[1440px] px-4 pb-4 lg:hidden">
+        <SidebarFooter />
       </div>
       <MobileNav messageCount={messageCount} notificationCount={notificationCount} isManufacturer={user?.role === "Supplier"} />
       <TimedAuthPrompt user={user} />

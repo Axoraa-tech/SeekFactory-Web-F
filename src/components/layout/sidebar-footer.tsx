@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Mail, MapPin, Phone } from "lucide-react";
+import { COMPANY } from "@/shared/config/company";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { cn } from "@/shared/lib/cn";
 import { getMessages } from "@/shared/lib/messages";
@@ -15,9 +16,34 @@ export function SidebarFooter() {
   const t = useTranslations();
   return (
     <footer className="px-2 pb-2 pt-3 text-center text-[12px] leading-6 text-ink-muted">
+      {/* Contact Us, carried over from the previous site's footer */}
+      <address className="mb-3 space-y-1.5 rounded-xl border border-line bg-surface/70 px-3 py-2.5 text-left not-italic leading-5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-ink">Contact Us</p>
+        <p className="flex items-start gap-2">
+          <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-orange" />
+          <a href={`mailto:${COMPANY.email}`} className="break-all text-ink hover:text-brand-blue hover:underline">{COMPANY.email}</a>
+        </p>
+        <p className="flex items-start gap-2">
+          <Phone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-orange" />
+          <span className="flex flex-wrap gap-x-2">
+            {COMPANY.phones.map((p) => (
+              <a key={p.tel} href={`tel:${p.tel}`} className="text-ink hover:text-brand-blue hover:underline">{p.label}</a>
+            ))}
+          </span>
+        </p>
+        {COMPANY.offices.map((office) => (
+          <p key={office} className="flex items-start gap-2">
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-orange" />
+            <span>{office}</span>
+          </p>
+        ))}
+      </address>
       <nav className="flex flex-wrap justify-center gap-x-3">
-        <Link href="/explore" className="hover:text-brand-blue hover:underline">
+        <Link href="/about" className="hover:text-brand-blue hover:underline">
           {t("layout.footer.about")}
+        </Link>
+        <Link href="/about#contact" className="hover:text-brand-blue hover:underline">
+          Contact Us
         </Link>
         <Link href="/legal/accessibility" className="hover:text-brand-blue hover:underline">
           {t("layout.footer.accessibility")}
