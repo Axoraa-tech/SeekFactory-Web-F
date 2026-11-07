@@ -102,6 +102,7 @@ export const config = {
   matcher: [
     // api/proxy is excluded: middleware buffers request bodies (10MB cap), which truncates
     // seek video uploads. The proxy returns the backend's own security headers.
-    "/((?!_next/static|_next/image|favicon.ico|api/proxy/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|ico)$).*)",
+    // Static files (fonts, scripts, styles, media) skip it too: it would only add work on the shared server.
+    "/((?!_next/static|_next/image|_vercel/|favicon.ico|robots.txt|sitemap.xml|api/proxy/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|mp4|webm|ico|woff2?|ttf|css|js|map|txt)$).*)",
   ],
 };
