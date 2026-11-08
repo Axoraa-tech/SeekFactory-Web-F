@@ -768,7 +768,14 @@
       "new": "新密码",
       "confirmNew": "确认新密码",
       "n8CharactersWithUpperLower": "至少 8 位，需包含大小写字母、数字和符号。",
-      "updatePassword": "更新密码"
+      "updatePassword": "更新密码",
+      "deleteAccount": "注销账号",
+      "deleteAccountBody": "永久删除您的 SeekFactory 账号和个人信息，并在所有设备上退出登录。过往的聊天和订单仍对对方可见，显示为“已注销用户”。工厂主页及其产品和视频将从平台下架。",
+      "deletePasswordLabel": "密码（若使用 Google 或手机号登录，请输入 DELETE）",
+      "deleteEnterPassword": "请输入密码；若账号没有密码，请输入 DELETE。",
+      "deleteConfirm": "确定注销您的 SeekFactory 账号吗？此操作无法撤销。",
+      "deleteButton": "注销我的账号",
+      "deleteDone": "您的账号已注销。"
     },
     "card": {
       "invalidPassword": "密码不符合要求",

@@ -42,6 +42,13 @@ export async function sendEmailVerificationAction(): Promise<AccountResult> {
   return run(() => getApi().account.sendEmailVerification());
 }
 
+export async function deleteAccountAction(password: string): Promise<AccountResult> {
+  const t = await getTranslations();
+  if (!password) return { ok: false, error: t("auth.security.deleteEnterPassword") };
+  if (!(await getApi().session.getCurrentUser())) return { ok: false, error: t("auth.errors.pleaseSignInAgain") };
+  return run(() => getApi().account.deleteAccount(password));
+}
+
 export async function requestPasswordResetAction(email: string): Promise<AccountResult> {
   const t = await getTranslations();
   const trimmed = email.trim();

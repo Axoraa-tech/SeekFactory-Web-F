@@ -1684,6 +1684,14 @@ export function createHttpApi(
         body: JSON.stringify({ token }),
       });
     },
+    async deleteAccount(password: string): Promise<void> {
+      // One field covers both cases: the backend checks `password` when the account has one,
+      // otherwise `confirmation` must be DELETE
+      await fetchJson<void>("/api/v1/account/delete", {
+        method: "POST",
+        body: JSON.stringify({ password, confirmation: password }),
+      });
+    },
   };
 
   // ── 11. ORDER REQUESTS (buyer side) ───────────────────────────
