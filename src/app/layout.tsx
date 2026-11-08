@@ -41,7 +41,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <LoadingScreen />
             <BuyerPlanProvider>
               {children}
-              <Analytics />
+              {/* Vercel-only: on Azure its script 404s on every page */}
+              {process.env.VERCEL ? <Analytics /> : null}
               <UpgradePlanModal />
             </BuyerPlanProvider>
           </ToastProvider>

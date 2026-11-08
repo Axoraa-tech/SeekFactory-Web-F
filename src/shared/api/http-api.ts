@@ -821,7 +821,8 @@ export function createHttpApi(
   // ── 3. MANUFACTURER REPOSITORY ─────────────────────────────────
   const manufacturers: ManufacturerRepository = {
     async listAll(): Promise<Manufacturer[]> {
-      const list = await fetchJson<BackendManufacturer[]>("/api/v1/manufacturers", { cache: "no-store" });
+      // The same for every viewer (no follow state): cached for a minute instead of fetched per page view
+      const list = await fetchJson<BackendManufacturer[]>("/api/v1/manufacturers", { next: { revalidate: 60 } });
       return list.map(normalizeManufacturer);
     },
 

@@ -13,6 +13,7 @@ import {
   type Portal,
   type TokenPair,
 } from "@/features/auth/auth-tokens";
+import { getPublic, isPublicCacheable, respondFromCache } from "@/features/api-proxy/public-cache";
 
 const HOP_BY_HOP_HEADERS = [
   "host",
@@ -98,6 +99,17 @@ async function handleProxy(req: NextRequest, { params }: { params: Promise<{ pat
         ? resolveSessionPortal(portal, hasRequestedSession, hasSellerSession)
         : portal;
     const names = cookieNames(sessionPortal);
+
+    // Signed-out visitors asking for a public list share one cached copy (see public-cache.ts)
+    if (isPublicCacheable(req.method, path, hasRequestedSession || hasSellerSession)) {
+      const cacheKey = `${path}?${searchParams}`;
+      const cacheHeaders = new Headers(headers);
+      cacheHeaders.set("accept-encoding", "gzip");
+      const entry = await getPublic(cacheKey, () => fetch(url, { method: "GET", headers: cacheHeaders }));
+      if (entry) {
+        return respondFromCache(entry, req.headers.get("if-none-match"), req.headers.get("accept-encoding"));
+      }
+    }
 
     const hasBody = req.method !== "GET" && req.method !== "HEAD" && req.body !== null;
     // Buffer body so Node fetch sends an accurate Content-Length and avoids chunked transfer 502s
