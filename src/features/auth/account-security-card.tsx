@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { KeyRound, MailCheck, MailWarning, Loader2, CheckCircle2, Eye, EyeOff } from "lucide-react";
-import { changePasswordAction, sendEmailVerificationAction } from "./account-actions";
+import { usePathname, useRouter } from "next/navigation";
+import { KeyRound, MailCheck, MailWarning, Loader2, CheckCircle2, Eye, EyeOff, Trash2 } from "lucide-react";
+import { changePasswordAction, deleteAccountAction, sendEmailVerificationAction } from "./account-actions";
 import { useTranslations } from "next-intl";
+import { getApi } from "@/shared/api";
+import { useToast } from "@/components/ui/toast";
+import { resetFollowStore } from "@/features/engagement/follow-store";
+import { resetUnreadCounts } from "@/features/inbox/unread-store";
 
 type Props = {
   email?: string;
@@ -12,12 +17,16 @@ type Props = {
   emailVerified?: boolean;
 };
 
-/** Email verification status + change password. Used in the seller hub and buyer settings. */
+/**
+ * Email verification status, change password and delete account. Used in the seller hub and buyer
+ * settings; the delete form is also the web deletion page Google Play links to.
+ */
 export function AccountSecurityCard({ email, emailVerified }: Props) {
   return (
     <div className="space-y-5">
       {email && emailVerified !== undefined && <EmailVerificationRow email={email} verified={emailVerified} />}
       <ChangePasswordForm />
+      <DeleteAccountForm />
     </div>
   );
 }
@@ -187,6 +196,78 @@ function ChangePasswordForm() {
           {t("auth.security.updatePassword")}
         </button>
       </div>
+    </form>
+  );
+}
+
+function DeleteAccountForm() {
+  const t = useTranslations();
+  const router = useRouter();
+  const pathname = usePathname();
+  const toast = useToast();
+  const [password, setPassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (deleting) return;
+    if (!password) {
+      setError(t("auth.security.deleteEnterPassword"));
+      return;
+    }
+    if (!window.confirm(t("auth.security.deleteConfirm"))) return;
+    setDeleting(true);
+    setError(null);
+    const result = await deleteAccountAction(password);
+    if (!result.ok) {
+      setDeleting(false);
+      setError(result.error);
+      return;
+    }
+    // The backend already rejects this session; clearing it here just tidies the cookies and stores
+    await getApi().session.logout().catch(() => undefined);
+    resetFollowStore();
+    resetUnreadCounts();
+    toast.success(t("auth.security.deleteDone"));
+    router.push(pathname.startsWith("/factory") ? "/login?role=manufacturer" : "/");
+    router.refresh();
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-red-200 bg-white p-5 shadow-xs">
+      <h2 className="flex items-center gap-2 text-sm font-bold text-red-700">
+        <Trash2 className="h-4 w-4" />
+        {t("auth.security.deleteAccount")}
+      </h2>
+      <p className="text-xs leading-relaxed text-ink-muted">{t("auth.security.deleteAccountBody")}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <label className="block flex-1">
+          <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">
+            {t("auth.security.deletePasswordLabel")}
+          </span>
+          <input
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-xl border border-neutral-300 px-3.5 py-2 text-xs text-neutral-900 focus:border-red-500 focus:outline-hidden"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={deleting}
+          className="sf-btn-danger inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white transition hover:bg-red-700 disabled:opacity-70"
+        >
+          {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          {t("auth.security.deleteButton")}
+        </button>
+      </div>
+      {error && (
+        <p role="alert" className="text-xs font-semibold text-red-600">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

@@ -768,7 +768,14 @@
       "new": "New",
       "confirmNew": "Confirm new",
       "n8CharactersWithUpperLower": "8+ characters with upper & lower case, a number and a symbol.",
-      "updatePassword": "Update Password"
+      "updatePassword": "Update Password",
+      "deleteAccount": "Delete account",
+      "deleteAccountBody": "Permanently deletes your SeekFactory account and personal details, and signs you out on every device. Past chats and orders stay visible to the other side as \"Deleted user\". A factory profile, its products and seeks are removed from the marketplace.",
+      "deletePasswordLabel": "Password (or type DELETE if you sign in with Google or phone)",
+      "deleteEnterPassword": "Enter your password, or DELETE if your account has no password.",
+      "deleteConfirm": "Delete your SeekFactory account? This can't be undone.",
+      "deleteButton": "Delete my account",
+      "deleteDone": "Your account has been deleted."
     },
     "card": {
       "invalidPassword": "Invalid Password",

@@ -377,6 +377,12 @@ export interface AccountRepository {
   requestPasswordReset(email: string): Promise<void>;
   resetPassword(token: string, newPassword: string): Promise<void>;
   verifyEmail(token: string): Promise<void>;
+  /**
+   * Permanently deletes the signed-in account. The backend anonymises it, so chats and orders stay
+   * readable for the other side as "Deleted user". Takes the password, or the word DELETE for
+   * accounts without one (Google or phone sign-in). Sign out afterwards.
+   */
+  deleteAccount(password: string): Promise<void>;
 }
 
 export interface ApiClient {
