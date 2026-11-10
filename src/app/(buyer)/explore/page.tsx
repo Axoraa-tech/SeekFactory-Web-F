@@ -148,7 +148,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                   </div>
                   <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
                     <p className="text-xs sm:text-sm font-bold text-brand-orange">
-                      <Price inr={product.priceInr} /> <span className="text-[10px] font-normal text-neutral-500">/ {product.unit}</span>
+                      <Price inr={product.priceInr} maxInr={product.priceMaxInr} /> <span className="text-[10px] font-normal text-neutral-500">/ {product.unit}</span>
                     </p>
                     <span className="text-[11px] font-semibold text-brand-orange group-hover:underline">{t("explore.inquire")}</span>
                   </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { CertificateDocumentPreview } from "./certificate-document-preview";
 import React, { useState } from "react";
 import {
   ChevronLeft,
@@ -218,9 +219,9 @@ function CertificateRow({ certificates, headingKey, isOwner, onDeleteCertificate
                   >
                     {/* Official Document Paper Image Box */}
                     <div className="relative aspect-[3/4] w-full rounded-md overflow-hidden bg-white border border-slate-200 shadow-2xs flex items-center justify-center p-1.5">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img loading="lazy" decoding="async" src={cert.imageUrl}
+                      <CertificateDocumentPreview url={cert.imageUrl}
                         alt={title}
+                        label={cert.documentName}
                         className="h-full w-full object-contain rounded-xs transition-transform duration-200 group-hover:scale-102"
                       />
 
@@ -245,7 +246,10 @@ function CertificateRow({ certificates, headingKey, isOwner, onDeleteCertificate
                         </h4>
                       </div>
 
-                      <p className="text-[11px] text-slate-500">{t(cert.verified === true ? "profile.certs.verifiedBySeekfactory" : "profile.certModal.unverifiedDocument")}</p>
+                      <p className="text-[11px] text-slate-500">
+                        {t(cert.verified === true ? "profile.certs.verifiedBySeekfactory" : "profile.certModal.unverifiedDocument")}
+                        {cert.custom && cert.verified !== true ? ` · ${t("profile.certs.companyProvided")}` : ""}
+                      </p>
                       {/* Certificate Number + Copy Icon */}
                       <div className="flex items-center justify-between text-slate-500 text-[11px] pt-1">
                         <span className="truncate max-w-[140px] font-mono text-[11px]">

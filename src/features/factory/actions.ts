@@ -56,6 +56,9 @@ export async function createProductAction(input: NewFactoryProduct): Promise<Act
   if (!input.name?.trim()) return { ok: false, error: t("seller.errors.productNameIsRequired") };
   if (!input.categoryId) return { ok: false, error: t("seller.errors.chooseACategory") };
   if (!(input.priceInr > 0)) return { ok: false, error: t("seller.errors.priceMustBeGreaterThan") };
+  if (input.priceMaxInr !== undefined && !(input.priceMaxInr >= input.priceInr)) {
+    return { ok: false, error: t("seller.errors.maxPriceBelowMin") };
+  }
   if (!isUploadableUrl(input.imageUrl)) return { ok: false, error: t("seller.errors.productPhotoWasNotUploaded") };
   return run(() => getApi().factory.addProduct({ ...input, name: input.name.trim() }));
 }
@@ -65,6 +68,9 @@ export async function updateProductAction(id: string, input: FactoryProductUpdat
   if (input.name !== undefined && !input.name.trim()) return { ok: false, error: t("seller.errors.productNameIsRequired") };
   if (input.priceInr !== undefined && !(input.priceInr > 0)) {
     return { ok: false, error: t("seller.errors.priceMustBeGreaterThan") };
+  }
+  if (input.priceMaxInr !== undefined && !(input.priceInr !== undefined && input.priceMaxInr >= input.priceInr)) {
+    return { ok: false, error: t("seller.errors.maxPriceBelowMin") };
   }
   if (input.imageUrls) {
     if (input.imageUrls.length === 0) return { ok: false, error: t("seller.errors.addAtLeastOneProduct") };

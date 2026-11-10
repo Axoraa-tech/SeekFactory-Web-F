@@ -19,6 +19,7 @@ import type { NewFactoryProduct } from "@/shared/api/contracts";
 import type { Category } from "@/entities/category";
 import type { SellerProduct } from "../types";
 import { useTranslations } from "next-intl";
+import { parsePriceInput, sanitizePriceInput, validatePriceRange } from "@/shared/lib/price-range";
 
 type Props = {
   isOpen: boolean;
@@ -67,7 +68,9 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
     initialCategory ? initialCategory.parentId ?? initialCategory.id : roots[0]?.id ?? "",
   );
   const [subCategoryId, setSubCategoryId] = useState(initialCategory?.parentId ? initialCategory.id : "");
-  const [priceInr, setPriceInr] = useState<number>(product?.priceInr ?? 2500000);
+  // Strings, not numbers: a number state turns a cleared box into 0 and typing then gives "05".
+  const [priceMin, setPriceMin] = useState(product?.priceInr ? String(product.priceInr) : "");
+  const [priceMax, setPriceMax] = useState(product?.priceMaxInr ? String(product.priceMaxInr) : "");
   const [unit, setUnit] = useState(product?.unit ?? "Set");
   const [moq, setMoq] = useState(product?.moq ?? "1 Set");
   const [gallery, setGallery] = useState<GalleryItem[]>(() =>
@@ -174,7 +177,18 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
       nameInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    if (!(priceInr > 0) || !moq.trim()) {
+    const priceInr = parsePriceInput(priceMin);
+    const priceMaxInr = parsePriceInput(priceMax);
+    const priceError = validatePriceRange(priceInr, priceMaxInr);
+    if (priceError === "maxBelowMin") {
+      setError(t("seller.errors.maxPriceBelowMin"));
+      return;
+    }
+    if (priceError === "negative") {
+      setError(t("seller.errors.priceCannotBeNegative"));
+      return;
+    }
+    if (priceError || priceInr === undefined || !moq.trim()) {
       setError(t("seller.product.enterPriceAndMoq"));
       return;
     }
@@ -210,6 +224,8 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
         imageUrls,
         categoryId,
         priceInr,
+        // Equal to the minimum = single price; the backend clears the max when it is omitted.
+        priceMaxInr: priceMaxInr !== undefined && priceMaxInr > priceInr ? priceMaxInr : undefined,
         unit,
         moq,
         specs: specsRecord,
@@ -315,14 +331,28 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
                 {t("seller.product.fobPriceRangeInr")} <span className="text-red-500">*</span>
               </label>
-              <input
-                type="number"
-                required
-                min={1}
-                value={priceInr}
-                onChange={(e) => setPriceInr(Number(e.target.value))}
-                className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm text-ink focus:border-brand-blue focus:ring-2 focus:ring-brand-blue-soft focus:outline-hidden font-semibold"
-              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  required
+                  aria-label={t("seller.product.minPrice")}
+                  placeholder={t("seller.product.minPrice")}
+                  value={priceMin}
+                  onChange={(e) => setPriceMin(sanitizePriceInput(e.target.value))}
+                  className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm text-ink focus:border-brand-blue focus:ring-2 focus:ring-brand-blue-soft focus:outline-hidden font-semibold"
+                />
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  aria-label={t("seller.product.maxPriceOptional")}
+                  placeholder={t("seller.product.maxPriceOptional")}
+                  value={priceMax}
+                  onChange={(e) => setPriceMax(sanitizePriceInput(e.target.value))}
+                  className="w-full rounded-lg border border-line px-3.5 py-2.5 text-sm text-ink focus:border-brand-blue focus:ring-2 focus:ring-brand-blue-soft focus:outline-hidden font-semibold"
+                />
+              </div>
+              <p className="mt-1 text-[11px] text-ink-muted">{t("seller.product.priceRangeHint")}</p>
             </div>
 
             <div>

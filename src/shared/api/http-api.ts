@@ -1,3 +1,4 @@
+import { rangeMax } from "@/shared/lib/price-range";
 import type {
   ApiClient,
   CategoryRepository,
@@ -179,6 +180,7 @@ interface BackendProduct {
   description?: string;
   price_inr?: number;
   priceInr?: number;
+  priceMaxInr?: number | null;
   unit?: string;
   moq?: number | string;
   category_id?: string;
@@ -1908,8 +1910,11 @@ function normalizeManufacturer(m: BackendManufacturer): Manufacturer {
     productionLines: m.productionLines ?? m.production_lines,
     certificates: m.certificates?.map((cert) => ({
       ...cert,
+      issuer: cert.issuer ?? "",
       certNumber: cert.certNumber ?? "",
       imageUrl: resolveMediaUrl(cert.imageUrl) || "",
+      custom: Boolean(cert.custom),
+      documentName: cert.documentName ?? undefined,
     })),
     certifications: m.certifications ?? [],
   };
@@ -1962,6 +1967,7 @@ function normalizeProduct(p: BackendProduct): Product {
       resolveMediaUrl(p.imageUrl || p.primaryImageUrl || p.primary_image_url || p.image_url) || PLACEHOLDER_IMAGE,
     description: p.description || "",
     priceInr: Number(p.priceInr ?? p.price_inr ?? 0),
+    priceMaxInr: rangeMax(Number(p.priceInr ?? p.price_inr ?? 0), p.priceMaxInr == null ? undefined : Number(p.priceMaxInr)),
     unit: p.unit || "",
     moq: moqStr,
     categoryId: p.categoryId || p.category_id || "",

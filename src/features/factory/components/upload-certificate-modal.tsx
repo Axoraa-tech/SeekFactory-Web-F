@@ -8,6 +8,7 @@ import {
   Award,
 } from "lucide-react";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
+import { CertificateDocumentPreview } from "@/components/profile/certificate-document-preview";
 import { getApi } from "@/shared/api";
 import { useTranslations } from "next-intl";
 
@@ -27,6 +28,18 @@ const COMMON_PRESETS = [
   { title: "Factory Gold On-Site Audit Report", issuer: "SeekFactory Inspection", category: "Audit Report" as const },
 ];
 
+/** Custom certificate documents: what the backend accepts for them (our upload, these types). */
+const CUSTOM_DOC_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/webp"];
+const CUSTOM_DOC_EXTENSIONS = /\.(pdf|png|jpe?g|webp)$/i;
+const CUSTOM_DOC_MAX_BYTES = 20 * 1024 * 1024;
+
+/** Client-side check before uploading a custom certificate document; null when acceptable. */
+export function customDocumentError(file: Pick<File, "name" | "type" | "size">): "type" | "size" | null {
+  if (!CUSTOM_DOC_EXTENSIONS.test(file.name) || (file.type && !CUSTOM_DOC_TYPES.includes(file.type))) return "type";
+  if (file.size > CUSTOM_DOC_MAX_BYTES) return "size";
+  return null;
+}
+
 export function UploadCertificateModal({
   isOpen,
   onClose,
@@ -43,8 +56,20 @@ export function UploadCertificateModal({
   const [previewError, setPreviewError] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isCustom, setIsCustom] = useState(false);
+  const [documentName, setDocumentName] = useState("");
 
   if (!isOpen) return null;
+
+  const switchMode = (custom: boolean) => {
+    setIsCustom(custom);
+    // A pasted URL or preset image is not a valid custom document, and vice versa.
+    setImageUrl("");
+    setDocumentName("");
+    setUploadError(null);
+    setPreviewError(false);
+    if (custom) setTitle("");
+  };
 
   const handleSelectPreset = (preset: typeof COMMON_PRESETS[0]) => {
     setTitle(preset.title);
@@ -57,10 +82,20 @@ export function UploadCertificateModal({
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadError(null);
+    if (isCustom) {
+      const problem = customDocumentError(file);
+      if (problem) {
+        setUploadError(t(problem === "type" ? "seller.cert.customDocumentType" : "seller.cert.customDocumentTooLarge"));
+        e.target.value = "";
+        return;
+      }
+    }
     setIsUploading(true);
     try {
-      const media = await getApi().factory.uploadMedia(file, "image");
+      // Custom certificates may be PDFs: "document" uploads accept PDFs and validated image scans.
+      const media = await getApi().factory.uploadMedia(file, isCustom ? "document" : "image");
       setImageUrl(media.url);
+      setDocumentName(file.name);
       setPreviewError(false);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : t("chat.attach.uploadFailedPleaseRetry"));
@@ -71,7 +106,11 @@ export function UploadCertificateModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !issuer.trim() || isUploading) return;
+    if (isUploading) return;
+    if (!title.trim() || (!isCustom && !issuer.trim())) {
+      setUploadError(t(isCustom ? "seller.cert.enterCustomCertificateName" : "seller.cert.enterTitleAndIssuer"));
+      return;
+    }
     // Buyers see this as the factory's certificate: it must be the real document, not a stock photo
     if (!imageUrl.trim()) {
       setUploadError(t("seller.cert.uploadAPhotoOrScan"));
@@ -93,6 +132,7 @@ export function UploadCertificateModal({
       // Seller-uploaded documents are unverified until SeekFactory reviews them.
       verified: false,
       category,
+      ...(isCustom ? { custom: true, documentName: documentName || undefined } : {}),
     };
 
     onAddCertificate(newCert);
@@ -129,8 +169,29 @@ export function UploadCertificateModal({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
+          {/* Preset vs custom certificate */}
+          <div role="radiogroup" aria-label={t("seller.cert.certificateType")} className="grid grid-cols-2 gap-1.5 rounded-xl bg-neutral-100 p-1">
+            {[false, true].map((custom) => (
+              <button
+                key={String(custom)}
+                type="button"
+                role="radio"
+                aria-checked={isCustom === custom}
+                onClick={() => switchMode(custom)}
+                className={`rounded-lg px-3 py-1.5 text-[11px] font-bold transition ${isCustom === custom ? "bg-white text-neutral-900 shadow-xs" : "text-neutral-600 hover:text-neutral-900"}`}
+              >
+                {custom ? `+ ${t("seller.cert.addCustomCertificate")}` : t("seller.cert.standardCertificate")}
+              </button>
+            ))}
+          </div>
+          {isCustom && (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
+              {t("seller.cert.customCertificateNote")}
+            </p>
+          )}
+
           {/* Quick Presets */}
-          <div>
+          {!isCustom && <div>
             <label className="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">
               {t("seller.cert.quickAuthorityPresets")}
             </label>
@@ -146,17 +207,19 @@ export function UploadCertificateModal({
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                {t("seller.cert.certificateTitle")}
+                {isCustom ? t("seller.cert.exactCertificateName") : t("seller.cert.certificateTitle")}
               </label>
               <input
                 type="text"
                 required
-                placeholder={t("seller.cert.eGIso90012015")}
+                maxLength={200}
+                aria-label={isCustom ? t("seller.cert.exactCertificateName") : t("seller.cert.certificateTitle")}
+                placeholder={isCustom ? "e.g. ISO 13485:2016" : t("seller.cert.eGIso90012015")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-xs focus:border-brand-blue focus:outline-hidden"
@@ -166,10 +229,12 @@ export function UploadCertificateModal({
             <div>
               <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
                 {t("seller.cert.issuingAuthorityRegistrar")}
+                {isCustom && <span className="ml-1 normal-case font-medium text-neutral-400">({t("seller.cert.optional")})</span>}
               </label>
               <input
                 type="text"
-                required
+                required={!isCustom}
+                maxLength={200}
                 placeholder={t("seller.cert.eGTuvRheinlandSgs")}
                 value={issuer}
                 onChange={(e) => setIssuer(e.target.value)}
@@ -228,14 +293,22 @@ export function UploadCertificateModal({
                 <label className="flex flex-col items-center justify-center border-2 border-dashed border-neutral-300 hover:border-amber-500 rounded-2xl p-4 cursor-pointer bg-neutral-50 hover:bg-amber-50/20 transition group text-center">
                   <UploadCloud className="h-6 w-6 text-neutral-400 group-hover:text-amber-600 transition" />
                   <span className="font-bold text-neutral-800 text-xs mt-1">
-                    {isUploading ? t("common.uploading") : t("seller.cert.uploadCertificateImage")}
+                    {isUploading
+                      ? t("common.uploading")
+                      : isCustom
+                        ? t("seller.cert.uploadCertificateDocument")
+                        : t("seller.cert.uploadCertificateImage")}
                   </span>
                   <span className="text-[10px] text-neutral-400 mt-0.5">
-                    {t("seller.cert.supportsPngJpgOrWebp")}
+                    {isCustom ? t("seller.cert.supportsPdfPngJpgOrWebp") : t("seller.cert.supportsPngJpgOrWebp")}
                   </span>
+                  {isCustom && documentName && (
+                    <span className="mt-1 max-w-full truncate text-[10px] font-semibold text-emerald-700">{documentName}</span>
+                  )}
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/webp"
+                    aria-label={isCustom ? t("seller.cert.uploadCertificateDocument") : t("seller.cert.uploadCertificateImage")}
+                    accept={isCustom ? "application/pdf,.pdf,image/png,image/jpeg,image/webp" : "image/png,image/jpeg,image/webp"}
                     onChange={handleFileChange}
                     disabled={isUploading}
                     className="hidden"
@@ -247,7 +320,7 @@ export function UploadCertificateModal({
                   </p>
                 )}
 
-                <div className="mt-2">
+                {!isCustom && <div className="mt-2">
                   <span className="text-[10px] text-neutral-400 font-semibold block mb-1">{t("seller.cert.orPasteImageUrl")}</span>
                   <input
                     type="url"
@@ -259,15 +332,15 @@ export function UploadCertificateModal({
                     }}
                     className="w-full rounded-xl border border-neutral-300 px-3 py-1.5 text-xs focus:border-brand-blue focus:outline-hidden"
                   />
-                </div>
+                </div>}
               </div>
 
               {/* Preview Box */}
               <div className="flex flex-col items-center justify-center h-32 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 p-2 relative overflow-hidden shadow-xs">
                 {imageUrl && !previewError ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img loading="lazy" decoding="async" src={imageUrl}
+                  <CertificateDocumentPreview url={imageUrl}
                     alt={t("seller.cert.certificatePreview")}
+                    label={documentName}
                     onError={() => setPreviewError(true)}
                     className="h-full w-full object-contain rounded-lg border border-amber-300 shadow-sm"
                   />

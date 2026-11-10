@@ -427,7 +427,8 @@
       "viewFull": "View Full",
       "declaredByFactory": "Declared by factory",
       "copyCertificateNumber": "Copy Certificate Number",
-      "deleteCertificate": "Delete Certificate"
+      "deleteCertificate": "Delete Certificate",
+      "companyProvided": "Company-provided"
     },
     "certModal": {
       "document": "Document",
@@ -884,7 +885,9 @@
       "enterAValidWebsiteUrl": "Enter a valid website URL, e.g. https://example.com",
       "aCertificateImageWasNot": "A certificate image was not uploaded.",
       "enterAValidBusinessRegistration": "Enter a valid business registration number.",
-      "enterTheFullFactoryAddress": "Enter the full factory address."
+      "enterTheFullFactoryAddress": "Enter the full factory address.",
+      "maxPriceBelowMin": "Maximum price cannot be less than the minimum price.",
+      "priceCannotBeNegative": "Prices cannot be negative."
     },
     "product": {
       "aProductCanHaveAt": "A product can have at most {MAX_IMAGES} photos.",
@@ -930,7 +933,10 @@
       "uploadingFiles": "Uploading files…",
       "publishProduct": "Publish Product",
       "enterProductName": "Enter the product title / model name at the top of the form.",
-      "enterPriceAndMoq": "Enter the price and MOQ."
+      "enterPriceAndMoq": "Enter the price and MOQ.",
+      "minPrice": "Min price",
+      "maxPriceOptional": "Max price (optional)",
+      "priceRangeHint": "Leave max empty for a single price."
     },
     "seek": {
       "status": {
@@ -1066,7 +1072,19 @@
       "orPasteImageUrl": "Or paste image URL:",
       "certificatePreview": "Certificate Preview",
       "framedDocumentPreview": "Framed Document Preview",
-      "publishToHallOfFame": "Publish to Hall of Fame"
+      "publishToHallOfFame": "Publish to Hall of Fame",
+      "customDocumentType": "Upload a PDF, PNG, JPG or WebP file.",
+      "customDocumentTooLarge": "The document must be 20 MB or smaller.",
+      "enterCustomCertificateName": "Enter the exact certificate name.",
+      "enterTitleAndIssuer": "Enter the certificate title and issuing authority.",
+      "certificateType": "Certificate type",
+      "addCustomCertificate": "Add custom certificate",
+      "standardCertificate": "Standard certificate",
+      "customCertificateNote": "Enter the certificate name exactly as printed and upload the document. It is shown as company-provided until SeekFactory verifies it.",
+      "exactCertificateName": "Exact certificate name",
+      "optional": "optional",
+      "uploadCertificateDocument": "Upload certificate document",
+      "supportsPdfPngJpgOrWebp": "PDF, PNG, JPG or WebP, up to 20 MB"
     },
     "dashboard": {
       "couldNotProduct": "Could not {listed} product: {error}",

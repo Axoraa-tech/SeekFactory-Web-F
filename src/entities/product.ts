@@ -15,6 +15,8 @@ export type Product = {
   imageUrl: string;
   description: string;
   priceInr: number;
+  /** Optional upper bound of a price range; absent = single price (priceInr). */
+  priceMaxInr?: number;
   unit: string;
   moq: string;
   categoryId: string;

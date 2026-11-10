@@ -24,6 +24,7 @@ export function toSellerProduct(product: Product, categories: Category[]): Selle
     category: categoryName(categories, product.categoryId, "Industrial Machinery"),
     categoryId: product.categoryId,
     priceInr: product.priceInr,
+    priceMaxInr: product.priceMaxInr,
     unit: product.unit,
     moq: product.moq,
     status: product.listed === false ? "Paused" : "Active",

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPriceRange } from "@/shared/lib/price-range";
 import { SupplierName } from "@/features/subscription";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -259,7 +260,7 @@ function RecommendedProductCard({
             <p className="truncate">
               {hasPrice ? (
                 <>
-                  <span className="text-base font-extrabold tracking-tight text-slate-900">{formatPrice(p.priceInr)}</span>
+                  <span className="text-base font-extrabold tracking-tight text-slate-900">{formatPriceRange(p.priceInr, p.priceMaxInr, formatPrice)}</span>
                   {p.unit && <span className="text-[11px] font-medium text-ink-muted"> /{translateUnit(p.unit)}</span>}
                 </>
               ) : (
@@ -321,6 +322,7 @@ function RecommendedProductCard({
           productId={p.id}
           productName={p.name}
           priceInr={hasPrice ? p.priceInr : undefined}
+          priceMaxInr={hasPrice ? p.priceMaxInr : undefined}
           unit={p.unit}
           moq={p.moq}
           onClose={() => setCartOpen(false)}
