@@ -63,7 +63,7 @@ export interface AdminSeekRow {
 export interface AdminProductRow {
   id: string; name: string; slug: string; imageUrl?: string;
   manufacturerId: string; manufacturerName: string; manufacturerSlug: string;
-  priceInr?: number; unit?: string; listed: boolean;
+  priceInr?: number; priceMaxInr?: number | null; unit?: string; listed: boolean;
   stockStatus?: "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK"; createdAt?: string;
 }
 

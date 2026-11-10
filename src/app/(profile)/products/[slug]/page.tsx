@@ -27,7 +27,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { localizeCategoryName } from "@/i18n/zh-terms";
 import { mediaThumb } from "@/shared/api/http-api";
 
-type PriceBand = { label: string; priceInr: number; savingPercent: number };
+type PriceBand = { label: string; priceInr: number; priceMaxInr?: number; savingPercent: number };
 
 /** Quantity bands from the factory's own price tiers; one band (the base price) when it set none. */
 function priceBands(product: Product): PriceBand[] {
@@ -40,7 +40,8 @@ function priceBands(product: Product): PriceBand[] {
     const label = next ? `${band.minQty} - ${next.minQty - 1}${unit}` : `${band.minQty}+${unit}`;
     const savingPercent =
       product.priceInr > 0 ? Math.round((100 * (product.priceInr - band.priceInr)) / product.priceInr) : 0;
-    return { label, priceInr: band.priceInr, savingPercent };
+    // The base band carries the seller's price range; bulk tiers are single prices.
+    return { label, priceInr: band.priceInr, priceMaxInr: i === 0 ? product.priceMaxInr : undefined, savingPercent };
   });
 }
 
@@ -239,7 +240,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                             : "mt-1 text-sm sm:text-base font-extrabold text-slate-900"
                         }
                       >
-                        <Price inr={band.priceInr} />
+                        <Price inr={band.priceInr} maxInr={band.priceMaxInr} />
                       </p>
                       {band.savingPercent > 0 ? (
                         <p className="text-[10px] text-emerald-600 font-bold">{t("product.page.save")} {band.savingPercent}%</p>
@@ -257,6 +258,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <ProductActionBar
                 productId={product.id}
                 priceInr={product.priceInr}
+                priceMaxInr={product.priceMaxInr}
                 unit={product.unit}
                 moq={product.moq}
                 productSlug={product.slug}

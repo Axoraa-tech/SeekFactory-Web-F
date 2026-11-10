@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPriceRange } from "@/shared/lib/price-range";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -216,7 +217,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                 </Link>
 
                 <p className="text-xs font-semibold text-neutral-800">
-                  ₹{(product.priceInr ?? 0).toLocaleString("en-IN")} / {product.unit} •{" "}
+                  {formatPriceRange(product.priceInr ?? 0, product.priceMaxInr, (n) => `₹${n.toLocaleString("en-IN")}`)} / {product.unit} •{" "}
                   <span className="text-ink-muted font-normal">{t("common.moqLabel")} {product.moq}</span>
                 </p>
 

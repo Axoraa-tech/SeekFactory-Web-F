@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPriceRange } from "@/shared/lib/price-range";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExternalLink, Eye, Heart, Loader2, MessageCircle, Play, Trash2 } from "lucide-react";
@@ -127,7 +128,7 @@ function ProductsList({ q, page, onPage }: ListProps) {
           <div className="min-w-0">
             <p className="font-medium text-slate-900 truncate">{p.name}</p>
             <p className="text-xs text-slate-500 truncate">
-              {p.priceInr ? `₹${p.priceInr.toLocaleString("en-IN")}${p.unit ? ` / ${p.unit}` : ""}` : "Price on request"}
+              {p.priceInr ? `${formatPriceRange(p.priceInr, p.priceMaxInr, (n) => `₹${n.toLocaleString("en-IN")}`)}${p.unit ? ` / ${p.unit}` : ""}` : "Price on request"}
             </p>
           </div>
         </div>

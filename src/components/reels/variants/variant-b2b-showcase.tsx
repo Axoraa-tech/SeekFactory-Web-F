@@ -337,6 +337,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               productName={product?.name}
               // Showcase: a seek without a product still shows the price slot ("Price on request")
               priceInr={product?.priceInr ?? (fill ? 0 : undefined)}
+              priceMaxInr={product?.priceMaxInr}
               unit={product?.unit}
               moq={product?.moq}
               hideMoq

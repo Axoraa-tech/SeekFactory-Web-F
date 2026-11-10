@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPriceRange } from "@/shared/lib/price-range";
 import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
@@ -71,7 +72,7 @@ export function TrendingProducts({ products, intervalMs = 3500 }: Props) {
               {translateProduct(currentProduct.name)}
             </p>
             <p className="text-xs font-extrabold text-brand-orange">
-              {formatPrice(currentProduct.priceInr)} / {translateUnit(currentProduct.unit)}
+              {formatPriceRange(currentProduct.priceInr, currentProduct.priceMaxInr, formatPrice)} / {translateUnit(currentProduct.unit)}
             </p>
           </div>
         </Link>

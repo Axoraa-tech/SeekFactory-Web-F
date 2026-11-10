@@ -427,7 +427,8 @@
       "viewFull": "查看大图",
       "declaredByFactory": "工厂自行申报",
       "copyCertificateNumber": "复制证书编号",
-      "deleteCertificate": "删除证书"
+      "deleteCertificate": "删除证书",
+      "companyProvided": "企业自行提供"
     },
     "certModal": {
       "document": "文件",
@@ -884,7 +885,9 @@
       "enterAValidWebsiteUrl": "请输入有效的网址，例如 https://example.com",
       "aCertificateImageWasNot": "证书图片未上传。",
       "enterAValidBusinessRegistration": "请输入有效的营业执照号。",
-      "enterTheFullFactoryAddress": "请填写完整的工厂地址。"
+      "enterTheFullFactoryAddress": "请填写完整的工厂地址。",
+      "maxPriceBelowMin": "最高价格不能低于最低价格。",
+      "priceCannotBeNegative": "价格不能为负数。"
     },
     "product": {
       "aProductCanHaveAt": "每个产品最多 {MAX_IMAGES} 张图片。",
@@ -930,7 +933,10 @@
       "uploadingFiles": "正在上传文件…",
       "publishProduct": "发布产品",
       "enterProductName": "请在表单顶部填写产品标题/型号。",
-      "enterPriceAndMoq": "请填写价格和起订量。"
+      "enterPriceAndMoq": "请填写价格和起订量。",
+      "minPrice": "最低价格",
+      "maxPriceOptional": "最高价格（可选）",
+      "priceRangeHint": "单一价格请留空最高价格。"
     },
     "seek": {
       "status": {
@@ -1066,7 +1072,19 @@
       "orPasteImageUrl": "或粘贴图片网址：",
       "certificatePreview": "证书预览",
       "framedDocumentPreview": "证书装裱预览",
-      "publishToHallOfFame": "发布到荣誉墙"
+      "publishToHallOfFame": "发布到荣誉墙",
+      "customDocumentType": "请上传 PDF、PNG、JPG 或 WebP 文件。",
+      "customDocumentTooLarge": "文件不能超过 20 MB。",
+      "enterCustomCertificateName": "请输入准确的证书名称。",
+      "enterTitleAndIssuer": "请输入证书名称和发证机构。",
+      "certificateType": "证书类型",
+      "addCustomCertificate": "添加自定义证书",
+      "standardCertificate": "标准证书",
+      "customCertificateNote": "请按证书原文填写名称并上传文件。在 SeekFactory 核验之前，将显示为企业自行提供。",
+      "exactCertificateName": "准确的证书名称",
+      "optional": "可选",
+      "uploadCertificateDocument": "上传证书文件",
+      "supportsPdfPngJpgOrWebp": "支持 PDF、PNG、JPG 或 WebP，最大 20 MB"
     },
     "dashboard": {
       "couldNotProduct": "产品{listed}失败：{error}",

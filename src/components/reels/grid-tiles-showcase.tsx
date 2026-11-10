@@ -46,7 +46,7 @@ export function GridTilesShowcase({ items, settings }: Props) {
 
               {product && (
                 <p className="truncate text-xs text-ink-muted">
-                  <span className="font-medium text-ink"><Price inr={product.priceInr} /></span>
+                  <span className="font-medium text-ink"><Price inr={product.priceInr} maxInr={product.priceMaxInr} /></span>
                   {product.unit ? ` / ${product.unit}` : ""}
                 </p>
               )}

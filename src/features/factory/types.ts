@@ -53,6 +53,7 @@ export type SellerProduct = {
   category: string;
   categoryId: string;
   priceInr: number;
+  priceMaxInr?: number;
   unit: string;
   moq: string;
   /** Active = visible to buyers; Paused = hidden by the seller (still editable). */

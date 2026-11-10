@@ -298,6 +298,7 @@ export function ProductSlideshowCard({ manufacturer, products, fill }: Props) {
             productId={product.id}
             productName={product.name}
             priceInr={product.priceInr}
+            priceMaxInr={product.priceMaxInr}
             unit={product.unit}
             moq={product.moq}
             productSlug={product.slug}

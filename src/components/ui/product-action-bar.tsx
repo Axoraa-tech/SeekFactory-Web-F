@@ -9,11 +9,14 @@ import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { minimumOrderQuantity } from "@/shared/lib/quantity";
 import { AddToCartModal } from "@/features/orders/add-to-cart-modal";
 import type { StockStatus } from "@/entities/product";
+import { formatPriceRange } from "@/shared/lib/price-range";
 
 type ProductActionBarProps = {
   /** Needed for "Add to cart". */
   productId?: string;
   priceInr?: number;
+  /** Upper bound of a price range; shown as "min – max". */
+  priceMaxInr?: number;
   unit?: string;
   moq?: string | number;
   /** Still used for the cart minimum, but not shown (seek cards: the product page shows it). */
@@ -34,6 +37,7 @@ type ProductActionBarProps = {
 export function ProductActionBar({
   productId,
   priceInr,
+  priceMaxInr,
   unit = "",
   moq,
   hideMoq = false,
@@ -95,7 +99,7 @@ export function ProductActionBar({
                     isSmall ? "text-sm" : isLarge ? "text-2xl" : "text-lg"
                   )}
                 >
-                  {formatPrice(priceInr)}
+                  {formatPriceRange(priceInr, priceMaxInr, formatPrice)}
                 </span>
                 {unit ? <span className="text-xs text-ink-muted font-medium">/{translateUnit(unit)}</span> : null}
               </>
@@ -205,6 +209,7 @@ export function ProductActionBar({
           productId={productId}
           productName={productName}
           priceInr={hasPrice ? priceInr : undefined}
+          priceMaxInr={hasPrice ? priceMaxInr : undefined}
           unit={unit}
           moq={moq}
           onClose={() => setIsOrderOpen(false)}

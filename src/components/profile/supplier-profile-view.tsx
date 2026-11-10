@@ -516,6 +516,7 @@ export function SupplierProfileView({
                       <ProductActionBar
                         productId={product.id}
                         priceInr={product.priceInr}
+                        priceMaxInr={product.priceMaxInr}
                         unit={product.unit}
                         moq={product.moq}
                         productSlug={product.slug}

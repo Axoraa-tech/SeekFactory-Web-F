@@ -73,7 +73,7 @@ export function ProfileSavedPanel({ savedProducts, savedSeeks, onRemoveSaved, on
                     {p.priceInr > 0 ? (
                       <>
                         <span className="text-sm sm:text-base font-extrabold text-ink">
-                          <Price inr={p.priceInr} />
+                          <Price inr={p.priceInr} maxInr={p.priceMaxInr} />
                         </span>
                         {p.unit ? <span className="text-[11px] text-ink-faint">/{p.unit}</span> : null}
                       </>

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPriceRange } from "@/shared/lib/price-range";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -16,6 +17,8 @@ type Props = {
   productId: string;
   productName?: string;
   priceInr?: number;
+  /** Range maximum: the listed price shows as a range; the estimate uses the minimum. */
+  priceMaxInr?: number;
   unit?: string;
   moq?: string | number;
   onClose: () => void;
@@ -30,7 +33,7 @@ const subscribeNever = () => () => {};
  * Rendered into document.body: seek cards create their own stacking/containing context, which
  * would otherwise trap a fixed overlay inside the card.
  */
-export function AddToCartModal({ productSlug, productId, productName, priceInr, unit = "Unit", moq, onClose }: Props) {
+export function AddToCartModal({ productSlug, productId, productName, priceInr, priceMaxInr, unit = "Unit", moq, onClose }: Props) {
   const t = useTranslations();
   // Same currency as the price on the card
   const { formatPrice } = useRegionalSettings();
@@ -159,7 +162,7 @@ export function AddToCartModal({ productSlug, productId, productName, priceInr, 
               <p className="font-bold text-neutral-900">{productName ?? t("orders.request.selectedProduct")}</p>
               {(priceInr !== undefined || moqLabel) && (
                 <p className="mt-0.5 text-ink-muted">
-                  {priceInr !== undefined && t("orders.addToCart.listed", { price: formatPrice(priceInr), unit })}
+                  {priceInr !== undefined && t("orders.addToCart.listed", { price: formatPriceRange(priceInr, priceMaxInr, formatPrice), unit })}
                   {priceInr !== undefined && moqLabel && " · "}
                   {moqLabel && t("orders.addToCart.moq", { moq: moqLabel })}
                 </p>
