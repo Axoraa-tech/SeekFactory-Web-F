@@ -1446,13 +1446,9 @@ export function createHttpApi(
     },
 
     async getProducts(): Promise<Product[]> {
-      try {
-        const list = await fetchJson<BackendProduct[]>("/api/v1/factory/products", { cache: "no-store" });
-        return list.map(normalizeProduct);
-      } catch (e) {
-        console.error("Failed to fetch factory products:", e);
-        return [];
-      }
+      // Callers decide how to present failures. An unavailable inventory is not an empty one.
+      const list = await fetchJson<BackendProduct[]>("/api/v1/factory/products", { cache: "no-store" });
+      return list.map(normalizeProduct);
     },
 
     async addProduct(data: NewFactoryProduct): Promise<Product> {

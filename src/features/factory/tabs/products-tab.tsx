@@ -155,7 +155,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
             {/* Left: Thumbnail & Details */}
             <div className="flex items-start gap-4 flex-1 min-w-0">
               <Link prefetch={false}
-                href={`/products/${product.slug}`}
+                href={`/factory/products/${encodeURIComponent(product.id)}`}
                 className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 bg-canvas border border-line block group/img"
                 title={`View ${product.name}`}
               >
@@ -209,7 +209,7 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
                 </div>
 
                 <Link prefetch={false}
-                  href={`/products/${product.slug}`}
+                  href={`/factory/products/${encodeURIComponent(product.id)}`}
                   className="block font-bold text-sm text-neutral-900 hover:text-brand-blue transition truncate"
                   title={`View ${product.name}`}
                 >
@@ -249,16 +249,14 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
               </div>
 
               <div className="flex w-full sm:w-auto items-center gap-2">
-                {product.status === "Active" && (
-                  <Link prefetch={false}
-                    href={`/products/${product.slug}`}
-                    className="sf-btn-nav flex-1 sm:flex-none justify-center inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
-                    title={t("seller.products.viewPublicMarketplaceListing")}
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                    <span>{t("common.view")}</span>
-                  </Link>
-                )}
+                <Link prefetch={false}
+                  href={`/factory/products/${encodeURIComponent(product.id)}`}
+                  className="sf-btn-nav flex-1 sm:flex-none justify-center inline-flex items-center gap-1.5 rounded-xl border border-line bg-canvas hover:bg-white hover:border-brand-blue hover:text-brand-blue px-3 py-1.5 text-xs font-bold text-neutral-700 transition shadow-2xs"
+                  title={t("seller.preview.ownerView")}
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  <span>{t("common.view")}</span>
+                </Link>
 
                 <select
                   value={product.stockStatus}

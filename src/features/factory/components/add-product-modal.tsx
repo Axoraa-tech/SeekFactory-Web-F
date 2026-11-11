@@ -43,12 +43,6 @@ type GalleryItem = { key: string; url: string; file?: File };
 
 type Datasheet = { url?: string; name: string; file?: File } | null;
 
-const DEFAULT_SPECS = [
-  { key: "Spindle Speed / Power", value: "12,000 RPM / 15 kW" },
-  { key: "Table Size / Capacity", value: "1200 x 600 mm" },
-  { key: "Certification", value: "ISO 9001 / CE" },
-];
-
 let keySeq = 0;
 const nextKey = () => `img-${++keySeq}`;
 
@@ -83,7 +77,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
   );
   const [description, setDescription] = useState(product?.description ?? "");
   const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>(() => {
-    if (!product) return DEFAULT_SPECS;
+    if (!product) return [{ key: "", value: "" }];
     const entries = Object.entries(product.specs).map(([key, value]) => ({ key, value }));
     return entries.length ? entries : [{ key: "", value: "" }];
   });
@@ -229,9 +223,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
         unit,
         moq,
         specs: specsRecord,
-        description:
-          description.trim() ||
-          `${name.trim()} manufactured to international quality standards for OEM/ODM export.`,
+        description: description.trim(),
         // Edit: "" clears a removed datasheet; create: omit when none
         datasheetUrl: datasheetUrl ?? (editing ? "" : undefined),
         datasheetName: datasheet?.name,
@@ -517,11 +509,13 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                 <span>{t("seller.product.addSpecification")}</span>
               </button>
             </div>
+            <p className="mb-2 text-xs text-ink-muted">{t("seller.product.specificationsHelp")}</p>
             <div className="space-y-2">
               {specs.map((s, idx) => (
                 <div key={idx} className="flex items-center gap-2">
                   <input
                     type="text"
+                    aria-label={t("seller.product.specNameEGSpindle")}
                     placeholder={t("seller.product.specNameEGSpindle")}
                     value={s.key}
                     onChange={(e) => handleSpecChange(idx, "key", e.target.value)}
@@ -529,6 +523,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                   />
                   <input
                     type="text"
+                    aria-label={t("seller.product.specValueEG12")}
                     placeholder={t("seller.product.specValueEG12")}
                     value={s.value}
                     onChange={(e) => handleSpecChange(idx, "value", e.target.value)}
