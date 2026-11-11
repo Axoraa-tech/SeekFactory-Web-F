@@ -129,11 +129,42 @@ describe("optional product video", () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:preview");
   });
 
+  it.each([
+    { initialVideo: undefined, latestVideo: "/added-elsewhere.mp4" },
+    { initialVideo: "/old.mp4", latestVideo: "/replaced-elsewhere.mp4" },
+    { initialVideo: "/old.mp4", latestVideo: undefined },
+  ])("does not overwrite another session's video on an unrelated stale edit: $initialVideo -> $latestVideo", async ({ initialVideo, latestVideo }) => {
+    const { container, onSubmit } = setup({ ...existing, videoUrl: initialVideo });
+    // Another session changes the stored video after this edit form has opened.
+    let storedVideo = latestVideo;
+    onSubmit.mockImplementation(async (input) => {
+      // Match the backend update contract: omitted = preserve, blank = clear.
+      if (input.videoUrl !== undefined) storedVideo = input.videoUrl || undefined;
+    });
+    fireEvent.change(container.querySelector("textarea")!, { target: { value: "Updated description" } });
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(onSubmit.mock.calls[0][0].description).toBe("Updated description");
+    expect(JSON.parse(JSON.stringify(onSubmit.mock.calls[0][0]))).not.toHaveProperty("videoUrl");
+    expect(storedVideo).toBe(latestVideo);
+    expect(uploadMedia).not.toHaveBeenCalled();
+  });
+
+  it("does not mark video changed when the picker is cancelled or rejects a file", async () => {
+    const { container, onSubmit } = setup({ ...existing, videoUrl: "/existing.mp4" });
+    fireEvent.change(container.querySelector<HTMLInputElement>("#product-video")!, { target: { files: [] } });
+    selectVideo(container, new File(["x"], "bad.pdf", { type: "application/pdf" }));
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(onSubmit.mock.calls[0][0].videoUrl).toBeUndefined();
+    expect(uploadMedia).not.toHaveBeenCalled();
+  });
+
   it("preserves the existing video without upload, and explicitly clears when removed", async () => {
     const first = setup({ ...existing, videoUrl: "/existing.mp4" });
     fireEvent.submit(first.container.querySelector("form")!);
     await waitFor(() => expect(first.onSubmit).toHaveBeenCalledOnce());
-    expect(first.onSubmit.mock.calls[0][0].videoUrl).toBe("/existing.mp4");
+    expect(first.onSubmit.mock.calls[0][0].videoUrl).toBeUndefined();
     expect(uploadMedia).not.toHaveBeenCalled();
     first.unmount();
     const second = setup({ ...existing, videoUrl: "/existing.mp4" });

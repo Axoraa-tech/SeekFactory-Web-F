@@ -79,6 +79,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
   const [video, setVideo] = useState<GalleryItem | null>(
     product?.videoUrl ? { key: "video", url: product.videoUrl } : null,
   );
+  const [videoChanged, setVideoChanged] = useState(false);
   useEffect(() => () => {
     if (video?.file) URL.revokeObjectURL(video.url);
   }, [video]);
@@ -156,6 +157,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
     }
     setError(null);
     setVideo({ key: "video", url: URL.createObjectURL(file), file });
+    setVideoChanged(true);
   }
 
   function pickDatasheet(e: React.ChangeEvent<HTMLInputElement>) {
@@ -245,7 +247,8 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
         name: name.trim(),
         imageUrl: imageUrls[0],
         imageUrls,
-        videoUrl: videoUrl ?? (editing ? "" : undefined),
+        // Untouched edits must preserve newer video changes from other sessions.
+        videoUrl: editing && !videoChanged ? undefined : videoUrl ?? (editing ? "" : undefined),
         categoryId,
         priceInr,
         // Equal to the minimum = single price; the backend clears the max when it is omitted.
@@ -496,7 +499,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
                 className="sf-btn-add rounded-lg border border-line px-3 py-2 text-xs font-bold text-brand-blue">
                 {video ? t("seller.product.replaceVideo") : t("seller.product.addVideo")}
               </button>
-              {video && <button type="button" onClick={() => setVideo(null)}
+              {video && <button type="button" onClick={() => { setVideo(null); setVideoChanged(true); }}
                 className="text-xs font-semibold text-red-600">{t("seller.product.removeVideo")}</button>}
               {video?.file && <span className="min-w-0 truncate text-xs text-ink-muted">{video.file.name}</span>}
             </div>
