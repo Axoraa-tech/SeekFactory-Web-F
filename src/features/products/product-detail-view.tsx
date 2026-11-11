@@ -1,3 +1,4 @@
+import { productGalleryVideos } from "./product-videos";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { SupplierName } from "@/features/subscription";
 import { Price } from "@/components/ui/price";
@@ -89,7 +90,7 @@ export async function ProductDetailView({ detail, categories, seekVideos, order,
               images={product.imageUrls?.length ? product.imageUrls : [product.imageUrl]}
               alt={product.name}
               badge={t("supplier.oemDirect")}
-              videos={seekVideos}
+              videos={productGalleryVideos(product, seekVideos)}
             />
           </Card>
 

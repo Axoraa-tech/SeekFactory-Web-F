@@ -19,6 +19,7 @@ export function toSellerProduct(product: Product, categories: Category[]): Selle
     slug: product.slug,
     imageUrl: product.imageUrl,
     imageUrls: product.imageUrls?.length ? product.imageUrls : [product.imageUrl],
+    videoUrl: product.videoUrl,
     datasheetUrl: product.datasheetUrl,
     datasheetName: product.datasheetName,
     category: categoryName(categories, product.categoryId, "Industrial Machinery"),

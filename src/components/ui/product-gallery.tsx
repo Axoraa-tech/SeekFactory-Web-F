@@ -6,14 +6,14 @@ import { cn } from "@/shared/lib/cn";
 import { useTranslations } from "next-intl";
 import { mediaThumb } from "@/shared/api/http-api";
 
-/** A seek video shown in the gallery after the product photos. */
+/** A product or linked Seek video shown in the gallery after the product photos. */
 export type GalleryVideo = { id: string; videoUrl: string; posterUrl?: string; title: string };
 
 type Props = {
   images: string[];
   alt: string;
   badge?: string;
-  /** Seeks that feature this product; they follow the photos, Alibaba style. */
+  /** The dedicated product video and linked Seeks, displayed after the photos. */
   videos?: GalleryVideo[];
 };
 
@@ -25,7 +25,7 @@ const FADE_IN = "animate-[sf-fade_600ms_ease-out] motion-reduce:animate-none";
 
 type Slide = { kind: "photo"; src: string } | { kind: "video"; video: GalleryVideo };
 
-/** Product media gallery: main photo or seek video with thumbnails and prev/next. */
+/** Product media gallery: main photo or product/Seek video with thumbnails and prev/next. */
 export function ProductGallery({ images, alt, badge, videos = [] }: Props) {
   const t = useTranslations();
   const slides: Slide[] = [

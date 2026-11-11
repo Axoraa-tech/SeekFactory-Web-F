@@ -29,13 +29,15 @@ type Props = {
   product?: SellerProduct;
   /**
    * Persists the product; rejects with a user-facing message on failure.
-   * In edit mode an empty datasheetUrl means "remove the datasheet".
+   * In edit mode an empty datasheetUrl/videoUrl removes that attachment.
    */
   onSubmit: (product: NewFactoryProduct) => Promise<void>;
 };
 
 const MAX_IMAGES = 8;
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
+const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 const MAX_PDF_BYTES = 20 * 1024 * 1024;
 
 /** A gallery slot: either already stored (url) or a device file waiting for upload (preview). */
@@ -50,6 +52,8 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
   const t = useTranslations();
   const editing = Boolean(product);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const submittingRef = useRef(false);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   // Uploads already done for a File, so a failed save can retry without re-sending it.
   const uploadedRef = useRef(new Map<File, string>());
@@ -72,6 +76,12 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
       ? product.imageUrls.map((url) => ({ key: nextKey(), url }))
       : [],
   );
+  const [video, setVideo] = useState<GalleryItem | null>(
+    product?.videoUrl ? { key: "video", url: product.videoUrl } : null,
+  );
+  useEffect(() => () => {
+    if (video?.file) URL.revokeObjectURL(video.url);
+  }, [video]);
   const [datasheet, setDatasheet] = useState<Datasheet>(
     product?.datasheetUrl ? { url: product.datasheetUrl, name: product.datasheetName || "Datasheet.pdf" } : null,
   );
@@ -132,6 +142,22 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
     });
   }
 
+  function pickVideo(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || submittingRef.current) return;
+    if (!VIDEO_TYPES.includes(file.type)) {
+      setError(t("seller.product.videoTypeError"));
+      return;
+    }
+    if (file.size > MAX_VIDEO_BYTES) {
+      setError(t("seller.product.videoSizeError"));
+      return;
+    }
+    setError(null);
+    setVideo({ key: "video", url: URL.createObjectURL(file), file });
+  }
+
   function pickDatasheet(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -152,7 +178,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
     setSpecs((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: val } : s)));
   }
 
-  async function upload(file: File, kind: "image" | "document") {
+  async function upload(file: File, kind: "image" | "document" | "video") {
     const cached = uploadedRef.current.get(file);
     if (cached) return cached;
     const media = await getApi().factory.uploadMedia(file, kind);
@@ -162,7 +188,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (busy) return;
+    if (submittingRef.current) return;
     // Our own messages instead of the browser's "Please fill in this field", which points at a
     // field that is often scrolled out of view on phones
     if (!name.trim()) {
@@ -201,14 +227,17 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
       if (s.key.trim() && s.value.trim()) specsRecord[s.key.trim()] = s.value.trim();
     });
 
+    submittingRef.current = true;
     setError(null);
+    setStatus("saving");
     try {
-      const needsUpload = gallery.some((item) => item.file) || Boolean(datasheet?.file);
+      const needsUpload = gallery.some((item) => item.file) || Boolean(datasheet?.file) || Boolean(video?.file);
       if (needsUpload) setStatus("uploading");
       const imageUrls: string[] = [];
       for (const item of gallery) {
         imageUrls.push(item.file ? await upload(item.file, "image") : item.url);
       }
+      const videoUrl = video?.file ? await upload(video.file, "video") : video?.url;
       const datasheetUrl = datasheet?.file ? await upload(datasheet.file, "document") : datasheet?.url;
 
       setStatus("saving");
@@ -216,6 +245,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
         name: name.trim(),
         imageUrl: imageUrls[0],
         imageUrls,
+        videoUrl: videoUrl ?? (editing ? "" : undefined),
         categoryId,
         priceInr,
         // Equal to the minimum = single price; the backend clears the max when it is omitted.
@@ -231,6 +261,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("seller.product.couldNotSaveProductPlease"));
+      submittingRef.current = false;
       setStatus("idle");
     }
   }
@@ -265,7 +296,8 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} noValidate className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="p-6">
+          <fieldset disabled={busy} className="min-w-0 space-y-5">
           {/* Product Name */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
@@ -449,6 +481,30 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
 
           </div>
 
+          {/* One optional video alongside the photo gallery, without creating a Seek. */}
+          <div className="space-y-2">
+            <label htmlFor="product-video" className="block text-xs font-bold uppercase tracking-wider text-ink">
+              {t("seller.product.productVideoOptional")}
+            </label>
+            {video && (
+              <video key={video.url} src={video.url} controls playsInline preload="metadata"
+                aria-label={t("seller.product.productVideoPreview")}
+                className="max-h-56 w-full rounded-lg bg-black" />
+            )}
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => videoInputRef.current?.click()}
+                className="sf-btn-add rounded-lg border border-line px-3 py-2 text-xs font-bold text-brand-blue">
+                {video ? t("seller.product.replaceVideo") : t("seller.product.addVideo")}
+              </button>
+              {video && <button type="button" onClick={() => setVideo(null)}
+                className="text-xs font-semibold text-red-600">{t("seller.product.removeVideo")}</button>}
+              {video?.file && <span className="min-w-0 truncate text-xs text-ink-muted">{video.file.name}</span>}
+            </div>
+            <input id="product-video" ref={videoInputRef} type="file" accept={VIDEO_TYPES.join(",")}
+              onChange={pickVideo} className="hidden" />
+            <p className="text-[11px] text-ink-muted">{t("seller.product.productVideoHint")}</p>
+          </div>
+
           {/* Datasheet PDF */}
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-ink">
@@ -598,6 +654,7 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
               </span>
             </button>
           </div>
+          </fieldset>
         </form>
       </div>
     </div>

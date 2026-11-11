@@ -263,11 +263,13 @@ export type NewFactoryProduct = {
   specs?: Record<string, string>;
   /** Full gallery (max 8); the first entry becomes the cover. */
   imageUrls?: string[];
+  /** One optional product video, independent of linked Seeks. Empty string clears on update. */
+  videoUrl?: string;
   datasheetUrl?: string;
   datasheetName?: string;
 };
 
-/** Partial product edit; omitted fields stay unchanged. datasheetUrl "" removes the datasheet. */
+/** Partial product edit; omitted fields stay unchanged. datasheetUrl/videoUrl "" removes that attachment. */
 export type FactoryProductUpdate = Partial<Omit<NewFactoryProduct, "imageUrl">>;
 
 /** Partial seek edit; omitted fields stay unchanged. */
