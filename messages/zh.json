@@ -936,7 +936,8 @@
       "enterPriceAndMoq": "请填写价格和起订量。",
       "minPrice": "最低价格",
       "maxPriceOptional": "最高价格（可选）",
-      "priceRangeHint": "单一价格请留空最高价格。"
+      "priceRangeHint": "单一价格请留空最高价格。",
+      "specificationsHelp": "选填。请仅填写已确认的产品参数。示例仅供参考，不会保存为实际参数。"
     },
     "seek": {
       "status": {
@@ -1279,7 +1280,11 @@
     "lastWeeks": "近 {count} 周",
     "preview": {
       "backToSellerHub": "返回制造商中心",
-      "buyerView": "您正在以买家视角查看您的商品"
+      "buyerView": "您正在以买家视角查看您的商品",
+      "ownerView": "商品私密预览",
+      "privateNotice": "此预览仅对您可见，不会发布商品。买家操作已禁用。",
+      "pausedNotice": "此商品已暂停展示，买家不可见。",
+      "unverifiedNotice": "您的工厂通过认证后，此商品才会向买家展示。"
     },
     "composer": {
       "startAPost": "开始发布",

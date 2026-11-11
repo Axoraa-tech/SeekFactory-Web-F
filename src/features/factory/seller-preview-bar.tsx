@@ -5,7 +5,7 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 import { SupplierPlanSync } from "./supplier-plan-sync";
 
 /** Replaces the buyer TopNav when a manufacturer previews a public page from the Seller Hub. */
-export async function SellerPreviewBar() {
+export async function SellerPreviewBar({ ownerPreview = false }: { ownerPreview?: boolean } = {}) {
   const t = await getTranslations();
 
   return (
@@ -18,11 +18,11 @@ export async function SellerPreviewBar() {
 
         <p className="hidden md:flex min-w-0 items-center gap-1.5 rounded-full bg-slate-100/80 px-3 py-1 text-xs font-medium text-slate-600 border border-slate-200/60 shadow-2xs">
           <Eye className="h-3.5 w-3.5 shrink-0 text-slate-500" />
-          <span className="truncate">{t("seller.preview.buyerView")}</span>
+          <span className="truncate">{t(ownerPreview ? "seller.preview.ownerView" : "seller.preview.buyerView")}</span>
         </p>
 
         <Link
-          href="/factory"
+          href={ownerPreview ? "/factory?tab=products" : "/factory"}
           className="sf-btn-nav inline-flex h-9 sm:h-10 shrink-0 items-center gap-1.5 rounded-xl bg-brand-orange hover:bg-[#d85b17] px-3.5 sm:px-4 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_14px_0_rgba(242,107,33,0.35)] transition-all active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -936,7 +936,8 @@
       "enterPriceAndMoq": "Enter the price and MOQ.",
       "minPrice": "Min price",
       "maxPriceOptional": "Max price (optional)",
-      "priceRangeHint": "Leave max empty for a single price."
+      "priceRangeHint": "Leave max empty for a single price.",
+      "specificationsHelp": "Optional. Enter only specifications confirmed for this product. Examples are hints, not saved values."
     },
     "seek": {
       "status": {
@@ -1279,7 +1280,11 @@
     "lastWeeks": "Last {count} weeks",
     "preview": {
       "backToSellerHub": "Back to Manufacturer Hub",
-      "buyerView": "You're viewing your listing as buyers see it"
+      "buyerView": "You're viewing your listing as buyers see it",
+      "ownerView": "Private product preview",
+      "privateNotice": "Only you can see this preview. It does not publish the product. Buyer actions are disabled.",
+      "pausedNotice": "This product is paused and hidden from buyers.",
+      "unverifiedNotice": "Your factory must be verified before this product is visible to buyers."
     },
     "composer": {
       "startAPost": "Start a post",
