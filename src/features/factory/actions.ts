@@ -56,7 +56,7 @@ export async function createProductAction(input: NewFactoryProduct): Promise<Act
   if (!input.name?.trim()) return { ok: false, error: t("seller.errors.productNameIsRequired") };
   if (!input.categoryId) return { ok: false, error: t("seller.errors.chooseACategory") };
   if (!(input.priceInr > 0)) return { ok: false, error: t("seller.errors.priceMustBeGreaterThan") };
-  if (input.priceMaxInr !== undefined && !(input.priceMaxInr >= input.priceInr)) {
+  if (input.priceMaxInr != null && !(Number.isFinite(input.priceMaxInr) && input.priceMaxInr >= input.priceInr)) {
     return { ok: false, error: t("seller.errors.maxPriceBelowMin") };
   }
   if (!isUploadableUrl(input.imageUrl)) return { ok: false, error: t("seller.errors.productPhotoWasNotUploaded") };
@@ -69,7 +69,7 @@ export async function updateProductAction(id: string, input: FactoryProductUpdat
   if (input.priceInr !== undefined && !(input.priceInr > 0)) {
     return { ok: false, error: t("seller.errors.priceMustBeGreaterThan") };
   }
-  if (input.priceMaxInr !== undefined && !(input.priceInr !== undefined && input.priceMaxInr >= input.priceInr)) {
+  if (input.priceMaxInr != null && (!Number.isFinite(input.priceMaxInr) || input.priceMaxInr < 0 || (input.priceInr !== undefined && input.priceMaxInr < input.priceInr))) {
     return { ok: false, error: t("seller.errors.maxPriceBelowMin") };
   }
   if (input.imageUrls) {

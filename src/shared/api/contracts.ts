@@ -255,8 +255,8 @@ export type NewFactoryProduct = {
   imageUrl: string;
   description?: string;
   priceInr: number;
-  /** Optional range maximum (>= priceInr). On update, sent together with priceInr; omit for a single price. */
-  priceMaxInr?: number;
+  /** Optional range maximum (>= priceInr). On update, omission preserves the saved maximum; null explicitly clears it. */
+  priceMaxInr?: number | null;
   unit?: string;
   moq?: string;
   categoryId: string;
