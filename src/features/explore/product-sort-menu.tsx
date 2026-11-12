@@ -40,6 +40,7 @@ export function ProductSortMenu({ current }: { current: ProductSort }) {
     setOpen(false);
     if (sort === current) return;
     const params = new URLSearchParams(searchParams.toString());
+    params.delete("page");
     if (sort === "relevance") params.delete("sort");
     else params.set("sort", sort);
     const qs = params.toString();

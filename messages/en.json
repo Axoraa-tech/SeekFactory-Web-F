@@ -400,6 +400,12 @@
         "newest": "Newest first",
         "moq": "Lowest MOQ"
       }
+    },
+    "pagination": {
+      "label": "Product pages",
+      "progress": "Showing {start}–{end} of {total} matching products",
+      "previous": "Previous",
+      "next": "Next"
     }
   },
   "profile": {
