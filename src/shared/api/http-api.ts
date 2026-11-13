@@ -187,6 +187,8 @@ interface BackendProduct {
   categoryId?: string;
   specs?: Record<string, string>;
   imageUrls?: string[];
+  /** One optional product video, independent of linked Seeks. Empty string clears on update. */
+  videoUrl?: string;
   datasheetUrl?: string;
   datasheetName?: string;
   stockStatus?: StockStatus;
@@ -1458,6 +1460,7 @@ export function createHttpApi(
           ...data,
           imageUrl: toStoredMediaUrl(data.imageUrl),
           imageUrls: data.imageUrls?.map((url) => toStoredMediaUrl(url)),
+          videoUrl: toStoredMediaUrl(data.videoUrl),
           datasheetUrl: toStoredMediaUrl(data.datasheetUrl),
         }),
       });
@@ -1470,6 +1473,7 @@ export function createHttpApi(
         body: JSON.stringify({
           ...data,
           imageUrls: data.imageUrls?.map((url) => toStoredMediaUrl(url)),
+          videoUrl: toStoredMediaUrl(data.videoUrl),
           datasheetUrl: toStoredMediaUrl(data.datasheetUrl),
         }),
       });
@@ -1971,6 +1975,7 @@ function normalizeProduct(p: BackendProduct): Product {
     imageUrls: p.imageUrls?.length
       ? p.imageUrls.map((url) => resolveMediaUrl(url) || url)
       : undefined,
+    videoUrl: resolveMediaUrl(p.videoUrl),
     datasheetUrl: resolveMediaUrl(p.datasheetUrl),
     datasheetName: p.datasheetName,
     listed: p.listed ?? true,

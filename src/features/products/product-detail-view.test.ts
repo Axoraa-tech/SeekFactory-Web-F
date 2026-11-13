@@ -1,6 +1,7 @@
 import { isValidElement, type ReactNode } from "react";
 import { expect, it, vi } from "vitest";
 import { ProductDetailView } from "./product-detail-view";
+import { ProductGallery } from "@/components/ui/product-gallery";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { TrackProductView } from "@/features/analytics/track-product-view";
 import type { ProductDetail } from "@/shared/api/contracts";
@@ -38,4 +39,15 @@ it("retains public buyer actions, analytics and order intent by default", async 
   expect(tree.some((node) => node.type === TrackProductView)).toBe(true);
   expect(tree.find((node) => node.type === ProductActionBar)?.props.autoOpenOrder).toBe(true);
   expect(tree.some((node) => node.props.href === "/rfq/new?product=lathe")).toBe(true);
+});
+
+
+it.each([false, true])("shows the dedicated video before linked Seeks in preview=%s", async (preview) => {
+  const videoDetail = { ...detail, product: { ...detail.product, videoUrl: "/product.mp4" } };
+  const seekVideos = [{ id: "seek", videoUrl: "/seek.mp4", title: "Tour" }];
+  const tree = elements(await ProductDetailView({ detail: videoDetail, categories: [], seekVideos, preview }));
+  expect(tree.find((node) => node.type === ProductGallery)?.props.videos).toEqual([
+    { id: "product-p1", videoUrl: "/product.mp4", title: "Lathe", posterUrl: "/image.png" },
+    ...seekVideos,
+  ]);
 });

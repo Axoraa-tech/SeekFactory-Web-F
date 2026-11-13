@@ -943,7 +943,16 @@
       "minPrice": "Min price",
       "maxPriceOptional": "Max price (optional)",
       "priceRangeHint": "Leave max empty for a single price.",
-      "specificationsHelp": "Optional. Enter only specifications confirmed for this product. Examples are hints, not saved values."
+      "specificationsHelp": "Optional. Enter only specifications confirmed for this product. Examples are hints, not saved values.",
+      "productVideoOptional": "Product video (optional)",
+      "productVideoPreview": "Product video preview",
+      "addVideo": "Add video",
+      "replaceVideo": "Replace video",
+      "removeVideo": "Remove video",
+      "productVideoHint": "One MP4, WebM or MOV video, up to 100 MB. Uploads when you save.",
+      "videoTypeError": "Choose an MP4, WebM or MOV video.",
+      "videoSizeError": "Video is larger than 100 MB. Choose a smaller file.",
+      "videoNotUploaded": "Product video was not uploaded. Please try again."
     },
     "seek": {
       "status": {

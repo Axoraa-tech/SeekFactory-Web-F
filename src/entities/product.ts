@@ -24,6 +24,8 @@ export type Product = {
   /** Gallery in display order; the first image is `imageUrl`. */
   imageUrls?: string[];
   /** Optional PDF datasheet. */
+  /** One optional product video, independent of linked Seeks. Empty string clears on update. */
+  videoUrl?: string;
   datasheetUrl?: string;
   datasheetName?: string;
   /** false = paused by the seller (only seller views ever receive paused items). */

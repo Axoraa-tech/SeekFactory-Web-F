@@ -60,6 +60,9 @@ export async function createProductAction(input: NewFactoryProduct): Promise<Act
     return { ok: false, error: t("seller.errors.maxPriceBelowMin") };
   }
   if (!isUploadableUrl(input.imageUrl)) return { ok: false, error: t("seller.errors.productPhotoWasNotUploaded") };
+  if (input.videoUrl && !isUploadableUrl(input.videoUrl)) {
+    return { ok: false, error: t("seller.product.videoNotUploaded") };
+  }
   return run(() => getApi().factory.addProduct({ ...input, name: input.name.trim() }));
 }
 
@@ -76,6 +79,9 @@ export async function updateProductAction(id: string, input: FactoryProductUpdat
     if (input.imageUrls.length === 0) return { ok: false, error: t("seller.errors.addAtLeastOneProduct") };
     if (input.imageUrls.length > 8) return { ok: false, error: t("seller.errors.aProductCanHaveAt") };
     if (!input.imageUrls.every(isUploadableUrl)) return { ok: false, error: t("seller.errors.aProductPhotoWasNot") };
+  }
+  if (input.videoUrl && !isUploadableUrl(input.videoUrl)) {
+    return { ok: false, error: t("seller.product.videoNotUploaded") };
   }
   if (input.datasheetUrl && !isUploadableUrl(input.datasheetUrl)) {
     return { ok: false, error: t("seller.errors.datasheetWasNotUploaded") };

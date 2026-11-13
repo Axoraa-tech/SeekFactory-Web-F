@@ -103,6 +103,134 @@ describe("manufacturer-authored product specifications", () => {
   });
 });
 
+describe("optional product video", () => {
+  function selectVideo(container: HTMLElement, file = new File(["video"], "demo.mp4", { type: "video/mp4" })) {
+    fireEvent.change(container.querySelector('#product-video')!, { target: { files: [file] } });
+    return file;
+  }
+
+  it("creates a photo-only product without a video", async () => {
+    const { container, onSubmit } = setup();
+    fillRequiredCreateFields(container);
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(onSubmit.mock.calls[0][0].videoUrl).toBeUndefined();
+  });
+
+  it("uploads exactly one video and previews it; releases the preview on unmount", async () => {
+    const { container, onSubmit, unmount } = setup(existing);
+    const file = selectVideo(container);
+    expect(container.querySelector("video")?.getAttribute("src")).toBe("blob:preview");
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(uploadMedia).toHaveBeenCalledWith(file, "video");
+    expect(onSubmit.mock.calls[0][0].videoUrl).toBe("/uploaded.png");
+    unmount();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:preview");
+  });
+
+  it.each([
+    { initialVideo: undefined, latestVideo: "/added-elsewhere.mp4" },
+    { initialVideo: "/old.mp4", latestVideo: "/replaced-elsewhere.mp4" },
+    { initialVideo: "/old.mp4", latestVideo: undefined },
+  ])("does not overwrite another session's video on an unrelated stale edit: $initialVideo -> $latestVideo", async ({ initialVideo, latestVideo }) => {
+    const { container, onSubmit } = setup({ ...existing, videoUrl: initialVideo });
+    // Another session changes the stored video after this edit form has opened.
+    let storedVideo = latestVideo;
+    onSubmit.mockImplementation(async (input) => {
+      // Match the backend update contract: omitted = preserve, blank = clear.
+      if (input.videoUrl !== undefined) storedVideo = input.videoUrl || undefined;
+    });
+    fireEvent.change(container.querySelector("textarea")!, { target: { value: "Updated description" } });
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(onSubmit.mock.calls[0][0].description).toBe("Updated description");
+    expect(JSON.parse(JSON.stringify(onSubmit.mock.calls[0][0]))).not.toHaveProperty("videoUrl");
+    expect(storedVideo).toBe(latestVideo);
+    expect(uploadMedia).not.toHaveBeenCalled();
+  });
+
+  it("does not mark video changed when the picker is cancelled or rejects a file", async () => {
+    const { container, onSubmit } = setup({ ...existing, videoUrl: "/existing.mp4" });
+    fireEvent.change(container.querySelector<HTMLInputElement>("#product-video")!, { target: { files: [] } });
+    selectVideo(container, new File(["x"], "bad.pdf", { type: "application/pdf" }));
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(onSubmit.mock.calls[0][0].videoUrl).toBeUndefined();
+    expect(uploadMedia).not.toHaveBeenCalled();
+  });
+
+  it("preserves the existing video without upload, and explicitly clears when removed", async () => {
+    const first = setup({ ...existing, videoUrl: "/existing.mp4" });
+    fireEvent.submit(first.container.querySelector("form")!);
+    await waitFor(() => expect(first.onSubmit).toHaveBeenCalledOnce());
+    expect(first.onSubmit.mock.calls[0][0].videoUrl).toBeUndefined();
+    expect(uploadMedia).not.toHaveBeenCalled();
+    first.unmount();
+    const second = setup({ ...existing, videoUrl: "/existing.mp4" });
+    fireEvent.click(screen.getByText("seller.product.removeVideo"));
+    expect(second.container.querySelector("video")).toBeNull();
+    fireEvent.submit(second.container.querySelector("form")!);
+    await waitFor(() => expect(second.onSubmit).toHaveBeenCalledOnce());
+    expect(second.onSubmit.mock.calls[0][0].videoUrl).toBe("");
+  });
+
+  it("rejects invalid type and oversized video without losing the existing selection", () => {
+    const { container } = setup({ ...existing, videoUrl: "/existing.mp4" });
+    selectVideo(container, new File(["x"], "bad.pdf", { type: "application/pdf" }));
+    expect(screen.getByRole("alert").textContent).toBe("seller.product.videoTypeError");
+    const large = new File(["x"], "large.mp4", { type: "video/mp4" });
+    Object.defineProperty(large, "size", { value: 100 * 1024 * 1024 + 1 });
+    selectVideo(container, large);
+    expect(screen.getByRole("alert").textContent).toBe("seller.product.videoSizeError");
+    expect(container.querySelector("video")?.getAttribute("src")).toBe("/existing.mp4");
+    expect(uploadMedia).not.toHaveBeenCalled();
+  });
+
+  it("replaces the video, releases removed previews and accepts the 100 MB boundary", () => {
+    const { container } = setup();
+    selectVideo(container);
+    const second = new File(["x"], "replacement.mov", { type: "video/quicktime" });
+    Object.defineProperty(second, "size", { value: 100 * 1024 * 1024 });
+    selectVideo(container, second);
+    expect(container.querySelectorAll("video")).toHaveLength(1);
+    expect(URL.revokeObjectURL).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByText("seller.product.removeVideo"));
+    expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
+  });
+
+  it("locks the form, ignores repeated submit, and reuses an uploaded video after save fails", async () => {
+    const { container, onSubmit, onClose } = setup(existing);
+    selectVideo(container);
+    let rejectSave!: (error: Error) => void;
+    onSubmit.mockImplementationOnce(() => new Promise((_, reject) => { rejectSave = reject; }));
+    fireEvent.submit(container.querySelector("form")!);
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(container.querySelector("fieldset")?.disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText("common.close"));
+    expect(onClose).not.toHaveBeenCalled();
+    rejectSave(new Error("Save failed"));
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("Save failed"));
+    expect(container.querySelector("fieldset")?.disabled).toBe(false);
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(2));
+    expect(uploadMedia).toHaveBeenCalledOnce();
+  });
+
+  it("allows retry after a failed upload without saving a broken video", async () => {
+    const { container, onSubmit } = setup(existing);
+    selectVideo(container);
+    uploadMedia.mockRejectedValueOnce(new Error("Upload failed"));
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("Upload failed"));
+    expect(onSubmit).not.toHaveBeenCalled();
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
+    expect(uploadMedia).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("explicit price range updates", () => {
   it.each([["", null], ["100", null], ["300", 300]])("serializes edited max %s without losing explicit clearing", async (value, expected) => {
     const { container, onSubmit } = setup({ ...existing, priceMaxInr: 250 });

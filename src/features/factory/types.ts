@@ -61,6 +61,8 @@ export type SellerProduct = {
   stockStatus: StockStatus;
   /** Gallery in display order (first = imageUrl). */
   imageUrls: string[];
+  /** One optional product video, independent of linked Seeks. Empty string clears on update. */
+  videoUrl?: string;
   datasheetUrl?: string;
   datasheetName?: string;
   viewsCount: number;
