@@ -230,3 +230,19 @@ describe("optional product video", () => {
     expect(uploadMedia).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("explicit price range updates", () => {
+  it.each([["", null], ["100", null], ["300", 300]])("serializes edited max %s without losing explicit clearing", async (value, expected) => {
+    const { container, onSubmit } = setup({ ...existing, priceMaxInr: 250 });
+    fireEvent.change(screen.getByLabelText("seller.product.maxPriceOptional"), { target: { value } });
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(JSON.stringify(onSubmit.mock.calls[0][0])).priceMaxInr).toBe(expected);
+  });
+  it("retains an existing range during an unrelated save", async () => {
+    const { container, onSubmit } = setup({ ...existing, priceMaxInr: 250 });
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect(onSubmit.mock.calls[0][0].priceMaxInr).toBe(250);
+  });
+});

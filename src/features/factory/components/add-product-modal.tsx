@@ -251,8 +251,8 @@ export function AddProductModal({ isOpen, onClose, categories, product, onSubmit
         videoUrl: editing && !videoChanged ? undefined : videoUrl ?? (editing ? "" : undefined),
         categoryId,
         priceInr,
-        // Equal to the minimum = single price; the backend clears the max when it is omitted.
-        priceMaxInr: priceMaxInr !== undefined && priceMaxInr > priceInr ? priceMaxInr : undefined,
+        // Explicit null clears a range; omission is reserved for updates that preserve it.
+        priceMaxInr: priceMaxInr !== undefined && priceMaxInr > priceInr ? priceMaxInr : null,
         unit,
         moq,
         specs: specsRecord,

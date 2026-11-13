@@ -1,3 +1,5 @@
+import { loadCatalogSnapshot } from "@/features/feed/catalog-snapshot";
+import { selectProductPage, productPageHref } from "@/features/explore/product-results";
 import { Price } from "@/components/ui/price";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -7,7 +9,7 @@ import { VerifiedManufacturersSection } from "@/features/explore/verified-manufa
 import { RecordSearch } from "@/features/explore/record-search";
 import { selectManufacturers } from "@/features/explore/manufacturer-results";
 import { ProductSortMenu } from "@/features/explore/product-sort-menu";
-import { parseProductSort, sortProducts } from "@/features/explore/product-sort";
+import { parseProductSort } from "@/features/explore/product-sort";
 import { getApi } from "@/shared/api";
 import { buildCategoryTree } from "@/features/categories/category-tree";
 import { Package, ShieldCheck } from "lucide-react";
@@ -16,15 +18,16 @@ import { getTranslations } from "next-intl/server";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams: Promise<{ q?: string; category?: string; sub?: string; sort?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; sub?: string; sort?: string; page?: string }>;
 };
 
 export default async function ExplorePage({ searchParams }: Props) {
   const t = await getTranslations();
-  const { q = "", category = "", sub = "", sort: sortParam } = await searchParams;
+  const { q = "", category = "", sub = "", sort: sortParam, page } = await searchParams;
   const sort = parseProductSort(sortParam);
   const api = getApi();
-  const categories = await api.categories.list();
+  const snapshot = await loadCatalogSnapshot(api);
+  const { categories, manufacturers: allManufacturers } = snapshot;
   const { roots, childrenByRoot } = buildCategoryTree(categories);
 
   const selectedRoot = roots.find((item) => item.slug === category) ?? null;
@@ -32,20 +35,9 @@ export default async function ExplorePage({ searchParams }: Props) {
   const selectedSub = children.find((item) => item.slug === sub) ?? null;
   const selected = selectedSub ?? selectedRoot;
 
-  // Search is a capped preview. Load approved manufacturers from the complete public list;
-  // keep the existing product preview and its sorting independent of manufacturer paging.
-  const [allManufacturers, { products: foundProducts }] = await Promise.all([
-    api.manufacturers.listAll(),
-    api.search.query({
-      q: q.trim(),
-      category: selected?.id ?? "",
-      limit: 60,
-      // Explore lists products and factories only
-      types: ["products", "manufacturers"],
-    }),
-  ]);
   const visibleManufacturers = selectManufacturers(allManufacturers, categories, selected?.id ?? "", q);
-  const visibleProducts = sortProducts(foundProducts, sort, q);
+  const productPage = selectProductPage(snapshot, selected?.id ?? "", q, sort, page);
+  const pageHref = (page: number) => productPageHref({ q, category, sub, sort, page });
 
   return (
     <section className="space-y-6">
@@ -111,16 +103,16 @@ export default async function ExplorePage({ searchParams }: Props) {
               <Package className="h-4 w-4 text-brand-orange" />
               <span>{t("explore.featuredMachineryProducts")}</span>
               <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-bold text-brand-orange">
-                {visibleProducts.length}
+                {productPage.total}
               </span>
             </h2>
-            {visibleProducts.length > 1 && <ProductSortMenu current={sort} />}
+            {productPage.total > 1 && <ProductSortMenu current={sort} />}
           </div>
           <span className="text-xs text-neutral-500">{t("explore.directFactoryPricing")}</span>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleProducts.map((product, index) => (
+          {productPage.items.map((product, index) => (
             <Link prefetch={false} key={product.id} href={`/products/${product.slug}`} className="group">
               <Card className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white hover:border-brand-orange/40 hover:shadow-md transition-all flex flex-col h-full">
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
@@ -157,9 +149,18 @@ export default async function ExplorePage({ searchParams }: Props) {
             </Link>
           ))}
         </div>
+        {productPage.total > 0 && (
+          <nav aria-label={t("explore.pagination.label")} className="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <p className="text-ink-muted">{t("explore.pagination.progress", { start: productPage.start, end: productPage.end, total: productPage.total })}</p>
+            <div className="flex gap-3">
+              {productPage.page > 1 && <Link href={pageHref(productPage.page - 1)} className="font-semibold text-brand-orange">{t("explore.pagination.previous")}</Link>}
+              {productPage.page < productPage.pages && <Link href={pageHref(productPage.page + 1)} className="font-semibold text-brand-orange">{t("explore.pagination.next")}</Link>}
+            </div>
+          </nav>
+        )}
       </div>
 
-      {visibleManufacturers.length === 0 && visibleProducts.length === 0 ? (
+      {visibleManufacturers.length === 0 && productPage.total === 0 ? (
         <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center space-y-2">
           <p className="text-sm font-bold text-neutral-800">{t("explore.noMachineryMatchingThisCategory")}</p>
           <p className="text-xs text-neutral-500">{t("explore.tryBrowsingAllCategoriesOr")}</p>

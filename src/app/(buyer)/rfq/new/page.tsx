@@ -1,3 +1,4 @@
+import { inquiryReturnPath } from "@/features/auth/inquiry-return-path";
 import { requireUser } from "@/features/auth/require-user";
 import { RfqForm } from "@/features/rfq/rfq-form";
 import { getApi } from "@/shared/api";
@@ -17,7 +18,7 @@ type Props = {
 
 export default async function NewRfqPage({ searchParams }: Props) {
   const { product = "", category = "" } = await searchParams;
-  const user = await requireUser("/rfq/new");
+  const user = await requireUser(inquiryReturnPath("/rfq/new", { product, category }));
   const api = getApi();
   const [allCategories, detail] = await Promise.all([
     api.categories.list(),
