@@ -967,12 +967,12 @@ export function createHttpApi(
   // ── 5. CATEGORY REPOSITORY ─────────────────────────────────────
   const categories: CategoryRepository = {
     async list(): Promise<Category[]> {
-      const list = await fetchJson<BackendCategory[]>("/api/v1/categories", { next: { revalidate: 300 } });
+      const list = await fetchJson<BackendCategory[]>("/api/v1/categories", { cache: "no-store" });
       return list.map(normalizeCategory);
     },
 
     async listRoots(): Promise<Category[]> {
-      const list = await fetchJson<BackendCategory[]>("/api/v1/categories/roots");
+      const list = await fetchJson<BackendCategory[]>("/api/v1/categories/roots", { cache: "no-store" });
       return list.map(normalizeCategory);
     },
 

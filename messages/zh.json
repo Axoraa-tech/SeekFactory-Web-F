@@ -388,6 +388,8 @@
     "directFactoryPricing": "工厂直供价",
     "verifiedOem": "认证 OEM",
     "inquire": "咨询 →",
+    "noPublicProductsInCategory": "此分类目前没有公开展示的产品。",
+    "browseParentProducts": "浏览所有{category}产品",
     "noMachineryMatchingThisCategory": "没有符合该类目或搜索条件的机械。",
     "tryBrowsingAllCategoriesOr": "试试浏览全部类目，或换个关键词搜索。",
     "exploreAllCategories": "浏览全部类目",
