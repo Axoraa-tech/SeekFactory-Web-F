@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Product } from "@/entities/product";
 import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
 import { selectManufacturers } from "./manufacturer-results";
@@ -32,6 +33,20 @@ describe("complete Explore manufacturer results", () => {
     expect(selectManufacturers(all, categories, "leaf", "").map((m) => m.id)).toEqual(["leaf"]);
     expect(selectManufacturers(all, categories, "missing", "")).toEqual([]);
     expect(selectManufacturers(all, categories, "", "")).toHaveLength(4);
+  });
+  it("counts a verified manufacturer with public child products, without leaking siblings or pending sellers", () => {
+    const all = [factory("seller", { categoryIds: ["root"] }), factory("root-only", { categoryIds: ["root"] }),
+      factory("pending", { verified: false, categoryIds: ["root"] })];
+    const products = [
+      { id: "p1", manufacturerId: "seller", categoryId: "leaf", listed: true },
+      { id: "p2", manufacturerId: "seller", categoryId: "leaf", listed: true },
+      { id: "p3", manufacturerId: "root-only", categoryId: "leaf", listed: false },
+      { id: "p4", manufacturerId: "pending", categoryId: "leaf", listed: true },
+    ] as Product[];
+    expect(selectManufacturers(all, categories, "child", "", products).map(m => m.id)).toEqual(["seller"]);
+    expect(selectManufacturers(all, categories, "other", "", products)).toEqual([]);
+    expect(selectManufacturers(all, categories, "child", "no match", products)).toEqual([]);
+    expect(selectManufacturers(all, categories, "child", "")).toEqual([]);
   });
   it("orders by followers with a stable ID tie break", () => {
     expect(selectManufacturers([factory("b"), factory("c", { followerCount: 4 }), factory("a")], categories, "", "").map((m) => m.id)).toEqual(["c", "a", "b"]);
