@@ -4,7 +4,13 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { getApi } from "@/shared/api";
-import type { FactoryQuote, FactorySeekUpdate, NewFactoryProduct, NewFactorySeek } from "@/shared/api/contracts";
+import type {
+  FactoryQuote,
+  FactorySeekUpdate,
+  NewFactoryProduct,
+  NewFactorySeek,
+  ProductUsage,
+} from "@/shared/api/contracts";
 import type { BuyerProfile } from "@/entities/user";
 import type {
   SellerChatMessage,
@@ -30,6 +36,7 @@ import {
   updateSeekAction,
   updateOrderStatusAction,
   updateFactoryProfileAction,
+  requestProductLimitAction,
 } from "./actions";
 import {
   toManufacturerUpdate,
@@ -53,6 +60,7 @@ import { SeekComposerModal } from "./post-composer/seek-composer-modal";
 import { EditSeekModal } from "./components/edit-seek-modal";
 import { RfqQuoteModal } from "./components/rfq-quote-modal";
 import { FactoryPricingModal, type FactoryPlanTier } from "./components/factory-pricing-modal";
+import { ProductLimitModal } from "./components/product-limit-modal";
 import Link from "next/link";
 import type { FactoryVerification } from "@/shared/api/contracts";
 
@@ -89,6 +97,8 @@ type Props = {
   initialConversations?: SellerConversation[];
   allCategories?: Category[];
   verification?: FactoryVerification | null;
+  /** Product limit and latest upgrade request; null when it could not be loaded (the backend still enforces it). */
+  initialUsage?: ProductUsage | null;
 };
 
 // Stable defaults: fresh `[]` literals would retrigger the prop-sync effects every render.
@@ -126,6 +136,7 @@ export function FactoryDashboard({
   initialConversations = NO_CONVERSATIONS,
   allCategories = NO_CATEGORIES,
   verification,
+  initialUsage = null,
 }: Props) {
   const t = useTranslations();
   // The open tab lives in the URL (/factory?tab=orders) so a reload or a shared link reopens it,
@@ -164,15 +175,38 @@ export function FactoryDashboard({
     const open = params.get("new");
     if (open !== "seek" && open !== "product") return;
     if (open === "seek") setIsAddSeekOpen(true);
+    else if (initialUsage && initialProducts.length >= initialUsage.productLimit) setIsLimitModalOpen(true);
     else setIsAddProductOpen(true);
     params.delete("new");
     const query = params.toString();
     window.history.replaceState(null, "", query ? `/factory?${query}` : "/factory");
+    // Runs once on mount: the deep link is read from the first render's data only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [editingProduct, setEditingProduct] = useState<SellerProduct | null>(null);
   const [editingSeek, setEditingSeek] = useState<SellerSeek | null>(null);
   const [quotingRfq, setQuotingRfq] = useState<SellerRfq | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [usage, setUsage] = useState<ProductUsage | null>(initialUsage);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
+  useEffect(() => {
+    setUsage(initialUsage);
+  }, [initialUsage]);
+  // Live products (paused included) count towards the limit, as on the backend.
+  const productLimit = usage?.productLimit ?? null;
+  const canAddProduct = productLimit === null || products.length < productLimit;
+
+  /** Opens the product form, or the upgrade request when the plan's product limit is reached. */
+  function openAddProduct() {
+    if (canAddProduct) setIsAddProductOpen(true);
+    else setIsLimitModalOpen(true);
+  }
+
+  async function handleRequestLimit(requestedLimit: number, message: string) {
+    const result = await requestProductLimitAction(requestedLimit, message || undefined);
+    if (!result.ok) throw new Error(result.error);
+    setUsage((prev) => (prev ? { ...prev, latestRequest: result.data } : prev));
+  }
 
   // Server actions revalidate /factory, which re-renders with fresh props: adopt them.
   useEffect(() => {
@@ -645,7 +679,7 @@ export function FactoryDashboard({
           {/* Top Header with title, hamburger menu, & action buttons */}
           <SalesproTopbar
             activeTab={activeTab}
-            onOpenAddProduct={() => setIsAddProductOpen(true)}
+            onOpenAddProduct={openAddProduct}
             onOpenAddSeek={() => setIsAddSeekOpen(true)}
             profile={profile}
             onOpenMobileMenu={() => setIsMobileSidebarOpen(true)}
@@ -712,7 +746,9 @@ export function FactoryDashboard({
             <div className="pt-5">
               <ProductsTab
                 products={products}
-                onOpenAddProduct={() => setIsAddProductOpen(true)}
+                onOpenAddProduct={openAddProduct}
+                productLimit={productLimit}
+                onRequestUpgrade={() => setIsLimitModalOpen(true)}
                 onEditProduct={setEditingProduct}
                 onSetListed={handleSetProductListed}
                 onSetStock={handleSetProductStock}
@@ -815,7 +851,7 @@ export function FactoryDashboard({
             setComposerProductId(null);
           }}
           onPublish={handleAddSeek}
-          onCreateProduct={() => setIsAddProductOpen(true)}
+          onCreateProduct={openAddProduct}
           newlyCreatedProductId={composerProductId}
           suspended={isAddProductOpen}
         />
@@ -828,6 +864,16 @@ export function FactoryDashboard({
           isOpen
           onClose={() => setQuotingRfq(null)}
           onSubmitQuote={handleSubmitQuote}
+        />
+      )}
+
+      {isLimitModalOpen && (
+        <ProductLimitModal
+          productCount={products.length}
+          productLimit={productLimit ?? products.length}
+          latestRequest={usage?.latestRequest ?? null}
+          onClose={() => setIsLimitModalOpen(false)}
+          onSubmit={handleRequestLimit}
         />
       )}
 

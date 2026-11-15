@@ -9,6 +9,7 @@ import type {
   FactoryVerification,
   NewFactoryProduct,
   NewFactorySeek,
+  ProductLimitRequest,
   VerificationSubmission,
 } from "@/shared/api/contracts";
 import type { Manufacturer } from "@/entities/manufacturer";
@@ -46,6 +47,10 @@ async function run<T>(mutate: () => Promise<T>): Promise<ActionResult<T>> {
   }
 }
 
+/** Photos per new product; one optional video is separate. Mirrors the backend. */
+const MAX_PRODUCT_PHOTOS = 4;
+const LEGACY_MAX_PRODUCT_PHOTOS = 8;
+
 function isUploadableUrl(url: string) {
   // blob:/data: URLs are browser-local and would break for every other viewer.
   return url.startsWith("/") || /^https?:\/\//i.test(url);
@@ -60,6 +65,9 @@ export async function createProductAction(input: NewFactoryProduct): Promise<Act
     return { ok: false, error: t("seller.errors.maxPriceBelowMin") };
   }
   if (!isUploadableUrl(input.imageUrl)) return { ok: false, error: t("seller.errors.productPhotoWasNotUploaded") };
+  if (input.imageUrls && input.imageUrls.length > MAX_PRODUCT_PHOTOS) {
+    return { ok: false, error: t("seller.errors.aProductCanHaveAt") };
+  }
   if (input.videoUrl && !isUploadableUrl(input.videoUrl)) {
     return { ok: false, error: t("seller.product.videoNotUploaded") };
   }
@@ -77,7 +85,8 @@ export async function updateProductAction(id: string, input: FactoryProductUpdat
   }
   if (input.imageUrls) {
     if (input.imageUrls.length === 0) return { ok: false, error: t("seller.errors.addAtLeastOneProduct") };
-    if (input.imageUrls.length > 8) return { ok: false, error: t("seller.errors.aProductCanHaveAt") };
+    // Products saved under the old 8-photo cap may keep them; the backend stops any growth past 4.
+    if (input.imageUrls.length > LEGACY_MAX_PRODUCT_PHOTOS) return { ok: false, error: t("seller.errors.aProductCanHaveAt") };
     if (!input.imageUrls.every(isUploadableUrl)) return { ok: false, error: t("seller.errors.aProductPhotoWasNot") };
   }
   if (input.videoUrl && !isUploadableUrl(input.videoUrl)) {
@@ -169,7 +178,23 @@ export async function updateFactoryProfileAction(
   if (data.certificates?.some((cert) => !isUploadableUrl(cert.imageUrl))) {
     return { ok: false, error: t("seller.errors.aCertificateImageWasNot") };
   }
+  if (data.profileVideoUrl && !isUploadableUrl(data.profileVideoUrl)) {
+    return { ok: false, error: t("seller.product.videoNotUploaded") };
+  }
   return run(() => getApi().factory.updateProfile(data));
+}
+
+/** Ask the admin for a higher product limit. No payment: the admin follows up manually. */
+export async function requestProductLimitAction(
+  requestedLimit: number,
+  message?: string,
+): Promise<ActionResult<ProductLimitRequest>> {
+  const t = await getTranslations();
+  if (!Number.isInteger(requestedLimit) || requestedLimit < 1 || requestedLimit > 1000) {
+    return { ok: false, error: t("seller.plan.chooseValidLimit") };
+  }
+  if (message && message.length > 1000) return { ok: false, error: t("seller.plan.messageTooLong") };
+  return run(() => getApi().factory.requestProductLimit(requestedLimit, message));
 }
 
 export async function submitVerificationAction(

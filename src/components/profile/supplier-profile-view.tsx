@@ -587,6 +587,20 @@ export function SupplierProfileView({
                 </div>
               </Card>
 
+              {manufacturer.profileVideoUrl && (
+                <Card className="p-5 border-slate-200/90 shadow-2xs space-y-3" data-testid="factory-profile-video">
+                  <h4 className="text-sm font-bold text-slate-900">{t("supplier.factoryVideo")}</h4>
+                  <video
+                    src={manufacturer.profileVideoUrl}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    aria-label={t("supplier.factoryVideo")}
+                    className="max-h-[420px] w-full rounded-lg bg-black"
+                  />
+                </Card>
+              )}
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <Card className="p-5 border-slate-200/90 shadow-2xs space-y-2.5">
                   <h4 className="text-sm font-bold text-slate-900">{t("supplier.plantCapability")}</h4>

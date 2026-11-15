@@ -15,6 +15,8 @@ import type {
   SessionRepository,
   FactoryQuote,
   FactoryRepository,
+  ProductLimitRequest,
+  ProductUsage,
   MediaKind,
   MessageItem,
   NewFactoryProduct,
@@ -234,6 +236,8 @@ interface BackendManufacturer {
   production_lines?: number;
   productionLines?: number;
   certificates?: FactoryCertificate[];
+  profileVideoUrl?: string | null;
+  profile_video_url?: string | null;
   products?: BackendProduct[];
   reels?: BackendReel[];
 }
@@ -1410,6 +1414,9 @@ export function createHttpApi(
         chairmanName: data.chairmanName,
         certifications: data.certifications,
         certificates: data.certificates?.map((cert) => ({ ...cert, imageUrl: toStoredMediaUrl(cert.imageUrl) })),
+        // Omitted keeps the video, "" removes it.
+        profileVideoUrl:
+          data.profileVideoUrl === undefined ? undefined : toStoredMediaUrl(data.profileVideoUrl) || "",
       };
       const res = await fetchJson<BackendManufacturer>("/api/v1/factory/profile", {
         method: "PUT",
@@ -1426,6 +1433,17 @@ export function createHttpApi(
       } catch {
         return null;
       }
+    },
+
+    async getProductUsage(): Promise<ProductUsage> {
+      return fetchJson<ProductUsage>("/api/v1/factory/plan/usage", { cache: "no-store" });
+    },
+
+    async requestProductLimit(requestedLimit: number, message?: string): Promise<ProductLimitRequest> {
+      return fetchJson<ProductLimitRequest>("/api/v1/factory/plan/limit-requests", {
+        method: "POST",
+        body: JSON.stringify({ requestedLimit, message: message?.trim() || undefined }),
+      });
     },
 
     async uploadMedia(file: File, kind: MediaKind, onProgress?: (percent: number) => void): Promise<UploadedMedia> {
@@ -1917,6 +1935,7 @@ function normalizeManufacturer(m: BackendManufacturer): Manufacturer {
       documentName: cert.documentName ?? undefined,
     })),
     certifications: m.certifications ?? [],
+    profileVideoUrl: resolveMediaUrl(m.profileVideoUrl || m.profile_video_url || undefined) || undefined,
   };
 }
 

@@ -17,7 +17,7 @@ export default async function FactoryHomePage({ searchParams }: Props) {
   const user = await requireSupplier(tab ? `/factory?tab=${encodeURIComponent(tab)}` : "/factory");
   const api = getApi();
 
-  const [profile, stats, products, seeks, rfqs, categories, convosRaw, orders, verification] = await Promise.all([
+  const [profile, stats, products, seeks, rfqs, categories, convosRaw, orders, verification, usage] = await Promise.all([
     api.factory.getProfile().catch(() => null),
     api.factory.getStats().catch(() => null),
     api.factory.getProducts().catch(() => []),
@@ -27,6 +27,7 @@ export default async function FactoryHomePage({ searchParams }: Props) {
     api.messages.listRecent().catch(() => []),
     api.factory.getOrders().catch(() => []),
     api.factory.getVerification().catch(() => null),
+    api.factory.getProductUsage().catch(() => null),
   ]);
 
   // Map Backend Conversations to SellerConversations for the Dashboard
@@ -56,6 +57,7 @@ export default async function FactoryHomePage({ searchParams }: Props) {
       initialConversations={initialConversations}
       allCategories={categories}
       verification={verification}
+      initialUsage={usage}
     />
   );
 }

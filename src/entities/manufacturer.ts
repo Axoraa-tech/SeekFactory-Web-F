@@ -22,4 +22,6 @@ export type Manufacturer = {
   certificates?: import("./factory-certificate").FactoryCertificate[];
   /** Certification names (e.g. "ISO 9001") declared for verification. */
   certifications?: string[];
+  /** One optional factory tour / chairman video shown on the profile. */
+  profileVideoUrl?: string;
 };
