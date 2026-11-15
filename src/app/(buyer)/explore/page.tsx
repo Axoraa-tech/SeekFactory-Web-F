@@ -160,15 +160,15 @@ export default async function ExplorePage({ searchParams }: Props) {
         )}
       </div>
 
-      {visibleManufacturers.length === 0 && productPage.total === 0 ? (
+      {productPage.total === 0 ? (
         <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center space-y-2">
-          <p className="text-sm font-bold text-neutral-800">{t("explore.noMachineryMatchingThisCategory")}</p>
+          <p className="text-sm font-bold text-neutral-800">{t(q.trim() ? "explore.noMachineryMatchingThisCategory" : "explore.noPublicProductsInCategory")}</p>
           <p className="text-xs text-neutral-500">{t("explore.tryBrowsingAllCategoriesOr")}</p>
           <Link
-            href="/explore"
+            href={selectedSub && selectedRoot ? `/explore?category=${encodeURIComponent(selectedRoot.slug)}` : "/explore"}
             className="sf-btn-nav inline-flex h-8 items-center rounded-full bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#d85b17] transition-colors mt-2"
           >
-            {t("explore.exploreAllCategories")}
+            {selectedSub && selectedRoot ? t("explore.browseParentProducts", { category: selectedRoot.name }) : t("explore.exploreAllCategories")}
           </Link>
         </div>
       ) : null}
