@@ -388,6 +388,8 @@
     "directFactoryPricing": "Direct Factory Pricing",
     "verifiedOem": "Verified OEM",
     "inquire": "Inquire →",
+    "noPublicProductsInCategory": "No public products are currently listed in this category.",
+    "browseParentProducts": "Browse all {category} products",
     "noMachineryMatchingThisCategory": "No machinery matching this category or query.",
     "tryBrowsingAllCategoriesOr": "Try browsing all categories or searching another term.",
     "exploreAllCategories": "Explore All Categories",
