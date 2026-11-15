@@ -1,4 +1,4 @@
-import { loadCatalogSnapshot } from "@/features/feed/catalog-snapshot";
+import { loadExploreSnapshot } from "@/features/explore/load-explore-snapshot";
 import { selectProductPage, productPageHref } from "@/features/explore/product-results";
 import { Price } from "@/components/ui/price";
 import Link from "next/link";
@@ -26,7 +26,7 @@ export default async function ExplorePage({ searchParams }: Props) {
   const { q = "", category = "", sub = "", sort: sortParam, page } = await searchParams;
   const sort = parseProductSort(sortParam);
   const api = getApi();
-  const snapshot = await loadCatalogSnapshot(api);
+  const snapshot = await loadExploreSnapshot(api, category, sub);
   const { categories, manufacturers: allManufacturers } = snapshot;
   const { roots, childrenByRoot } = buildCategoryTree(categories);
 
