@@ -862,7 +862,7 @@
   },
   "notFound": {
     "pageNotFound": "页面不存在",
-    "thisFactoryOrProductIs": "未找到该工厂或产品。",
+    "thisFactoryOrProductIs": "此页面暂不可用。它可能已移动、被移除或尚未公开。",
     "backToSeeks": "返回希克"
   },
   "seller": {
