@@ -15,7 +15,7 @@ export default async function SeekDetailPage({ params }: Props) {
   const { id } = await params;
   await requireSupplier(`/factory/seeks/${encodeURIComponent(id)}`);
   const api = getApi();
-  const seeks = await api.factory.getSeeks().catch(() => []);
+  const seeks = await api.factory.getSeeks();
   const seek = seeks.find((item) => item.id === id);
 
   if (!seek) notFound();
