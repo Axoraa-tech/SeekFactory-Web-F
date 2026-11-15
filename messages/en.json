@@ -862,7 +862,7 @@
   },
   "notFound": {
     "pageNotFound": "Page not found",
-    "thisFactoryOrProductIs": "This factory or product is not in the mock catalog.",
+    "thisFactoryOrProductIs": "This page is unavailable. It may have moved, been removed, or not be public yet.",
     "backToSeeks": "Back to Seeks"
   },
   "seller": {
