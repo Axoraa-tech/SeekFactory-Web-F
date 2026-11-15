@@ -23,9 +23,11 @@ export function SalesproTopbar({
   const t = useTranslations();
   const [shareState, setShareState] = useState<"idle" | "copied" | "failed">("idle");
 
+  const canShareProfile = profile.verified === true && Boolean(profile.slug.trim());
+
   /** Shares the public factory page (never the private /factory dashboard URL). */
   async function handleShare() {
-    if (!profile.slug) return;
+    if (!canShareProfile) return;
     const url = `${window.location.origin}/manufacturers/${profile.slug}`;
     try {
       if (navigator.share) {
@@ -99,22 +101,28 @@ export function SalesproTopbar({
           <LanguageCurrencyDropdown align="right" />
         </div>
 
-        <Link prefetch={false}
+        {canShareProfile ? <Link prefetch={false}
           href={`/manufacturers/${profile.slug}`}
           className="sf-btn-nav flex items-center gap-1.5 rounded-lg border border-[#E6E8EB] bg-white px-3.5 py-2 text-xs font-semibold text-[#1C1C1C] hover:bg-[#F3F4F6] hover:text-[#1A73E8] transition shadow-2xs"
         >
           <Eye className="h-3.5 w-3.5 text-[#5F6368]" />
           <span>{t("seller.top.publicProfile")}</span>
-        </Link>
+        </Link> : (
+          <button type="button" disabled title={t("seller.top.publicProfileUnavailable")}
+            className="flex items-center gap-1.5 rounded-lg border border-[#E6E8EB] bg-white px-3.5 py-2 text-xs font-semibold text-[#5F6368] opacity-50">
+            <Eye className="h-3.5 w-3.5" />
+            <span>{t("seller.top.publicProfile")}</span>
+          </button>
+        )}
 
         <button
           type="button"
           onClick={() => void handleShare()}
-          disabled={!profile.slug}
+          disabled={!canShareProfile}
           title={
-            profile.verified
+            canShareProfile
               ? t("seller.top.shareYourPublicFactoryProfile")
-              : t("seller.top.sharesYourPublicProfileLink")
+              : t("seller.top.publicProfileUnavailable")
           }
           className="sf-btn-soft flex items-center gap-1.5 rounded-lg border border-[#E6E8EB] bg-white px-3 py-2 text-xs font-semibold text-[#5F6368] hover:bg-[#F3F4F6] hover:text-[#1C1C1C] transition shadow-2xs disabled:opacity-50"
         >
@@ -127,6 +135,12 @@ export function SalesproTopbar({
             {shareState === "copied" ? t("seller.top.linkCopied") : shareState === "failed" ? t("seller.top.copyFailed") : t("common.share")}
           </span>
         </button>
+
+        {!canShareProfile && (
+          <p role="status" className="col-span-2 text-xs text-amber-800 sm:basis-full">
+            {t("seller.top.publicProfileUnavailable")}
+          </p>
+        )}
 
         {/* Primary Action Button (Brand Blue #1A73E8) */}
         <button

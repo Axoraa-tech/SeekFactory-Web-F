@@ -20,20 +20,42 @@ export function FeedListShowcase({ items, settings }: Props) {
   const [visible, setVisible] = useState<string | null>(null);
   const cardsRef = useRef<Map<string, HTMLElement>>(new Map());
 
-  // Only the seek most in view plays, so several videos never compete for bandwidth
+  // IntersectionObserver sends only changed entries, not a full viewport snapshot.
+  // Keep all visible ratios so an unchanged, more-visible video remains selected.
   useEffect(() => {
-    if (!settings.autoplay) return;
+    setVisible(null);
+    if (!settings.autoplay || typeof IntersectionObserver === "undefined") return;
+    const ratios = new Map<string, number>();
+    const videoIds = new Set(items.filter((item) => item.reel.videoUrl).map((item) => item.reel.id));
+    const selectVisible = () => {
+      let best: string | null = null;
+      let ratio = 0;
+      if (!document.hidden) {
+        for (const [id, value] of ratios) {
+          if (value >= 0.5 && value > ratio) { best = id; ratio = value; }
+        }
+      }
+      setVisible(best);
+    };
     const observer = new IntersectionObserver(
       (entries) => {
-        const best = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (best) setVisible((best.target as HTMLElement).dataset.reelId ?? null);
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset.reelId;
+          if (!id || !videoIds.has(id)) continue;
+          if (entry.isIntersecting) ratios.set(id, entry.intersectionRatio);
+          else ratios.delete(id);
+        }
+        // No card visible means no autoplay, rather than keeping the last video running.
+        selectVisible();
       },
-      { threshold: [0.5, 0.75] },
+      { threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
-    cardsRef.current.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    cardsRef.current.forEach((el, id) => { if (videoIds.has(id)) observer.observe(el); });
+    document.addEventListener("visibilitychange", selectVisible);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", selectVisible);
+    };
   }, [items, settings.autoplay]);
 
   if (items.length === 0) return <EmptyShowcase />;

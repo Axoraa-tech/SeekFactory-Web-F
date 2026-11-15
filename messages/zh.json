@@ -862,7 +862,7 @@
   },
   "notFound": {
     "pageNotFound": "页面不存在",
-    "thisFactoryOrProductIs": "未找到该工厂或产品。",
+    "thisFactoryOrProductIs": "此页面暂不可用。它可能已移动、被移除或尚未公开。",
     "backToSeeks": "返回希克"
   },
   "seller": {
@@ -1063,6 +1063,7 @@
       "indiaChinaIndustrialMachineryDiscovery": "中印工业机械发现与询价",
       "openOfficialCompanyWebsiteIn": "在新标签页打开公司官网",
       "sellerWebsite": "卖家官网",
+      "publicProfileUnavailable": "工厂审核通过且主页链接就绪后，即可查看和分享公开主页。",
       "publicProfile": "公开主页",
       "shareYourPublicFactoryProfile": "分享你的工厂公开主页",
       "sharesYourPublicProfileLink": "分享公开主页链接。工厂通过认证后，采购商即可打开。",

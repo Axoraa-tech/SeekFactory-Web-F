@@ -862,7 +862,7 @@
   },
   "notFound": {
     "pageNotFound": "Page not found",
-    "thisFactoryOrProductIs": "This factory or product is not in the mock catalog.",
+    "thisFactoryOrProductIs": "This page is unavailable. It may have moved, been removed, or not be public yet.",
     "backToSeeks": "Back to Seeks"
   },
   "seller": {
@@ -1063,6 +1063,7 @@
       "indiaChinaIndustrialMachineryDiscovery": "India–China Industrial Machinery Discovery & Inquiries",
       "openOfficialCompanyWebsiteIn": "Open official company website in new tab",
       "sellerWebsite": "Seller Website",
+      "publicProfileUnavailable": "Public profile and sharing are available after factory approval and a profile link is ready.",
       "publicProfile": "Public Profile",
       "shareYourPublicFactoryProfile": "Share your public factory profile",
       "sharesYourPublicProfileLink": "Shares your public profile link. It opens for buyers once your factory is verified.",
