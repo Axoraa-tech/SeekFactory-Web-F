@@ -35,7 +35,7 @@ export default async function ExplorePage({ searchParams }: Props) {
   const selectedSub = children.find((item) => item.slug === sub) ?? null;
   const selected = selectedSub ?? selectedRoot;
 
-  const visibleManufacturers = selectManufacturers(allManufacturers, categories, selected?.id ?? "", q);
+  const visibleManufacturers = selectManufacturers(allManufacturers, categories, selected?.id ?? "", q, snapshot.products);
   const productPage = selectProductPage(snapshot, selected?.id ?? "", q, sort, page);
   const pageHref = (page: number) => productPageHref({ q, category, sub, sort, page });
 
