@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
-import { createElement } from 'react';
+import { createElement, type AnchorHTMLAttributes } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import NotFound from './not-found';
 import FactoryNotFound from './factory/not-found';
 import ErrorPage from './error';
 vi.mock('next-intl', () => ({useTranslations: () => (key: string) => key}));
-vi.mock('next/link', () => ({default: ({children, ...props}: any) => createElement('a', props, children)}));
+vi.mock('next/link', () => ({default: ({children, ...props}: AnchorHTMLAttributes<HTMLAnchorElement>) => createElement('a', props, children)}));
 afterEach(cleanup);
 it('missing public resource offers safe recovery', () => {
  render(createElement(NotFound));
