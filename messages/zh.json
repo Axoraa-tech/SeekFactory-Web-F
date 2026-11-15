@@ -726,7 +726,8 @@
     "businessDetailsVerified": "企业信息已核验",
     "notVerified": "未认证",
     "lockedName": "认证供应商",
-    "thisSupplier": "该供应商"
+    "thisSupplier": "该供应商",
+    "factoryVideo": "工厂视频"
   },
   "legal": {
     "accessibility": {
@@ -881,7 +882,7 @@
       "priceMustBeGreaterThan": "价格必须大于 0。",
       "productPhotoWasNotUploaded": "产品图片未上传。",
       "addAtLeastOneProduct": "请至少添加一张产品图片。",
-      "aProductCanHaveAt": "每个产品最多 8 张图片。",
+      "aProductCanHaveAt": "每个产品最多 4 张图片。",
       "aProductPhotoWasNot": "有产品图片未上传。",
       "datasheetWasNotUploaded": "规格书未上传。",
       "videoTitleIsRequired": "请填写视频标题。",
@@ -1210,7 +1211,14 @@
       "removeExportMarket": "移除 {country}",
       "noExportMarketsAdded": "尚未添加出口市场。",
       "factoryProfileChangesSuccessfullySaved": "工厂资料已保存！",
-      "changesReflectImmediatelyOnYour": "修改会立即同步到你的公开制造商主页。"
+      "changesReflectImmediatelyOnYour": "修改会立即同步到你的公开制造商主页。",
+      "profileVideo": "工厂 / 董事长视频",
+      "profileVideoHint": "一个视频（MP4、WebM 或 MOV，最大 100 MB），买家可在工厂主页观看。",
+      "addProfileVideo": "添加视频",
+      "replaceProfileVideo": "更换视频",
+      "removeProfileVideo": "删除视频",
+      "profileVideoUploading": "视频上传中…",
+      "profileVideoInvalid": "请选择不超过 100 MB 的 MP4、WebM 或 MOV 视频。"
     },
     "rfqs": {
       "rfqsBuyerPurchaseInquiries": "询价与采购需求",
@@ -1310,6 +1318,31 @@
       "photo": "产品图片",
       "postVideo": "发布视频",
       "postProduct": "发布产品"
+    },
+    "plan": {
+      "productsUsed": "已使用 {count}/{limit} 个产品名额",
+      "limitReachedTitle": "已达到产品数量上限",
+      "limitReachedBody": "您的套餐允许 {limit} 个产品，当前已有 {count} 个。现有产品将继续展示。如需添加更多，请向管理员申请提高上限。",
+      "upgradeCta": "升级套餐 / 联系管理员",
+      "modalTitle": "升级套餐 / 联系管理员",
+      "modalIntro": "向 SeekFactory 管理员申请更多产品名额。管理员将人工审核并与您联系，此处不收取任何费用。",
+      "requestedLimit": "需要的产品数量",
+      "productsOption": "{count} 个产品",
+      "custom": "其他",
+      "customPlaceholder": "例如 25",
+      "message": "给管理员的留言（可选）",
+      "messagePlaceholder": "告诉管理员您计划上架的产品",
+      "send": "发送申请",
+      "sending": "发送中…",
+      "sent": "申请已发送，管理员审核后会与您联系。",
+      "pending": "申请处理中：{requested} 个产品（{date} 提交）。",
+      "approved": "您的申请已通过，上限已提高到 {limit} 个产品。",
+      "rejected": "您的上一次申请未通过。",
+      "adminNote": "管理员备注：{note}",
+      "chooseValidLimit": "请选择 1 到 1000 之间的数量。",
+      "mustExceed": "请选择大于当前上限 {limit} 的数量。",
+      "messageTooLong": "留言最多 1000 个字符。",
+      "close": "关闭"
     }
   },
   "chat": {

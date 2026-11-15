@@ -11,6 +11,7 @@ import {
 import type { SellerFactoryProfile } from "../types";
 import type { FactoryCertificate } from "@/entities/factory-certificate";
 import { UploadCertificateModal } from "../components/upload-certificate-modal";
+import { ProfileVideoSection } from "../components/profile-video-section";
 import { CertificateLightboxModal } from "@/components/profile/certificate-lightbox-modal";
 import { AlibabaCertSection } from "@/components/profile/alibaba-cert-section";
 import { AccountSecurityCard } from "@/features/auth/account-security-card";
@@ -403,6 +404,11 @@ export function ProfileTab({ profile, onUpdateProfile, onOpenUpgradeModal, email
           </button>
         </div>
       </form>
+
+      <ProfileVideoSection
+        videoUrl={profile.profileVideoUrl}
+        onSave={(profileVideoUrl) => onUpdateProfile({ profileVideoUrl })}
+      />
 
       <section className="space-y-3">
         <h2 className="text-sm font-bold text-neutral-900">{t("profile.page.accountSecurity")}</h2>

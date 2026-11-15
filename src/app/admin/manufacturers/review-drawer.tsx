@@ -141,6 +141,9 @@ export function ReviewDrawer({ id, onClose, onReviewed }: {
 
               <Section title="Activity">
                 <Field label="Products" value={String(data.productCount)} />
+                {data.productLimit !== undefined && (
+                  <Field label="Product limit" value={`${data.liveProductCount ?? data.productCount} of ${data.productLimit} used`} />
+                )}
                 <Field label="Seeks" value={String(data.reelCount)} />
                 <Field label="Quotes" value={String(data.quoteCount)} />
                 <Field label="Followers" value={String(data.followerCount)} />

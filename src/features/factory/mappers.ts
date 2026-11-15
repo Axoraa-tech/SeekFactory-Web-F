@@ -124,6 +124,7 @@ export function toSellerProfile(
     productionLines: manufacturer?.productionLines ?? 0,
     verified: manufacturer?.verified ?? false,
     websiteUrl: manufacturer?.websiteUrl,
+    profileVideoUrl: manufacturer?.profileVideoUrl,
     tier,
   };
 }
@@ -142,6 +143,7 @@ export function toManufacturerUpdate(profile: Partial<SellerFactoryProfile>): Pa
     description: profile.description,
     certificates: profile.certificates,
     exportCountries: profile.exportCountries,
+    profileVideoUrl: profile.profileVideoUrl,
   };
   // Partial saves (e.g. certificates only) must not blank out other fields.
   return Object.fromEntries(

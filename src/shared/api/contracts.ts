@@ -319,10 +319,34 @@ export type FactoryQuote = {
   notes?: string;
 };
 
+/** One request for a higher product limit; handled manually by an admin (no payment). */
+export type ProductLimitRequest = {
+  id: string;
+  currentCount: number;
+  currentLimit: number;
+  requestedLimit: number;
+  message?: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  adminNote?: string;
+  createdAt?: string;
+  reviewedAt?: string;
+};
+
+/** The factory's live (not deleted) product count against its product limit. */
+export type ProductUsage = {
+  productCount: number;
+  productLimit: number;
+  canAddProduct: boolean;
+  latestRequest: ProductLimitRequest | null;
+};
+
 export interface FactoryRepository {
   getProfile(): Promise<Manufacturer>;
   updateProfile(data: Partial<Manufacturer>): Promise<Manufacturer>;
   getStats(): Promise<SellerStats | null>;
+  getProductUsage(): Promise<ProductUsage>;
+  /** Ask the admin for a higher product limit. */
+  requestProductLimit(requestedLimit: number, message?: string): Promise<ProductLimitRequest>;
   /** Browser-only: uploads a device file and returns a URL usable in addProduct/addSeek/profile. */
   uploadMedia(file: File, kind: MediaKind, onProgress?: (percent: number) => void): Promise<UploadedMedia>;
   getProducts(): Promise<Product[]>;

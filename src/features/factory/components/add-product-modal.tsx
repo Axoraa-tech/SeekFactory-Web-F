@@ -34,7 +34,7 @@ type Props = {
   onSubmit: (product: NewFactoryProduct) => Promise<void>;
 };
 
-const MAX_IMAGES = 8;
+const MAX_IMAGES = 4;
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];

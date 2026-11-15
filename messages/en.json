@@ -726,7 +726,8 @@
     "businessDetailsVerified": "Business details verified",
     "notVerified": "Not verified",
     "lockedName": "Verified supplier",
-    "thisSupplier": "this supplier"
+    "thisSupplier": "this supplier",
+    "factoryVideo": "Factory video"
   },
   "legal": {
     "accessibility": {
@@ -881,7 +882,7 @@
       "priceMustBeGreaterThan": "Price must be greater than zero.",
       "productPhotoWasNotUploaded": "Product photo was not uploaded.",
       "addAtLeastOneProduct": "Add at least one product photo.",
-      "aProductCanHaveAt": "A product can have at most 8 photos.",
+      "aProductCanHaveAt": "A product can have at most 4 photos.",
       "aProductPhotoWasNot": "A product photo was not uploaded.",
       "datasheetWasNotUploaded": "Datasheet was not uploaded.",
       "videoTitleIsRequired": "Video title is required.",
@@ -1210,7 +1211,14 @@
       "removeExportMarket": "Remove {country}",
       "noExportMarketsAdded": "No export markets added yet.",
       "factoryProfileChangesSuccessfullySaved": "Factory Profile Changes Successfully Saved!",
-      "changesReflectImmediatelyOnYour": "Changes reflect immediately on your live public manufacturer profile."
+      "changesReflectImmediatelyOnYour": "Changes reflect immediately on your live public manufacturer profile.",
+      "profileVideo": "Factory / chairman video",
+      "profileVideoHint": "One video (MP4, WebM or MOV, up to 100 MB). Buyers see it on your factory profile.",
+      "addProfileVideo": "Add video",
+      "replaceProfileVideo": "Replace video",
+      "removeProfileVideo": "Remove video",
+      "profileVideoUploading": "Uploading video…",
+      "profileVideoInvalid": "Choose an MP4, WebM or MOV video up to 100 MB."
     },
     "rfqs": {
       "rfqsBuyerPurchaseInquiries": "RFQs & Buyer Purchase Inquiries",
@@ -1310,6 +1318,31 @@
       "photo": "Product photos",
       "postVideo": "Post video",
       "postProduct": "Post product"
+    },
+    "plan": {
+      "productsUsed": "{count} of {limit} products used",
+      "limitReachedTitle": "Product limit reached",
+      "limitReachedBody": "Your plan allows {limit} products and you have {count}. Your existing products stay live. To add more, ask the admin for a higher limit.",
+      "upgradeCta": "Upgrade the plan / Contact admin",
+      "modalTitle": "Upgrade the plan / Contact admin",
+      "modalIntro": "Ask the SeekFactory admin for room for more products. The admin reviews requests manually and will contact you. No payment is taken here.",
+      "requestedLimit": "Products you need",
+      "productsOption": "{count} products",
+      "custom": "Other",
+      "customPlaceholder": "e.g. 25",
+      "message": "Message to admin (optional)",
+      "messagePlaceholder": "Tell the admin what you plan to list",
+      "send": "Send request",
+      "sending": "Sending…",
+      "sent": "Request sent. The admin will review it and contact you.",
+      "pending": "Request pending: {requested} products (sent {date}).",
+      "approved": "Your last request was approved. Limit raised to {limit} products.",
+      "rejected": "Your last request was declined.",
+      "adminNote": "Admin note: {note}",
+      "chooseValidLimit": "Choose a limit between 1 and 1000.",
+      "mustExceed": "Choose more than your current limit of {limit} products.",
+      "messageTooLong": "Message must be at most 1000 characters.",
+      "close": "Close"
     }
   },
   "chat": {

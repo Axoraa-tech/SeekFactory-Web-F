@@ -27,6 +27,10 @@ import { mediaThumb } from "@/shared/api/http-api";
 type Props = {
   products: SellerProduct[];
   onOpenAddProduct: () => void;
+  /** Plan's product limit; null when unknown (the backend still enforces it). */
+  productLimit?: number | null;
+  /** Opens "Upgrade the plan / Contact admin". */
+  onRequestUpgrade?: () => void;
   onEditProduct: (product: SellerProduct) => void;
   /** Pause (false) or relist (true); resolves when saved. */
   onSetListed: (id: string, listed: boolean) => Promise<void>;
@@ -43,7 +47,16 @@ const STOCK_OPTIONS: { value: StockStatus; key: string; badge: string }[] = [
   { value: "OUT_OF_STOCK", key: "stock.outOfStock", badge: "bg-rose-50 text-rose-700 border-rose-200" },
 ];
 
-export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetListed, onSetStock, onDeleteProduct }: Props) {
+export function ProductsTab({
+  products,
+  onOpenAddProduct,
+  productLimit = null,
+  onRequestUpgrade,
+  onEditProduct,
+  onSetListed,
+  onSetStock,
+  onDeleteProduct,
+}: Props) {
   const t = useTranslations();
   const { translateCategory } = useRegionalSettings();
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,6 +115,39 @@ export function ProductsTab({ products, onOpenAddProduct, onEditProduct, onSetLi
           <span>{t("seller.product.postNewIndustrialProduct")}</span>
         </button>
       </div>
+
+      {productLimit !== null && (
+        <div
+          data-testid="product-limit-banner"
+          className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border px-4 py-3 text-xs ${
+            products.length >= productLimit
+              ? "border-amber-200 bg-amber-50 text-amber-800"
+              : "border-line bg-white text-ink-muted"
+          }`}
+        >
+          <div>
+            <p className="font-semibold">
+              {products.length >= productLimit
+                ? t("seller.plan.limitReachedTitle")
+                : t("seller.plan.productsUsed", { count: products.length, limit: productLimit })}
+            </p>
+            {products.length >= productLimit && (
+              <p className="mt-0.5">
+                {t("seller.plan.limitReachedBody", { count: products.length, limit: productLimit })}
+              </p>
+            )}
+          </div>
+          {onRequestUpgrade && (
+            <button
+              type="button"
+              onClick={onRequestUpgrade}
+              className="shrink-0 rounded-lg border border-brand-blue px-3 py-1.5 font-bold text-brand-blue hover:bg-blue-50 transition"
+            >
+              {t("seller.plan.upgradeCta")}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Filter & Search Toolbar */}
       <div className="flex flex-col md:flex-row gap-3">

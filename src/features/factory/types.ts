@@ -168,5 +168,7 @@ export type SellerFactoryProfile = {
   productionLines: number;
   verified: boolean;
   websiteUrl?: string;
+  /** One factory tour / chairman video. */
+  profileVideoUrl?: string;
   tier: string;
 };

@@ -83,6 +83,22 @@ export interface AdminManufacturerDetail {
   ownerCountry?: string; ownerCompanyName?: string; ownerJoinedAt?: string;
   productCount: number; reelCount: number; quoteCount: number; followerCount: number;
   planId?: string; planName?: string; createdAt?: string;
+  /** Product allowance: live (not deleted) products against the limit. */
+  productLimit?: number; liveProductCount?: number; profileVideoUrl?: string;
+}
+
+export type ProductLimitRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+/** A factory asking for a higher product limit. Handled manually; no payment is involved. */
+export interface AdminProductLimitRequestRow {
+  id: string; manufacturerId: string; manufacturerName: string; manufacturerSlug?: string;
+  ownerName?: string; ownerEmail?: string;
+  /** Live values now. */
+  productCount: number; productLimit: number;
+  /** What the factory had when it asked. */
+  countAtRequest: number; limitAtRequest: number; requestedLimit: number;
+  message?: string; status: ProductLimitRequestStatus; adminNote?: string;
+  reviewedBy?: string; reviewedAt?: string; createdAt?: string;
 }
 
 export interface AdminRfq {
@@ -170,6 +186,20 @@ export const adminData = {
     }),
   setPlan: (id: string, planId?: string) =>
     adminRequest<void>(`manufacturers/${id}/plan`, { method: "PUT", query: { planId } }),
+  /** Existing products are never removed when the limit is lowered. */
+  setProductLimit: (id: string, limit: number) =>
+    adminRequest<void>(`manufacturers/${id}/product-limit`, { method: "PUT", query: { limit } }),
+
+  productLimitRequests: (query: ListQuery & { status?: string }) =>
+    adminRequest<AdminPage<AdminProductLimitRequestRow>>("product-limit-requests", { query }),
+  /** approvedLimit defaults to the requested limit. */
+  approveProductLimitRequest: (id: string, approvedLimit?: number, note?: string) =>
+    adminRequest<void>(`product-limit-requests/${id}/approve`, {
+      method: "PUT",
+      body: JSON.stringify({ approvedLimit, note: note || undefined }),
+    }),
+  rejectProductLimitRequest: (id: string, note: string) =>
+    adminRequest<void>(`product-limit-requests/${id}/reject`, { method: "PUT", body: JSON.stringify({ note }) }),
 
   rfqs: (query: ListQuery & { status?: string }) =>
     adminRequest<AdminPage<AdminRfq>>("rfqs", { query }),
