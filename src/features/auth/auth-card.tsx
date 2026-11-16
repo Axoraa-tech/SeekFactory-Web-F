@@ -13,8 +13,8 @@ import { postAuthPath } from "@/features/auth/session-cookie";
 import { useToast } from "@/components/ui/toast";
 import { getApi } from "@/shared/api";
 
-import { isValidPhoneNumber } from "libphonenumber-js";
-import { PhoneInput } from 'react-international-phone';
+import { isValidPhoneNumber, parsePhoneNumberFromString } from "libphonenumber-js/max";
+import { InternationalPhoneField } from "@/features/auth/international-phone-field";
 import { useTranslations } from "next-intl";
 
 
@@ -57,6 +57,7 @@ export function AuthCard({
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const needsPhone = method === "phone" || (mode === "join" && isManufacturer);
   const passwordErrors = validatePassword(password);
   const isPasswordValid = passwordErrors.length===0;
 
@@ -72,6 +73,11 @@ export function AuthCard({
     event.preventDefault();
     setError("");
     const form = new FormData(event.currentTarget);
+
+    if (needsPhone && !isValidPhoneNumber(phone || "")) {
+      setError(t("auth.card.enterAValidPhoneNumber"));
+      return;
+    }
 
     if (method === "email") {
       if (!isPasswordValid) {
@@ -101,7 +107,7 @@ export function AuthCard({
       name: String(form.get("name") ?? "") || undefined,
       email: String(form.get("email") ?? email) || undefined,
       password: String(form.get("password") ?? password) || undefined,
-      phone: phone || undefined,
+      phone: needsPhone ? parsePhoneNumberFromString(phone)?.number : undefined,
       otp: String(form.get("otp") ?? "").trim() || undefined,
       companyName: String(form.get("companyName") ?? "") || undefined,
     };
@@ -262,17 +268,6 @@ export function AuthCard({
           </>
         ) : (
           <>
-            <PhoneInput
-              defaultCountry="cn"
-              value={phone}
-              onChange={setPhone}
-              className="w-full"
-              inputClassName="!h-10 sm:!h-10.5 !w-full !rounded-l-none !rounded-r-xl !border-slate-300 !text-sm !outline-none focus:!border-brand-orange focus:!ring-2 focus:!ring-brand-orange/20"
-              countrySelectorStyleProps={{
-                buttonClassName: "!h-10 sm:!h-10.5 !rounded-l-xl !rounded-r-none !border-slate-300",
-              }}
-            />
-
             {otpSent ? (
               <input
                 name="otp"
@@ -283,6 +278,12 @@ export function AuthCard({
             ) : null}
           </>
         )}
+
+        {needsPhone && <InternationalPhoneField value={phone} onChange={(value) => {
+          setPhone(value);
+          setOtpSent(false);
+          setNotice("");
+        }} />}
 
         {mode === "join" ? (
           <p className="pt-1 text-center text-xs leading-relaxed text-ink-muted">

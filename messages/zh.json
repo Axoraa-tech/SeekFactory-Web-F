@@ -789,6 +789,8 @@
     },
     "card": {
       "invalidPassword": "密码不符合要求",
+      "registrationPhone": "电话号码",
+      "phoneCountryHint": "根据浏览器偏好建议国家/地区。请按需更改，并输入您自己的电话号码。",
       "enterAValidPhoneNumber": "请输入有效的手机号码",
       "mockCodeSentUse123456": "验证码已发送（演示：123456）。",
       "enterTheVerificationCode": "请输入验证码。",
