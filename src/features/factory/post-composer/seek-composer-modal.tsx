@@ -156,6 +156,7 @@ export function SeekComposerModal({
   const [invalid, setInvalid] = useState<"video" | "title" | "category" | null>(null);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const selectedVideoRef = useRef<File | null>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -194,10 +195,43 @@ export function SeekComposerModal({
     };
   }, [busy, onClose, suspended]);
 
-  // Free preview URLs when they change or the composer closes
-  useEffect(() => () => {
-    if (video) URL.revokeObjectURL(video.url);
-  }, [video]);
+  // Selection must not depend on Safari decoding metadata from a detached video.
+  // Metadata is best-effort; slow/unsupported gallery codecs must not lose the file.
+  useEffect(() => {
+    if (!video) return;
+    const { file, url } = video;
+    let active = true;
+    const probe = document.createElement("video");
+    const cleanupProbe = () => {
+      clearTimeout(timer);
+      probe.onloadedmetadata = null;
+      probe.onerror = null;
+      probe.removeAttribute("src");
+      probe.load();
+    };
+    const timer = setTimeout(cleanupProbe, 5000);
+    probe.preload = "metadata";
+    probe.muted = true;
+    probe.playsInline = true;
+    probe.onloadedmetadata = () => {
+      if (active && Number.isFinite(probe.duration) && probe.duration > 0) {
+        const duration = Math.max(1, Math.round(probe.duration));
+        setVideo((current) => current?.file === file ? { ...current, duration } : current);
+      }
+      cleanupProbe();
+    };
+    probe.onerror = cleanupProbe;
+    probe.src = url;
+    probe.load();
+    return () => {
+      active = false;
+      cleanupProbe();
+      URL.revokeObjectURL(url);
+    };
+    // Duration updates must not revoke the selected preview URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video?.file, video?.url]);
+  useEffect(() => () => { selectedVideoRef.current = null; }, []);
   useEffect(() => () => {
     if (cover) URL.revokeObjectURL(cover.url);
   }, [cover]);
@@ -216,17 +250,16 @@ export function SeekComposerModal({
       return;
     }
     const url = URL.createObjectURL(file);
-    const probe = document.createElement("video");
-    probe.preload = "metadata";
-    probe.onloadedmetadata = () => {
-      setVideo({ file, url, duration: Math.round(probe.duration) || 30 });
-    };
-    probe.onerror = () => setVideo({ file, url, duration: 30 });
-    probe.src = url;
+    selectedVideoRef.current = file;
+    setVideo({ file, url, duration: 30 });
     setError(null);
     setInvalid(null);
-    // Upload in the background while the seller fills in the details; Post reuses this promise
-    upload(file, "video").catch(() => {});
+    // Upload while the seller fills in details; Post reuses the same promise.
+    upload(file, "video").catch((err: unknown) => {
+      if (selectedVideoRef.current !== file) return;
+      setVideoProgress(null);
+      setError(err instanceof Error ? err.message : t("seller.seek.couldNotPublishSeekPlease"));
+    });
   }
 
   function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
@@ -248,11 +281,16 @@ export function SeekComposerModal({
   function upload(file: File, kind: "image" | "video"): Promise<string> {
     const cached = uploadsRef.current.get(file);
     if (cached) return cached;
-    if (kind === "video") setVideoProgress(0);
-    const onProgress = kind === "video" ? (p: number) => setVideoProgress(p) : undefined;
+    if (kind === "video" && selectedVideoRef.current === file) setVideoProgress(0);
+    const onProgress = kind === "video" ? (p: number) => {
+      if (selectedVideoRef.current === file) setVideoProgress(p);
+    } : undefined;
     const promise = getApi()
       .factory.uploadMedia(file, kind, onProgress)
-      .then((media) => media.url);
+      .then((media) => {
+        if (kind === "video" && selectedVideoRef.current === file) setVideoProgress(100);
+        return media.url;
+      });
     uploadsRef.current.set(file, promise);
     // A failed upload is forgotten so the next Post retries it
     promise.catch(() => {
@@ -409,7 +447,12 @@ export function SeekComposerModal({
               {!busy && (
                 <button
                   type="button"
-                  onClick={() => setVideo(null)}
+                  onClick={() => {
+                    selectedVideoRef.current = null;
+                    setVideo(null);
+                    setVideoProgress(null);
+                    setError(null);
+                  }}
                   aria-label={t("composer.removeVideo")}
                   className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80"
                 >
@@ -432,6 +475,15 @@ export function SeekComposerModal({
               <span className="text-sm font-bold text-ink">{t("composer.addVideo")}</span>
               <span className="text-xs text-ink-muted">{t("composer.videoHint")}</span>
             </button>
+          )}
+
+          {video && (
+            <p className="text-xs text-ink-muted" aria-live="polite">
+              {video.file.name}
+              {!busy && videoProgress !== null && videoProgress < 100
+                ? ` · ${t("seller.seek.status.uploadingVideo")} ${videoProgress}%`
+                : ""}
+            </p>
           )}
 
           {/* Cover (optional) */}
@@ -592,7 +644,7 @@ export function SeekComposerModal({
           </div>
         </div>
 
-        <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" onChange={pickVideo} className="hidden" />
+        <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.mov,.webm" onChange={pickVideo} className="hidden" />
         <input ref={coverInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={pickCover} className="hidden" />
       </div>
     </div>
