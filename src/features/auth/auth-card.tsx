@@ -15,6 +15,7 @@ import { getApi } from "@/shared/api";
 
 import { isValidPhoneNumber, parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { InternationalPhoneField } from "@/features/auth/international-phone-field";
+import { isSignupPhoneAllowed, type PhoneAudience } from "@/features/auth/phone-country-policy";
 import { useTranslations } from "next-intl";
 
 
@@ -57,7 +58,16 @@ export function AuthCard({
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const needsPhone = method === "phone" || (mode === "join" && isManufacturer);
+  // Every signup needs a phone: buyers from any country except China, manufacturers from China (+86) only
+  const needsPhone = method === "phone" || mode === "join";
+  const phoneAudience: PhoneAudience = mode === "join" ? (isManufacturer ? "manufacturer" : "buyer") : "any";
+  const [phoneRole, setPhoneRole] = useState(role);
+  if (phoneRole !== role) {
+    // Switching Buyer/Manufacturer changes which countries are allowed, so start the number over
+    setPhoneRole(role);
+    setPhone("");
+    setOtpSent(false);
+  }
   const passwordErrors = validatePassword(password);
   const isPasswordValid = passwordErrors.length===0;
 
@@ -76,6 +86,10 @@ export function AuthCard({
 
     if (needsPhone && !isValidPhoneNumber(phone || "")) {
       setError(t("auth.card.enterAValidPhoneNumber"));
+      return;
+    }
+    if (needsPhone && !isSignupPhoneAllowed(phone, phoneAudience)) {
+      setError(phoneAudience === "manufacturer" ? t("auth.card.manufacturerPhoneChinaOnly") : t("auth.card.buyerPhoneNotChina"));
       return;
     }
 
@@ -279,7 +293,7 @@ export function AuthCard({
           </>
         )}
 
-        {needsPhone && <InternationalPhoneField value={phone} onChange={(value) => {
+        {needsPhone && <InternationalPhoneField audience={phoneAudience} value={phone} onChange={(value) => {
           setPhone(value);
           setOtpSent(false);
           setNotice("");
