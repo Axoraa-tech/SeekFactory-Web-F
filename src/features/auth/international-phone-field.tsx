@@ -1,42 +1,47 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
-import { getCountries } from "libphonenumber-js";
-import { PhoneInput } from "react-international-phone";
+import { useEffect, useId, useMemo, useState } from "react";
+import { defaultCountries, parseCountry, PhoneInput } from "react-international-phone";
 import { useTranslations } from "next-intl";
+import {
+  isPhoneCountryAllowed,
+  suggestedPhoneCountry,
+  type PhoneAudience,
+} from "@/features/auth/phone-country-policy";
 
-/** Browser preferences are a suggestion, not proof of location or nationality. */
-export function suggestedPhoneCountry(languages: readonly string[]): string {
-  const supported = new Set<string>(getCountries());
-  for (const language of languages) {
-    try {
-      // Do not maximize: a language alone (e.g. English) does not identify a country.
-      const region = new Intl.Locale(language).region;
-      if (region && supported.has(region)) return region.toLowerCase();
-    } catch {
-      // Ignore malformed browser locale values.
-    }
-  }
-  return "cn";
-}
+export { suggestedPhoneCountry } from "@/features/auth/phone-country-policy";
 
-export function InternationalPhoneField({ value, onChange }: {
+export function InternationalPhoneField({ value, onChange, audience = "any" }: {
   value: string;
   onChange: (value: string) => void;
+  /** Buyers: every country except China. Manufacturers: China (+86) only. */
+  audience?: PhoneAudience;
 }) {
   const t = useTranslations();
   const id = useId();
-  const [country, setCountry] = useState<string>();
+  const [languages, setLanguages] = useState<readonly string[]>();
   useEffect(() => {
-    setCountry(suggestedPhoneCountry(navigator.languages?.length ? navigator.languages : [navigator.language]));
+    setLanguages(navigator.languages?.length ? navigator.languages : [navigator.language]);
   }, []);
+
+  const countries = useMemo(
+    () => defaultCountries.filter((country) => isPhoneCountryAllowed(parseCountry(country).iso2, audience)),
+    [audience],
+  );
+  const country = languages ? suggestedPhoneCountry(languages, audience) : undefined;
+  const chinaOnly = audience === "manufacturer";
 
   return (
     <div className="space-y-1">
       <label htmlFor={id} className="text-xs font-medium text-ink">{t("auth.card.registrationPhone")}</label>
       {country ? (
         <PhoneInput
+          // Remount when the role changes so the country list and default country reset
+          key={audience}
           defaultCountry={country}
+          countries={countries}
+          forceDialCode={chinaOnly}
+          hideDropdown={chinaOnly}
           value={value}
           onChange={onChange}
           inputProps={{ id, name: "phone", required: true, autoComplete: "tel", "aria-describedby": `${id}-hint` }}
@@ -45,7 +50,13 @@ export function InternationalPhoneField({ value, onChange }: {
           countrySelectorStyleProps={{ buttonClassName: "!h-10 sm:!h-10.5 !rounded-l-xl !rounded-r-none !border-slate-300" }}
         />
       ) : <div className="h-10 rounded-xl border border-slate-300" aria-hidden="true" />}
-      <p id={`${id}-hint`} className="text-xs text-ink-muted">{t("auth.card.phoneCountryHint")}</p>
+      <p id={`${id}-hint`} className="text-xs text-ink-muted">
+        {audience === "manufacturer"
+          ? t("auth.card.manufacturerPhoneHint")
+          : audience === "buyer"
+            ? t("auth.card.buyerPhoneHint")
+            : t("auth.card.phoneCountryHint")}
+      </p>
     </div>
   );
 }
