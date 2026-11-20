@@ -7,7 +7,7 @@ import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 
 vi.mock("./showcase-parts", () => ({
-  EmptyShowcase: () => null, FactoryLine: () => null, Hashtags: () => null,
+  BlurredPoster: () => null, EmptyShowcase: () => null, FactoryLine: () => null, Hashtags: () => null,
   Poster: () => null, SeekActions: () => null, Stats: () => null,
 }));
 vi.mock("@/shared/api/http-api", () => ({ mediaThumb: (url: string) => url }));

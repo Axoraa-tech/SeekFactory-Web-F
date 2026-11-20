@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { EmptyShowcase, FactoryLine, Hashtags, Poster, SeekActions, Stats } from "@/components/reels/showcase-parts";
+import { BlurredPoster, EmptyShowcase, FactoryLine, Hashtags, Poster, SeekActions, Stats } from "@/components/reels/showcase-parts";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { mediaThumb } from "@/shared/api/http-api";
+import { useMediaWindow } from "@/hooks/use-media-window";
+import { signalFirstMediaReady, whenPosterLoaded } from "@/shared/lib/video-source";
 
 type Props = { items: FeedItem[]; settings: FeedShowcase };
 
@@ -84,7 +86,7 @@ export function FeedListShowcase({ items, settings }: Props) {
             <Hashtags item={item} />
           </div>
 
-          <SeekMedia item={item} play={settings.autoplay && visible === item.reel.id} eager={index === 0} />
+          <SeekMedia item={item} play={settings.autoplay && visible === item.reel.id} eager={index === 0} first={index === 0} autoplay={settings.autoplay} />
 
           {settings.showPhotos && <ProductStrip item={item} />}
 
@@ -99,32 +101,43 @@ export function FeedListShowcase({ items, settings }: Props) {
 }
 
 /** 16:9 media plane. Click toggles playback; `play` drives the in-view autoplay. */
-function SeekMedia({ item, play, eager }: { item: FeedItem; play: boolean; eager?: boolean }) {
+function SeekMedia({ item, play, eager, first, autoplay }: { item: FeedItem; play: boolean; eager?: boolean; first?: boolean; autoplay?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const media = useMediaWindow({ containerRef: ref, videoRef: ref, first, eager });
 
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
     if (play) video.play().catch(() => {}); // browsers may refuse; the poster stays
     else video.pause();
-  }, [play]);
+  }, [play, media.attached]);
+
+  // Without autoplay (or without a video) the first poster is what the viewer waits for
+  useEffect(() => {
+    if (!first || (autoplay && item.reel.videoUrl)) return;
+    return whenPosterLoaded(mediaThumb(item.reel.posterUrl, 1280), signalFirstMediaReady);
+  }, [first, autoplay, item.reel.videoUrl, item.reel.posterUrl]);
 
   if (!item.reel.videoUrl) {
     return <Poster src={item.reel.posterUrl} alt={item.reel.title} className="aspect-video w-full" />;
   }
   return (
-    <video
-      ref={ref}
-      src={item.reel.videoUrl}
-      poster={mediaThumb(item.reel.posterUrl, 1280)}
-      muted
-      loop
-      playsInline
-      controls
-      // The first seek is above the fold: fetch its metadata up front so it starts quickly
-      preload={eager ? "metadata" : "none"}
-      className="aspect-video w-full bg-black object-contain"
-    />
+    <div className="relative aspect-video w-full overflow-hidden bg-black">
+      <BlurredPoster src={item.reel.posterUrl} eager={eager} />
+      <video
+        ref={ref}
+        src={media.attached ? item.reel.videoUrl : undefined}
+        poster={mediaThumb(item.reel.posterUrl, 1280)}
+        muted
+        loop
+        playsInline
+        controls
+        preload={media.preload}
+        onCanPlay={first && autoplay ? signalFirstMediaReady : undefined}
+        onError={first ? signalFirstMediaReady : undefined}
+        className="absolute inset-0 h-full w-full object-contain"
+      />
+    </div>
   );
 }
 

@@ -1841,7 +1841,11 @@ const RESIZABLE_MEDIA = /\/media\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 export function mediaThumb(url: string, width: MediaThumbWidth): string;
 export function mediaThumb(url: string | undefined, width: MediaThumbWidth): string | undefined;
 export function mediaThumb(url: string | undefined, width: MediaThumbWidth): string | undefined {
-  const match = url?.match(RESIZABLE_MEDIA);
+  if (!url) return url;
+  // A URL already resolved to the media base (whose own path may contain /media/) maps back to
+  // its key; thumbnails always come from the API, which serves or redirects to the stored copy.
+  const key = CDN_MEDIA_PREFIX && url.startsWith(CDN_MEDIA_PREFIX) ? `/media/${url.slice(CDN_MEDIA_PREFIX.length)}` : url;
+  const match = key.match(RESIZABLE_MEDIA);
   if (!match) return url;
   const path = `${BACKEND_MEDIA_PREFIX}${match[1]}?w=${width}`;
   if (typeof window !== "undefined" && window.location.protocol === "https:" && MEDIA_ORIGIN.startsWith("http://")) {

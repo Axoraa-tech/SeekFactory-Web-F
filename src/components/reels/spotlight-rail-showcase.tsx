@@ -4,12 +4,14 @@ import { SupplierName, useBuyerPlan } from "@/features/subscription";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { EmptyShowcase, FactoryLine, Hashtags, Poster, SeekActions, Stats } from "@/components/reels/showcase-parts";
+import { BlurredPoster, EmptyShowcase, FactoryLine, Hashtags, Poster, SeekActions, Stats } from "@/components/reels/showcase-parts";
 import { cn } from "@/shared/lib/cn";
 import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { useTranslations } from "next-intl";
 import { mediaThumb } from "@/shared/api/http-api";
+import { useMediaWindow } from "@/hooks/use-media-window";
+import { signalFirstMediaReady, whenPosterLoaded } from "@/shared/lib/video-source";
 
 type Props = { items: FeedItem[]; settings: FeedShowcase };
 
@@ -124,21 +126,36 @@ export function SpotlightRailShowcase({ items, settings }: Props) {
 }
 
 function HeroMedia({ item, autoplay }: { item: FeedItem; autoplay: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  // The hero is the page's first seek: same loading rule as the feed's first card
+  const media = useMediaWindow({ containerRef: ref, videoRef: ref, first: true });
+
+  useEffect(() => {
+    if (autoplay && item.reel.videoUrl) return;
+    return whenPosterLoaded(mediaThumb(item.reel.posterUrl, 1280), signalFirstMediaReady);
+  }, [autoplay, item.reel.videoUrl, item.reel.posterUrl]);
+
   if (!item.reel.videoUrl) {
     return <Poster src={item.reel.posterUrl} alt={item.reel.title} className="aspect-video w-full rounded-xl" />;
   }
   return (
-    <video
-      src={item.reel.videoUrl}
-      poster={mediaThumb(item.reel.posterUrl, 1280)}
-      autoPlay={autoplay}
-      muted
-      loop
-      playsInline
-      controls
-      preload="metadata"
-      className="aspect-video w-full rounded-xl bg-black object-contain"
-    />
+    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+      <BlurredPoster src={item.reel.posterUrl} eager />
+      <video
+        ref={ref}
+        src={media.attached ? item.reel.videoUrl : undefined}
+        poster={mediaThumb(item.reel.posterUrl, 1280)}
+        autoPlay={autoplay}
+        muted
+        loop
+        playsInline
+        controls
+        preload={media.preload}
+        onCanPlay={autoplay ? signalFirstMediaReady : undefined}
+        onError={signalFirstMediaReady}
+        className="absolute inset-0 h-full w-full object-contain"
+      />
+    </div>
   );
 }
 

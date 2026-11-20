@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { getApi } from "@/shared/api";
 import { readBrowserCookie } from "@/features/auth/session-cookie";
 import { useProductLikes } from "@/features/engagement/use-product-likes";
+import { browserCatalogStartEnv, whenCatalogMayStart } from "./catalog-start";
 import { loadCatalogSnapshotShared, shuffleCatalog, type CatalogSnapshot } from "./catalog-snapshot";
 
 type CatalogState = { status: "loading" | "ready" | "error"; snapshot: CatalogSnapshot | null; retry: () => void; productLikes: ReturnType<typeof useProductLikes> };
@@ -24,22 +25,26 @@ export function CatalogSnapshotProvider({ enabled, children }: { enabled: boolea
     let cancelled = false;
     const viewer = readBrowserCookie()?.id ?? "";
     setState({ status: "loading", snapshot: null });
-    const timeout = window.setTimeout(() => {
-      cancelled = true;
-      setState({ status: "error", snapshot: null });
-    }, 45_000);
-    loadCatalogSnapshotShared(getApi(), viewer)
-      .then((snapshot) => {
-        if (cancelled) return;
-        if ((readBrowserCookie()?.id ?? "") !== viewer) { retry(); return; }
-        setState({ status: "ready", snapshot: { ...snapshot, products: shuffleCatalog(snapshot.products) } });
-      })
-      .catch(() => { if (!cancelled) setState({ status: "error", snapshot: null }); })
-      .finally(() => window.clearTimeout(timeout));
+    let timeout = 0;
+    // The first seek video gets the connection first; consumers keep seeing "loading" meanwhile
+    const cancelStart = whenCatalogMayStart(() => {
+      timeout = window.setTimeout(() => {
+        cancelled = true;
+        setState({ status: "error", snapshot: null });
+      }, 45_000);
+      loadCatalogSnapshotShared(getApi(), viewer)
+        .then((snapshot) => {
+          if (cancelled) return;
+          if ((readBrowserCookie()?.id ?? "") !== viewer) { retry(); return; }
+          setState({ status: "ready", snapshot: { ...snapshot, products: shuffleCatalog(snapshot.products) } });
+        })
+        .catch(() => { if (!cancelled) setState({ status: "error", snapshot: null }); })
+        .finally(() => window.clearTimeout(timeout));
+    }, browserCatalogStartEnv());
     // A different account in another tab must not retain this viewer's snapshot on return.
     const checkViewer = () => { if ((readBrowserCookie()?.id ?? "") !== viewer) retry(); };
     window.addEventListener("focus", checkViewer);
-    return () => { cancelled = true; window.clearTimeout(timeout); window.removeEventListener("focus", checkViewer); };
+    return () => { cancelled = true; cancelStart(); window.clearTimeout(timeout); window.removeEventListener("focus", checkViewer); };
   }, [enabled, attempt, retry]);
   return <CatalogContext.Provider value={{ ...state, retry, productLikes }}>
     {enabled && state.status === "loading" && <p role="status" className="mb-3 text-sm text-ink-muted">{t("showcase.single.catalogLoading")}</p>}

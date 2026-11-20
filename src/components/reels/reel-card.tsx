@@ -46,6 +46,7 @@ export function ReelCard({
       product={products[0]}
       // The first card of each column is above the fold
       eager={itemIndex < 2}
+      first={itemIndex === 0}
       fill={fill}
     />
   );

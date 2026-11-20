@@ -238,3 +238,16 @@ export function EmptyShowcase() {
     </div>
   );
 }
+
+/**
+ * Blurred 160 px copy of the poster that fills a media frame while the video or full poster
+ * loads, so a card never shows an empty black box (same look as the seek cards).
+ */
+export function BlurredPoster({ src, eager }: { src?: string; eager?: boolean }) {
+  if (!src) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={mediaThumb(src, 160)} alt="" aria-hidden loading={eager ? "eager" : "lazy"}
+      className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
+  );
+}

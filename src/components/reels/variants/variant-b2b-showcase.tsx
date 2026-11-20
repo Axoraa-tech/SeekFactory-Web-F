@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
+import { useMediaWindow } from "@/hooks/use-media-window";
+import { signalFirstMediaReady } from "@/shared/lib/video-source";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
 import { SeekTrustBadge } from "@/components/reels/seek-trust-strip";
@@ -43,6 +45,8 @@ type Props = {
   product?: Product;
   /** Above-the-fold card: fetch video metadata up front so it starts quickly. */
   eager?: boolean;
+  /** The first seek on the page: buffers right away and ends the intro when it can play. */
+  first?: boolean;
   /**
    * Single-seek showcase: the card fills its parent's height, every block has a fixed height and
    * the same rows appear on every seek, and the video takes the rest (at most 16:9), so every seek's
@@ -55,7 +59,7 @@ type Props = {
  * VARIANT 3: B2B Industrial Showcase & Technical Spec Sheet (Industrial Segmented 5-Button Bar)
  */
 
-export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product, eager, fill }: Props) {
+export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, followingManufacturer, product, eager, first, fill }: Props) {
   const t = useTranslations();
   const { following, toggleFollow } = useFollow(manufacturer.id, followingManufacturer, manufacturer.followerCount);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -95,6 +99,8 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
     setIsMuted,
     pingControls,
   });
+
+  const media = useMediaWindow({ containerRef: videoWrapperRef, videoRef, first, eager });
 
   // Playback follows scrolling only (useSeekAutoplay: the seek in view plays, the rest pause).
   // The cursor no longer starts or stops a video; hovering just shows the controls.
@@ -173,18 +179,18 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 factory video is never cropped or stretched, whatever the card's shape */}
             {reel.posterUrl && (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={mediaThumb(reel.posterUrl, 160)} alt="" aria-hidden loading="lazy"
+              <img src={mediaThumb(reel.posterUrl, 160)} alt="" aria-hidden loading={eager ? "eager" : "lazy"}
                 className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
             )}
             {reel.videoUrl ? (
               <video
                 ref={videoRef}
-                src={reel.videoUrl}
+                src={media.attached ? reel.videoUrl : undefined}
                 poster={mediaThumb(reel.posterUrl, 1280)}
                 loop
                 playsInline
                 muted={isMuted}
-                preload={eager ? "metadata" : "none"}
+                preload={media.preload}
                 onTimeUpdate={(e) => {
                   trackImpression(e.currentTarget);
                   if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
@@ -196,8 +202,15 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
                 onPlaying={() => setIsBuffering(false)}
                 // A video paused mid-buffer (e.g. another seek took over playback) never fires "playing"
                 onPause={() => setIsBuffering(false)}
-                onCanPlay={() => setIsBuffering(false)}
-                onError={() => setIsBuffering(false)}
+                onCanPlay={() => {
+                  setIsBuffering(false);
+                  if (first) signalFirstMediaReady();
+                }}
+                onError={() => {
+                  setIsBuffering(false);
+                  // A broken first video must not hold the intro until its maximum
+                  if (first) signalFirstMediaReady();
+                }}
                 className="absolute inset-0 h-full w-full object-contain"
               />
             ) : (
@@ -205,7 +218,10 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               <img src={mediaThumb(reel.posterUrl, 1280)}
                 alt={reel.title}
                 loading={eager ? "eager" : "lazy"}
+                fetchPriority={eager ? "high" : "auto"}
                 decoding="async"
+                onLoad={first ? signalFirstMediaReady : undefined}
+                onError={first ? signalFirstMediaReady : undefined}
                 className="absolute inset-0 h-full w-full object-contain"
               />
             )}
