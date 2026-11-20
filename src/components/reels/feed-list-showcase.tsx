@@ -7,6 +7,7 @@ import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { mediaThumb } from "@/shared/api/http-api";
 import { useMediaWindow } from "@/hooks/use-media-window";
+import { useStreamingSource } from "@/hooks/use-streaming-source";
 import { signalFirstMediaReady, whenPosterLoaded } from "@/shared/lib/video-source";
 
 type Props = { items: FeedItem[]; settings: FeedShowcase };
@@ -104,6 +105,9 @@ export function FeedListShowcase({ items, settings }: Props) {
 function SeekMedia({ item, play, eager, first, autoplay }: { item: FeedItem; play: boolean; eager?: boolean; first?: boolean; autoplay?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   const media = useMediaWindow({ containerRef: ref, videoRef: ref, first, eager });
+  const videoSrc = useStreamingSource(ref, {
+    hlsUrl: item.reel.hlsUrl, videoUrl: item.reel.videoUrl, attached: media.attached, preload: media.preload,
+  });
 
   useEffect(() => {
     const video = ref.current;
@@ -126,7 +130,7 @@ function SeekMedia({ item, play, eager, first, autoplay }: { item: FeedItem; pla
       <BlurredPoster src={item.reel.posterUrl} eager={eager} />
       <video
         ref={ref}
-        src={media.attached ? item.reel.videoUrl : undefined}
+        src={videoSrc}
         poster={mediaThumb(item.reel.posterUrl, 1280)}
         muted
         loop

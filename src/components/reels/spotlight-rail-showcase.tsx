@@ -11,6 +11,7 @@ import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { useTranslations } from "next-intl";
 import { mediaThumb } from "@/shared/api/http-api";
 import { useMediaWindow } from "@/hooks/use-media-window";
+import { useStreamingSource } from "@/hooks/use-streaming-source";
 import { signalFirstMediaReady, whenPosterLoaded } from "@/shared/lib/video-source";
 
 type Props = { items: FeedItem[]; settings: FeedShowcase };
@@ -129,6 +130,9 @@ function HeroMedia({ item, autoplay }: { item: FeedItem; autoplay: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   // The hero is the page's first seek: same loading rule as the feed's first card
   const media = useMediaWindow({ containerRef: ref, videoRef: ref, first: true });
+  const videoSrc = useStreamingSource(ref, {
+    hlsUrl: item.reel.hlsUrl, videoUrl: item.reel.videoUrl, attached: media.attached, preload: media.preload,
+  });
 
   useEffect(() => {
     if (autoplay && item.reel.videoUrl) return;
@@ -143,7 +147,7 @@ function HeroMedia({ item, autoplay }: { item: FeedItem; autoplay: boolean }) {
       <BlurredPoster src={item.reel.posterUrl} eager />
       <video
         ref={ref}
-        src={media.attached ? item.reel.videoUrl : undefined}
+        src={videoSrc}
         poster={mediaThumb(item.reel.posterUrl, 1280)}
         autoPlay={autoplay}
         muted

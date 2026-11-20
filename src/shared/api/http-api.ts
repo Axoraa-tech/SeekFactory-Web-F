@@ -145,6 +145,8 @@ interface BackendReel {
   posterUrl?: string;
   video_url?: string;
   videoUrl?: string;
+  hls_url?: string;
+  hlsUrl?: string;
   duration_sec?: number;
   durationSec?: number;
   start_sec?: number;
@@ -1881,6 +1883,7 @@ function normalizeReel(r: BackendReel, fallbackManufacturerId = "", tab: FeedTab
     hashtags: r.hashtags || [],
     posterUrl: resolveMediaUrl(r.posterUrl || r.poster_url) || PLACEHOLDER_IMAGE,
     videoUrl: resolveMediaUrl(r.videoUrl || r.video_url),
+    hlsUrl: resolveMediaUrl(r.hlsUrl || r.hls_url) || undefined,
     durationSec: r.durationSec ?? r.duration_sec ?? 0,
     startSec: r.startSec || r.start_sec || 0,
     views: r.views || 0,

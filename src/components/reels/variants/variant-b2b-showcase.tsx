@@ -17,6 +17,7 @@ import {
 import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { useMediaWindow } from "@/hooks/use-media-window";
+import { useStreamingSource } from "@/hooks/use-streaming-source";
 import { signalFirstMediaReady } from "@/shared/lib/video-source";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
 import { SupplierLockOverlay } from "@/components/reels/supplier-lock-overlay";
@@ -101,6 +102,9 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
   });
 
   const media = useMediaWindow({ containerRef: videoWrapperRef, videoRef, first, eager });
+  const videoSrc = useStreamingSource(videoRef, {
+    hlsUrl: reel.hlsUrl, videoUrl: reel.videoUrl, attached: media.attached, preload: media.preload,
+  });
 
   // Playback follows scrolling only (useSeekAutoplay: the seek in view plays, the rest pause).
   // The cursor no longer starts or stops a video; hovering just shows the controls.
@@ -185,7 +189,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             {reel.videoUrl ? (
               <video
                 ref={videoRef}
-                src={media.attached ? reel.videoUrl : undefined}
+                src={videoSrc}
                 poster={mediaThumb(reel.posterUrl, 1280)}
                 loop
                 playsInline
