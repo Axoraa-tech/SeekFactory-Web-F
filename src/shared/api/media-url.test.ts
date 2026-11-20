@@ -38,3 +38,28 @@ describe("media URLs", () => {
     expect(resolveMediaUrl(undefined)).toBeUndefined();
   });
 });
+
+describe("mediaThumb with a media base URL", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  const PHOTO = "0f8fad5b-d9cb-469f-a165-70867728950e.png";
+
+  it("sends photos resolved to the media base back to the API thumbnail path", async () => {
+    const { resolveMediaUrl, mediaThumb } = await load({
+      api: "https://api.example.com",
+      cdn: "https://acct.blob.core.windows.net/media",
+    });
+    const direct = resolveMediaUrl(`/api/v1/media/${PHOTO}`);
+    expect(direct).toBe(`https://acct.blob.core.windows.net/media/media/${PHOTO}`);
+    expect(mediaThumb(direct, 640)).toBe(`https://api.example.com/api/v1/media/${PHOTO}?w=640`);
+    expect(mediaThumb(`${direct}?sv=2024`, 160)).toBe(`https://api.example.com/api/v1/media/${PHOTO}?w=160`);
+  });
+
+  it("leaves media-base videos untouched", async () => {
+    const { resolveMediaUrl, mediaThumb } = await load({ api: "https://api.example.com", cdn: "https://media.example.com" });
+    const video = resolveMediaUrl(`/api/v1/media/${KEY}`);
+    expect(mediaThumb(video, 640)).toBe(video);
+  });
+});

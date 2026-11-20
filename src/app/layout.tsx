@@ -5,6 +5,8 @@ import "@/styles/globals.css";
 import { Analytics } from '@vercel/analytics/react';
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
+import { preconnect, prefetchDNS } from "react-dom";
+import { resourceHintOrigins } from "@/shared/lib/resource-hints";
 
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { ToastProvider } from "@/components/ui/toast";
@@ -32,6 +34,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
+  // Open the media and API connections while the HTML is still parsing (only when configured)
+  for (const origin of resourceHintOrigins(process.env.NEXT_PUBLIC_MEDIA_BASE_URL, process.env.NEXT_PUBLIC_API_URL)) {
+    preconnect(origin, { crossOrigin: "anonymous" });
+    preconnect(origin);
+    prefetchDNS(origin);
+  }
   return (
     <html lang={locale === "zh" ? "zh-CN" : "en"} suppressHydrationWarning>
       <body className={`${sans.variable} font-sans antialiased`}>

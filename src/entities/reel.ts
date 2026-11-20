@@ -11,6 +11,8 @@ export type Reel = {
   hashtags: string[];
   posterUrl: string;
   videoUrl?: string;
+  /** Adaptive stream (HLS) of `videoUrl`, when the backend has made one; players fall back to `videoUrl`. */
+  hlsUrl?: string;
   durationSec: number;
   startSec: number;
   views: number;

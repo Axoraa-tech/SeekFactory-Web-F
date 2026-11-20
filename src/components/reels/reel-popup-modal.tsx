@@ -33,6 +33,7 @@ import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useReelPopup } from "@/components/reels/use-reel-popup";
 import type { FeedItem } from "@/shared/api/contracts";
 import { useReelImpression } from "@/hooks/use-reel-impression";
+import { useStreamingSource } from "@/hooks/use-streaming-source";
 import { useFollow, useReelEngagement } from "@/features/engagement/use-engagement";
 import { useTranslations } from "next-intl";
 import { createWheelStepper } from "@/hooks/wheel-stepper";
@@ -55,6 +56,7 @@ export function ReelPopupModal({ items }: Props) {
   // Per-reel video state – reset when index changes
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackImpression = useReelImpression(reel?.id);
+  const videoSrc = useStreamingSource(videoRef, { hlsUrl: reel?.hlsUrl, videoUrl: reel?.videoUrl, attached: isOpen });
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -226,7 +228,7 @@ export function ReelPopupModal({ items }: Props) {
               <video
                 key={reel.id}
                 ref={videoRef}
-                src={reel.videoUrl}
+                src={videoSrc}
                 poster={mediaThumb(reel.posterUrl, 1280)}
                 loop
                 playsInline

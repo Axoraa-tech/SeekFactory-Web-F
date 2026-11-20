@@ -3,16 +3,15 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { CheckCircle2, X } from "lucide-react";
+import { FIRST_MEDIA_READY_EVENT, firstMediaReady } from "@/shared/lib/video-source";
+import { INTRO_MAX_MS, introRemainingMs } from "./intro-timing";
 
 /**
- * 3-Second Welcome Screen for SeekFactory Web App.
- * Displays the verified marketplace title and subtitle during the first 3 seconds,
- * then smoothly fades out into the main marketplace page.
+ * Welcome screen for SeekFactory Web App. Shows the marketplace title while the first seek
+ * loads behind it: at least 1.5 s, gone as soon as the first seek can play, at most 5 s.
  */
 
-const VISIBLE_MS = 3000;
 const FADE_MS = 400;
-const TOTAL_MS = VISIBLE_MS + FADE_MS;
 
 const SKIP_PREFIXES = ["/admin", "/login", "/join", "/legal"];
 
@@ -52,7 +51,7 @@ export function LoadingScreen() {
   const [done, setDone] = useState(false);
   const [isFading, setIsFading] = useState(false);
   const [progress, setProgress] = useState(100);
-  const [secondsRemaining, setSecondsRemaining] = useState(3);
+  const [secondsRemaining, setSecondsRemaining] = useState(Math.ceil(INTRO_MAX_MS / 1000));
 
   const startRef = useRef<number>(Date.now());
 
@@ -67,26 +66,33 @@ export function LoadingScreen() {
     markShown();
     startRef.current = Date.now();
 
+    let fadeTimer = 0;
+    let doneTimer = 0;
     const interval = window.setInterval(() => {
       const elapsed = Date.now() - startRef.current;
-      const remaining = Math.max(0, VISIBLE_MS - elapsed);
-      setProgress((remaining / VISIBLE_MS) * 100);
+      const remaining = Math.max(0, INTRO_MAX_MS - elapsed);
+      setProgress((remaining / INTRO_MAX_MS) * 100);
       setSecondsRemaining(Math.ceil(remaining / 1000));
     }, 40);
 
-    const fadeTimer = window.setTimeout(() => {
-      setIsFading(true);
-    }, VISIBLE_MS);
-
-    const doneTimer = window.setTimeout(() => {
-      setDone(true);
-      window.clearInterval(interval);
-    }, TOTAL_MS);
+    const schedule = () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(doneTimer);
+      const wait = introRemainingMs(Date.now() - startRef.current, firstMediaReady());
+      fadeTimer = window.setTimeout(() => setIsFading(true), wait);
+      doneTimer = window.setTimeout(() => {
+        setDone(true);
+        window.clearInterval(interval);
+      }, wait + FADE_MS);
+    };
+    schedule();
+    window.addEventListener(FIRST_MEDIA_READY_EVENT, schedule);
 
     return () => {
       window.clearInterval(interval);
       window.clearTimeout(fadeTimer);
       window.clearTimeout(doneTimer);
+      window.removeEventListener(FIRST_MEDIA_READY_EVENT, schedule);
     };
   }, []);
 

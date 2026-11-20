@@ -9,6 +9,8 @@ import { RecommendedProductsPanel } from "@/components/reels/recommended-product
 
 const mocks = vi.hoisted(() => ({ viewer: "", api: { categories: { list: vi.fn() }, products: { listByCategory: vi.fn(), toggleLike: vi.fn() }, manufacturers: { listAll: vi.fn() } } }));
 vi.mock("@/shared/api", () => ({ getApi: () => mocks.api }));
+// The first-video deferral has its own test (catalog-start.test.ts); here the catalogue starts at once
+vi.mock("./catalog-start", () => ({ whenCatalogMayStart: (start: () => void) => { start(); return () => {}; }, browserCatalogStartEnv: () => ({}) }));
 vi.mock("@/features/auth/session-cookie", () => ({ readBrowserCookie: () => mocks.viewer ? { id: mocks.viewer } : null }));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("@/shared/i18n/regional-context", () => ({ useRegionalSettings: () => ({ t: (key: string, args?: unknown) => key + (args && typeof args === "object" ? JSON.stringify(args) : ""), formatPrice: () => "100", translateUnit: (unit: string) => unit }) }));
