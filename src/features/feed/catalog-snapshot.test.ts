@@ -3,7 +3,7 @@ import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { ApiClient } from "@/shared/api/contracts";
-import { CATALOG_CONCURRENCY, CATALOG_PAGE_SIZE, CATALOG_RETRY_DELAYS_MS, catalogPartitions, isRetryableCatalogError, loadCatalogSnapshot, selectCatalogProducts, shuffleCatalog, withCatalogRetries } from "./catalog-snapshot";
+import { CATALOG_CONCURRENCY, CATALOG_PAGE_SIZE, CATALOG_RETRY_DELAYS_MS, catalogPartitions, isRetryableCatalogError, keepPreviewFirst, loadCatalogSnapshot, selectCatalogProducts, shuffleCatalog, withCatalogRetries } from "./catalog-snapshot";
 import { groupCatalogProducts } from "./use-showcase-products";
 import { ApiError } from "@/shared/api/http-api";
 
@@ -122,5 +122,14 @@ describe("catalogue retries", () => {
     const load = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
     await expect(withCatalogRetries(load, noWait, () => true)).rejects.toThrow();
     expect(load).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("preview ordering", () => {
+  it("keeps preview products first and in order, without duplicates, using the catalogue's copies", () => {
+    const catalogue = [product("a"), product("b"), product("c"), product("d")];
+    expect(keepPreviewFirst(["c", "gone", "a", "c"], catalogue).map((p) => p.id)).toEqual(["c", "a", "b", "d"]);
+    expect(keepPreviewFirst(["c"], catalogue)[0]).toBe(catalogue[2]);
+    expect(keepPreviewFirst([], catalogue)).toBe(catalogue);
   });
 });

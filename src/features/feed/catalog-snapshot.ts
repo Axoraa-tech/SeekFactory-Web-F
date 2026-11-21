@@ -152,6 +152,33 @@ export function invalidateCatalogSnapshot() {
   reusable = null;
 }
 
+/**
+ * How many products the panel shows from the small "recommended" call while the complete catalogue
+ * (~1.4 MB) is still downloading. On slow links (mainland China) that is the difference between
+ * products in a second or two and an empty panel for most of a minute.
+ */
+export const CATALOG_PREVIEW_SIZE = 24;
+
+/**
+ * The full catalogue in visit order, with the preview's products (already on screen) kept first and
+ * in place, so cards do not jump when the catalogue arrives. Preview products the catalogue no
+ * longer has are dropped; the catalogue's copies are used (fresh flags and counts).
+ */
+export function keepPreviewFirst(previewIds: readonly string[], products: Product[]): Product[] {
+  if (previewIds.length === 0) return products;
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const first: Product[] = [];
+  const seen = new Set<string>();
+  for (const id of previewIds) {
+    const product = byId.get(id);
+    if (product && !seen.has(id)) {
+      first.push(product);
+      seen.add(id);
+    }
+  }
+  return [...first, ...products.filter((p) => !seen.has(p.id))];
+}
+
 /** A new immutable order once per completed browse snapshot; slicing never reshuffles it. */
 export function shuffleCatalog<T>(items: T[], random = Math.random): T[] {
   const result = [...items];
