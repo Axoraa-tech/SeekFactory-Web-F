@@ -92,6 +92,37 @@ export async function loadCatalogSnapshot(api: CatalogApi, cancelled = () => fal
   return { categories, manufacturers, products: [...unique.values()] };
 }
 
+/**
+ * Pauses before each automatic retry of a failed catalogue download. Cross-border links (mainland
+ * China to our East Asia servers) often drop one request out of the three the catalogue needs; a
+ * second try usually works, so the visitor should not have to press "Try again" for it.
+ */
+export const CATALOG_RETRY_DELAYS_MS = [2_000, 6_000] as const;
+
+/** Worth another try: no answer at all (connection reset, offline), a timeout, or a server error. */
+export function isRetryableCatalogError(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return true;
+  return error.status >= 500 || error.status === 408 || error.status === 429 || error.status < 400;
+}
+
+/** Runs `load`, retrying retryable failures after each delay in turn; the last failure is thrown. */
+export async function withCatalogRetries<T>(
+  load: () => Promise<T>,
+  wait: (ms: number) => Promise<void>,
+  cancelled: () => boolean = () => false,
+  delays: readonly number[] = CATALOG_RETRY_DELAYS_MS,
+): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await load();
+    } catch (error) {
+      if (attempt >= delays.length || cancelled() || !isRetryableCatalogError(error)) throw error;
+      await wait(delays[attempt]);
+      if (cancelled()) throw error;
+    }
+  }
+}
+
 /** How long a loaded catalogue is reused within this tab (e.g. leaving the feed and coming back). */
 export const CATALOG_REUSE_MS = 2 * 60_000;
 let reusable: { viewer: string; loadedAt: number; snapshot: Promise<CatalogSnapshot> } | null = null;

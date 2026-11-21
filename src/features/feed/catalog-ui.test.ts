@@ -85,11 +85,23 @@ describe("catalog photo panel", () => {
     expect(mocks.api.categories.list).toHaveBeenCalledTimes(1);
     expect(mocks.api.products.listByCategory).toHaveBeenCalledTimes(20);
   }, 30_000);
+  it("retries a dropped catalogue request on its own instead of showing Try again", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mocks.api.products.listByCategory.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(h(Browse));
+    await act(async () => { await vi.advanceTimersByTimeAsync(2_500); });
+    await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(24));
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
   it("shows a complete-catalog error and retry even with photos turned off", async () => {
-    mocks.api.products.listByCategory.mockRejectedValueOnce(new Error("one partition offline"));
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mocks.api.products.listByCategory.mockRejectedValue(new Error("one partition offline"));
     render(h(Browse, { showPhotos: false }));
+    await act(async () => { await vi.advanceTimersByTimeAsync(9_000); });
     await waitFor(() => expect(screen.getByRole("alert")).toBeTruthy());
     expect(screen.queryByText("showcase.single.catalogComplete")).toBeNull();
+    // Back online: "Try again" loads it
+    mocks.api.products.listByCategory.mockImplementation(async (id: string) => products.filter((p) => p.categoryId === id));
     fireEvent.click(screen.getByRole("button", { name: "showcase.single.tryAgain" }));
     await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
     await waitFor(() => expect(screen.queryByRole("status")).toBeNull());
@@ -116,6 +128,18 @@ describe("catalog photo panel", () => {
     expect(screen.getByRole("status")).toBeTruthy();
     // Old promises are cancelled by unmount; no old cards carry over into the next viewer.
     await act(async () => { resolve?.([]); });
+  });
+  it("still shows a slow catalogue that arrives after the 45 s notice", async () => {
+    vi.useFakeTimers();
+    let resolve: ((value: unknown) => void) | undefined;
+    mocks.api.categories.list.mockImplementationOnce(() => new Promise((r) => { resolve = r; }));
+    render(h(Browse));
+    await act(async () => { vi.advanceTimersByTime(45_001); });
+    expect(screen.getByRole("alert")).toBeTruthy();
+    await act(async () => { resolve?.(Array.from({ length: 20 }, (_, i) => ({ id: `c${i}`, slug: `c${i}`, parentId: null }))); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getAllByRole("article")).toHaveLength(24);
   });
   it("times out a stalled full catalog visibly instead of waiting forever", async () => {
     vi.useFakeTimers();

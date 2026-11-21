@@ -6,7 +6,7 @@ import { getApi } from "@/shared/api";
 import { readBrowserCookie } from "@/features/auth/session-cookie";
 import { useProductLikes } from "@/features/engagement/use-product-likes";
 import { browserCatalogStartEnv, whenCatalogMayStart } from "./catalog-start";
-import { loadCatalogSnapshotShared, shuffleCatalog, type CatalogSnapshot } from "./catalog-snapshot";
+import { loadCatalogSnapshotShared, shuffleCatalog, withCatalogRetries, type CatalogSnapshot } from "./catalog-snapshot";
 
 type CatalogState = { status: "loading" | "ready" | "error"; snapshot: CatalogSnapshot | null; retry: () => void; productLikes: ReturnType<typeof useProductLikes> };
 const CatalogContext = createContext<CatalogState | null>(null);
@@ -26,13 +26,16 @@ export function CatalogSnapshotProvider({ enabled, children }: { enabled: boolea
     const viewer = readBrowserCookie()?.id ?? "";
     setState({ status: "loading", snapshot: null });
     let timeout = 0;
+    let retryTimer = 0;
+    const wait = (ms: number) => new Promise<void>((resolve) => { retryTimer = window.setTimeout(resolve, ms); });
     // The first seek video gets the connection first; consumers keep seeing "loading" meanwhile
     const cancelStart = whenCatalogMayStart(() => {
+      // A slow link gets a visible "Try again" after 45 s, but the download keeps going: if it
+      // arrives later the products still appear (and "Try again" reuses the same download).
       timeout = window.setTimeout(() => {
-        cancelled = true;
-        setState({ status: "error", snapshot: null });
+        setState((current) => current.status === "loading" ? { status: "error", snapshot: null } : current);
       }, 45_000);
-      loadCatalogSnapshotShared(getApi(), viewer)
+      withCatalogRetries(() => loadCatalogSnapshotShared(getApi(), viewer), wait, () => cancelled)
         .then((snapshot) => {
           if (cancelled) return;
           if ((readBrowserCookie()?.id ?? "") !== viewer) { retry(); return; }
@@ -44,7 +47,7 @@ export function CatalogSnapshotProvider({ enabled, children }: { enabled: boolea
     // A different account in another tab must not retain this viewer's snapshot on return.
     const checkViewer = () => { if ((readBrowserCookie()?.id ?? "") !== viewer) retry(); };
     window.addEventListener("focus", checkViewer);
-    return () => { cancelled = true; cancelStart(); window.clearTimeout(timeout); window.removeEventListener("focus", checkViewer); };
+    return () => { cancelled = true; cancelStart(); window.clearTimeout(timeout); window.clearTimeout(retryTimer); window.removeEventListener("focus", checkViewer); };
   }, [enabled, attempt, retry]);
   return <CatalogContext.Provider value={{ ...state, retry, productLikes }}>
     {enabled && state.status === "loading" && <p role="status" className="mb-3 text-sm text-ink-muted">{t("showcase.single.catalogLoading")}</p>}

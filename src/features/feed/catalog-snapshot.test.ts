@@ -3,7 +3,7 @@ import type { Category } from "@/entities/category";
 import type { Manufacturer } from "@/entities/manufacturer";
 import type { Product } from "@/entities/product";
 import type { ApiClient } from "@/shared/api/contracts";
-import { CATALOG_CONCURRENCY, CATALOG_PAGE_SIZE, catalogPartitions, loadCatalogSnapshot, selectCatalogProducts, shuffleCatalog } from "./catalog-snapshot";
+import { CATALOG_CONCURRENCY, CATALOG_PAGE_SIZE, CATALOG_RETRY_DELAYS_MS, catalogPartitions, isRetryableCatalogError, loadCatalogSnapshot, selectCatalogProducts, shuffleCatalog, withCatalogRetries } from "./catalog-snapshot";
 import { groupCatalogProducts } from "./use-showcase-products";
 import { ApiError } from "@/shared/api/http-api";
 
@@ -94,5 +94,33 @@ describe("complete public catalog snapshot", () => {
     const products = Array.from({ length: 31 }, (_, i) => product(`${i}`));
     expect(groupCatalogProducts(products, [manufacturer], null)[0].products).toHaveLength(31);
     expect(groupCatalogProducts(products, [manufacturer], new Set())).toEqual([]);
+  });
+});
+
+describe("catalogue retries", () => {
+  const noWait = () => Promise.resolve();
+  it("retries dropped connections and server errors, then succeeds", async () => {
+    const load = vi.fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockRejectedValueOnce(new ApiError("Bad gateway", 502))
+      .mockResolvedValueOnce("ok");
+    await expect(withCatalogRetries(load, noWait)).resolves.toBe("ok");
+    expect(load).toHaveBeenCalledTimes(3);
+  });
+  it("gives up after the last retry with the last error", async () => {
+    const load = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    await expect(withCatalogRetries(load, noWait)).rejects.toThrow("Failed to fetch");
+    expect(load).toHaveBeenCalledTimes(CATALOG_RETRY_DELAYS_MS.length + 1);
+  });
+  it("does not retry a request the server refused", async () => {
+    const load = vi.fn().mockRejectedValue(new ApiError("Forbidden", 403));
+    await expect(withCatalogRetries(load, noWait)).rejects.toThrow("Forbidden");
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(isRetryableCatalogError(new ApiError("Too many", 429))).toBe(true);
+  });
+  it("stops retrying once the page no longer needs the catalogue", async () => {
+    const load = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    await expect(withCatalogRetries(load, noWait, () => true)).rejects.toThrow();
+    expect(load).toHaveBeenCalledTimes(1);
   });
 });
