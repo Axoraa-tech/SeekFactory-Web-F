@@ -2,8 +2,9 @@
  * How a seek video is played. An adaptive stream (HLS: small and large quality in short pieces) starts
  * quickly on weak connections and steps up when it can; the plain MP4 is the fallback everywhere.
  *
- * - "native-hls": Safari / iOS play the playlist URL directly.
- * - "hlsjs":      other browsers via hls.js (Media Source Extensions), loaded only when a video needs it.
+ * - "hlsjs":      wherever Media Source Extensions exist (Chrome, Edge, Firefox, Safari, iOS 17.1+): hls.js
+ *                 starts at the small quality, buffers ahead and keeps what it downloaded.
+ * - "native-hls": browsers without MSE that play the playlist URL themselves (older iPhones).
  * - "mp4":        no stream yet, streaming switched off, no support, or the stream failed.
  */
 export type StreamMode = "native-hls" | "hlsjs" | "mp4";
@@ -28,9 +29,10 @@ export function chooseStreamMode({
   failed: boolean;
 }): StreamMode {
   if (!hlsUrl || !enabled || failed) return "mp4";
-  // Safari supports both; its own player is lighter and needs no extra download
-  if (nativeHls) return "native-hls";
+  // hls.js first: Chrome now also plays HLS natively, but its own player jumps to the large quality and
+  // keeps a short buffer, so on slow links (mainland China) seeks stall on play, resume and scroll
   if (mediaSource) return "hlsjs";
+  if (nativeHls) return "native-hls";
   return "mp4";
 }
 

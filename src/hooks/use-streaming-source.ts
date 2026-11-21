@@ -19,7 +19,7 @@ type HlsInstance = {
 
 /**
  * The `src` a seek <video> should render with, picking the adaptive stream when there is one:
- * Safari plays it natively, other browsers through hls.js (attached here, so `src` stays undefined),
+ * hls.js wherever Media Source exists, the browser's own player otherwise (attached here, so `src` stays undefined),
  * and any stream error switches the video to its plain file for good. With `attached` false the video
  * holds nothing (see useMediaWindow). `preload` "auto" lets hls.js buffer; otherwise it only reads the
  * playlist, so cards waiting below the screen cost almost nothing.
@@ -79,9 +79,12 @@ export function useStreamingSource(
           startLevel: 0,             // small quality first: the first frame arrives fast on weak links
           capLevelToPlayerSize: true,
           autoStartLoad: preload === "auto",
-          maxBufferLength: 10,       // a feed: keep a short buffer, not whole videos
-          maxMaxBufferLength: 30,
-          backBufferLength: 10,
+          // Seeks are short: buffer well ahead and keep what was downloaded, so pause/resume and the
+          // loop never fetch again and a slow link (mainland China) does not stall mid-video
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+          backBufferLength: Infinity,
+          abrEwmaDefaultEstimate: 500_000, // assume a modest link until measured: no early jump to large
         }) as unknown as HlsInstance;
         instance.on(Hls.Events.ERROR, (_event, data) => {
           if (!data?.fatal) return;
