@@ -7,7 +7,7 @@ import { invalidateCatalogSnapshot } from "./catalog-snapshot";
 import { useRecommendedProducts } from "./use-recommended-products";
 import { RecommendedProductsPanel } from "@/components/reels/recommended-products-panel";
 
-const mocks = vi.hoisted(() => ({ viewer: "", api: { categories: { list: vi.fn() }, products: { listByCategory: vi.fn(), toggleLike: vi.fn() }, manufacturers: { listAll: vi.fn() } } }));
+const mocks = vi.hoisted(() => ({ viewer: "", api: { categories: { list: vi.fn() }, products: { listByCategory: vi.fn(), toggleLike: vi.fn(), listRecommended: vi.fn() }, manufacturers: { listAll: vi.fn() } } }));
 vi.mock("@/shared/api", () => ({ getApi: () => mocks.api }));
 // The first-video deferral has its own test (catalog-start.test.ts); here the catalogue starts at once
 vi.mock("./catalog-start", () => ({ whenCatalogMayStart: (start: () => void) => { start(); return () => {}; }, browserCatalogStartEnv: () => ({}) }));
@@ -39,6 +39,8 @@ beforeEach(() => {
   mocks.api.manufacturers.listAll.mockReset().mockResolvedValue([{ id: "m", slug: "m", name: "Factory", verified: true }]);
   mocks.api.products.listByCategory.mockReset().mockImplementation(async (id: string) => products.filter((p) => p.categoryId === id));
   mocks.api.products.toggleLike.mockReset().mockResolvedValue({ liked: true, likesCount: 8 });
+  // No quick preview unless a test asks for one
+  mocks.api.products.listRecommended.mockReset().mockResolvedValue({ personalized: false, products: [], manufacturers: [] });
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
@@ -85,11 +87,23 @@ describe("catalog photo panel", () => {
     expect(mocks.api.categories.list).toHaveBeenCalledTimes(1);
     expect(mocks.api.products.listByCategory).toHaveBeenCalledTimes(20);
   }, 30_000);
+  it("retries a dropped catalogue request on its own instead of showing Try again", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mocks.api.products.listByCategory.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(h(Browse));
+    await act(async () => { await vi.advanceTimersByTimeAsync(2_500); });
+    await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(24));
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
   it("shows a complete-catalog error and retry even with photos turned off", async () => {
-    mocks.api.products.listByCategory.mockRejectedValueOnce(new Error("one partition offline"));
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mocks.api.products.listByCategory.mockRejectedValue(new Error("one partition offline"));
     render(h(Browse, { showPhotos: false }));
+    await act(async () => { await vi.advanceTimersByTimeAsync(9_000); });
     await waitFor(() => expect(screen.getByRole("alert")).toBeTruthy());
     expect(screen.queryByText("showcase.single.catalogComplete")).toBeNull();
+    // Back online: "Try again" loads it
+    mocks.api.products.listByCategory.mockImplementation(async (id: string) => products.filter((p) => p.categoryId === id));
     fireEvent.click(screen.getByRole("button", { name: "showcase.single.tryAgain" }));
     await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
     await waitFor(() => expect(screen.queryByRole("status")).toBeNull());
@@ -116,6 +130,44 @@ describe("catalog photo panel", () => {
     expect(screen.getByRole("status")).toBeTruthy();
     // Old promises are cancelled by unmount; no old cards carry over into the next viewer.
     await act(async () => { resolve?.([]); });
+  });
+  it("shows quick preview products while the catalogue downloads, then keeps them first", async () => {
+    let release: (() => void) | undefined;
+    const gate = new Promise<void>((r) => { release = r; });
+    mocks.api.categories.list.mockImplementationOnce(async () => {
+      await gate;
+      return Array.from({ length: 20 }, (_, i) => ({ id: `c${i}`, slug: `c${i}`, parentId: null }));
+    });
+    mocks.api.products.listRecommended.mockResolvedValue({
+      personalized: false,
+      products: [products[500], products[7]],
+      manufacturers: [{ id: "m", slug: "m", name: "Factory", verified: true, logoUrl: "/logo.svg", country: "China" }],
+    });
+    render(h(Browse));
+    await waitFor(() => expect(ids()).toEqual(["/products/product-500", "/products/product-7"]));
+    expect(screen.queryByRole("button", { name: "showcase.single.loadMoreProducts" })).toBeNull();
+    await act(async () => { release?.(); });
+    await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(24));
+    expect(ids().slice(0, 2)).toEqual(["/products/product-500", "/products/product-7"]);
+  });
+  it("does not show the unfiltered preview for a search", async () => {
+    mocks.api.categories.list.mockImplementationOnce(() => new Promise(() => {}));
+    mocks.api.products.listRecommended.mockResolvedValue({ personalized: false, products: [products[1]], manufacturers: [] });
+    render(h(Browse, { query: "Product 6" }));
+    await act(async () => { await Promise.resolve(); });
+    expect(screen.queryAllByRole("article")).toHaveLength(0);
+  });
+  it("still shows a slow catalogue that arrives after the 45 s notice", async () => {
+    vi.useFakeTimers();
+    let resolve: ((value: unknown) => void) | undefined;
+    mocks.api.categories.list.mockImplementationOnce(() => new Promise((r) => { resolve = r; }));
+    render(h(Browse));
+    await act(async () => { vi.advanceTimersByTime(45_001); });
+    expect(screen.getByRole("alert")).toBeTruthy();
+    await act(async () => { resolve?.(Array.from({ length: 20 }, (_, i) => ({ id: `c${i}`, slug: `c${i}`, parentId: null }))); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getAllByRole("article")).toHaveLength(24);
   });
   it("times out a stalled full catalog visibly instead of waiting forever", async () => {
     vi.useFakeTimers();

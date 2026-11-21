@@ -49,7 +49,9 @@ describe("complete Explore product results", () => {
 
   it("wires Explore to the full catalogue and renders page items with the full total", () => {
     const source = readFileSync(new URL("../../app/(buyer)/explore/page.tsx", import.meta.url), "utf8");
-    expect(source).toContain("await loadCatalogSnapshot(api)");
+    // Category pages load only that category; everything else is the complete catalogue
+    expect(source).toContain("await loadExploreSnapshot(api,");
+    expect(readFileSync(new URL("./load-explore-snapshot.ts", import.meta.url), "utf8")).toContain("if (!category) return loadCatalogSnapshot(api);");
     expect(source).not.toContain("api.search.query");
     expect(source).toContain("{productPage.total}");
     expect(source).toContain("productPage.items.map");
