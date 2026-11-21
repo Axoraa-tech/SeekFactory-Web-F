@@ -12,8 +12,12 @@ describe("chooseStreamMode", () => {
     expect(chooseStreamMode({ ...base, failed: true, nativeHls: true })).toBe("mp4");
   });
 
-  it("prefers the browser's own HLS player (Safari, iOS)", () => {
-    expect(chooseStreamMode({ ...base, nativeHls: true, mediaSource: true })).toBe("native-hls");
+  it("prefers hls.js even where the browser plays HLS itself (Chrome, Safari)", () => {
+    expect(chooseStreamMode({ ...base, nativeHls: true, mediaSource: true })).toBe("hlsjs");
+  });
+
+  it("uses the browser's own player where there is no Media Source (older iPhones)", () => {
+    expect(chooseStreamMode({ ...base, nativeHls: true })).toBe("native-hls");
   });
 
   it("uses hls.js where Media Source Extensions exist", () => {
