@@ -142,6 +142,16 @@ export interface AdminShowcase {
   updatedBy?: string;
 }
 
+export type AdminAlertSettings = {
+  enabled: boolean;
+  recipients: string[];
+  newUser: boolean;
+  newManufacturer: boolean;
+  newContent: boolean;
+  newPayment: boolean;
+  updatedAt?: string | null;
+};
+
 export class AdminApiError extends Error {
   constructor(message: string, public status: number) {
     super(message);
@@ -229,6 +239,12 @@ export const adminData = {
   /** Buyer-site order of sibling categories (main categories, or one category's subcategories). */
   reorderCategories: (ids: string[]) =>
     adminRequest<unknown>("categories/order", { method: "PUT", body: JSON.stringify({ ids }) }),
+
+  /** Email alerts to admins: on/off, recipients and which events. */
+  alerts: () => adminRequest<AdminAlertSettings>("settings/alerts"),
+  saveAlerts: (s: AdminAlertSettings) =>
+    adminRequest<AdminAlertSettings>("settings/alerts", { method: "PUT", body: JSON.stringify(s) }),
+  testAlerts: () => adminRequest<{ sent: number }>("settings/alerts/test", { method: "POST" }),
 
   showcase: () => adminRequest<AdminShowcase>("settings/feed-showcase"),
   publishShowcase: (s: Pick<AdminShowcase, "mode" | "autoplay" | "showProfile" | "showPhotos">) =>
