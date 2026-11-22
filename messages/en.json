@@ -1180,6 +1180,8 @@
       "pausedHiddenFromBuyers": "Paused • hidden from buyers",
       "active": "Active",
       "datasheet": "Datasheet",
+      "shareBuyerLink": "Share the buyer page link for this product",
+      "shareWhenLive": "Share is available once the product is live",
       "viewPublicMarketplaceListing": "View Public Marketplace Listing",
       "editProduct": "Edit product",
       "showThisProductToBuyers": "Show this product to buyers again",

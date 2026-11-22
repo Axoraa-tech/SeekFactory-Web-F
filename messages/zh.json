@@ -1180,6 +1180,8 @@
       "pausedHiddenFromBuyers": "已暂停 • 对采购商隐藏",
       "active": "在售",
       "datasheet": "规格书",
+      "shareBuyerLink": "分享该产品的买家页面链接",
+      "shareWhenLive": "产品上架后即可分享",
       "viewPublicMarketplaceListing": "查看公开商品页",
       "editProduct": "编辑产品",
       "showThisProductToBuyers": "重新向采购商展示该产品",

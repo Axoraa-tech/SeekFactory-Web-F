@@ -226,6 +226,10 @@ export const adminData = {
     adminRequest<void>(`pricing/plans/${id}`, { method: "PUT", body: JSON.stringify(plan) }),
   deletePlan: (id: string) => adminRequest<void>(`pricing/plans/${id}`, { method: "DELETE" }),
 
+  /** Buyer-site order of sibling categories (main categories, or one category's subcategories). */
+  reorderCategories: (ids: string[]) =>
+    adminRequest<unknown>("categories/order", { method: "PUT", body: JSON.stringify({ ids }) }),
+
   showcase: () => adminRequest<AdminShowcase>("settings/feed-showcase"),
   publishShowcase: (s: Pick<AdminShowcase, "mode" | "autoplay" | "showProfile" | "showPhotos">) =>
     adminRequest<AdminShowcase>("settings/feed-showcase", { method: "PUT", body: JSON.stringify(s) }),

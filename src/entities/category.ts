@@ -33,5 +33,7 @@ export type Category = {
   listingCount: number;
   parentId: string | null;
   icon: CategoryIconKey;
+  /** Admin-chosen position among siblings (0 = first); null/absent follows, A-Z. */
+  displayOrder?: number | null;
   subcategories?: Category[];
 };
