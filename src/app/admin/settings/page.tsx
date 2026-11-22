@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Copy, Loader2, ShieldAlert, ShieldCheck, UserPlus } from "lucide-react";
 import { AdminApiError, adminData, type AdminUser } from "@/shared/api/admin-api";
 import { DataTable, PageHeader, Pill, formatDate, initials, useAdminList, useToast, type Column } from "@/features/admin/ui";
+import { EmailAlerts } from "@/features/admin/email-alerts";
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -62,7 +63,9 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader title="Settings" subtitle="Administrator accounts and access" />
+      <PageHeader title="Settings" subtitle="Administrator accounts, access and email alerts" />
+
+      <EmailAlerts />
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="text-base font-medium text-slate-900">Invite an administrator</h3>
