@@ -17,6 +17,7 @@ import {
 import { CommentsModalLazy } from "@/components/reels/comments-modal-lazy";
 import { useSeekAutoplay } from "@/hooks/use-seek-autoplay";
 import { useMediaWindow } from "@/hooks/use-media-window";
+import { posterFor } from "@/hooks/media-window";
 import { useStreamingSource } from "@/hooks/use-streaming-source";
 import { signalFirstMediaReady } from "@/shared/lib/video-source";
 import { ProductActionBar } from "@/components/ui/product-action-bar";
@@ -190,7 +191,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               <video
                 ref={videoRef}
                 src={videoSrc}
-                poster={mediaThumb(reel.posterUrl, 1280)}
+                poster={posterFor(mediaThumb(reel.posterUrl, 1280), media)}
                 loop
                 playsInline
                 muted={isMuted}

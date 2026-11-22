@@ -30,3 +30,13 @@ describe("pickNext", () => {
     expect(pickNext([], 800)).toBeNull();
   });
 });
+
+import { posterFor } from "./media-window";
+describe("posterFor", () => {
+  it("gives a poster only to cards near the screen", () => {
+    expect(posterFor("p.jpg", { preload: "auto", attached: true })).toBe("p.jpg");
+    expect(posterFor("p.jpg", { preload: "metadata", attached: true })).toBe("p.jpg");
+    expect(posterFor("p.jpg", { preload: "none", attached: true })).toBeUndefined();
+    expect(posterFor("p.jpg", { preload: "none", attached: false })).toBeUndefined();
+  });
+});

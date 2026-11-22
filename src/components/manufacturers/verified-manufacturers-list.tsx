@@ -223,7 +223,7 @@ function ExploreLayout({ manufacturers }: { manufacturers: Manufacturer[] }) {
                 </div>
                 <div className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-lg overflow-hidden border border-white shadow-xs bg-white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={mediaThumb(m.logoUrl, 160)} alt="" className="h-full w-full object-cover" />
+                  <img loading="lazy" decoding="async" src={mediaThumb(m.logoUrl, 160)} alt="" className="h-full w-full object-cover" />
                 </div>
               </div>
 

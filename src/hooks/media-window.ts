@@ -37,6 +37,15 @@ export function mediaLoadFor({
   return { preload: eager ? "metadata" : "none", attached: true };
 }
 
+/**
+ * A <video poster> downloads as soon as the element renders (it is not lazy like <img>), so cards
+ * that are not near the screen get none: a long feed would otherwise fetch every large poster up
+ * front and compete with the first video on slow links.
+ */
+export function posterFor<T>(poster: T, load: MediaLoad): T | undefined {
+  return load.preload === "none" ? undefined : poster;
+}
+
 /** The upcoming card: the closest one starting below the screen. */
 export function pickNext<T>(candidates: Iterable<[T, number]>, viewportBottom: number): T | null {
   let best: T | null = null;
