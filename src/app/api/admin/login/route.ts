@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      // A sleeping or restarting API must not hold the sign-in page forever
+      signal: AbortSignal.timeout(20_000),
     });
 
     const data = (await readBackendJson(backendRes)) as {

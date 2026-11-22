@@ -242,6 +242,9 @@ export const adminData = {
     adminRequest<{ token: string }>("auth/invite", { method: "POST", body: JSON.stringify({ email }) }),
 };
 
+/** How long sign-in may take before the page gives up and lets the admin retry. */
+const LOGIN_TIMEOUT_MS = 25_000;
+
 export const adminApi = {
   /**
    * Set up admin password using an invite token.
@@ -270,13 +273,20 @@ export const adminApi = {
    * Returns access token on success.
    */
   async login(email: string, password: string, totpCode: string) {
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, code: totpCode }),
-    });
+    // Never spin forever: a server that does not answer becomes a clear, retryable error
+    let res: Response;
+    try {
+      res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, code: totpCode }),
+        signal: AbortSignal.timeout(LOGIN_TIMEOUT_MS),
+      });
+    } catch {
+      throw new Error("The server is taking too long to answer. Please try again with a new code.");
+    }
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({ success: false, message: "Sign-in failed. Please try again." }));
     if (!res.ok || !data.success) {
       throw new Error(data.message || "Invalid credentials");
     }

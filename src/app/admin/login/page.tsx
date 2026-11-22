@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Shield, Mail, Lock, KeyRound, Loader2, Eye, EyeOff } from "lucide-react";
@@ -25,6 +25,11 @@ export default function AdminLoginPage() {
    * whether a password was right before they needed a second factor. The real
    * login now happens once, in step 2, with the real code.
    */
+  // Download the dashboard while the admin types the code, so it opens at once after sign-in
+  useEffect(() => {
+    if (step === 2) router.prefetch("/admin/dashboard");
+  }, [step, router]);
+
   const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -49,7 +54,7 @@ export default function AdminLoginPage() {
 
       await adminApi.login(email, password, totpCode);
       // Success: the session cookie is set by the server route
-      router.push("/admin/dashboard");
+      router.replace("/admin/dashboard");
     } catch (err: unknown) {
       setError((err as Error).message || "Invalid credentials or TOTP code.");
       setIsLoading(false);
