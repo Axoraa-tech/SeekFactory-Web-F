@@ -263,6 +263,8 @@ interface BackendCategory {
   listing_count?: number;
   parentId?: string | null;
   listingCount?: number;
+  displayOrder?: number | null;
+  display_order?: number | null;
 }
 
 interface BackendCommentReply {
@@ -2025,6 +2027,7 @@ function normalizeCategory(c: BackendCategory): Category {
     listingCount: c.listing_count || c.listingCount || 0,
     icon: (c.icon || "other") as CategoryIconKey,
     parentId: c.parent_id || c.parentId || null,
+    displayOrder: c.displayOrder ?? c.display_order ?? null,
   };
 }
 

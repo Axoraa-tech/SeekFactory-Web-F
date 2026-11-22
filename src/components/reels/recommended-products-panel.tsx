@@ -5,7 +5,10 @@ import { SupplierName } from "@/features/subscription";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Shuffle, Zap, FileText, Pause, Play, Repeat2, Heart } from "lucide-react";
+import { PackageSearch, PackageX, RotateCw, ShieldCheck, ShoppingCart, Shuffle, Zap, FileText, Pause, Play, Repeat2, ThumbsUp, MessageCircle, BarChart2, Bookmark } from "lucide-react";
+import { useRequireSignIn } from "@/features/engagement/use-engagement";
+import { getApi } from "@/shared/api";
+import { ApiError } from "@/shared/api/http-api";
 import { useCatalogSnapshot } from "@/features/feed/catalog-snapshot-provider";
 import { formatCount } from "@/shared/lib/format";
 import { usePhotoPanelMotion } from "@/hooks/use-photo-panel-motion";
@@ -158,6 +161,9 @@ export function RecommendedProductsPanel({ variant, recommended }: Props) {
   );
 }
 
+/** One icon button in a product card's action row. */
+const ACTION = "sf-btn-toggle flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-ink-muted transition hover:bg-white hover:text-brand-blue disabled:opacity-50";
+
 /** Explore-style product card with its own Add to cart / Buy now. */
 function RecommendedProductCard({
   product: p,
@@ -179,6 +185,18 @@ function RecommendedProductCard({
   const sharing = useProductShare(p.slug, p.name);
   const { productLikes } = useCatalogSnapshot();
   const like = productLikes.getState(p);
+  const requireSignIn = useRequireSignIn();
+  const [savedOverride, setSavedOverride] = useState<boolean | null>(null);
+  const saved = savedOverride ?? Boolean(p.savedByMe);
+  const toggleSave = async () => {
+    setSavedOverride(!saved);
+    try {
+      setSavedOverride((await getApi().products.toggleSave(p.id)).saved);
+    } catch (err) {
+      setSavedOverride(saved);
+      if (err instanceof ApiError && err.status === 401) requireSignIn();
+    }
+  };
   const href = `/products/${p.slug}`;
   const images = p.imageUrls?.length ? p.imageUrls : [p.imageUrl];
   const hasPrice = p.priceInr > 0;
@@ -215,23 +233,41 @@ function RecommendedProductCard({
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-3">
-        <div className="flex items-center gap-2">
+        {/* Same icons as a seek: ask the factory, share, like, views, save (icons only, no labels) */}
+        <div className="flex items-center justify-between rounded-xl bg-canvas/60 p-0.5 text-xs">
+          {factory?.slug && (
+            <Link prefetch={false} href={`/messages?with=${factory.slug}`}
+              aria-label={t("showcase.products.askFactory")} title={t("showcase.products.askFactory")}
+              className={ACTION}>
+              <MessageCircle className="h-4 w-4" />
+            </Link>
+          )}
+          <button type="button" disabled={sharing.pending} onClick={(event) => { event.stopPropagation(); void sharing.share(); }}
+            aria-label={t("showcase.single.shareProduct")}
+            title={sharing.status === "shared" ? t("showcase.single.productShared") : sharing.status === "error" ? t("showcase.single.productShareFailed") : t("showcase.single.shareProduct")}
+            className={cn(ACTION, sharing.status === "shared" && "text-brand-blue")}>
+            <Repeat2 className="h-4 w-4" />
+          </button>
           <button type="button" disabled={like.pending || like.likes === undefined}
             onClick={(event) => { event.stopPropagation(); void productLikes.toggleLike(p); }}
             aria-pressed={like.liked} aria-label={t(like.liked ? "showcase.single.unlikeProduct" : "showcase.single.likeProduct")}
             title={t(like.likes === undefined ? "showcase.single.productLikesUnavailable" : like.liked ? "showcase.single.unlikeProduct" : "showcase.single.likeProduct")}
-            className={cn("sf-btn-toggle inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold hover:bg-canvas disabled:opacity-50", like.liked ? "text-rose-600" : "text-ink-muted")}>
-            <Heart className={cn("h-4 w-4", like.liked && "fill-rose-500")} />
-            {like.likes !== undefined && <span className="tabular-nums">{formatCount(like.likes)}</span>}
+            className={cn(ACTION, like.liked && "text-brand-blue")}>
+            <ThumbsUp className={cn("h-4 w-4", like.liked && "fill-brand-blue")} />
+            {like.likes !== undefined && <span className="text-[11px] tabular-nums">{formatCount(like.likes)}</span>}
           </button>
-          <button type="button" disabled={sharing.pending} onClick={(event) => { event.stopPropagation(); void sharing.share(); }}
-            aria-label={t("showcase.single.shareProduct")} title={t("showcase.single.shareProduct")}
-            className="sf-btn-toggle inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-ink-muted hover:bg-canvas disabled:opacity-50">
-            <Repeat2 className="h-4 w-4" />{t("showcase.single.shareProduct")}
+          {p.viewsCount !== undefined && (
+            <span title={t("seek.viewCount", { count: formatCount(p.viewsCount) })}
+              className="flex flex-1 cursor-default items-center justify-center gap-1 py-1.5 text-neutral-500">
+              <BarChart2 className="h-4 w-4" />
+              <span className="text-[11px] tabular-nums">{formatCount(p.viewsCount)}</span>
+            </span>
+          )}
+          <button type="button" onClick={(event) => { event.stopPropagation(); void toggleSave(); }}
+            aria-pressed={saved} aria-label={saved ? t("common.saved") : t("common.save")} title={saved ? t("common.saved") : t("common.save")}
+            className={cn(ACTION, saved && "text-brand-blue")}>
+            <Bookmark className={cn("h-4 w-4", saved && "fill-brand-blue")} />
           </button>
-          <span role="status" className="text-[11px] text-ink-muted">
-            {sharing.status === "shared" ? t("showcase.single.productShared") : sharing.status === "error" ? t("showcase.single.productShareFailed") : ""}
-          </span>
         </div>
         {like.error && <p role="alert" className="text-[11px] text-rose-600">{t("showcase.single.productLikeFailed")}</p>}
         <Link prefetch={false}

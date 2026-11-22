@@ -23,6 +23,7 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { useTranslations } from "next-intl";
 import { useRegionalSettings } from "@/shared/i18n/regional-context";
 import { mediaThumb } from "@/shared/api/http-api";
+import { ShareProductButton } from "../share-product-button";
 
 type Props = {
   products: SellerProduct[];
@@ -303,6 +304,9 @@ export function ProductsTab({
                   <Eye className="h-3.5 w-3.5" />
                   <span>{t("common.view")}</span>
                 </Link>
+
+                {/* Shares the public buyer page, not this hub */}
+                <ShareProductButton slug={product.slug} name={product.name} disabled={product.status !== "Active"} />
 
                 <select
                   value={product.stockStatus}

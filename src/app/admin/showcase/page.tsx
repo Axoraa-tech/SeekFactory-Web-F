@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Monitor, Smartphone, Tablet, Upload, RotateCcw } from "lucide-react";
 import { AdminApiError, adminData, type AdminShowcase } from "@/shared/api/admin-api";
 import { PageHeader, Pill, Toggle, formatDate, useToast } from "@/features/admin/ui";
+import { CategoryOrder } from "@/features/admin/category-order";
 import type { ShowcaseMode } from "@/features/feed/load-showcase";
 
 type Draft = Pick<AdminShowcase, "mode" | "autoplay" | "showProfile" | "showPhotos">;
@@ -310,6 +311,8 @@ export default function AdminShowcasePage() {
               />
             </div>
           </section>
+
+          <CategoryOrder />
 
           <section className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-xs text-slate-600 space-y-1.5">
             <p className="font-medium text-slate-900">Responsive behaviour ({layout.title.toLowerCase()})</p>

@@ -68,7 +68,8 @@ describe("catalog photo panel", () => {
     const href = control.closest("article")!.querySelector("a")!.getAttribute("href");
     fireEvent.click(control);
     await waitFor(() => expect(share).toHaveBeenCalledWith({ title: expect.any(String), url: `${window.location.origin}${href}` }));
-    await waitFor(() => expect(screen.getByText("showcase.single.productShared")).toBeTruthy());
+    // Icon only (no label): the result shows as the button's tooltip
+    await waitFor(() => expect(control.getAttribute("title")).toBe("showcase.single.productShared"));
   });
   it("reaches all634 unique products in stable24-card pages and survives LINE/SIDE variant changes", async () => {
     const view = render(h(Browse));
