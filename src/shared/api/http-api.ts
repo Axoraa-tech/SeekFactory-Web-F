@@ -1,3 +1,4 @@
+import { DIRECT_THUMBS, directThumbUrl } from "@/shared/lib/direct-thumbs";
 import { rangeMax } from "@/shared/lib/price-range";
 import type {
   ApiClient,
@@ -1849,6 +1850,8 @@ export function mediaThumb(url: string | undefined, width: MediaThumbWidth): str
   const key = CDN_MEDIA_PREFIX && url.startsWith(CDN_MEDIA_PREFIX) ? `/media/${url.slice(CDN_MEDIA_PREFIX.length)}` : url;
   const match = key.match(RESIZABLE_MEDIA);
   if (!match) return url;
+  // Straight from storage (no API round trip); a missing copy falls back to the API in the browser
+  if (DIRECT_THUMBS && CDN_MEDIA_PREFIX) return directThumbUrl(CDN_MEDIA_PREFIX, match[1], width);
   const path = `${BACKEND_MEDIA_PREFIX}${match[1]}?w=${width}`;
   if (typeof window !== "undefined" && window.location.protocol === "https:" && MEDIA_ORIGIN.startsWith("http://")) {
     return `/api/proxy${path}`;

@@ -7,6 +7,7 @@ import type { FeedItem } from "@/shared/api/contracts";
 import type { FeedShowcase } from "@/features/feed/load-showcase";
 import { mediaThumb } from "@/shared/api/http-api";
 import { useMediaWindow } from "@/hooks/use-media-window";
+import { posterFor } from "@/hooks/media-window";
 import { useStreamingSource } from "@/hooks/use-streaming-source";
 import { signalFirstMediaReady, whenPosterLoaded } from "@/shared/lib/video-source";
 
@@ -131,7 +132,7 @@ function SeekMedia({ item, play, eager, first, autoplay }: { item: FeedItem; pla
       <video
         ref={ref}
         src={videoSrc}
-        poster={mediaThumb(item.reel.posterUrl, 1280)}
+        poster={posterFor(mediaThumb(item.reel.posterUrl, 1280), media)}
         muted
         loop
         playsInline

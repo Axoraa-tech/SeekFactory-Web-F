@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { preconnect, prefetchDNS } from "react-dom";
 import { resourceHintOrigins } from "@/shared/lib/resource-hints";
+import { DIRECT_THUMBS, thumbFallbackScript } from "@/shared/lib/direct-thumbs";
 
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { ToastProvider } from "@/components/ui/toast";
@@ -43,6 +44,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={locale === "zh" ? "zh-CN" : "en"} suppressHydrationWarning>
       <body className={`${sans.variable} font-sans antialiased`}>
+        {DIRECT_THUMBS && (
+          // Before any image: a missing direct thumbnail switches to the API, which makes it
+          <script dangerouslySetInnerHTML={{ __html: thumbFallbackScript((process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/+$/, "")) }} />
+        )}
         <NextIntlClientProvider>
         <RegionalSettingsProvider>
           <ToastProvider>

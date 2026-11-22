@@ -6,6 +6,7 @@
 #   Variable NEXT_PUBLIC_GOOGLE_CLIENT_ID  optional; empty shows the "coming soon" notice
 #   Variable NEXT_PUBLIC_MEDIA_BASE_URL    optional; empty loads media via the API
 #   Variable NEXT_PUBLIC_HLS_ENABLED       optional; "true" plays adaptive streams (HLS) when the API has them
+#   Variable NEXT_PUBLIC_DIRECT_THUMBS     optional; "true" loads photo thumbnails straight from storage
 name: deploy-azure-web
 
 # Manual only (Actions → deploy-azure-web → Run workflow) while the code is still changing daily
@@ -36,6 +37,7 @@ jobs:
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
           NEXT_PUBLIC_MEDIA_BASE_URL: ${{ vars.NEXT_PUBLIC_MEDIA_BASE_URL }}
           NEXT_PUBLIC_HLS_ENABLED: ${{ vars.NEXT_PUBLIC_HLS_ENABLED }}
+          NEXT_PUBLIC_DIRECT_THUMBS: ${{ vars.NEXT_PUBLIC_DIRECT_THUMBS }}
           NEXT_TELEMETRY_DISABLED: 1
         run: npm run build
 
