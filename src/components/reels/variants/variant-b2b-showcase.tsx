@@ -351,8 +351,9 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             </div>
           </div>
 
-          {/* BELOW the video: price and order actions */}
-          <div className={cn("glass-tile rounded-2xl px-3", fill ? "flex h-[52px] items-center [&>*]:w-full" : "py-2.5")}>
+          {/* BELOW the video: order actions and engagement in one panel (no gap between them) */}
+          <div className="glass-tile overflow-hidden rounded-2xl">
+          <div className={cn("px-3", fill ? "flex h-[52px] items-center [&>*]:w-full" : "py-2.5")}>
             <ProductActionBar
               productId={product?.id}
               productName={product?.name}
@@ -369,8 +370,8 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
             />
           </div>
 
-          {/* DISTINCT DESIGN 3: Industrial Segmented 5-Button Bar (Thin & Compact) */}
-          <div className="glass-tile flex select-none items-center justify-between rounded-2xl p-1 text-xs">
+          {/* Engagement bar: comments, reposts, likes, views, save */}
+          <div className="flex select-none items-center justify-between border-t border-[rgba(28,22,22,0.06)] p-1 text-xs">
 
             {/* 1. Comments */}
             <button
@@ -426,6 +427,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
               <Bookmark className={cn("h-3.5 w-3.5", saved && "fill-brand-blue")} />
               <span className="font-medium text-[11px]">{saved ? t("common.saved") : t("common.save")}</span>
             </button>
+          </div>
           </div>
         </div>
       </article>
