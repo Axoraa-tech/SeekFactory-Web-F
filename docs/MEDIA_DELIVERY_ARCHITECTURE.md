@@ -77,17 +77,13 @@ HTML ─┬─► JavaScript ─► page starts ─► player attaches (files al
 
 ## 4. Switches
 
-All on by default, written in code: backend in `application-prod.yaml`, website in
-`.github/workflows/azure-web.yml`. Nothing needs to be added in Azure or GitHub. To switch one off
-without a code change, add a setting with the same name set to `false`.
-
-| Setting | Default in code | Effect |
+| Setting | Where | Effect |
 |---|---|---|
-| `APP_MEDIA_HLS_ENABLED` (Azure → seekfactory-api) | `true` | Makes/serves streaming copies |
-| `NEXT_PUBLIC_HLS_ENABLED` (GitHub variable) | `true` | Website plays the streams (off = MP4) |
-| `NEXT_PUBLIC_MEDIA_BASE_URL` (GitHub variable) | Blob URL | Media straight from Blob |
-| `NEXT_PUBLIC_DIRECT_THUMBS` (GitHub variable) | `true` | Photo copies straight from Blob |
-| `APP_MEDIA_WARM_VARIANTS` (Azure → seekfactory-api) | `auto` | Photo-copy job runs once by itself, then never again (recorded in the database) |
+| `APP_MEDIA_HLS_ENABLED` | Azure → seekfactory-api (already set) | Makes/serves streaming copies |
+| `NEXT_PUBLIC_HLS_ENABLED` | GitHub variable (already set) | Website plays the streams (off = MP4) |
+| `NEXT_PUBLIC_MEDIA_BASE_URL` | GitHub variable (already set) | Media straight from Blob |
+| `NEXT_PUBLIC_DIRECT_THUMBS` | In code, on by default (deploy workflow) | Photo copies straight from Blob; a GitHub variable set to `false` turns it off |
+| Photo-copy job | In code, nothing to set | Runs once by itself after the deploy that needs it, recorded in the database |
 
 ## 5. Expected effect (1 Mbps China link)
 

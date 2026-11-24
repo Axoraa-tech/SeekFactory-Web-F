@@ -1,17 +1,12 @@
 # Builds the Next.js site and deploys it to the Azure App Service web app.
-#
-# Only one repo setting is required (Settings -> Secrets and variables -> Actions):
+# Repo settings (Settings → Secrets and variables → Actions):
 #   Secret   AZURE_WEBAPP_PUBLISH_PROFILE  contents of the web app's downloaded publish profile
-#
-# The live site's build settings are written below (after "||"), so no GitHub Variables are needed for
-# them. A Variable with the same name still wins, e.g. NEXT_PUBLIC_HLS_ENABLED=false to switch streaming
-# off, or NEXT_PUBLIC_MEDIA_BASE_URL=https://media.seekfactory.com for a CDN later.
-#   NEXT_PUBLIC_API_URL           backend origin, baked into the browser bundle at build time
-#   NEXT_PUBLIC_GOOGLE_CLIENT_ID  Google sign-in client id (public, not a secret)
-#   NEXT_PUBLIC_MEDIA_BASE_URL    where photos/videos load from (empty = through the API)
-#   NEXT_PUBLIC_HLS_ENABLED       "true" plays adaptive streams (HLS) when the API has them
-#   NEXT_PUBLIC_DIRECT_THUMBS     "true" loads photo thumbnails straight from storage
-#   AZURE_WEBAPP_NAME             the Azure web app to deploy to
+#   Variable AZURE_WEBAPP_NAME             e.g. seekfactory-web
+#   Variable NEXT_PUBLIC_API_URL           backend origin, baked into the browser bundle at build time
+#   Variable NEXT_PUBLIC_GOOGLE_CLIENT_ID  optional; empty shows the "coming soon" notice
+#   Variable NEXT_PUBLIC_MEDIA_BASE_URL    optional; empty loads media via the API
+#   Variable NEXT_PUBLIC_HLS_ENABLED       optional; "true" plays adaptive streams (HLS) when the API has them
+#   Variable NEXT_PUBLIC_DIRECT_THUMBS     optional; on by default (set "false" to load thumbnails via the API)
 name: deploy-azure-web
 
 # Manual only (Actions → deploy-azure-web → Run workflow) while the code is still changing daily
@@ -38,10 +33,10 @@ jobs:
 
       - name: Build
         env:
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://seekfactory-api-eqfxbgh3cvhqdvcv.eastasia-01.azurewebsites.net' }}
-          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '755855438157-ed0cikqv3srof2rgv6oe77jtaul9pcpf.apps.googleusercontent.com' }}
-          NEXT_PUBLIC_MEDIA_BASE_URL: ${{ vars.NEXT_PUBLIC_MEDIA_BASE_URL || 'https://seekfactorymedia.blob.core.windows.net/media' }}
-          NEXT_PUBLIC_HLS_ENABLED: ${{ vars.NEXT_PUBLIC_HLS_ENABLED || 'true' }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+          NEXT_PUBLIC_MEDIA_BASE_URL: ${{ vars.NEXT_PUBLIC_MEDIA_BASE_URL }}
+          NEXT_PUBLIC_HLS_ENABLED: ${{ vars.NEXT_PUBLIC_HLS_ENABLED }}
           NEXT_PUBLIC_DIRECT_THUMBS: ${{ vars.NEXT_PUBLIC_DIRECT_THUMBS || 'true' }}
           NEXT_TELEMETRY_DISABLED: 1
         run: npm run build
@@ -56,6 +51,6 @@ jobs:
 
       - uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ vars.AZURE_WEBAPP_NAME || 'seekfactory-web' }}
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: site.zip
