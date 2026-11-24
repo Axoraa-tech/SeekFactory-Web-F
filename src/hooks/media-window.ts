@@ -15,6 +15,8 @@ export type MediaLoad = {
   preload: "auto" | "metadata" | "none";
   /** false: the video has no source, so it downloads nothing and holds no buffer. */
   attached: boolean;
+  /** "watching": buffer well ahead; "upNext": only the opening seconds (see BUFFER_SECONDS). */
+  buffer: "watching" | "upNext";
 };
 
 export function mediaLoadFor({
@@ -31,10 +33,12 @@ export function mediaLoadFor({
   /** The nearest upcoming card below the screen: the only one that buffers ahead. */
   isNext?: boolean;
 }): MediaLoad {
-  if (zone === "far") return { preload: "none", attached: false };
-  if (first || zone === "visible") return { preload: "auto", attached: true };
-  if (zone === "near") return { preload: isNext ? "auto" : "metadata", attached: true };
-  return { preload: eager ? "metadata" : "none", attached: true };
+  if (zone === "far") return { preload: "none", attached: false, buffer: "upNext" };
+  if (zone === "visible" || (first && zone === null)) return { preload: "auto", attached: true, buffer: "watching" };
+  // The first seek starts loading before its card is measured, but once scrolled past it yields
+  if (first) return { preload: "auto", attached: true, buffer: "upNext" };
+  if (zone === "near") return { preload: isNext ? "auto" : "metadata", attached: true, buffer: "upNext" };
+  return { preload: eager ? "metadata" : "none", attached: true, buffer: "upNext" };
 }
 
 /**

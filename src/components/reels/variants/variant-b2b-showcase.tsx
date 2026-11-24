@@ -104,7 +104,7 @@ export function VariantB2bShowcase({ reel, manufacturer, productSlug, onExpand, 
 
   const media = useMediaWindow({ containerRef: videoWrapperRef, videoRef, first, eager });
   const videoSrc = useStreamingSource(videoRef, {
-    hlsUrl: reel.hlsUrl, videoUrl: reel.videoUrl, attached: media.attached, preload: media.preload,
+    hlsUrl: reel.hlsUrl, videoUrl: reel.videoUrl, attached: media.attached, preload: media.preload, buffer: media.buffer,
   });
 
   // Playback follows scrolling only (useSeekAutoplay: the seek in view plays, the rest pause).

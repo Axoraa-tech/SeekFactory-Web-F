@@ -4,6 +4,8 @@ import { loadShowcase } from "@/features/feed/load-showcase";
 import { getApi } from "@/shared/api";
 import { buildCategoryTree } from "@/features/categories/category-tree";
 import { FeedPostComposer } from "@/features/factory/post-composer/feed-post-composer";
+import { preload } from "react-dom";
+import { firstStreamFiles, HLS_ENABLED } from "@/shared/lib/streaming-source";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +40,14 @@ export default async function HomePage({ searchParams }: Props) {
   const { roots, childrenByRoot } = buildCategoryTree(allCategories);
   const subcategoryId = sub ? allCategories.find((c) => c.slug === sub)?.id ?? "" : "";
   const items = await (unfilteredFeed ?? loadFeed(tab, subcategoryId, q));
+
+  // Start the first seek's video now, in parallel with the page's JavaScript: its playlists and first
+  // segment are cached by the time the player asks for them (see firstStreamFiles)
+  if (HLS_ENABLED) {
+    for (const href of firstStreamFiles(items[0]?.reel.hlsUrl)) {
+      preload(href, { as: "fetch", crossOrigin: "anonymous", fetchPriority: "high" });
+    }
+  }
 
   return (
     <HomeSeeksInteractiveFeed

@@ -131,7 +131,7 @@ function HeroMedia({ item, autoplay }: { item: FeedItem; autoplay: boolean }) {
   // The hero is the page's first seek: same loading rule as the feed's first card
   const media = useMediaWindow({ containerRef: ref, videoRef: ref, first: true });
   const videoSrc = useStreamingSource(ref, {
-    hlsUrl: item.reel.hlsUrl, videoUrl: item.reel.videoUrl, attached: media.attached, preload: media.preload,
+    hlsUrl: item.reel.hlsUrl, videoUrl: item.reel.videoUrl, attached: media.attached, preload: media.preload, buffer: media.buffer,
   });
 
   useEffect(() => {
