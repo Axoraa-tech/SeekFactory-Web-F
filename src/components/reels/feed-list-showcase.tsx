@@ -107,7 +107,7 @@ function SeekMedia({ item, play, eager, first, autoplay }: { item: FeedItem; pla
   const ref = useRef<HTMLVideoElement>(null);
   const media = useMediaWindow({ containerRef: ref, videoRef: ref, first, eager });
   const videoSrc = useStreamingSource(ref, {
-    hlsUrl: item.reel.hlsUrl, videoUrl: item.reel.videoUrl, attached: media.attached, preload: media.preload,
+    hlsUrl: item.reel.hlsUrl, videoUrl: item.reel.videoUrl, attached: media.attached, preload: media.preload, buffer: media.buffer,
   });
 
   useEffect(() => {

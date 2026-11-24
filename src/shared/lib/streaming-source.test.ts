@@ -45,3 +45,18 @@ describe("videoSrcFor", () => {
     expect(videoSrcFor(null, { ...urls, attached: true })).toBeUndefined();
   });
 });
+
+import { firstStreamFiles } from "./streaming-source";
+
+describe("firstStreamFiles", () => {
+  const base = "https://store.example/media/media/hls/9c052948-f232-4104-8de5-46dad6a5bf6c/";
+  it("names the lightest quality's opening files for both layouts", () => {
+    expect(firstStreamFiles(`${base}index.m3u8`)).toEqual([`${base}index.m3u8`, `${base}v2_0.m3u8`, `${base}v2_0_000.ts`]);
+    expect(firstStreamFiles(`${base}master.m3u8`)).toEqual([`${base}master.m3u8`, `${base}stream_0.m3u8`, `${base}stream_0_000.ts`]);
+  });
+  it("ignores anything else", () => {
+    expect(firstStreamFiles(undefined)).toEqual([]);
+    expect(firstStreamFiles(`${base}clip.mp4`)).toEqual([]);
+    expect(firstStreamFiles(`${base}other.m3u8`)).toEqual([]);
+  });
+});

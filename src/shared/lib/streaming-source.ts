@@ -53,3 +53,23 @@ export function supportsMediaSource(): boolean {
   return !!ms && typeof ms.isTypeSupported === "function"
     && ms.isTypeSupported('video/mp4; codecs="avc1.42E01E,mp4a.40.2"');
 }
+
+/**
+ * What a player fetches first for an adaptive stream: the master playlist, the lightest quality's playlist
+ * and its first segment. Our packager writes fixed names (v2: index.m3u8 / v2_0.m3u8 / v2_0_000.ts; v1:
+ * master.m3u8 / stream_0.m3u8 / stream_0_000.ts), so the server can name them in the page and the browser
+ * downloads them while the JavaScript is still arriving, instead of after it (one round trip each from
+ * mainland China). Empty for any other address.
+ */
+export function firstStreamFiles(hlsUrl: string | undefined): string[] {
+  if (!hlsUrl) return [];
+  const m = hlsUrl.match(/^(.*\/)(index|master)\.m3u8$/);
+  if (!m) return [];
+  const [, folder, master] = m;
+  const rung = master === "index" ? "v2_0" : "stream_0";
+  return [hlsUrl, `${folder}${rung}.m3u8`, `${folder}${rung}_000.ts`];
+}
+
+/** hls.js buffer target (seconds ahead) by role: the seek being watched keeps a long buffer; the next one
+ * only its opening seconds, so it is ready to start without taking bandwidth from the one on screen. */
+export const BUFFER_SECONDS = { watching: 30, upNext: 4 } as const;
