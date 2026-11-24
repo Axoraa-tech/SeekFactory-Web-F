@@ -75,15 +75,19 @@ HTML ─┬─► JavaScript ─► page starts ─► player attaches (files al
 | Catalogue, factories, categories | Website server memory + browser ETag | 1 min fresh, 10 min stale-while-refresh; repeat visits get a 304 |
 | JavaScript | Browser | 1 year (versioned file names) |
 
-## 4. Switches (each can be turned off without code)
+## 4. Switches
 
-| Setting | Where | Effect |
+All on by default, written in code: backend in `application-prod.yaml`, website in
+`.github/workflows/azure-web.yml`. Nothing needs to be added in Azure or GitHub. To switch one off
+without a code change, add a setting with the same name set to `false`.
+
+| Setting | Default in code | Effect |
 |---|---|---|
-| `APP_MEDIA_HLS_ENABLED` | Azure → seekfactory-api | Makes/serves streaming copies |
-| `NEXT_PUBLIC_HLS_ENABLED` | GitHub variable (web build) | Website plays the streams (off = MP4) |
-| `NEXT_PUBLIC_MEDIA_BASE_URL` | GitHub variable | Media straight from Blob |
-| `NEXT_PUBLIC_DIRECT_THUMBS` | GitHub variable | Photo copies straight from Blob |
-| `APP_MEDIA_WARM_VARIANTS` | Azure → seekfactory-api | One-time photo-copy job (remove after) |
+| `APP_MEDIA_HLS_ENABLED` (Azure → seekfactory-api) | `true` | Makes/serves streaming copies |
+| `NEXT_PUBLIC_HLS_ENABLED` (GitHub variable) | `true` | Website plays the streams (off = MP4) |
+| `NEXT_PUBLIC_MEDIA_BASE_URL` (GitHub variable) | Blob URL | Media straight from Blob |
+| `NEXT_PUBLIC_DIRECT_THUMBS` (GitHub variable) | `true` | Photo copies straight from Blob |
+| `APP_MEDIA_WARM_VARIANTS` (Azure → seekfactory-api) | `auto` | Photo-copy job runs once by itself, then never again (recorded in the database) |
 
 ## 5. Expected effect (1 Mbps China link)
 
