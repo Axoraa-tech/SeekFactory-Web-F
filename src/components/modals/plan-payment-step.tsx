@@ -4,15 +4,14 @@ import React, { useRef, useState } from "react";
 import { ArrowLeft, Loader2, Paperclip, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getApi } from "@/shared/api";
-import type { BuyerPlanTier } from "@/entities/user";
-import type { PlanPayment } from "@/entities/plan";
+import type { PaidPlanCode, PlanPayment } from "@/entities/plan";
 import type { SubscriptionRegion } from "@/features/subscription";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
 type Props = {
-  planCode: BuyerPlanTier;
+  planCode: PaidPlanCode;
   planName: string;
   /** Price as shown to the buyer, e.g. "₹1 (1 Rs)". */
   amountLabel: string;
