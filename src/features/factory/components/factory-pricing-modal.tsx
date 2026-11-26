@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   X,
   Check,
@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { useTranslations } from "next-intl";
+import { getApi } from "@/shared/api";
+import { PlanPaymentStep } from "@/components/modals/plan-payment-step";
+import type { FactoryMembershipPlan, PlanPayment } from "@/entities/plan";
 
 export type FactoryPlanTier =
   | "basic"
@@ -22,25 +25,67 @@ export type FactoryPlanTier =
   | "vip_partner"
   | "strategic_vip";
 
+/** The plan code the backend uses for each card, in ascending order. */
+const PLAN_CODE: Record<FactoryPlanTier, FactoryMembershipPlan> = {
+  basic: "basic",
+  premium: "premium",
+  vip_partner: "vip",
+  strategic_vip: "strategic",
+};
+const PLAN_ORDER: FactoryMembershipPlan[] = ["basic", "premium", "vip", "strategic"];
+/** The backend's plan names, lower case, to match a pending payment to its card. */
+const PLAN_NAME: Record<FactoryPlanTier, string> = {
+  basic: "basic listing",
+  premium: "premium",
+  vip_partner: "vip global partner",
+  strategic_vip: "strategic global vip",
+};
+/** Shown on the payment step; the backend prices the payment itself. */
+const PLAN_AMOUNT: Record<FactoryMembershipPlan, string> = {
+  basic: "USD 0",
+  premium: "USD 1,000",
+  vip: "USD 10,000",
+  strategic: "USD 20,000",
+};
+
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  currentTier?: string;
-  onSelectPlan: (tier: FactoryPlanTier, tierName: string) => void;
+  /** The factory's current plan (from its product usage); basic when unknown. */
+  currentPlan?: FactoryMembershipPlan;
 };
 
-export function FactoryPricingModal({
-  isOpen,
-  onClose,
-  currentTier = "basic",
-  onSelectPlan,
-}: Props) {
+/**
+ * Factory membership plans. A paid plan is bought like a buyer plan: pay through the QR code,
+ * upload the screenshot, and an admin activates the plan once the payment is confirmed.
+ */
+export function FactoryPricingModal({ isOpen, onClose, currentPlan = "basic" }: Props) {
   const tr = useTranslations();
+  const tp = useTranslations("payment");
   const [activeView, setActiveView] = useState<"cards" | "matrix">("cards");
   const [remarksOpen, setRemarksOpen] = useState(false);
-  const [selectedPlanFeedback, setSelectedPlanFeedback] = useState<string | null>(null);
+  const [paying, setPaying] = useState<{ code: FactoryMembershipPlan; title: string } | null>(null);
+  const [payments, setPayments] = useState<PlanPayment[]>([]);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setPaying(null);
+    setNotice(null);
+    let cancelled = false;
+    getApi()
+      .session.listMyPlanPayments()
+      .then((list) => { if (!cancelled) setPayments(list); })
+      .catch(() => { if (!cancelled) setPayments([]); });
+    return () => { cancelled = true; };
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const latestPayment = payments[0];
+  const pendingPayment = latestPayment?.status === "PENDING" ? latestPayment : undefined;
+  const rejectedPayment = latestPayment?.status === "REJECTED" ? latestPayment : undefined;
+  const currentRank = PLAN_ORDER.indexOf(currentPlan);
 
   const tiers = [
     {
@@ -214,13 +259,12 @@ export function FactoryPricingModal({
     },
   ];
 
+  // A paid plan above the current one opens the QR payment step; nothing changes until an admin approves
   const handleSelect = (tierId: FactoryPlanTier, title: string) => {
-    setSelectedPlanFeedback(tr("seller.pricing.selectedUpdatingFactoryMembershipStatus", { title }));
-    setTimeout(() => {
-      onSelectPlan(tierId, title);
-      setSelectedPlanFeedback(null);
-      onClose();
-    }, 900);
+    const code = PLAN_CODE[tierId];
+    if (code === "basic" || PLAN_ORDER.indexOf(code) <= currentRank || pendingPayment) return;
+    setNotice(null);
+    setPaying({ code, title });
   };
 
   return (
@@ -284,21 +328,54 @@ export function FactoryPricingModal({
           </div>
         </div>
 
-        {/* Feedback alert if plan selected */}
-        {selectedPlanFeedback && (
-          <div className="bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white text-center flex items-center justify-center gap-2">
+        {/* Payment status: submitted just now, waiting for review, or last one rejected */}
+        {notice && (
+          <div role="status" className="bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white text-center flex items-center justify-center gap-2">
             <CheckCircle2 className="h-4 w-4" />
-            <span>{selectedPlanFeedback}</span>
+            <span>{notice}</span>
+          </div>
+        )}
+        {!paying && !notice && pendingPayment && (
+          <div role="status" className="border-b border-amber-200 bg-amber-50 px-6 py-2.5 text-xs text-amber-900">
+            <p className="font-bold">{tp("underReviewTitle")}</p>
+            <p className="mt-0.5">{tp("underReviewBody", { plan: pendingPayment.planName })}</p>
+          </div>
+        )}
+        {!paying && !pendingPayment && rejectedPayment && (
+          <div role="alert" className="border-b border-red-200 bg-red-50 px-6 py-2.5 text-xs text-red-800">
+            <p className="font-bold">{tp("rejectedTitle")}</p>
+            <p className="mt-0.5">{tp("rejectedBody", { reason: rejectedPayment.rejectionReason ?? "—" })}</p>
           </div>
         )}
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+          {/* PAYMENT STEP: QR code + payment screenshot */}
+          {paying && (
+            <div className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+              <PlanPaymentStep
+                planCode={paying.code as Exclude<FactoryMembershipPlan, "basic">}
+                planName={paying.title}
+                amountLabel={PLAN_AMOUNT[paying.code]}
+                region="china"
+                onBack={() => setPaying(null)}
+                onSubmitted={(payment) => {
+                  setPayments((previous) => [payment, ...previous]);
+                  setPaying(null);
+                  setNotice(tp("submittedThanks"));
+                }}
+              />
+            </div>
+          )}
+
           {/* VIEW 1: 4 TIER PLAN CARDS */}
-          {activeView === "cards" && (
+          {!paying && activeView === "cards" && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {tiers.map((t) => {
-                const isSelected = currentTier.toLowerCase().includes(t.id);
+                const rank = PLAN_ORDER.indexOf(PLAN_CODE[t.id]);
+                const isSelected = rank === currentRank;
+                const isIncluded = rank < currentRank;
+                const isPendingPlan = !!pendingPayment && pendingPayment.planName.toLowerCase() === PLAN_NAME[t.id];
 
                 return (
                   <div
@@ -350,12 +427,20 @@ export function FactoryPricingModal({
                       <button
                         type="button"
                         onClick={() => handleSelect(t.id, t.title)}
+                        disabled={isSelected || isIncluded || !!pendingPayment || t.id === "basic"}
                         className={cn(
-                          "sf-btn-commit w-full py-2.5 px-4 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer",
-                          t.btnClass
+                          "sf-btn-commit w-full py-2.5 px-4 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer disabled:cursor-default disabled:active:scale-100",
+                          t.btnClass,
+                          (isIncluded || (!!pendingPayment && !isPendingPlan && !isSelected)) && "opacity-60"
                         )}
                       >
-                        {isSelected ? "Current Plan (当前方案)" : `Choose ${t.title}`}
+                        {isSelected
+                          ? "Current Plan (当前方案)"
+                          : isPendingPlan
+                            ? `${tp("underReviewTitle")}`
+                            : isIncluded || t.id === "basic"
+                              ? "Included (已包含)"
+                              : `Choose ${t.title}`}
                       </button>
                     </div>
 
@@ -396,7 +481,7 @@ export function FactoryPricingModal({
           )}
 
           {/* VIEW 2: COMPLETE 29-FEATURE MATRIX */}
-          {activeView === "matrix" && (
+          {!paying && activeView === "matrix" && (
             <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">

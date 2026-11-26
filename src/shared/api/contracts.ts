@@ -8,7 +8,7 @@ import type { ReelComment, ReelCommentReply } from "@/entities/comment";
 import type { RfqDraft, RfqItem } from "@/entities/rfq";
 import type { Cart, CheckoutLine, NewOrderRequest, OrderContact, OrderRequest, OrderStatus } from "@/entities/order";
 import type { BuyerPlanTier, BuyerProfile } from "@/entities/user";
-import type { BuyerPlan, ExchangeRates, PlanPayment, PlanPaymentInput } from "@/entities/plan";
+import type { BuyerPlan, ExchangeRates, FactoryMembershipPlan, PlanPayment, PlanPaymentInput } from "@/entities/plan";
 import type { JoinInput, LoginInput } from "@/features/auth/session-cookie";
 import type { Portal } from "@/features/auth/auth-tokens";
 import type { SellerStats } from "@/features/factory/types";
@@ -338,6 +338,8 @@ export type ProductUsage = {
   productLimit: number;
   canAddProduct: boolean;
   latestRequest: ProductLimitRequest | null;
+  /** The factory's membership plan; absent from older backends (treat as basic). */
+  membershipPlan?: FactoryMembershipPlan;
 };
 
 export interface FactoryRepository {

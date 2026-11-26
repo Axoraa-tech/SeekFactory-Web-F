@@ -10,6 +10,12 @@ export type BuyerPlan = {
 
 export type PlanPaymentStatus = "PENDING" | "APPROVED" | "REJECTED";
 
+/** A factory's membership plan (seller hub "Global Enterprise Membership Plans"). */
+export type FactoryMembershipPlan = "basic" | "premium" | "vip" | "strategic";
+
+/** Any plan that is paid for with a payment proof: a buyer plan or a paid factory plan. */
+export type PaidPlanCode = BuyerPlanTier | Exclude<FactoryMembershipPlan, "basic">;
+
 /** A buyer's payment request for a paid plan, decided by an admin. */
 export type PlanPayment = {
   id: string;
@@ -24,7 +30,7 @@ export type PlanPayment = {
 };
 
 export type PlanPaymentInput = {
-  plan: BuyerPlanTier;
+  plan: PaidPlanCode;
   region: "india" | "china";
   reference?: string;
   file: File;

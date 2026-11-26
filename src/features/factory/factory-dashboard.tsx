@@ -59,7 +59,8 @@ import { AddProductModal } from "./components/add-product-modal";
 import { SeekComposerModal } from "./post-composer/seek-composer-modal";
 import { EditSeekModal } from "./components/edit-seek-modal";
 import { RfqQuoteModal } from "./components/rfq-quote-modal";
-import { FactoryPricingModal, type FactoryPlanTier } from "./components/factory-pricing-modal";
+import { FactoryPricingModal } from "./components/factory-pricing-modal";
+import type { FactoryMembershipPlan } from "@/entities/plan";
 import { ProductLimitModal } from "./components/product-limit-modal";
 import Link from "next/link";
 import type { FactoryVerification } from "@/shared/api/contracts";
@@ -102,6 +103,13 @@ type Props = {
 };
 
 // Stable defaults: fresh `[]` literals would retrigger the prop-sync effects every render.
+/** Name shown on the dashboard for a paid membership plan (basic keeps the "Verified" label). */
+const PAID_PLAN_LABEL: Partial<Record<FactoryMembershipPlan, string>> = {
+  premium: "Premium",
+  vip: "VIP Global Partner",
+  strategic: "Strategic Global VIP",
+};
+
 const NO_PRODUCTS: Product[] = [];
 const NO_SEEKS: Reel[] = [];
 const NO_RFQS: RfqItem[] = [];
@@ -238,13 +246,12 @@ export function FactoryDashboard({
     setConversations(initialConversations);
   }, [initialConversations]);
 
-  function handleSelectFactoryPlan(tierId: FactoryPlanTier, tierName: string) {
-    setProfile((prev) => ({
-      ...prev,
-      tier: tierName,
-    }));
-    setIsPricingModalOpen(false);
-  }
+  // The plan an admin activated after a confirmed payment; paid plans replace the "Verified" label
+  const membershipPlan = usage?.membershipPlan ?? "basic";
+  useEffect(() => {
+    const label = PAID_PLAN_LABEL[membershipPlan];
+    if (label) setProfile((prev) => (prev.tier === label ? prev : { ...prev, tier: label }));
+  }, [membershipPlan]);
 
   // Unread messages count
   const unreadMessagesCount = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
@@ -881,8 +888,7 @@ export function FactoryDashboard({
       <FactoryPricingModal
         isOpen={isPricingModalOpen}
         onClose={() => setIsPricingModalOpen(false)}
-        currentTier={profile.tier}
-        onSelectPlan={handleSelectFactoryPlan}
+        currentPlan={membershipPlan}
       />
     </div>
   );
