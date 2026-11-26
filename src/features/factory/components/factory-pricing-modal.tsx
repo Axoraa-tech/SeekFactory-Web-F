@@ -234,7 +234,7 @@ export function FactoryPricingModal({
       {/* Modal Dialog Box */}
       <div className="relative z-10 w-full max-w-6xl max-h-[92vh] overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-2xl flex flex-col my-auto">
         {/* Top Header Banner */}
-        <div className="relative bg-slate-900 px-6 py-6 sm:px-8 sm:py-7 text-white shrink-0 border-b border-white/10">
+        <div className="relative bg-brand-orange px-6 py-6 sm:px-8 sm:py-7 text-white shrink-0 border-b border-white/10">
           {/* Close Button */}
           <button
             type="button"
@@ -250,7 +250,7 @@ export function FactoryPricingModal({
               全球企业会员方案 • Global Enterprise Membership Plans
             </h2>
 
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
               Connect Factory Owners and Management directly with International Buyers, Importers, and Decision-Makers. Remove unnecessary middlemen and close deals directly.
             </p>
           </div>
@@ -264,7 +264,7 @@ export function FactoryPricingModal({
                 "sf-btn-toggle rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
                 activeView === "cards"
                   ? "bg-white text-slate-900 shadow-sm"
-                  : "bg-white/10 text-white hover:bg-white/20"
+                  : "bg-white/20 text-white hover:bg-white/30"
               )}
             >
               Plan Overview (方案总览)
@@ -276,7 +276,7 @@ export function FactoryPricingModal({
                 "sf-btn-toggle rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
                 activeView === "matrix"
                   ? "bg-white text-slate-900 shadow-sm"
-                  : "bg-white/10 text-white hover:bg-white/20"
+                  : "bg-white/20 text-white hover:bg-white/30"
               )}
             >
               Complete 29-Feature Comparison Matrix (全部功能对比表)
