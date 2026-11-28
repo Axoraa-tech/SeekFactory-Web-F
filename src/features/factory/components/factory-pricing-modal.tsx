@@ -17,6 +17,8 @@ import { cn } from "@/shared/lib/cn";
 import { useTranslations } from "next-intl";
 import { getApi } from "@/shared/api";
 import { PlanPaymentStep } from "@/components/modals/plan-payment-step";
+import { useRegionalSettings } from "@/shared/i18n/regional-context";
+import { RatesCredit } from "@/features/subscription";
 import type { FactoryMembershipPlan, PlanPayment } from "@/entities/plan";
 
 export type FactoryPlanTier =
@@ -40,12 +42,12 @@ const PLAN_NAME: Record<FactoryPlanTier, string> = {
   vip_partner: "vip global partner",
   strategic_vip: "strategic global vip",
 };
-/** Shown on the payment step; the backend prices the payment itself. */
-const PLAN_AMOUNT: Record<FactoryMembershipPlan, string> = {
-  basic: "USD 0",
-  premium: "USD 1,000",
-  vip: "USD 10,000",
-  strategic: "USD 20,000",
+/** Annual price in US dollars (the backend prices the payment itself; this is for display). */
+const PLAN_USD: Record<FactoryMembershipPlan, number> = {
+  basic: 0,
+  premium: 1000,
+  vip: 10000,
+  strategic: 20000,
 };
 
 type Props = {
@@ -62,6 +64,16 @@ type Props = {
 export function FactoryPricingModal({ isOpen, onClose, currentPlan = "basic" }: Props) {
   const tr = useTranslations();
   const tp = useTranslations("payment");
+  const { formatConverted } = useRegionalSettings();
+  /** "≈ ¥7,100" in the viewer's currency, at today's market rate; nothing for USD viewers or before rates load. */
+  const localPrice = (usd: number) => (usd > 0 ? formatConverted(usd, "USD") : undefined);
+  /** The payment step amount: dollars, plus yuan for the Alipay QR. */
+  const paymentAmount = (code: FactoryMembershipPlan) => {
+    const usd = PLAN_USD[code];
+    const dollars = `USD ${usd.toLocaleString("en-US")}`;
+    const yuan = formatConverted(usd, "USD", "CNY");
+    return yuan ? `${dollars} ≈ ${yuan} (CNY)` : dollars;
+  };
   const [activeView, setActiveView] = useState<"cards" | "matrix">("cards");
   const [remarksOpen, setRemarksOpen] = useState(false);
   const [paying, setPaying] = useState<{ code: FactoryMembershipPlan; title: string } | null>(null);
@@ -356,7 +368,7 @@ export function FactoryPricingModal({ isOpen, onClose, currentPlan = "basic" }: 
               <PlanPaymentStep
                 planCode={paying.code as Exclude<FactoryMembershipPlan, "basic">}
                 planName={paying.title}
-                amountLabel={PLAN_AMOUNT[paying.code]}
+                amountLabel={paymentAmount(paying.code)}
                 region="china"
                 onBack={() => setPaying(null)}
                 onSubmitted={(payment) => {
@@ -417,6 +429,11 @@ export function FactoryPricingModal({ isOpen, onClose, currentPlan = "basic" }: 
                           </span>
                           <span className="text-[11px] font-semibold text-slate-500">{t.period}</span>
                         </div>
+                        {localPrice(PLAN_USD[PLAN_CODE[t.id]]) && (
+                          <p className="text-xs font-bold text-brand-orange mt-0.5" title="Today's market rate">
+                            ≈ {localPrice(PLAN_USD[PLAN_CODE[t.id]])} / Year
+                          </p>
+                        )}
                         <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{t.priceDetail}</p>
                         <p className="text-[10px] text-slate-400 mt-0.5">{t.priceDetailCn}</p>
                       </div>
@@ -624,6 +641,7 @@ export function FactoryPricingModal({ isOpen, onClose, currentPlan = "basic" }: 
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-emerald-600" />
             <span>SeekFactory Global Chairman Sourcing Network • ISO & SGS Audited Plants</span>
+            {localPrice(1000) && <RatesCredit className="ml-2" />}
           </div>
           <button
             type="button"

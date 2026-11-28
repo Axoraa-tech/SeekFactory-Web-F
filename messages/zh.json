@@ -1574,6 +1574,7 @@
     "submittedThanks": "付款已提交，我们会尽快确认。"
   },
   "plans": {
+    "marketRateHint": "按今日市场汇率",
     "signInToChangeYour": "请先登录再更换方案",
     "couldNotChangeYourPlan": "方案更换失败",
     "plansAreUnavailable": "暂无可用方案"

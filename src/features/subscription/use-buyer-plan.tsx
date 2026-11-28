@@ -23,6 +23,9 @@ interface SubscriptionPricing {
   currencyCode: string;      // "INR" or "CNY"
   regionName: string;        // "India" or "China"
   flag: string;              // "🇮🇳" or "🇨🇳"
+  /** Raw prices in the region's currency (null until plans load), for showing local equivalents. */
+  proAmount: number | null;
+  enterpriseAmount: number | null;
 }
 
 const REGIONS: Record<SubscriptionRegion, Pick<SubscriptionPricing, "currencySymbol" | "currencyCode" | "regionName" | "flag">> = {
@@ -47,6 +50,8 @@ function buildPricing(plans: BuyerPlan[], region: SubscriptionRegion): Subscript
   if (region === "india") {
     return {
       ...meta,
+      proAmount: pro,
+      enterpriseAmount: enterprise,
       freePrice: free === null ? unknown : `₹${trim(free)}`,
       proPrice: pro === null ? unknown : `${trim(pro)} Rs`,
       proPriceFormatted: pro === null ? unknown : `₹${trim(pro)}`,
@@ -58,6 +63,8 @@ function buildPricing(plans: BuyerPlan[], region: SubscriptionRegion): Subscript
   }
   return {
     ...meta,
+    proAmount: pro,
+    enterpriseAmount: enterprise,
     freePrice: free === null ? unknown : `¥${trim(free)}`,
     proPrice: pro === null ? unknown : `${trim(pro)} Yuan`,
     proPriceFormatted: pro === null ? unknown : `${trim(pro)} Yuan`,

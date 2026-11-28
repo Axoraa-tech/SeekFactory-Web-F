@@ -14,7 +14,7 @@ import {
   Globe,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
-import { useBuyerPlan, type BuyerPlanTier, planPriceLabel } from "@/features/subscription";
+import { useBuyerPlan, type BuyerPlanTier, planPriceLabel, LocalPriceHint } from "@/features/subscription";
 import { useTranslations } from "next-intl";
 import { getApi } from "@/shared/api";
 import type { PlanPayment } from "@/entities/plan";
@@ -406,6 +406,7 @@ export function UpgradePlanModal() {
                   </span>
                   <span className="text-[11px] font-medium text-slate-500"> / month</span>
                 </div>
+                <LocalPriceHint amount={pricing.proAmount} currency={pricing.currencyCode} period="/ month" />
 
                 <ul className="space-y-1.5 text-[11px] sm:text-xs text-slate-700 pt-0.5">
                   <li className="flex items-center gap-2 font-semibold text-slate-900">

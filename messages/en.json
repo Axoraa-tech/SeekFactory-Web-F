@@ -1574,6 +1574,7 @@
     "submittedThanks": "Payment submitted. We will confirm it shortly."
   },
   "plans": {
+    "marketRateHint": "At today's market rate",
     "signInToChangeYour": "Sign in to change your plan",
     "couldNotChangeYourPlan": "Could not change your plan",
     "plansAreUnavailable": "Plans are unavailable"

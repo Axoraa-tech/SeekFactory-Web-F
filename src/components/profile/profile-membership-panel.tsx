@@ -3,7 +3,7 @@
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import type { MembershipTier } from "./profile-types";
-import { useBuyerPlan, planPriceLabel } from "@/features/subscription";
+import { useBuyerPlan, planPriceLabel, LocalPriceHint } from "@/features/subscription";
 import { useTranslations } from "next-intl";
 
 function IndiaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
@@ -175,6 +175,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
               <span className="text-xs font-bold text-brand-blue">({pricing.proPriceSub})</span>
               <span className="text-xs text-ink-muted"> / month</span>
             </div>
+            <LocalPriceHint amount={pricing.proAmount} currency={pricing.currencyCode} period="/ month" className="-mt-1" />
             <ul className="space-y-2 text-xs text-ink font-medium">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />{" "}
@@ -226,6 +227,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
               <span className="text-2xl font-black text-ink">{pricing.enterprisePrice}</span>
               <span className="text-xs text-ink-muted"> / month</span>
             </div>
+            <LocalPriceHint amount={pricing.enterpriseAmount} currency={pricing.currencyCode} period="/ month" className="-mt-1" />
             <ul className="space-y-2 text-xs text-ink-muted">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.allProBuyerFeaturesIncluded")}
