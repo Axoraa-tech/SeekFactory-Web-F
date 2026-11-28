@@ -1410,7 +1410,6 @@
     "directWhatsappCall": "Direct WhatsApp/Call",
     "auditIsoReports": "Audit & ISO Reports",
     "activePricingRegion": "Active Pricing Region:",
-    "pricingForYourLocation": "Pricing for your location",
     "freeBuyer": "Free Buyer",
     "previewFactoryVideoReels": "Preview factory video reels",
     "supplierIdentityMaskedBlurred": "Supplier identity masked & blurred",
@@ -1576,6 +1575,7 @@
   },
   "plans": {
     "marketRateHint": "At today's market rate",
+    "billedAs": "Billed as {amount}",
     "signInToChangeYour": "Sign in to change your plan",
     "couldNotChangeYourPlan": "Could not change your plan",
     "plansAreUnavailable": "Plans are unavailable"

@@ -1410,7 +1410,6 @@
     "directWhatsappCall": "WhatsApp / 电话直联",
     "auditIsoReports": "验厂与 ISO 报告",
     "activePricingRegion": "当前价格地区：",
-    "pricingForYourLocation": "按您所在地区定价",
     "freeBuyer": "免费采购商",
     "previewFactoryVideoReels": "预览工厂视频希克",
     "supplierIdentityMaskedBlurred": "供应商身份已隐藏",
@@ -1576,6 +1575,7 @@
   },
   "plans": {
     "marketRateHint": "按今日市场汇率",
+    "billedAs": "实际收费 {amount}",
     "signInToChangeYour": "请先登录再更换方案",
     "couldNotChangeYourPlan": "方案更换失败",
     "plansAreUnavailable": "暂无可用方案"
