@@ -1096,6 +1096,7 @@
       "uploadCertificateImage": "上传证书图片",
       "supportsPngJpgOrWebp": "支持 PNG、JPG 或 WEBP，最大 20MB",
       "orPasteImageUrl": "或粘贴图片网址：",
+      "uploadedFile": "已上传：{name}",
       "certificatePreview": "证书预览",
       "framedDocumentPreview": "证书装裱预览",
       "publishToHallOfFame": "发布到荣誉墙",

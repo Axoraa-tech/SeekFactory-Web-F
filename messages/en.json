@@ -1096,6 +1096,7 @@
       "uploadCertificateImage": "Upload Certificate Image",
       "supportsPngJpgOrWebp": "Supports PNG, JPG or WEBP up to 20MB",
       "orPasteImageUrl": "Or paste image URL:",
+      "uploadedFile": "Uploaded: {name}",
       "certificatePreview": "Certificate Preview",
       "framedDocumentPreview": "Framed Document Preview",
       "publishToHallOfFame": "Publish to Hall of Fame",

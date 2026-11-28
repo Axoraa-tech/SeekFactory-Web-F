@@ -320,14 +320,20 @@ export function UploadCertificateModal({
                   </p>
                 )}
 
+                {!isCustom && documentName && imageUrl && (
+                  <p className="mt-2 truncate text-[11px] font-semibold text-emerald-700">✓ {t("seller.cert.uploadedFile", { name: documentName })}</p>
+                )}
                 {!isCustom && <div className="mt-2">
                   <span className="text-[10px] text-neutral-400 font-semibold block mb-1">{t("seller.cert.orPasteImageUrl")}</span>
                   <input
                     type="url"
                     placeholder="https://.../certificate.jpg"
-                    value={imageUrl}
+                    // Only a pasted web address goes here: an uploaded file is a stored path (/api/v1/media/…),
+                    // which the browser's URL check would reject and so block "Publish"
+                    value={documentName ? "" : imageUrl}
                     onChange={(e) => {
                       setImageUrl(e.target.value);
+                      setDocumentName("");
                       setPreviewError(false);
                     }}
                     className="w-full rounded-xl border border-neutral-300 px-3 py-1.5 text-xs focus:border-brand-blue focus:outline-hidden"

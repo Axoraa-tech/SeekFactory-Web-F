@@ -3,6 +3,7 @@
 import { FileText } from "lucide-react";
 import { isPdfDocument } from "@/entities/factory-certificate";
 import { cn } from "@/shared/lib/cn";
+import { resolveMediaUrl } from "@/shared/api/http-api";
 
 type Props = {
   url: string;
@@ -28,7 +29,8 @@ export function CertificateDocumentPreview({ url, alt, label, className, onError
     );
   }
   return (
+    // Freshly uploaded documents are stored paths (/api/v1/media/…): load them from the media host
     // eslint-disable-next-line @next/next/no-img-element
-    <img loading="lazy" decoding="async" src={url} alt={alt} onError={onError} className={className} />
+    <img loading="lazy" decoding="async" src={resolveMediaUrl(url) ?? url} alt={alt} onError={onError} className={className} />
   );
 }
