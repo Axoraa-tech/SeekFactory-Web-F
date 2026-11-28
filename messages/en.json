@@ -1096,6 +1096,7 @@
       "uploadCertificateImage": "Upload Certificate Image",
       "supportsPngJpgOrWebp": "Supports PNG, JPG or WEBP up to 20MB",
       "orPasteImageUrl": "Or paste image URL:",
+      "uploadedFile": "Uploaded: {name}",
       "certificatePreview": "Certificate Preview",
       "framedDocumentPreview": "Framed Document Preview",
       "publishToHallOfFame": "Publish to Hall of Fame",
@@ -1574,6 +1575,8 @@
     "submittedThanks": "Payment submitted. We will confirm it shortly."
   },
   "plans": {
+    "marketRateHint": "At today's market rate",
+    "billedAs": "Billed as {amount}",
     "signInToChangeYour": "Sign in to change your plan",
     "couldNotChangeYourPlan": "Could not change your plan",
     "plansAreUnavailable": "Plans are unavailable"

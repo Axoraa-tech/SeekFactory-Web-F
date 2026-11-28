@@ -11,6 +11,7 @@ import {
   subscribeExchangeRates,
 } from "@/shared/lib/exchange-rates";
 import { LOCALE_COOKIE, toLocale, type Locale } from "@/i18n/config";
+import { browserLocationCurrency } from "@/shared/lib/location-currency";
 import { ZH_CATEGORY_NAMES, ZH_COUNTRY_NAMES, ZH_UNIT_NAMES } from "@/i18n/zh-terms";
 
 export type LanguageOption = {
@@ -71,6 +72,12 @@ type RegionalSettingsContextType = {
   /** Translates a message key; falls back to the given English when the key is missing. */
   t: (key: string, fallbackOrValues?: string | MessageValues, values?: MessageValues) => string;
   formatPrice: (amountInr: number) => string;
+  /**
+   * An amount in another currency (e.g. a USD plan price) shown in `toCode`, by default the viewer's
+   * currency, at the current market rate. Undefined while rates load, for an unknown currency, or
+   * when both currencies are the same (nothing to convert).
+   */
+  formatConverted: (amount: number, fromCode: string, toCode?: string) => string | undefined;
   /** Platform taxonomy names (not user text), so they are translated. */
   translateCategory: (categoryName: string) => string;
   translateCountry: (countryName: string) => string;
@@ -84,6 +91,16 @@ type RegionalSettingsContextType = {
 type MessageValues = Record<string, string | number | Date>;
 
 const RegionalSettingsContext = createContext<RegionalSettingsContextType | null>(null);
+
+/** A converted amount with its currency symbol, rounded to what matters at that size. */
+export function formatInCurrency(value: number, currency: CurrencyOption): string {
+  const sym = currency.symbol;
+  if (currency.code === "JPY") return `${sym}${Math.round(value).toLocaleString("ja-JP")}`;
+  if (currency.code === "INR") return `₹${Math.round(value).toLocaleString("en-IN")}`;
+  if (value >= 100) return `${sym}${Math.round(value).toLocaleString("en-US")}`;
+  if (value < 10) return `${sym}${value.toFixed(2)}`;
+  return `${sym}${value.toFixed(1)}`;
+}
 
 const keepAsWritten = (text: string) => text;
 const subscribeNever = () => () => {};
@@ -109,13 +126,16 @@ export function RegionalSettingsProvider({ children }: { children: ReactNode }) 
   }, []);
 
   useEffect(() => {
+    // The visitor's own choice wins; otherwise their location decides (not saved, so it can follow them)
+    let saved: string | null = null;
     try {
-      const savedCurr = localStorage.getItem("seek_curr");
-      const found = savedCurr && CURRENCIES.find((c) => c.code === savedCurr);
-      if (found) setSelectedCurrency(found);
+      saved = localStorage.getItem("seek_curr");
     } catch {
-      // ignore
+      // Storage unavailable (private mode): use the location
     }
+    const code = saved && CURRENCIES.some((c) => c.code === saved) ? saved : browserLocationCurrency();
+    const found = CURRENCIES.find((c) => c.code === code);
+    if (found) setSelectedCurrency(found);
   }, []);
 
   const setLocale = useCallback(
@@ -152,22 +172,16 @@ export function RegionalSettingsProvider({ children }: { children: ReactNode }) 
     if (selectedCurrency.code === "INR" || rate === undefined) {
       return `₹${amountInr.toLocaleString("en-IN")}`;
     }
-    const converted = amountInr * rate;
-    const sym = selectedCurrency.symbol;
+    return formatInCurrency(amountInr * rate, selectedCurrency);
+  };
 
-    if (selectedCurrency.code === "JPY") {
-      return `${sym}${Math.round(converted).toLocaleString("ja-JP")}`;
-    }
-
-    if (converted >= 1000) {
-      return `${sym}${Math.round(converted).toLocaleString()}`;
-    }
-
-    if (converted < 10) {
-      return `${sym}${converted.toFixed(2)}`;
-    }
-
-    return `${sym}${converted.toFixed(1)}`;
+  const formatConverted = (amount: number, fromCode: string, toCode: string = selectedCurrency.code) => {
+    if (!hydrated || fromCode === toCode) return undefined;
+    const to = CURRENCIES.find((c) => c.code === toCode);
+    const fromRate = rateFromInr(fromCode);
+    const toRate = rateFromInr(toCode);
+    if (!to || !fromRate || !toRate) return undefined;
+    return formatInCurrency((amount / fromRate) * toRate, to);
   };
 
   const zh = locale === "zh";
@@ -186,6 +200,7 @@ export function RegionalSettingsProvider({ children }: { children: ReactNode }) 
         setCurrency: handleSetCurrency,
         t,
         formatPrice,
+        formatConverted,
         translateCategory,
         translateCountry,
         translateUnit,
@@ -212,6 +227,7 @@ export function useRegionalSettings() {
       setCurrency: () => {},
       t: (key: string, fallbackOrValues?: string | MessageValues) => (typeof fallbackOrValues === "string" ? fallbackOrValues : key),
       formatPrice: (amountInr: number) => `₹${amountInr.toLocaleString()}`,
+      formatConverted: () => undefined,
       translateCategory: keepAsWritten,
       translateCountry: keepAsWritten,
       translateUnit: keepAsWritten,

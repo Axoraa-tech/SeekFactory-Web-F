@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BadgeCheck, Building2, Check, ExternalLink, Loader2, Mail, MapPin, Phone, X } from "lucide-react";
+import { BadgeCheck, Building2, Check, ExternalLink, FileText, Loader2, Mail, MapPin, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { AdminApiError, adminData, type AdminManufacturerDetail } from "@/shared/api/admin-api";
 import { Pill, formatDate, initials, useToast } from "@/features/admin/ui";
+import type { FactoryCertificate } from "@/entities/factory-certificate";
+import { mediaThumb, resolveMediaUrl } from "@/shared/api/http-api";
 
 /**
  * Full manufacturer application, for approving or rejecting.
@@ -118,6 +120,8 @@ export function ReviewDrawer({ id, onClose, onReviewed }: {
                 <Field label="Certifications" value={data.certifications.join(", ")} wide />
               </Section>
 
+              <CertificateDocuments certificates={data.certificateDocuments ?? []} />
+
               <Section title="Owner account">
                 <Field label="Name" value={data.ownerName} />
                 <Field label="Company" value={data.ownerCompanyName} />
@@ -229,6 +233,84 @@ export function StatusPill({ status }: { status: string }) {
   if (status === "APPROVED") return <Pill tone="green"><BadgeCheck className="mr-1 inline h-3 w-3" />Approved</Pill>;
   if (status === "REJECTED") return <Pill tone="red">Rejected</Pill>;
   return <Pill tone="amber">Awaiting review</Pill>;
+}
+
+/**
+ * The certificate documents the factory uploaded on its profile ("Factory Profile & Certs"), with
+ * every detail it entered and the document itself, so a reviewer can check them before deciding.
+ */
+function CertificateDocuments({ certificates }: { certificates: FactoryCertificate[] }) {
+  const today = new Date().toISOString().slice(0, 10);
+  return (
+    <section>
+      <h3 className="text-sm font-semibold text-slate-900">
+        Uploaded certificates <span className="font-normal text-slate-500">({certificates.length})</span>
+      </h3>
+      <p className="mb-2 text-xs text-slate-500">Documents the factory added on its profile, with the details it entered</p>
+      {certificates.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-slate-200 p-3 text-sm text-slate-400">No certificates uploaded</p>
+      ) : (
+        <ul className="space-y-3">
+          {certificates.map((cert, i) => {
+            const url = resolveMediaUrl(cert.imageUrl) ?? cert.imageUrl;
+            const isPdf = /\.pdf(\?|$)/i.test(cert.imageUrl) || /\.pdf$/i.test(cert.documentName ?? "");
+            const expired = !!cert.expiryDate && cert.expiryDate < today;
+            return (
+              <li key={cert.id || i} className="flex gap-3 rounded-lg border border-slate-200 p-3">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50"
+                  title="Open the document"
+                >
+                  {isPdf ? (
+                    <span className="flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-600">
+                      <FileText className="h-6 w-6 text-red-500" />
+                      PDF
+                    </span>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={mediaThumb(url, 640)} alt={cert.title} className="h-full w-full object-cover" loading="lazy" />
+                  )}
+                </a>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <p className="text-sm font-semibold text-slate-900">{cert.title}</p>
+                    {cert.verified
+                      ? <Pill tone="green">Verified</Pill>
+                      : <Pill tone="amber">{cert.custom ? "Company-provided (custom)" : "Company-provided"}</Pill>}
+                    {expired && <Pill tone="red">Expired</Pill>}
+                  </div>
+                  <dl className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                    <CertField label="Issuer" value={cert.issuer} />
+                    <CertField label="Certificate no." value={cert.certNumber} />
+                    <CertField label="Issued" value={cert.issueDate} />
+                    <CertField label="Expires" value={cert.expiryDate} />
+                    {cert.category && <CertField label="Type" value={cert.category} />}
+                  </dl>
+                  <a href={url} target="_blank" rel="noopener noreferrer"
+                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline">
+                    <ExternalLink className="h-3 w-3" />
+                    {isPdf ? "Open PDF" : "Open full image"}{cert.documentName ? ` · ${cert.documentName}` : ""}
+                  </a>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function CertField({ label, value }: { label: string; value?: string }) {
+  return (
+    <div>
+      <dt className="text-slate-500">{label}</dt>
+      <dd className={value ? "text-slate-900" : "text-slate-400"}>{value || "Not provided"}</dd>
+    </div>
+  );
 }
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {

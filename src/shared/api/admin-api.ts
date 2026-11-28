@@ -6,6 +6,7 @@
  * The Next.js server proxies to the Spring Boot backend server-to-server.
  */
 
+import type { FactoryCertificate } from "@/entities/factory-certificate";
 import type { ShowcaseMode } from "@/features/feed/load-showcase";
 
 export type AnalyticsPeriod = 7 | 30 | 90 | 365;
@@ -85,6 +86,10 @@ export interface AdminManufacturerDetail {
   planId?: string; planName?: string; createdAt?: string;
   /** Product allowance: live (not deleted) products against the limit. */
   productLimit?: number; liveProductCount?: number; profileVideoUrl?: string;
+  /** Certificate documents the factory uploaded on its profile (older backends omit it). */
+  certificateDocuments?: FactoryCertificate[];
+  /** Membership plan code: basic, premium, vip or strategic. */
+  membershipPlan?: string;
 }
 
 export type ProductLimitRequestStatus = "PENDING" | "APPROVED" | "REJECTED";

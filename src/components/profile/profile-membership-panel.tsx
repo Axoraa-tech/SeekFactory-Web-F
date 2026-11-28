@@ -3,41 +3,8 @@
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import type { MembershipTier } from "./profile-types";
-import { useBuyerPlan, planPriceLabel } from "@/features/subscription";
+import { useBuyerPlan, usePlanDisplay, BilledAs } from "@/features/subscription";
 import { useTranslations } from "next-intl";
-
-function IndiaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
-  return (
-    <svg
-      className={cn("shrink-0 rounded-xs shadow-2xs overflow-hidden", className)}
-      viewBox="0 0 640 480"
-      aria-hidden="true"
-    >
-      <path fill="#f93" d="M0 0h640v160H0z" />
-      <path fill="#fff" d="M0 160h640v160H0z" />
-      <path fill="#128807" d="M0 320h640v160H0z" />
-      <circle cx="320" cy="240" r="50" fill="none" stroke="#008" strokeWidth="8" />
-      <circle cx="320" cy="240" r="8" fill="#008" />
-    </svg>
-  );
-}
-
-function ChinaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
-  return (
-    <svg
-      className={cn("shrink-0 rounded-xs shadow-2xs overflow-hidden", className)}
-      viewBox="0 0 640 480"
-      aria-hidden="true"
-    >
-      <path fill="#de2910" d="M0 0h640v480H0z" />
-      <polygon fill="#ffde00" points="120,60 138,115 196,115 149,149 167,204 120,170 73,204 91,149 44,115 102,115" />
-      <polygon fill="#ffde00" points="240,40 244,58 262,54 248,65 256,82 242,72 230,84 234,66 220,56 238,58" />
-      <polygon fill="#ffde00" points="280,80 286,96 304,90 292,102 302,118 286,110 276,122 278,104 262,96 280,96" />
-      <polygon fill="#ffde00" points="280,160 286,176 304,170 292,182 302,198 286,190 276,202 278,184 262,176 280,176" />
-      <polygon fill="#ffde00" points="240,200 244,218 262,214 248,225 256,242 242,232 230,244 234,226 220,216 238,218" />
-    </svg>
-  );
-}
 
 type Props = {
   currentTier: MembershipTier;
@@ -46,7 +13,8 @@ type Props = {
 
 export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
   const t = useTranslations();
-  const { region, setRegion, pricing, plans } = useBuyerPlan();
+  const { region } = useBuyerPlan();
+  const display = usePlanDisplay();
 
   return (
     <div className="glass-fade-in w-full space-y-6">
@@ -60,51 +28,6 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
           </p>
         </div>
 
-        {/* Region Switcher Pills */}
-        <div className="inline-flex items-center rounded-2xl bg-white p-1 border border-slate-200 shadow-xs shrink-0 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setRegion("india")}
-            className={cn(
-              "sf-btn-toggle flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
-              region === "india"
-                ? "bg-brand-blue text-white shadow-xs"
-                : "text-ink-muted hover:text-ink hover:bg-slate-50"
-            )}
-          >
-            <IndiaFlagIcon />
-            <span>{t("membership.india")}</span>
-            <span
-              className={cn(
-                "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
-                region === "india" ? "bg-white/20 text-white" : "bg-blue-50 text-brand-blue"
-              )}
-            >
-              {planPriceLabel(plans, "pro", "india")}
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setRegion("china")}
-            className={cn(
-              "sf-btn-toggle flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
-              region === "china"
-                ? "bg-rose-600 text-white shadow-xs"
-                : "text-ink-muted hover:text-ink hover:bg-slate-50"
-            )}
-          >
-            <ChinaFlagIcon />
-            <span>{t("membership.china")}</span>
-            <span
-              className={cn(
-                "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
-                region === "china" ? "bg-white/20 text-white" : "bg-rose-50 text-rose-700"
-              )}
-            >
-              {planPriceLabel(plans, "pro", "china")}
-            </span>
-          </button>
-        </div>
       </header>
 
       <div className="grid w-full gap-4 pt-1 md:grid-cols-3 md:items-stretch">
@@ -125,7 +48,7 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
               )}
             </div>
             <div>
-              <span className="text-2xl font-black text-ink">{pricing.freePrice}</span>
+              <span className="text-2xl font-black text-ink">{display.free.main}</span>
               <span className="text-xs text-ink-muted"> / forever</span>
             </div>
             <ul className="space-y-2 text-xs text-ink-muted">
@@ -171,10 +94,11 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
               )}
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-black text-ink">{pricing.proPriceFormatted}</span>
-              <span className="text-xs font-bold text-brand-blue">({pricing.proPriceSub})</span>
+              <span className="text-3xl font-black text-ink">{display.pro.main}</span>
+              {display.proSub && <span className="text-xs font-bold text-brand-blue">({display.proSub})</span>}
               <span className="text-xs text-ink-muted"> / month</span>
             </div>
+            <BilledAs billed={display.pro.billed} className="-mt-1 text-[11px] font-semibold text-ink-muted" />
             <ul className="space-y-2 text-xs text-ink font-medium">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />{" "}
@@ -201,8 +125,8 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             {currentTier === "pro"
               ? t("membership.currentPlanActive")
               : region === "india"
-              ? t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "india") })
-              : t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "china") })}
+              ? t("membership.upgradeToPro", { planPriceLabel: display.buttonLabel("pro") })
+              : t("membership.upgradeToPro", { planPriceLabel: display.buttonLabel("pro") })}
           </button>
         </div>
 
@@ -223,9 +147,10 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
               )}
             </div>
             <div>
-              <span className="text-2xl font-black text-ink">{pricing.enterprisePrice}</span>
+              <span className="text-2xl font-black text-ink">{display.enterprise.main}</span>
               <span className="text-xs text-ink-muted"> / month</span>
             </div>
+            <BilledAs billed={display.enterprise.billed} className="-mt-1 text-[11px] font-semibold text-ink-muted" />
             <ul className="space-y-2 text-xs text-ink-muted">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {t("membership.allProBuyerFeaturesIncluded")}
@@ -251,8 +176,8 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
             {currentTier === "enterprise"
               ? t("membership.currentPlanActive")
               : region === "india"
-              ? t("membership.upgradeToEnterprise", { planPriceLabel: planPriceLabel(plans, "enterprise", "india") })
-              : t("membership.upgradeToEnterprise", { planPriceLabel: planPriceLabel(plans, "enterprise", "china") })}
+              ? t("membership.upgradeToEnterprise", { planPriceLabel: display.buttonLabel("enterprise") })
+              : t("membership.upgradeToEnterprise", { planPriceLabel: display.buttonLabel("enterprise") })}
           </button>
         </div>
       </div>

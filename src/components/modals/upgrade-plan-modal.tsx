@@ -11,55 +11,19 @@ import {
   FileCheck2,
   Lock,
   ArrowRight,
-  Globe,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
-import { useBuyerPlan, type BuyerPlanTier, planPriceLabel } from "@/features/subscription";
+import { useBuyerPlan, type BuyerPlanTier, usePlanDisplay, BilledAs } from "@/features/subscription";
 import { useTranslations } from "next-intl";
 import { getApi } from "@/shared/api";
 import type { PlanPayment } from "@/entities/plan";
 import { PlanPaymentStep } from "./plan-payment-step";
 
-/**
- * Crisp SVG flag components to avoid OS emoji rendering issues (e.g. "IN" / "CN" text on Windows)
- */
-function IndiaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
-  return (
-    <svg
-      className={cn("shrink-0 rounded-xs shadow-2xs overflow-hidden", className)}
-      viewBox="0 0 640 480"
-      aria-hidden="true"
-    >
-      <path fill="#f93" d="M0 0h640v160H0z" />
-      <path fill="#fff" d="M0 160h640v160H0z" />
-      <path fill="#128807" d="M0 320h640v160H0z" />
-      <circle cx="320" cy="240" r="50" fill="none" stroke="#008" strokeWidth="8" />
-      <circle cx="320" cy="240" r="8" fill="#008" />
-    </svg>
-  );
-}
-
-function ChinaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
-  return (
-    <svg
-      className={cn("shrink-0 rounded-xs shadow-2xs overflow-hidden", className)}
-      viewBox="0 0 640 480"
-      aria-hidden="true"
-    >
-      <path fill="#de2910" d="M0 0h640v480H0z" />
-      <polygon fill="#ffde00" points="120,60 138,115 196,115 149,149 167,204 120,170 73,204 91,149 44,115 102,115" />
-      <polygon fill="#ffde00" points="240,40 244,58 262,54 248,65 256,82 242,72 230,84 234,66 220,56 238,58" />
-      <polygon fill="#ffde00" points="280,80 286,96 304,90 292,102 302,118 286,110 276,122 278,104 262,96 280,96" />
-      <polygon fill="#ffde00" points="280,160 286,176 304,170 292,182 302,198 286,190 276,202 278,184 262,176 280,176" />
-      <polygon fill="#ffde00" points="240,200 244,218 262,214 248,225 256,242 242,232 230,244 234,226 220,216 238,218" />
-    </svg>
-  );
-}
-
 export function UpgradePlanModal() {
   const t = useTranslations();
   const tp = useTranslations("payment");
-  const { tier, region, pricing, isUpgradeModalOpen, closeUpgradeModal, setRegion, upgradeTier, plans, isSignedIn } = useBuyerPlan();
+  const { tier, region, isUpgradeModalOpen, closeUpgradeModal, upgradeTier, plans, isSignedIn } = useBuyerPlan();
+  const display = usePlanDisplay();
 
   const [upgradeFeedback, setUpgradeFeedback] = useState<string | null>(null);
   const [step, setStep] = useState<"plans" | "pay">("plans");
@@ -198,7 +162,7 @@ export function UpgradePlanModal() {
             <PlanPaymentStep
               planCode="pro"
               planName={proPlan?.name ?? "Pro"}
-              amountLabel={planPriceLabel(plans, "pro", region)}
+              amountLabel={display.paymentLabel("pro")}
               region={region}
               onBack={() => setStep("plans")}
               onSubmitted={(payment) => {
@@ -222,60 +186,6 @@ export function UpgradePlanModal() {
               <p className="mt-0.5">{tp("rejectedBody", { reason: rejectedPayment.rejectionReason ?? "—" })}</p>
             </div>
           )}
-
-          {/* Active Pricing Region Selector Pill Bar */}
-          <div className="flex items-center justify-between gap-2 p-2 sm:p-2.5 bg-slate-50 rounded-xl border border-slate-200/90 shadow-2xs">
-            <div className="flex items-center gap-1.5">
-              <Globe className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-              <span className="text-[11px] sm:text-xs font-bold text-slate-700">
-                {t("upgrade.activePricingRegion")}
-              </span>
-            </div>
-            <div className="inline-flex items-center rounded-lg bg-white p-0.5 border border-slate-200 shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setRegion("india")}
-                className={cn(
-                  "sf-btn-toggle flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all cursor-pointer",
-                  region === "india"
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                )}
-              >
-                <IndiaFlagIcon />
-                <span>{t("membership.india")}</span>
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
-                    region === "india" ? "bg-white/20 text-white" : "bg-blue-50 text-blue-700"
-                  )}
-                >
-                  {planPriceLabel(plans, "pro", "india")}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setRegion("china")}
-                className={cn(
-                  "sf-btn-toggle flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all cursor-pointer",
-                  region === "china"
-                    ? "bg-rose-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                )}
-              >
-                <ChinaFlagIcon />
-                <span>{t("membership.china")}</span>
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
-                    region === "china" ? "bg-white/20 text-white" : "bg-rose-50 text-rose-700"
-                  )}
-                >
-                  {planPriceLabel(plans, "pro", "china")}
-                </span>
-              </button>
-            </div>
-          </div>
 
           {upgradeFeedback && (
             <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
@@ -307,7 +217,7 @@ export function UpgradePlanModal() {
 
                 <div className="flex items-baseline gap-1.5 pt-0.5">
                   <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
-                    {pricing.freePrice}
+                    {display.free.main}
                   </span>
                   <span className="text-[11px] font-medium text-slate-500"> / forever</span>
                 </div>
@@ -394,18 +304,21 @@ export function UpgradePlanModal() {
 
                 <div className="flex items-baseline gap-1.5 pt-0.5">
                   <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
-                    {pricing.proPriceFormatted}
+                    {display.pro.main}
                   </span>
-                  <span
-                    className={cn(
-                      "text-xs sm:text-sm font-extrabold",
-                      region === "china" ? "text-rose-600" : "text-blue-600"
-                    )}
-                  >
-                    ({pricing.proPriceSub})
-                  </span>
+                  {display.proSub && (
+                    <span
+                      className={cn(
+                        "text-xs sm:text-sm font-extrabold",
+                        region === "china" ? "text-rose-600" : "text-blue-600"
+                      )}
+                    >
+                      ({display.proSub})
+                    </span>
+                  )}
                   <span className="text-[11px] font-medium text-slate-500"> / month</span>
                 </div>
+                <BilledAs billed={display.pro.billed} />
 
                 <ul className="space-y-1.5 text-[11px] sm:text-xs text-slate-700 pt-0.5">
                   <li className="flex items-center gap-2 font-semibold text-slate-900">
@@ -466,8 +379,8 @@ export function UpgradePlanModal() {
                       : pendingPayment
                       ? tp("underReviewTitle")
                       : region === "india"
-                      ? t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "india") })
-                      : t("membership.upgradeToPro", { planPriceLabel: planPriceLabel(plans, "pro", "china") })}
+                      ? t("membership.upgradeToPro", { planPriceLabel: display.buttonLabel("pro") })
+                      : t("membership.upgradeToPro", { planPriceLabel: display.buttonLabel("pro") })}
                   </span>
                   <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                 </button>
