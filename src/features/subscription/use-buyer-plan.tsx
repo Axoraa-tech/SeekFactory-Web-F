@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useRegionalSettings, CURRENCIES } from "@/shared/i18n/regional-context";
+import { browserLocationCurrency } from "@/shared/lib/location-currency";
 import { getApi } from "@/shared/api";
 import type { BuyerPlan } from "@/entities/plan";
 import type { BuyerPlanTier } from "@/entities/user";
@@ -96,7 +96,6 @@ interface BuyerPlanContextValue {
   isSignedIn: boolean;
   isSupplierLocked: boolean;
   isUpgradeModalOpen: boolean;
-  setRegion: (region: SubscriptionRegion) => void;
   /** Saves the plan on the account (no payment is collected yet). Guests are sent to sign in. */
   upgradeTier: (tier: BuyerPlanTier) => Promise<UpgradeResult>;
   /** Called by the shell with the signed-in user's plan (null for guests). Manufacturers are never locked. */
@@ -107,13 +106,20 @@ interface BuyerPlanContextValue {
 
 const BuyerPlanContext = createContext<BuyerPlanContextValue | null>(null);
 
-/** The pricing region is a per-browser viewing preference; the plan itself lives on the account. */
-const REGION_STORAGE_KEY = "seekfactory_subscription_region";
+/** Set by the old India/China switch; no longer read (the region follows the visitor's location). */
+const LEGACY_REGION_STORAGE_KEY = "seekfactory_subscription_region";
+
+/**
+ * Buyer plan pricing region for a location: China pricing (yuan) in China, India pricing (rupees)
+ * everywhere else. Visitors cannot switch it; prices elsewhere also show their own currency.
+ */
+export function subscriptionRegionFor(locationCurrency: string): SubscriptionRegion {
+  return locationCurrency === "CNY" ? "china" : "india";
+}
 
 export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations();
   const router = useRouter();
-  const { selectedCurrency, setCurrency } = useRegionalSettings();
   const [tier, setTier] = useState<BuyerPlanTier>("free");
   const [signedIn, setSignedIn] = useState(false);
   const [isManufacturer, setIsManufacturer] = useState(false);
@@ -130,18 +136,15 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
       });
   }, []);
 
+  // From the device's location (time zone, then browser language), not from the currency menu
   useEffect(() => {
+    setRegionState(subscriptionRegionFor(browserLocationCurrency()));
     try {
-      const savedRegion = localStorage.getItem(REGION_STORAGE_KEY) as SubscriptionRegion | null;
-      if (savedRegion === "india" || savedRegion === "china") {
-        setRegionState(savedRegion);
-      } else {
-        setRegionState(selectedCurrency?.code === "CNY" ? "china" : "india");
-      }
+      localStorage.removeItem(LEGACY_REGION_STORAGE_KEY);
     } catch {
-      // ignore
+      // Storage unavailable: nothing to clean up
     }
-  }, [selectedCurrency?.code]);
+  }, []);
 
   const syncPlan = useCallback((next: BuyerPlanTier | null, manufacturer = false) => {
     setSignedIn(next !== null);
@@ -149,20 +152,6 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
     setTier(next ?? "free");
   }, []);
 
-  const setRegion = useCallback((newRegion: SubscriptionRegion) => {
-    setRegionState(newRegion);
-    try {
-      localStorage.setItem(REGION_STORAGE_KEY, newRegion);
-    } catch {
-      // ignore
-    }
-    // Synchronize global currency if matching option exists
-    const targetCode = newRegion === "china" ? "CNY" : "INR";
-    const found = CURRENCIES.find((c) => c.code === targetCode);
-    if (found && setCurrency) {
-      setCurrency(found);
-    }
-  }, [setCurrency]);
 
   const upgradeTier = useCallback(async (newTier: BuyerPlanTier): Promise<UpgradeResult> => {
     if (!signedIn) {
@@ -208,7 +197,6 @@ export function BuyerPlanProvider({ children }: { children: React.ReactNode }) {
         isSignedIn: signedIn,
         isSupplierLocked,
         isUpgradeModalOpen,
-        setRegion,
         upgradeTier,
         syncPlan,
         openUpgradeModal,
@@ -232,7 +220,6 @@ export function useBuyerPlan(): BuyerPlanContextValue {
       isSignedIn: false,
       isSupplierLocked: true,
       isUpgradeModalOpen: false,
-      setRegion: () => {},
       upgradeTier: async () => ({ ok: false, message: t("plans.plansAreUnavailable") }),
       syncPlan: () => {},
       openUpgradeModal: () => {},

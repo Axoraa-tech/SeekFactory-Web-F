@@ -59,7 +59,7 @@ function ChinaFlagIcon({ className = "h-3.5 w-5" }: { className?: string }) {
 export function UpgradePlanModal() {
   const t = useTranslations();
   const tp = useTranslations("payment");
-  const { tier, region, pricing, isUpgradeModalOpen, closeUpgradeModal, setRegion, upgradeTier, plans, isSignedIn } = useBuyerPlan();
+  const { tier, region, pricing, isUpgradeModalOpen, closeUpgradeModal, upgradeTier, plans, isSignedIn } = useBuyerPlan();
 
   const [upgradeFeedback, setUpgradeFeedback] = useState<string | null>(null);
   const [step, setStep] = useState<"plans" | "pay">("plans");
@@ -223,58 +223,26 @@ export function UpgradePlanModal() {
             </div>
           )}
 
-          {/* Active Pricing Region Selector Pill Bar */}
+          {/* Pricing region: fixed by the visitor's location, not selectable */}
           <div className="flex items-center justify-between gap-2 p-2 sm:p-2.5 bg-slate-50 rounded-xl border border-slate-200/90 shadow-2xs">
             <div className="flex items-center gap-1.5">
               <Globe className="h-3.5 w-3.5 text-blue-600 shrink-0" />
               <span className="text-[11px] sm:text-xs font-bold text-slate-700">
-                {t("upgrade.activePricingRegion")}
+                {t("upgrade.pricingForYourLocation")}
               </span>
             </div>
-            <div className="inline-flex items-center rounded-lg bg-white p-0.5 border border-slate-200 shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setRegion("india")}
-                className={cn(
-                  "sf-btn-toggle flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all cursor-pointer",
-                  region === "india"
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                )}
-              >
-                <IndiaFlagIcon />
-                <span>{t("membership.india")}</span>
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
-                    region === "india" ? "bg-white/20 text-white" : "bg-blue-50 text-blue-700"
-                  )}
-                >
-                  {planPriceLabel(plans, "pro", "india")}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setRegion("china")}
-                className={cn(
-                  "sf-btn-toggle flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all cursor-pointer",
-                  region === "china"
-                    ? "bg-rose-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                )}
-              >
-                <ChinaFlagIcon />
-                <span>{t("membership.china")}</span>
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
-                    region === "china" ? "bg-white/20 text-white" : "bg-rose-50 text-rose-700"
-                  )}
-                >
-                  {planPriceLabel(plans, "pro", "china")}
-                </span>
-              </button>
-            </div>
+            <span
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold text-white shadow-xs",
+                region === "china" ? "bg-rose-600" : "bg-blue-600"
+              )}
+            >
+              {region === "china" ? <ChinaFlagIcon /> : <IndiaFlagIcon />}
+              <span>{t(region === "china" ? "membership.china" : "membership.india")}</span>
+              <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight">
+                {planPriceLabel(plans, "pro", region)}
+              </span>
+            </span>
           </div>
 
           {upgradeFeedback && (

@@ -46,7 +46,7 @@ type Props = {
 
 export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
   const t = useTranslations();
-  const { region, setRegion, pricing, plans } = useBuyerPlan();
+  const { region, pricing, plans } = useBuyerPlan();
 
   return (
     <div className="glass-fade-in w-full space-y-6">
@@ -60,50 +60,21 @@ export function ProfileMembershipPanel({ currentTier, onUpgradeTier }: Props) {
           </p>
         </div>
 
-        {/* Region Switcher Pills */}
-        <div className="inline-flex items-center rounded-2xl bg-white p-1 border border-slate-200 shadow-xs shrink-0 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setRegion("india")}
+        {/* Pricing region: fixed by the visitor's location, not selectable */}
+        <div className="flex flex-col items-start gap-1 shrink-0 self-start sm:items-end sm:self-auto">
+          <span className="text-[11px] font-semibold text-ink-muted">{t("upgrade.pricingForYourLocation")}</span>
+          <span
             className={cn(
-              "sf-btn-toggle flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
-              region === "india"
-                ? "bg-brand-blue text-white shadow-xs"
-                : "text-ink-muted hover:text-ink hover:bg-slate-50"
+              "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold text-white shadow-xs",
+              region === "china" ? "bg-rose-600" : "bg-brand-blue"
             )}
           >
-            <IndiaFlagIcon />
-            <span>{t("membership.india")}</span>
-            <span
-              className={cn(
-                "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
-                region === "india" ? "bg-white/20 text-white" : "bg-blue-50 text-brand-blue"
-              )}
-            >
-              {planPriceLabel(plans, "pro", "india")}
+            {region === "china" ? <ChinaFlagIcon /> : <IndiaFlagIcon />}
+            <span>{t(region === "china" ? "membership.china" : "membership.india")}</span>
+            <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight">
+              {planPriceLabel(plans, "pro", region)}
             </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setRegion("china")}
-            className={cn(
-              "sf-btn-toggle flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
-              region === "china"
-                ? "bg-rose-600 text-white shadow-xs"
-                : "text-ink-muted hover:text-ink hover:bg-slate-50"
-            )}
-          >
-            <ChinaFlagIcon />
-            <span>{t("membership.china")}</span>
-            <span
-              className={cn(
-                "rounded px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight",
-                region === "china" ? "bg-white/20 text-white" : "bg-rose-50 text-rose-700"
-              )}
-            >
-              {planPriceLabel(plans, "pro", "china")}
-            </span>
-          </button>
+          </span>
         </div>
       </header>
 
